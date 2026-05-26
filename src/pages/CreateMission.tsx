@@ -315,9 +315,9 @@ export default function CreateMission() {
                   className="flex-1 py-3 rounded-xl text-sm font-medium border" style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#b8a898' }}>
                   Brouillon
                 </button>
-                <button onClick={() => submit('open')} disabled={loading}
+                <button onClick={() => submit('open')} disabled={loading || uploadingVenue}
                   className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#1a0a2e]">
-                  {loading ? 'Publication...' : 'Publier 🚀'}
+                  {uploadingVenue ? 'Photo en cours...' : loading ? 'Publication...' : 'Publier 🚀'}
                 </button>
               </div>
             </>

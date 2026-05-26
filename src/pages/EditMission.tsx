@@ -355,9 +355,9 @@ export default function EditMission() {
               )}
               <div className="flex gap-3 pt-2">
                 <button onClick={() => setStep(1)} className="btn-outline-gold flex-1 py-3 rounded-xl">← Retour</button>
-                <button onClick={() => save()} disabled={saving}
+                <button onClick={() => save()} disabled={saving || uploadingVenue}
                   className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#1a0a2e]">
-                  {saving ? 'Sauvegarde...' : 'Enregistrer les modifications'}
+                  {uploadingVenue ? 'Photo en cours...' : saving ? 'Sauvegarde...' : 'Enregistrer les modifications'}
                 </button>
               </div>
             </>

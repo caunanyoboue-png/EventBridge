@@ -30,7 +30,6 @@ const sLabel: React.CSSProperties = {
 export default function Settings() {
   const { user, signOut } = useAuth();
 
-  const [currentPwd, setCurrentPwd] = useState('');
   const [newPwd, setNewPwd]         = useState('');
   const [confirmPwd, setConfirmPwd] = useState('');
   const [busy, setBusy]             = useState(false);
