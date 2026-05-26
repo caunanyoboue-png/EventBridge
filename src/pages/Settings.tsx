@@ -46,7 +46,7 @@ export default function Settings() {
       const { error } = await supabase.auth.updateUser({ password: newPwd });
       if (error) throw error;
       toast.success('Mot de passe mis à jour.');
-      setCurrentPwd(''); setNewPwd(''); setConfirmPwd('');
+      setNewPwd(''); setConfirmPwd('');
     } catch (e: unknown) {
       toast.error((e as Error).message || 'Erreur lors du changement de mot de passe.');
     } finally { setBusy(false); }
