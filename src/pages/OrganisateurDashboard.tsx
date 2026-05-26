@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Briefcase, Users, MessageSquare, User,
   LogOut, ChevronRight, FileText, Check, AlertCircle,
-  Target, Calendar, PlusCircle, Zap,
+  Target, Calendar, PlusCircle, Zap, Menu, X, Settings,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -32,18 +32,6 @@ const sLabel: React.CSSProperties = {
   color: 'rgba(201,168,76,0.5)',
 };
 
-// ── Logo pont ─────────────────────────────────────────────────────────────────
-function BridgeLogo() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <path d="M2 18h4V9M16 18h4V9" stroke={C.gold} strokeWidth="1.7" strokeLinecap="round"/>
-      <path d="M6 18V13M16 18V13" stroke={C.gold} strokeWidth="1.7" strokeLinecap="round"/>
-      <path d="M2 9h18" stroke={C.gold} strokeWidth="1.7" strokeLinecap="round"/>
-      <path d="M6 9C6 6.2 8.2 4 11 4s5 2.2 5 5" stroke={C.gold} strokeWidth="1.7"
-        strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  );
-}
 
 // ── KPI Card ──────────────────────────────────────────────────────────────────
 interface KpiProps {
@@ -117,6 +105,7 @@ export default function OrganisateurDashboard() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [hovKpi, setHovKpi] = useState<number | null>(null);
   const [hovBtn, setHovBtn] = useState<number | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Stats dérivées
   const totalMissions    = missions.length;
@@ -195,7 +184,7 @@ export default function OrganisateurDashboard() {
     const { error } = await supabase.from('applications')
       .update({ status: action, responded_at: new Date().toISOString() })
       .eq('id', appId);
-    if (error) toast.error('Erreur lors de la mise à jour');
+    if (error) { console.error('[handleApplication]', error); toast.error(error.message || 'Erreur lors de la mise à jour'); }
     else {
       toast.success(action === 'accepted' ? 'Candidature acceptée !' : 'Candidature refusée');
       fetchAll();
@@ -246,6 +235,7 @@ export default function OrganisateurDashboard() {
     { icon: Users,           label: 'Freelances',      to: '/freelances',             badge: undefined },
     { icon: MessageSquare,   label: 'Messages',        to: '/messages',               badge: unread > 0 ? unread : undefined },
     { icon: User,            label: 'Mon profil',      to: '/profile',                badge: undefined },
+    { icon: Settings,        label: 'Paramètres',      to: '/settings',               badge: undefined },
   ];
 
   const initials = (profile?.company_name || profile?.full_name || 'O')
@@ -257,19 +247,24 @@ export default function OrganisateurDashboard() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: C.bg,
-      fontFamily: 'Inter, system-ui, -apple-system, sans-serif', color: C.text }}>
+      fontFamily: 'Inter, system-ui, -apple-system, sans-serif', color: C.text, position: 'relative' }}>
+
+      {/* Overlay mobile */}
+      <div className={`eb-overlay${sidebarOpen ? ' open' : ''}`} onClick={() => setSidebarOpen(false)} />
 
       {/* ── SIDEBAR ─────────────────────────────────────────────────────────── */}
-      <aside style={{ width: 220, flexShrink: 0, height: '100vh', position: 'sticky', top: 0,
+      <aside className={`eb-sidebar${sidebarOpen ? ' open' : ''}`} style={{ width: 220, flexShrink: 0, height: '100vh', position: 'sticky', top: 0,
         background: C.side, borderRight: `1px solid ${C.sideB}`,
         display: 'flex', flexDirection: 'column', padding: '20px 14px', overflowY: 'auto' }}>
 
+        {/* Bouton fermeture mobile */}
+        <button className="eb-sidebar-close" onClick={() => setSidebarOpen(false)}>
+          <X size={16} />
+        </button>
+
         {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 28, paddingLeft: 2 }}>
-          <BridgeLogo />
-          <span style={{ fontSize: 15, fontWeight: 500, color: C.text, letterSpacing: '0.2px' }}>
-            EventBridge
-          </span>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
+          <img src="/logo.png.jpeg" alt="EventBridge" style={{ height: 52, width: 'auto', objectFit: 'contain' }} />
         </div>
 
         {/* Nav */}
@@ -354,9 +349,18 @@ export default function OrganisateurDashboard() {
       {/* ── MAIN ────────────────────────────────────────────────────────────── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', minHeight: '100vh' }}>
 
+        {/* Top bar hamburger (mobile uniquement) */}
+        <div className="eb-topbar">
+          <button onClick={() => setSidebarOpen(true)} style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', color: C.gold, display: 'flex' }}>
+            <Menu size={20} />
+          </button>
+          <img src="/logo.png.jpeg" alt="EventBridge" style={{ height: 36, width: 'auto', objectFit: 'contain' }} />
+          <div style={{ width: 36 }} />
+        </div>
+
         {/* HERO BAND */}
-        <div style={{ position: 'relative', height: 180, flexShrink: 0, overflow: 'hidden' }}>
-          <img src="/images/page d'accueil eventbridge.png" alt=""
+        <div className="eb-hero-band" style={{ position: 'relative', height: 180, flexShrink: 0, overflow: 'hidden' }}>
+          <img src="/images/Dashboard-organisateur.jpeg" alt=""
             style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%' }} />
           <div style={{ position: 'absolute', inset: 0,
             background: 'linear-gradient(to bottom, rgba(15,10,30,0.25) 0%, rgba(15,10,30,0.82) 65%, #0f0a1e 100%)' }} />
@@ -394,7 +398,7 @@ export default function OrganisateurDashboard() {
         </div>
 
         {/* CONTENU */}
-        <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 20, flex: 1 }}>
+        <div className="eb-content-pad" style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 20, flex: 1 }}>
 
           {/* Bannière candidatures en attente */}
           {pendingApps.length > 0 && (
@@ -409,7 +413,7 @@ export default function OrganisateurDashboard() {
           )}
 
           {/* 4 KPI cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+          <div className="eb-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
             {kpis.map((k, i) => (
               <KpiCard key={i}
                 icon={k.icon} accent={k.accent}
@@ -421,7 +425,7 @@ export default function OrganisateurDashboard() {
           </div>
 
           {/* 2 colonnes */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 14, flex: 1, minHeight: 0 }}>
+          <div className="eb-kpi-grid eb-org-two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 14, flex: 1, minHeight: 0 }}>
 
             {/* Colonne gauche */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -471,6 +475,15 @@ export default function OrganisateurDashboard() {
                             )}
                           </div>
                           <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                            {fl?.id && (
+                              <button
+                                onClick={() => navigate(`/public-profile?id=${fl.id}`)}
+                                style={{ padding: '5px 12px', borderRadius: 7, fontSize: 12, fontWeight: 500,
+                                  background: 'transparent', color: C.gold,
+                                  border: `1px solid ${C.gold}40`, cursor: 'pointer' }}>
+                                Profil
+                              </button>
+                            )}
                             <button
                               onClick={() => handleApplication(a.id, 'rejected')}
                               disabled={actionLoading === a.id}
@@ -544,18 +557,19 @@ export default function OrganisateurDashboard() {
                       const total = m.slots_total || 1;
                       return (
                         <div key={m.id}
-                          onClick={() => navigate(`/MissionDetail?id=${m.id}`)}
                           style={{ display: 'flex', alignItems: 'center', gap: 12,
-                            padding: '10px 12px', borderRadius: 10, cursor: 'pointer',
+                            padding: '10px 12px', borderRadius: 10,
                             transition: 'background 0.15s' }}
                           onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.background = `${C.gold}06`}
                           onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.background = 'transparent'}>
                           <div style={{ width: 32, height: 32, borderRadius: 8, flexShrink: 0,
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            background: `${C.gold}0a` }}>
+                            background: `${C.gold}0a`, cursor: 'pointer' }}
+                            onClick={() => navigate(`/MissionDetail?id=${m.id}`)}>
                             <Calendar size={15} color={`${C.gold}70`} />
                           </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ flex: 1, minWidth: 0, cursor: 'pointer' }}
+                            onClick={() => navigate(`/MissionDetail?id=${m.id}`)}>
                             <p style={{ fontSize: 13, fontWeight: 500, color: C.text, margin: 0,
                               whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {m.title}
@@ -574,6 +588,17 @@ export default function OrganisateurDashboard() {
                             background: `${ms.color}18`, color: ms.color }}>
                             {ms.label}
                           </span>
+                          {(m.status === 'open' || m.status === 'draft') && (
+                            <button
+                              onClick={e => { e.stopPropagation(); navigate(`/edit-mission?id=${m.id}`); }}
+                              style={{ flexShrink: 0, fontSize: 11, fontWeight: 500, padding: '3px 10px',
+                                borderRadius: 8, cursor: 'pointer', border: `1px solid ${C.gold}40`,
+                                color: C.gold, background: 'transparent', transition: 'background 0.15s' }}
+                              onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = `${C.gold}10`}
+                              onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = 'transparent'}>
+                              Modifier
+                            </button>
+                          )}
                         </div>
                       );
                     })}

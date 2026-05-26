@@ -3,7 +3,10 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { COMPETENCES, VILLES, formatCFA } from '../lib/utils';
+import { getBrowserPosition, reverseGeocode } from '../lib/geo';
 import { type Review } from '../types';
+import PortfolioSection from '../components/PortfolioSection';
+import MapView from '../components/MapView';
 import toast from 'react-hot-toast';
 
 function Stars({ rating }: { rating: number }) {
@@ -26,6 +29,10 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [geoLat, setGeoLat] = useState<number | null>(null);
+  const [geoLng, setGeoLng] = useState<number | null>(null);
+  const [geoAddr, setGeoAddr] = useState('');
 
   const [form, setForm] = useState({
     full_name: '', bio: '', ville: 'Abidjan - Cocody', quartier: '',
@@ -36,6 +43,8 @@ export default function Profile() {
 
   useEffect(() => {
     if (!profile) return;
+    if (profile.latitude) setGeoLat(profile.latitude);
+    if (profile.longitude) setGeoLng(profile.longitude);
     setForm({
       full_name: profile.full_name || '',
       bio: profile.bio || '',
@@ -65,11 +74,30 @@ export default function Profile() {
   async function save() {
     setSaving(true);
     try {
-      await updateProfile(form);
+      await updateProfile({
+        ...form,
+        ...(geoLat && geoLng ? { latitude: geoLat, longitude: geoLng } : {}),
+      });
       toast.success('Profil mis à jour !');
       setEditing(false);
     } catch { toast.error('Erreur lors de la sauvegarde'); }
     finally { setSaving(false); }
+  }
+
+  async function detectLocation() {
+    setLocating(true);
+    try {
+      const coords = await getBrowserPosition();
+      setGeoLat(coords.latitude);
+      setGeoLng(coords.longitude);
+      const addr = await reverseGeocode(coords.latitude, coords.longitude);
+      setGeoAddr(addr);
+      toast.success('Position détectée !');
+    } catch {
+      toast.error('Impossible d\'accéder à la géolocalisation');
+    } finally {
+      setLocating(false);
+    }
   }
 
   async function uploadAvatar(e: React.ChangeEvent<HTMLInputElement>) {
@@ -355,6 +383,40 @@ export default function Profile() {
                 </div>
               </>
             )}
+
+            {/* Section géolocalisation */}
+            <div style={{ height: 1, background: 'rgba(201,168,76,0.08)', margin: '24px 0' }} />
+            <h3 style={{ fontSize: 14, fontWeight: 700, color: '#f0e6d3', marginBottom: 12,
+              letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              Ma localisation
+            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14, flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={detectLocation}
+                disabled={locating}
+                style={{
+                  padding: '10px 18px', borderRadius: 10, fontSize: 13, fontWeight: 600,
+                  cursor: locating ? 'wait' : 'pointer',
+                  background: 'linear-gradient(135deg,#c9a84c,#e8c97a)',
+                  color: '#1a0a2e', border: 'none',
+                  opacity: locating ? 0.7 : 1, transition: 'opacity 0.15s',
+                }}
+              >
+                {locating ? '…' : '📍 Détecter ma position GPS'}
+              </button>
+              {geoLat && geoLng && (
+                <span style={{ fontSize: 12, color: '#10b981' }}>
+                  ✓ Position enregistrée {geoAddr ? `— ${geoAddr}` : ''}
+                </span>
+              )}
+            </div>
+            {geoLat && geoLng && (
+              <MapView lat={geoLat} lng={geoLng} label={geoAddr || 'Ma position'} zoom={14} />
+            )}
+            <p style={{ fontSize: 11, color: '#4a3a5a', marginTop: 8 }}>
+              Utilisée pour calculer les distances avec les missions et améliorer votre matching.
+            </p>
           </div>
         )}
 
@@ -413,6 +475,24 @@ export default function Profile() {
               </p>
             </div>
           </div>
+        )}
+
+        {/* Carte position enregistrée (lecture) */}
+        {!editing && geoLat && geoLng && (
+          <div className="card-glass" style={{ padding: 24, marginBottom: 16 }}>
+            <h3 style={{ fontSize: 13, fontWeight: 700, color: '#f0e6d3', marginBottom: 12,
+              textTransform: 'uppercase', letterSpacing: '0.06em' }}>Ma localisation</h3>
+            <MapView lat={geoLat} lng={geoLng} label={profile.quartier || profile.ville || 'Ma position'} zoom={14} />
+          </div>
+        )}
+
+        {/* Portfolio (freelance uniquement) */}
+        {isFreelance && (
+          <PortfolioSection
+            freelanceId={profile.id}
+            editable={true}
+            currentUserId={profile.id}
+          />
         )}
 
         {/* Avis reçus */}

@@ -100,6 +100,7 @@ const NAV_ITEMS_FREELANCE = [
   { Icon: IcoMessages,   label: 'Messages',          path: '/messages'             },
   { Icon: IcoDoc,        label: 'Mes candidatures',  path: '/my-applications'      },
   { Icon: IcoPerson,     label: 'Mon profil',        path: '/profile'              },
+  { Icon: IcoGear,       label: 'Paramètres',        path: '/settings'             },
 ];
 const NAV_ITEMS_ORG = [
   { Icon: IcoDashboard,  label: 'Tableau de bord',  path: '/organisateur-dashboard' },
@@ -108,6 +109,7 @@ const NAV_ITEMS_ORG = [
   { Icon: IcoMessages,   label: 'Messages',          path: '/messages'               },
   { Icon: IcoClipboard,  label: 'Mes missions',      path: '/my-missions'            },
   { Icon: IcoPerson,     label: 'Mon profil',        path: '/profile'                },
+  { Icon: IcoGear,       label: 'Paramètres',        path: '/settings'               },
 ];
 const ADMIN_ITEMS = [
   { Icon: IcoDashAdmin, label: 'Dashboard',    path: '/admin/AdminDashboard' },
@@ -118,9 +120,13 @@ const ADMIN_ITEMS = [
   { Icon: IcoGear,      label: 'Paramètres',   path: '/admin/AdminSettings' },
 ];
 
-interface SidebarProps { glassy?: boolean }
+interface SidebarProps {
+  glassy?: boolean;
+  isOpen?: boolean;
+  onClose?: () => void;
+}
 
-export default function Sidebar({ glassy }: SidebarProps) {
+export default function Sidebar({ glassy, isOpen, onClose }: SidebarProps) {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -135,9 +141,20 @@ export default function Sidebar({ glassy }: SidebarProps) {
   const blur = glassy ? 'blur(22px)' : undefined;
 
   return (
-    <aside style={{ width: 240, height: '100vh', position: 'fixed', left: 0, top: 0, zIndex: 40,
-      display: 'flex', flexDirection: 'column', padding: '20px 16px',
-      background: bg, backdropFilter: blur, borderRight: `1px solid ${bdr}` }}>
+    <aside
+      className={`eb-sidebar${isOpen ? ' open' : ''}`}
+      style={{ width: 240, height: '100vh', position: 'fixed', left: 0, top: 0, zIndex: 40,
+        display: 'flex', flexDirection: 'column', padding: '20px 16px',
+        background: bg, backdropFilter: blur, borderRight: `1px solid ${bdr}` }}
+    >
+      {/* Bouton fermeture mobile */}
+      {onClose && (
+        <button className="eb-sidebar-close" onClick={onClose}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M2 2l12 12M14 2L2 14" stroke="#c9a84c" strokeWidth="1.6" strokeLinecap="round"/>
+          </svg>
+        </button>
+      )}
 
       {/* Logo */}
       <NavLink to="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 10,

@@ -1,610 +1,482 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, Target, Users, MessageSquare, User, Settings,
-  LogOut, ChevronRight, Star, FileText, Check, AlertCircle,
-  Briefcase, Calendar,
+  LayoutDashboard, Briefcase, Users, MessageSquare,
+  User, Settings, LogOut, ChevronRight,
+  Send, CheckCircle, Star, Award, FileText,
+  Menu, X,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { type Application, type Mission } from '../types';
-import { formatCFA, formatDateShort } from '../lib/utils';
-import toast from 'react-hot-toast';
 
-// ─── Tokens ───────────────────────────────────────────────────────────────────
+// ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
-  bg:     '#0f0a1e',
-  side:   '#13102a',
-  card:   '#1a1232',
-  gold:   '#c9a84c',
-  goldLt: '#e8c97a',
-  text:   '#f0e6d3',
-  muted:  'rgba(240,230,211,0.4)',
-  bdr:    'rgba(201,168,76,0.10)',
-  sideB:  'rgba(201,168,76,0.12)',
+  bg:        '#0f0a1e',
+  sidebar:   '#13102a',
+  card:      '#1a1232',
+  gold:      '#c9a84c',
+  goldLt:    '#e8c97a',
+  text:      '#f0e6d3',
+  textDim:   'rgba(240,230,211,0.4)',
+  border:    'rgba(201,168,76,0.12)',
+  cardBd:    'rgba(201,168,76,0.10)',
 } as const;
 
-const sectionLabel: React.CSSProperties = {
-  fontSize: 11,
-  fontWeight: 500,
-  textTransform: 'uppercase',
-  letterSpacing: '0.8px',
-  color: 'rgba(201,168,76,0.5)',
-  margin: 0,
-};
+const LOGO = '/logo.png.jpeg';
 
-// ─── Logo pont SVG ────────────────────────────────────────────────────────────
-function BridgeLogo() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <path d="M2 18h4V9M16 18h4V9" stroke={C.gold} strokeWidth="1.7" strokeLinecap="round"/>
-      <path d="M6 18V13M16 18V13" stroke={C.gold} strokeWidth="1.7" strokeLinecap="round"/>
-      <path d="M2 9h18"            stroke={C.gold} strokeWidth="1.7" strokeLinecap="round"/>
-      <path d="M6 9C6 6.2 8.2 4 11 4s5 2.2 5 5" stroke={C.gold} strokeWidth="1.7"
-        strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  );
-}
+// ─── Nav items ────────────────────────────────────────────────────────────────
+const NAV = [
+  { Icon: LayoutDashboard, label: 'Tableau de bord', path: '/freelance-dashboard' },
+  { Icon: Briefcase,       label: 'Missions',        path: '/missions' },
+  { Icon: Users,           label: 'Freelances',      path: '/freelances' },
+  { Icon: MessageSquare,   label: 'Messages',        path: '/messages', badge: true },
+  { Icon: User,            label: 'Mon profil',      path: '/profile' },
+  { Icon: Settings,        label: 'Paramètres',      path: '/settings' },
+];
 
-// ─── KPI Card ─────────────────────────────────────────────────────────────────
-interface KpiProps {
-  icon: React.ElementType;
-  accent: string;
+// ─── NavItem ──────────────────────────────────────────────────────────────────
+function NavItem({
+  Icon, label, isActive, badge,
+}: {
+  Icon: React.ComponentType<{ size?: number; color?: string }>;
   label: string;
-  value: React.ReactNode;
-  sub: string;
-  hovered: boolean;
-  onEnter: () => void;
-  onLeave: () => void;
-}
-function KpiCard({ icon: Icon, accent, label, value, sub, hovered, onEnter, onLeave }: KpiProps) {
+  isActive: boolean;
+  badge?: number;
+}) {
+  const [hov, setHov] = useState(false);
   return (
     <div
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
       style={{
-        background: C.card,
-        border: `1px solid ${hovered ? 'rgba(201,168,76,0.22)' : C.bdr}`,
-        borderTop: `2px solid ${hovered ? accent : 'transparent'}`,
-        borderRadius: 14,
-        padding: '20px 18px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 12,
-        transition: 'border-color 0.2s',
-        cursor: 'default',
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '9px 12px', borderRadius: 10, marginBottom: 2,
+        cursor: 'pointer', transition: 'all 0.15s',
+        background: isActive ? 'rgba(201,168,76,0.10)' : hov ? 'rgba(201,168,76,0.07)' : 'transparent',
+        borderLeft: isActive ? `2px solid ${C.gold}` : '2px solid transparent',
+      }}
+    >
+      <Icon
+        size={16}
+        color={isActive ? C.gold : hov ? 'rgba(240,230,211,0.7)' : C.textDim}
+      />
+      <span style={{
+        fontSize: 13, flex: 1,
+        fontWeight: isActive ? 500 : 400,
+        color: isActive ? C.gold : hov ? 'rgba(240,230,211,0.7)' : 'rgba(240,230,211,0.45)',
       }}>
-      {/* icône + label */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{
-          width: 34, height: 34, borderRadius: 9, flexShrink: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: `${accent}18`, color: accent,
+        {label}
+      </span>
+      {!!badge && (
+        <span style={{
+          background: C.gold, color: '#1a0a2e',
+          borderRadius: 10, fontSize: 10, fontWeight: 600,
+          padding: '1px 6px',
         }}>
-          <Icon size={17} />
-        </div>
-        <p style={sectionLabel}>{label}</p>
-      </div>
-      {/* valeur */}
-      <p style={{ fontSize: 26, fontWeight: 500, color: C.text, lineHeight: 1, margin: 0 }}>
-        {value}
-      </p>
-      {/* sous-texte */}
-      <p style={{ fontSize: 12, color: C.muted, lineHeight: 1.6, margin: 0 }}>{sub}</p>
+          {badge}
+        </span>
+      )}
     </div>
   );
 }
 
-// ─── Composant principal ──────────────────────────────────────────────────────
-export default function FreelanceDashboard() {
-  const { profile, signOut, updateProfile } = useAuth();
-  const navigate = useNavigate();
-
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [unread, setUnread]             = useState(0);
-  const [dispo, setDispo]               = useState(profile?.is_available ?? true);
-  const [toggling, setToggling]         = useState(false);
-  const [loading, setLoading]           = useState(true);
-  const [hovKpi, setHovKpi]             = useState<number | null>(null);
-  const [hovBtn, setHovBtn]             = useState<number | null>(null);
-
-  // ── Complétion profil ──────────────────────────────────────────────────────
-  const completionFields = [
-    { label: 'Photo de profil', done: !!profile?.avatar_url },
-    { label: 'Téléphone',       done: !!profile?.phone },
-    { label: 'Bio',             done: !!(profile?.bio && profile.bio.length > 20) },
-    { label: 'Compétences',     done: !!(profile?.skills?.length) },
-    { label: 'Quartier',        done: !!profile?.quartier },
-    { label: 'Tarif horaire',   done: !!(profile?.hourly_rate && profile.hourly_rate > 0) },
-  ];
-  const donePct = Math.round(
-    completionFields.filter(f => f.done).length / completionFields.length * 100
+// ─── KPI card ─────────────────────────────────────────────────────────────────
+function KpiCard({
+  icon, iconBg, iconColor, value, label, sublabel, accent,
+}: {
+  icon: React.ReactNode;
+  iconBg: string;
+  iconColor: string;
+  value: string | number;
+  label: string;
+  sublabel: string;
+  accent: string;
+}) {
+  const [hov, setHov] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        background: C.card,
+        border: `1px solid ${hov ? 'rgba(201,168,76,0.25)' : C.cardBd}`,
+        borderTop: `2px solid ${hov ? accent : 'transparent'}`,
+        borderRadius: 16, padding: '20px 22px',
+        transition: 'all 0.2s', cursor: 'default',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+        <div style={{
+          width: 42, height: 42, borderRadius: 10,
+          background: iconBg, flexShrink: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <span style={{ color: iconColor, display: 'flex' }}>{icon}</span>
+        </div>
+        <div>
+          <div style={{ fontSize: 26, fontWeight: 500, color: C.text, lineHeight: 1 }}>{value}</div>
+          <div style={{
+            fontSize: 11, fontWeight: 500, marginTop: 6,
+            color: 'rgba(201,168,76,0.5)',
+            textTransform: 'uppercase', letterSpacing: '0.8px',
+          }}>
+            {label}
+          </div>
+          <div style={{ fontSize: 12, color: C.textDim, marginTop: 4 }}>{sublabel}</div>
+        </div>
+      </div>
+    </div>
   );
+}
 
-  // ── Fetch ──────────────────────────────────────────────────────────────────
-  const fetchAll = useCallback(async () => {
-    if (!profile) return;
-    setLoading(true);
-    const [appRes, convRes] = await Promise.all([
-      supabase
-        .from('applications')
-        .select('*, mission:missions(*)')
-        .eq('freelance_id', profile.id)
-        .order('applied_at', { ascending: false })
-        .limit(8),
-      supabase
-        .from('conversations')
-        .select('participant_1,participant_2,unread_count_1,unread_count_2')
-        .or(`participant_1.eq.${profile.id},participant_2.eq.${profile.id}`),
-    ]);
-    setApplications(appRes.data || []);
-    const u = ((convRes.data || []) as {
-      participant_1: string; participant_2: string;
-      unread_count_1: number; unread_count_2: number;
-    }[]).reduce((acc, c) => {
-      if (c.participant_1 === profile.id) return acc + (c.unread_count_1 || 0);
-      return acc + (c.unread_count_2 || 0);
-    }, 0);
-    setUnread(u);
-    setLoading(false);
-  }, [profile]);
+// ─── Quick-access button ──────────────────────────────────────────────────────
+function QuickBtn({ label, color, bg, onClick }: {
+  label: string; color: string; bg: string; onClick: () => void;
+}) {
+  const [hov, setHov] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        width: '100%', padding: '11px 14px', borderRadius: 10,
+        background: hov ? bg.replace('0.08', '0.14') : bg,
+        border: `1px solid ${color}30`,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        cursor: 'pointer', transition: 'all 0.15s',
+        transform: hov ? 'translateX(2px)' : 'none',
+        fontSize: 13, color, fontWeight: 500,
+        textAlign: 'left',
+      }}
+    >
+      {label}
+      <ChevronRight size={14} color={color} />
+    </button>
+  );
+}
 
-  useEffect(() => { fetchAll(); }, [fetchAll]);
-  useEffect(() => { setDispo(profile?.is_available ?? true); }, [profile]);
+// ─── Main component ───────────────────────────────────────────────────────────
+export default function FreelanceDashboard() {
+  const navigate = useNavigate();
+  const { profile, signOut, user } = useAuth();
 
-  async function toggleDispo() {
-    setToggling(true);
-    try {
-      await updateProfile({ is_available: !dispo });
-      setDispo(p => !p);
-      toast.success(!dispo ? 'Vous êtes disponible' : 'Vous êtes indisponible');
-    } catch { toast.error('Erreur'); }
-    finally { setToggling(false); }
-  }
+  const [unread, setUnread] = useState(0);
+  const [stats, setStats] = useState({ total: 0, accepted: 0, completed: 0 });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // ── Stats dérivées ─────────────────────────────────────────────────────────
-  const total     = applications.length;
-  const accepted  = applications.filter(a => a.status === 'accepted').length;
-  const pending   = applications.filter(a => a.status === 'pending').length;
-  const rejected  = applications.filter(a => a.status === 'rejected').length;
-  const acceptPct = total > 0 ? Math.round(accepted / total * 100) : 0;
+  useEffect(() => {
+    if (!user) return;
+    async function load() {
+      const [{ count: total }, { count: accepted }, { count: completed }, { count: msgs }] =
+        await Promise.all([
+          supabase.from('applications').select('*', { count: 'exact', head: true }).eq('freelance_id', user!.id),
+          supabase.from('applications').select('*', { count: 'exact', head: true }).eq('freelance_id', user!.id).eq('status', 'accepted'),
+          supabase.from('applications').select('*', { count: 'exact', head: true }).eq('freelance_id', user!.id).eq('status', 'completed'),
+          supabase.from('conversations').select('*', { count: 'exact', head: true })
+            .or(`participant_1.eq.${user!.id},participant_2.eq.${user!.id}`)
+            .gt('unread_count_1', 0),
+        ]);
+      setStats({ total: total ?? 0, accepted: accepted ?? 0, completed: completed ?? 0 });
+      setUnread(msgs ?? 0);
+    }
+    load();
+  }, [user]);
 
-  const kpis = [
-    {
-      icon: FileText, accent: '#3b82f6', label: 'Candidatures',
-      value: total,
-      sub: `${pending} en attente · ${total > 0 ? acceptPct + '% acceptées' : 'Taux non calculé'}`,
-    },
-    {
-      icon: Check, accent: '#10b981', label: 'Acceptées',
-      value: accepted,
-      sub: `${rejected} refusée${rejected !== 1 ? 's' : ''} · ${pending} en attente`,
-    },
-    {
-      icon: Star, accent: C.gold, label: 'Note moyenne',
-      value: (profile?.avg_rating ?? 0) > 0 ? (profile!.avg_rating!).toFixed(1) : '—',
-      sub: (profile?.total_reviews ?? 0) > 0
-        ? `${profile!.total_reviews} évaluation${profile!.total_reviews! > 1 ? 's' : ''} reçue${profile!.total_reviews! > 1 ? 's' : ''}`
-        : 'Aucune évaluation reçue',
-    },
-    {
-      icon: Briefcase, accent: '#8b5cf6', label: 'Missions réalisées',
-      value: profile?.total_missions ?? 0,
-      sub: `${profile?.experience_years ?? 0} an${(profile?.experience_years ?? 0) > 1 ? 's' : ''} d'expérience`
-        + (profile?.hourly_rate ? ` · ${formatCFA(profile.hourly_rate)}/h` : ''),
-    },
-  ];
+  const firstName = profile?.full_name?.split(' ')[0] ?? 'Utilisateur';
+  const initials  = (profile?.full_name ?? '?')
+    .split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
 
-  const STATUS: Record<string, { label: string; color: string }> = {
-    pending:   { label: 'En attente', color: '#f59e0b' },
-    accepted:  { label: 'Acceptée',   color: '#10b981' },
-    rejected:  { label: 'Refusée',    color: '#ef4444' },
-    withdrawn: { label: 'Retirée',    color: C.muted   },
-  };
-
-  const quickBtns = [
-    {
-      label: 'Voir les missions', sub: 'Matching intelligent disponible',
-      color: C.gold,    bg: `${C.gold}18`,           bgH: `${C.gold}28`,           to: '/missions',
-    },
-    {
-      label: 'Mon profil', sub: `${donePct}% complété`,
-      color: '#a78bfa', bg: 'rgba(167,139,250,0.12)', bgH: 'rgba(167,139,250,0.22)', to: '/profile',
-    },
-    {
-      label: 'Messages', sub: `${unread} non lu${unread !== 1 ? 's' : ''}`,
-      color: '#34d399', bg: 'rgba(52,211,153,0.12)',  bgH: 'rgba(52,211,153,0.22)',  to: '/messages',
-    },
-  ];
-
-  const navItems = [
-    { icon: LayoutDashboard, label: 'Tableau de bord', to: '/freelance-dashboard', badge: undefined      },
-    { icon: Target,          label: 'Missions',        to: '/missions',            badge: undefined      },
-    { icon: Users,           label: 'Freelances',      to: '/freelances',          badge: undefined      },
-    { icon: MessageSquare,   label: 'Messages',        to: '/messages',            badge: unread || undefined },
-    { icon: User,            label: 'Mon profil',      to: '/profile',             badge: undefined      },
-    { icon: Settings,        label: 'Paramètres',      to: '/profile',             badge: undefined      },
-  ];
-
-  const initials = (profile?.full_name || 'U')
-    .split(' ').map(n => n[0] || '').join('').toUpperCase().slice(0, 2) || 'U';
-  const firstName = profile?.full_name?.split(' ')[0] ?? '';
-  const hour      = new Date().getHours();
-  const greeting  = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
-  const today     = new Date().toLocaleDateString('fr-CI', {
+  const today = new Date().toLocaleDateString('fr-FR', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   });
 
-  // ─────────────────────────────────────────────────────────────────────────
-  return (
-    <div style={{
-      display: 'flex', minHeight: '100vh', background: C.bg,
-      fontFamily: 'Inter, system-ui, -apple-system, sans-serif', color: C.text,
-    }}>
+  const completionItems = [
+    { label: 'Photo de profil',        done: !!profile?.avatar_url },
+    { label: 'Bio complétée',          done: !!profile?.bio },
+    { label: 'Compétences ajoutées',   done: !!(profile?.skills?.length) },
+    { label: 'Ville renseignée',       done: !!profile?.ville },
+    { label: 'Tarif horaire défini',   done: !!profile?.hourly_rate },
+  ];
+  const completionPct     = Math.round(completionItems.filter(i => i.done).length / completionItems.length * 100);
+  const profileIncomplete = completionPct < 100;
 
-      {/* ════════════════════ SIDEBAR ════════════════════ */}
-      <aside style={{
-        width: 220, flexShrink: 0, height: '100vh', position: 'sticky', top: 0,
-        background: C.side, borderRight: `1px solid ${C.sideB}`,
-        display: 'flex', flexDirection: 'column', padding: '20px 14px', overflowY: 'auto',
+  async function handleSignOut() {
+    await signOut();
+    navigate('/');
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', background: C.bg, fontFamily: 'Inter, system-ui, sans-serif', position: 'relative' }}>
+
+      {/* Overlay mobile */}
+      <div className={`eb-overlay${sidebarOpen ? ' open' : ''}`} onClick={() => setSidebarOpen(false)} />
+
+      {/* ── Sidebar ─────────────────────────────────────────────────────────── */}
+      <aside className={`eb-sidebar${sidebarOpen ? ' open' : ''}`} style={{
+        width: 220, flexShrink: 0,
+        background: C.sidebar, borderRight: `1px solid ${C.border}`,
+        display: 'flex', flexDirection: 'column',
+        position: 'sticky', top: 0, height: '100vh',
       }}>
+        {/* Bouton fermeture mobile */}
+        <button className="eb-sidebar-close" onClick={() => setSidebarOpen(false)}>
+          <X size={16} />
+        </button>
 
         {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 28, paddingLeft: 2 }}>
-          <BridgeLogo />
-          <span style={{ fontSize: 15, fontWeight: 500, color: C.text, letterSpacing: '0.2px' }}>
-            EventBridge
-          </span>
+        <div style={{ padding: '20px 20px 16px', borderBottom: `1px solid ${C.border}`, display: 'flex', justifyContent: 'center' }}>
+          <img src={LOGO} alt="EventBridge" style={{ height: 52, width: 'auto', objectFit: 'contain' }} />
         </div>
 
-        {/* Navigation */}
-        <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {navItems.map((item, i) => (
-            <NavLink key={i} to={item.to}
-              style={({ isActive }) => ({
-                display: 'flex', alignItems: 'center', gap: 10,
-                padding: '9px 12px', borderRadius: 9,
-                fontSize: 13, fontWeight: 500, textDecoration: 'none',
-                transition: 'all 0.15s',
-                borderLeft: isActive ? `2px solid ${C.gold}` : '2px solid transparent',
-                background: isActive ? `${C.gold}0d` : 'transparent',
-                color: isActive ? C.gold : C.muted,
-              })}
-              onMouseEnter={e => {
-                const el = e.currentTarget as HTMLAnchorElement;
-                el.style.background = 'rgba(201,168,76,0.07)';
-                el.style.color = 'rgba(240,230,211,0.75)';
-              }}
-              onMouseLeave={e => {
-                const el = e.currentTarget as HTMLAnchorElement;
-                el.style.background = 'transparent';
-                el.style.color = C.muted;
-              }}>
-              <item.icon size={16} />
-              <span style={{ flex: 1 }}>{item.label}</span>
-              {item.badge !== undefined && item.badge > 0 && (
-                <span style={{
-                  fontSize: 10, fontWeight: 500, padding: '2px 6px',
-                  borderRadius: 99, background: '#3b82f6', color: '#fff', lineHeight: 1.4,
-                }}>
-                  {item.badge}
-                </span>
+        {/* Nav */}
+        <nav style={{ flex: 1, padding: '16px 10px', overflowY: 'auto' }}>
+          {NAV.map(({ Icon, label, path, badge }) => (
+            <NavLink key={path} to={path} style={{ textDecoration: 'none' }}>
+              {({ isActive }) => (
+                <NavItem Icon={Icon} label={label} isActive={isActive} badge={badge ? unread : 0} />
               )}
             </NavLink>
           ))}
         </nav>
 
-        {/* Footer sidebar */}
-        <div style={{
-          borderTop: `1px solid ${C.sideB}`, paddingTop: 16,
-          display: 'flex', flexDirection: 'column', gap: 10,
-        }}>
-          {/* Avatar + nom */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        {/* User footer */}
+        <div style={{ padding: '16px 14px', borderTop: `1px solid ${C.border}` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
             <div style={{
-              width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
+              width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+              background: `linear-gradient(135deg,${C.gold},${C.goldLt})`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 13, fontWeight: 500, color: '#1a0a2e',
-              background: `linear-gradient(135deg, ${C.gold}, ${C.goldLt})`,
+              fontSize: 13, fontWeight: 600, color: '#1a0a2e',
             }}>
               {initials}
             </div>
-            <div style={{ overflow: 'hidden', flex: 1 }}>
-              <p style={{
-                fontSize: 13, fontWeight: 500, color: C.text, margin: 0,
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                fontSize: 13, fontWeight: 500, color: C.text,
                 whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
               }}>
-                {profile?.full_name ?? '—'}
-              </p>
-              <p style={{ fontSize: 11, color: C.muted, margin: '2px 0 0' }}>Freelance</p>
+                {profile?.full_name ?? 'Utilisateur'}
+              </div>
+              <div style={{ fontSize: 11, color: C.textDim }}>Freelance</div>
             </div>
           </div>
-
-          {/* Déconnexion */}
-          <button onClick={signOut}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8, width: '100%',
-              padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500,
-              background: 'transparent', border: '1px solid rgba(239,68,68,0.2)',
-              color: 'rgba(239,68,68,0.55)', cursor: 'pointer', transition: 'all 0.15s',
-            }}
-            onMouseEnter={e => {
-              const b = e.currentTarget as HTMLElement;
-              b.style.background = 'rgba(239,68,68,0.08)';
-              b.style.color = '#ef4444';
-            }}
-            onMouseLeave={e => {
-              const b = e.currentTarget as HTMLElement;
-              b.style.background = 'transparent';
-              b.style.color = 'rgba(239,68,68,0.55)';
-            }}>
-            <LogOut size={14} /> Déconnexion
-          </button>
+          <LogoutBtn onClick={handleSignOut} />
         </div>
       </aside>
 
-      {/* ════════════════════ MAIN ════════════════════ */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', minHeight: '100vh' }}>
+      {/* ── Main ────────────────────────────────────────────────────────────── */}
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
 
-        {/* ── HERO BAND ── */}
-        <div style={{ position: 'relative', height: 180, flexShrink: 0, overflow: 'hidden' }}>
-          <img
-            src="/images/page d'accueil eventbridge.png"
-            alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%' }}
-          />
-          {/* gradient sombre vers le bas */}
+        {/* Top bar hamburger (mobile uniquement) */}
+        <div className="eb-topbar">
+          <button onClick={() => setSidebarOpen(true)} style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', color: C.gold, display: 'flex' }}>
+            <Menu size={20} />
+          </button>
+          <img src={LOGO} alt="EventBridge" style={{ height: 36, width: 'auto', objectFit: 'contain' }} />
+          <div style={{ width: 36 }} />
+        </div>
+
+        {/* Hero band */}
+        <div className="eb-hero-band" style={{
+          height: 180, position: 'relative', overflow: 'hidden', flexShrink: 0,
+          backgroundImage: 'url(/images/Dashboard-freelance.jpg)',
+          backgroundSize: 'cover', backgroundPosition: 'center',
+        }}>
           <div style={{
             position: 'absolute', inset: 0,
-            background: 'linear-gradient(to bottom, rgba(15,10,30,0.2) 0%, rgba(15,10,30,0.75) 60%, #0f0a1e 100%)',
+            background: 'linear-gradient(to bottom, rgba(15,10,30,0.3) 0%, rgba(15,10,30,0.88) 100%)',
           }} />
-
-          {/* Contenu hero */}
           <div style={{
-            position: 'absolute', bottom: 20, left: 32, right: 24,
+            position: 'absolute', bottom: 20, left: 32, right: 32,
             display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
           }}>
             <div>
-              <h1 style={{ fontSize: 22, fontWeight: 500, color: C.text, margin: 0, lineHeight: 1.2 }}>
-                {greeting}, {firstName}
-              </h1>
-              <p style={{ fontSize: 12, color: C.muted, margin: '4px 0 0' }}>{today}</p>
+              <div style={{ fontSize: 22, fontWeight: 500, color: C.text }}>Bonjour, {firstName}</div>
+              <div style={{ fontSize: 13, color: 'rgba(240,230,211,0.55)', marginTop: 2, textTransform: 'capitalize' }}>
+                {today}
+              </div>
             </div>
-
-            {/* Badge disponibilité */}
-            <button onClick={toggleDispo} disabled={toggling}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px',
-                borderRadius: 20, fontSize: 12, fontWeight: 500, cursor: 'pointer',
-                background: 'rgba(15,10,30,0.7)', backdropFilter: 'blur(12px)',
-                border: `1px solid ${dispo ? 'rgba(52,211,153,0.4)' : 'rgba(239,68,68,0.3)'}`,
-                color: dispo ? '#34d399' : '#ef4444', transition: 'all 0.2s',
-              }}>
-              <span style={{ position: 'relative', display: 'inline-flex', width: 8, height: 8 }}>
-                {dispo && (
-                  <span className="animate-ping" style={{
-                    position: 'absolute', inset: 0, borderRadius: '50%',
-                    background: '#34d399', opacity: 0.5,
-                  }} />
-                )}
-                <span style={{
-                  width: 8, height: 8, borderRadius: '50%', position: 'relative',
-                  background: dispo ? '#34d399' : '#ef4444',
-                }} />
-              </span>
-              {toggling ? '…' : dispo ? 'Disponible pour missions' : 'Indisponible'}
-            </button>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              background: 'rgba(15,10,30,0.65)', backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(201,168,76,0.2)', borderRadius: 20,
+              padding: '6px 14px', fontSize: 12, color: C.text,
+            }}>
+              <span style={{
+                width: 7, height: 7, borderRadius: '50%',
+                background: '#4ade80',
+                animation: 'pulseGreen 1.5s ease-in-out infinite',
+              }} />
+              Disponible pour missions
+            </div>
           </div>
+          <style>{`
+            @keyframes pulseGreen {
+              0%, 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0.5); }
+              50%       { box-shadow: 0 0 0 5px rgba(74,222,128,0); }
+            }
+          `}</style>
         </div>
 
-        {/* ── CONTENU ── */}
-        <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 20, flex: 1 }}>
+        {/* Content */}
+        <div className="eb-content-pad" style={{ padding: '24px 32px', flex: 1, overflowY: 'auto' }}>
 
-          {/* Bannière profil incomplet */}
-          {donePct < 100 && (
+          {/* Incomplete profile banner */}
+          {profileIncomplete && (
             <div style={{
-              display: 'flex', alignItems: 'center', gap: 12, padding: '11px 16px',
-              borderRadius: 10, background: 'rgba(52,211,153,0.07)',
-              border: '1px solid rgba(52,211,153,0.18)',
+              background: 'rgba(74,222,128,0.08)',
+              border: '1px solid rgba(74,222,128,0.2)',
+              borderRadius: 12, padding: '12px 16px', marginBottom: 24,
+              display: 'flex', alignItems: 'center', gap: 10,
+              fontSize: 13, color: '#86efac',
             }}>
-              <AlertCircle size={15} color="#34d399" />
-              <p style={{ fontSize: 13, fontWeight: 500, color: '#34d399', flex: 1, margin: 0 }}>
-                Profil complété à {donePct}%. Complétez-le pour augmenter votre visibilité.
-              </p>
-              <button onClick={() => navigate('/profile')}
-                style={{
-                  fontSize: 12, fontWeight: 500, color: '#34d399',
-                  padding: '5px 12px', background: 'rgba(52,211,153,0.1)',
-                  border: '1px solid rgba(52,211,153,0.25)', borderRadius: 7, cursor: 'pointer',
-                }}>
-                Compléter →
-              </button>
+              <CheckCircle size={15} />
+              Complétez votre profil pour maximiser vos chances — {completionPct}% complété
             </div>
           )}
 
-          {/* 4 KPI cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-            {kpis.map((k, i) => (
-              <KpiCard key={i}
-                icon={k.icon} accent={k.accent} label={k.label} value={k.value} sub={k.sub}
-                hovered={hovKpi === i}
-                onEnter={() => setHovKpi(i)}
-                onLeave={() => setHovKpi(null)}
-              />
-            ))}
+          {/* KPI grid */}
+          <div className="eb-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 28 }}>
+            <KpiCard
+              icon={<Send size={18} />}
+              iconBg="rgba(201,168,76,0.12)" iconColor={C.gold}
+              value={stats.total} label="Candidatures"
+              sublabel="envoyées au total" accent={C.gold}
+            />
+            <KpiCard
+              icon={<CheckCircle size={18} />}
+              iconBg="rgba(74,222,128,0.12)" iconColor="#4ade80"
+              value={stats.accepted} label="Acceptées"
+              sublabel="missions décrochées" accent="#4ade80"
+            />
+            <KpiCard
+              icon={<Star size={18} />}
+              iconBg="rgba(251,191,36,0.12)" iconColor="#fbbf24"
+              value={profile?.avg_rating ? profile.avg_rating.toFixed(1) : '—'} label="Note moyenne"
+              sublabel="sur 5 étoiles" accent="#fbbf24"
+            />
+            <KpiCard
+              icon={<Award size={18} />}
+              iconBg="rgba(139,92,246,0.12)" iconColor="#a78bfa"
+              value={stats.completed} label="Missions réalisées"
+              sublabel="avec succès" accent="#a78bfa"
+            />
           </div>
 
-          {/* 2 colonnes */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 14, flex: 1, minHeight: 0 }}>
+          {/* 2-col layout */}
+          <div className="eb-two-col" style={{ display: 'flex', gap: 20 }}>
 
-            {/* ── Candidatures récentes ── */}
-            <div style={{
-              background: C.card, border: `1px solid ${C.bdr}`, borderRadius: 14,
-              padding: '20px 18px', display: 'flex', flexDirection: 'column', gap: 16,
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <p style={sectionLabel}>Mes candidatures récentes</p>
-                {applications.length > 0 && (
-                  <button onClick={() => navigate('/my-applications')}
-                    style={{ fontSize: 12, fontWeight: 500, color: C.gold, background: 'none', border: 'none', cursor: 'pointer' }}>
-                    Voir tout →
-                  </button>
-                )}
-              </div>
-
-              {loading ? (
-                <p style={{ fontSize: 13, color: C.muted, textAlign: 'center', padding: '32px 0', margin: 0 }}>
-                  Chargement…
-                </p>
-              ) : applications.length === 0 ? (
-                /* État vide */
+            {/* Left: recent applications */}
+            <div style={{ flex: 1 }}>
+              <div style={{
+                background: C.card, border: `1px solid ${C.cardBd}`,
+                borderRadius: 16, padding: '22px 24px',
+              }}>
                 <div style={{
-                  flex: 1, display: 'flex', flexDirection: 'column',
-                  alignItems: 'center', justifyContent: 'center', gap: 14, padding: '32px 20px',
+                  fontSize: 11, fontWeight: 500, marginBottom: 20,
+                  color: 'rgba(201,168,76,0.5)',
+                  textTransform: 'uppercase', letterSpacing: '0.8px',
                 }}>
+                  Mes candidatures récentes
+                </div>
+
+                {/* Empty state */}
+                <div style={{ textAlign: 'center', padding: '36px 20px' }}>
                   <div style={{
-                    width: 52, height: 52, borderRadius: 14,
+                    width: 56, height: 56, borderRadius: 16,
+                    background: 'rgba(201,168,76,0.08)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: `${C.gold}0a`, border: `1px solid ${C.bdr}`,
+                    margin: '0 auto 16px',
                   }}>
-                    <FileText size={22} color={`${C.gold}60`} />
+                    <FileText size={24} color="rgba(201,168,76,0.4)" />
                   </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <p style={{ fontSize: 14, fontWeight: 500, color: C.text, margin: '0 0 6px' }}>
-                      Aucune candidature
-                    </p>
-                    <p style={{ fontSize: 12, color: C.muted, lineHeight: 1.7, margin: 0 }}>
-                      Postulez à des missions pour<br />voir vos candidatures ici.
-                    </p>
+                  <div style={{ fontSize: 14, fontWeight: 500, color: C.text, marginBottom: 8 }}>
+                    Aucune candidature pour l'instant
                   </div>
-                  <button onClick={() => navigate('/missions')}
+                  <div style={{ fontSize: 13, color: C.textDim, marginBottom: 20 }}>
+                    Parcourez les missions disponibles et postulez pour commencer
+                  </div>
+                  <button
+                    onClick={() => navigate('/missions')}
                     style={{
-                      padding: '9px 22px', borderRadius: 9, fontSize: 13, fontWeight: 500,
-                      color: '#1a0a2e',
-                      background: `linear-gradient(135deg, ${C.gold}, ${C.goldLt})`,
-                      border: 'none', cursor: 'pointer',
-                    }}>
-                    Voir les missions
+                      padding: '10px 22px', borderRadius: 10,
+                      fontSize: 13, fontWeight: 500,
+                      background: `linear-gradient(135deg,${C.gold},${C.goldLt})`,
+                      color: '#1a0a2e', border: 'none', cursor: 'pointer',
+                    }}
+                  >
+                    Voir les missions disponibles
                   </button>
                 </div>
-              ) : (
-                /* Liste candidatures */
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {applications.map(a => {
-                    const m  = a.mission as Mission;
-                    const st = STATUS[a.status] ?? STATUS.pending;
-                    return (
-                      <div key={a.id}
-                        onClick={() => m?.id && navigate(`/MissionDetail?id=${m.id}`)}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: 12,
-                          padding: '10px 12px', borderRadius: 10, cursor: 'pointer',
-                          transition: 'background 0.15s',
-                        }}
-                        onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.background = `${C.gold}06`}
-                        onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.background = 'transparent'}>
-                        <div style={{
-                          width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          background: `${C.gold}0a`,
-                        }}>
-                          <Calendar size={15} color={`${C.gold}70`} />
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{
-                            fontSize: 13, fontWeight: 500, color: C.text, margin: 0,
-                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                          }}>
-                            {m?.title ?? '—'}
-                          </p>
-                          <p style={{ fontSize: 11, color: C.muted, margin: '2px 0 0' }}>
-                            {m?.event_date ? formatDateShort(m.event_date) : '—'}
-                            {m?.location ? ` · ${m.location}` : ''}
-                          </p>
-                        </div>
-                        <span style={{
-                          fontSize: 11, fontWeight: 500, padding: '3px 9px',
-                          borderRadius: 999, whiteSpace: 'nowrap', flexShrink: 0,
-                          background: `${st.color}18`, color: st.color,
-                        }}>
-                          {st.label}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+              </div>
             </div>
 
-            {/* ── Colonne droite ── */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {/* Right column */}
+            <div className="eb-right-col" style={{ width: 320, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-              {/* Accès rapide */}
-              <div style={{ background: C.card, border: `1px solid ${C.bdr}`, borderRadius: 14, padding: '18px 16px' }}>
-                <p style={{ ...sectionLabel, marginBottom: 14 }}>Accès rapide</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {quickBtns.map((b, i) => (
-                    <button key={i} onClick={() => navigate(b.to)}
-                      onMouseEnter={() => setHovBtn(i)}
-                      onMouseLeave={() => setHovBtn(null)}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-                        padding: '10px 12px', borderRadius: 9, cursor: 'pointer',
-                        background: hovBtn === i ? b.bgH : b.bg,
-                        border: `1px solid ${b.color}20`,
-                        transform: hovBtn === i ? 'translateX(2px)' : 'translateX(0)',
-                        transition: 'all 0.15s',
-                      }}>
-                      <div style={{ flex: 1, textAlign: 'left' }}>
-                        <p style={{ fontSize: 13, fontWeight: 500, color: b.color, margin: 0 }}>{b.label}</p>
-                        <p style={{ fontSize: 11, color: C.muted, margin: '2px 0 0' }}>{b.sub}</p>
-                      </div>
-                      <ChevronRight size={14} color={b.color} style={{ opacity: 0.6, flexShrink: 0 }} />
-                    </button>
-                  ))}
+              {/* Quick access */}
+              <div style={{
+                background: C.card, border: `1px solid ${C.cardBd}`,
+                borderRadius: 16, padding: '22px 24px',
+              }}>
+                <div style={{
+                  fontSize: 11, fontWeight: 500, marginBottom: 14,
+                  color: 'rgba(201,168,76,0.5)',
+                  textTransform: 'uppercase', letterSpacing: '0.8px',
+                }}>
+                  Accès rapide
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <QuickBtn label="Voir les missions"  color={C.gold}    bg="rgba(201,168,76,0.08)"  onClick={() => navigate('/missions')} />
+                  <QuickBtn label="Mon profil"         color="#a78bfa"   bg="rgba(139,92,246,0.08)"  onClick={() => navigate('/profile')} />
+                  <QuickBtn label="Messages"           color="#4ade80"   bg="rgba(74,222,128,0.08)"  onClick={() => navigate('/messages')} />
                 </div>
               </div>
 
-              {/* Complétion du profil */}
+              {/* Profile completion */}
               <div style={{
-                background: C.card, border: `1px solid ${C.bdr}`, borderRadius: 14,
-                padding: '18px 16px', flex: 1,
+                background: C.card, border: `1px solid ${C.cardBd}`,
+                borderRadius: 16, padding: '22px 24px',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <p style={sectionLabel}>Complétion du profil</p>
-                  <span style={{ fontSize: 13, fontWeight: 500, color: C.gold }}>{donePct}%</span>
+                <div style={{
+                  display: 'flex', alignItems: 'center',
+                  justifyContent: 'space-between', marginBottom: 12,
+                }}>
+                  <span style={{
+                    fontSize: 11, fontWeight: 500,
+                    color: 'rgba(201,168,76,0.5)',
+                    textTransform: 'uppercase', letterSpacing: '0.8px',
+                  }}>
+                    Complétion du profil
+                  </span>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: C.gold }}>{completionPct}%</span>
                 </div>
 
-                {/* Barre de progression */}
-                <div style={{ height: 5, background: `${C.gold}12`, borderRadius: 99, marginBottom: 16 }}>
+                <div style={{
+                  height: 6, borderRadius: 3,
+                  background: 'rgba(255,255,255,0.06)',
+                  marginBottom: 16, overflow: 'hidden',
+                }}>
                   <div style={{
-                    height: '100%', borderRadius: 99, width: `${donePct}%`,
-                    background: `linear-gradient(to right, ${C.gold}, ${C.goldLt})`,
-                    transition: 'width 0.8s ease',
+                    height: '100%', width: `${completionPct}%`,
+                    background: `linear-gradient(90deg,${C.gold},${C.goldLt})`,
+                    borderRadius: 3, transition: 'width 0.4s',
                   }} />
                 </div>
 
-                {/* Checklist */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {completionFields.map(f => (
-                    <div key={f.label} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                  {completionItems.map(item => (
+                    <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12 }}>
                       <div style={{
-                        width: 18, height: 18, borderRadius: 5, flexShrink: 0,
+                        width: 16, height: 16, borderRadius: '50%', flexShrink: 0,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: f.done ? 'rgba(52,211,153,0.12)' : `${C.gold}06`,
-                        border: `1px solid ${f.done ? 'rgba(52,211,153,0.28)' : C.bdr}`,
+                        background: item.done ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.05)',
+                        border: `1px solid ${item.done ? 'rgba(74,222,128,0.4)' : 'rgba(255,255,255,0.08)'}`,
                       }}>
-                        {f.done
-                          ? <Check size={10} color="#34d399" />
-                          : <span style={{ width: 4, height: 4, borderRadius: '50%', background: C.muted, display: 'block' }} />
-                        }
+                        {item.done && <CheckCircle size={10} color="#4ade80" />}
                       </div>
-                      <span style={{
-                        fontSize: 12, fontWeight: 500,
-                        color: f.done ? C.muted : 'rgba(240,230,211,0.5)',
-                      }}>
-                        {f.label}
-                      </span>
+                      <span style={{ color: item.done ? C.text : C.textDim }}>{item.label}</span>
                     </div>
                   ))}
                 </div>
@@ -613,7 +485,31 @@ export default function FreelanceDashboard() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
+  );
+}
+
+// ─── Logout button (extracted to avoid inline event-handler re-renders) ────────
+function LogoutBtn({ onClick }: { onClick: () => void }) {
+  const [hov, setHov] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        width: '100%', padding: '8px 12px', borderRadius: 10,
+        background: hov ? 'rgba(201,168,76,0.07)' : 'transparent',
+        border: '1px solid rgba(201,168,76,0.15)',
+        color: hov ? '#f0e6d3' : 'rgba(240,230,211,0.4)',
+        fontSize: 12, cursor: 'pointer',
+        display: 'flex', alignItems: 'center', gap: 8,
+        transition: 'all 0.15s',
+      }}
+    >
+      <LogOut size={14} />
+      Déconnexion
+    </button>
   );
 }

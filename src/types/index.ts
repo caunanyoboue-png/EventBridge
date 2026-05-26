@@ -61,6 +61,7 @@ export interface Mission {
   payment_method?: PaymentMethod;
   total_amount?: number;
   commission_rate?: number;
+  venue_photo_url?: string;
   created_at?: string;
   updated_at?: string;
   organisateur?: Profile;
@@ -98,6 +99,9 @@ export interface Message {
   conversation_id: string;
   sender_id: string;
   content: string;
+  attachment_url?: string;
+  attachment_name?: string;
+  attachment_type?: 'image' | 'file';
   is_read?: boolean;
   created_at?: string;
   sender?: Profile;
@@ -127,6 +131,15 @@ export interface SosSession {
   status: SosStatus;
   notified_count: number;
   expires_at: string;
+  created_at?: string;
+}
+
+export interface PortfolioItem {
+  id: string;
+  freelance_id: string;
+  image_url: string;
+  title: string;
+  category: string;
   created_at?: string;
 }
 

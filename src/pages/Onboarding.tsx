@@ -1,275 +1,408 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import toast from 'react-hot-toast';
 import { COMPETENCES, VILLES } from '../lib/utils';
 import { type UserRole } from '../types';
+import toast from 'react-hot-toast';
 
 const LOGO = '/logo.png.jpeg';
 
+// ─── Styles réutilisables ─────────────────────────────────────────────────────
+const inp: React.CSSProperties = {
+  width: '100%',
+  padding: '12px 16px',
+  borderRadius: 12,
+  fontSize: 14,
+  outline: 'none',
+  background: 'rgba(255,255,255,0.05)',
+  border: '1px solid rgba(201,168,76,0.2)',
+  color: '#f0e6d3',
+  boxSizing: 'border-box',
+};
+const btnGold: React.CSSProperties = {
+  width: '100%',
+  padding: '13px',
+  borderRadius: 12,
+  fontSize: 14,
+  fontWeight: 600,
+  cursor: 'pointer',
+  border: 'none',
+  background: 'linear-gradient(135deg,#c9a84c,#e8c97a)',
+  color: '#1a0a2e',
+  transition: 'opacity 0.15s',
+};
+const btnOutline: React.CSSProperties = {
+  width: '100%',
+  padding: '13px',
+  borderRadius: 12,
+  fontSize: 14,
+  fontWeight: 500,
+  cursor: 'pointer',
+  background: 'transparent',
+  border: '1px solid rgba(201,168,76,0.3)',
+  color: '#c9a84c',
+  transition: 'background 0.15s',
+};
+
+type Mode = 'login' | 'register';
+
 export default function Onboarding() {
-  const navigate = useNavigate();
-  const { signIn, signUp, profile, updateProfile } = useAuth();
+  const navigate   = useNavigate();
+  const { signIn, signUp, updateProfile, profile, user, loading } = useAuth();
 
-  const [mode, setMode] = useState<'login' | 'register' | 'complete'>('login');
-  const [step, setStep] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [mode, setMode]       = useState<Mode>('login');
+  const [step, setStep]       = useState(0);   // 0=rôle, 1=infos, 2=complétion
+  const [busy, setBusy]       = useState(false);
 
-  const [form, setForm] = useState({
-    email: '', password: '', full_name: '', phone: '',
-    role: 'freelance' as UserRole, ville: 'Abidjan - Cocody',
-    quartier: '', bio: '', skills: [] as string[],
-    hourly_rate: 2500, experience_years: 0,
-    company_name: '', company_sector: '', rccm: '',
-  });
+  // Champs formulaire
+  const [email, setEmail]         = useState('');
+  const [password, setPassword]   = useState('');
+  const [fullName, setFullName]   = useState('');
+  const [role, setRole]           = useState<UserRole>('freelance');
+  const [ville, setVille]         = useState('Abidjan - Cocody');
+  const [phone, setPhone]         = useState('');
+  const [quartier, setQuartier]   = useState('');
+  const [bio, setBio]             = useState('');
+  const [skills, setSkills]       = useState<string[]>([]);
+  const [hourlyRate, setHourlyRate] = useState(2500);
+  const [expYears, setExpYears]   = useState(0);
+  const [companyName, setCompanyName] = useState('');
+  const [companySector, setCompanySector] = useState('');
 
-  function updateForm(key: string, value: unknown) {
-    setForm(prev => ({ ...prev, [key]: value }));
+  // ── Rediriger si déjà connecté et profil complet ──────────────────────────
+  useEffect(() => {
+    if (loading) return;
+    if (!user || !profile) return;
+    // onboarding_done peut être true, false ou undefined (colonne absente)
+    if (profile.onboarding_done !== false) {
+      // Profil complet → aller au bon dashboard
+      if (profile.role === 'freelance')        navigate('/freelance-dashboard', { replace: true });
+      else if (profile.role === 'organisateur') navigate('/organisateur-dashboard', { replace: true });
+      else if (profile.role === 'admin')        navigate('/admin/AdminDashboard', { replace: true });
+    }
+  }, [loading, user, profile, navigate]);
+
+  function toggleSkill(s: string) {
+    setSkills(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
   }
 
-  function toggleSkill(skill: string) {
-    setForm(prev => ({
-      ...prev,
-      skills: prev.skills.includes(skill)
-        ? prev.skills.filter(s => s !== skill)
-        : [...prev.skills, skill],
-    }));
-  }
-
+  // ─────────────────────────────────────────────────────────────────────────
+  // CONNEXION
+  // ─────────────────────────────────────────────────────────────────────────
   async function handleLogin() {
-    setLoading(true);
+    if (!email || !password) return;
+    setBusy(true);
     try {
-      await signIn(form.email, form.password);
+      await signIn(email, password);
+      // La redirection est gérée par l'useEffect ci-dessus (via profile chargé)
       navigate('/dashboard');
     } catch (e: unknown) {
       const msg = (e as Error).message || '';
-      if (msg.toLowerCase().includes('email not confirmed')) {
-        toast.error('Confirmez votre email avant de vous connecter (vérifiez vos spams)');
-      } else if (msg.toLowerCase().includes('invalid login') || msg.toLowerCase().includes('invalid credentials')) {
-        toast.error('Email ou mot de passe incorrect');
+      if (msg.includes('email not confirmed') || msg.includes('Email not confirmed')) {
+        toast.error('Confirmez votre adresse email avant de vous connecter.');
+      } else if (msg.includes('Invalid login') || msg.includes('invalid credentials') || msg.includes('Invalid credentials')) {
+        toast.error('Email ou mot de passe incorrect.');
       } else {
-        toast.error(msg || 'Erreur de connexion');
+        toast.error(msg || 'Erreur de connexion.');
       }
-    } finally { setLoading(false); }
+    } finally { setBusy(false); }
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // INSCRIPTION — étape 1 : créer le compte
+  // ─────────────────────────────────────────────────────────────────────────
   async function handleRegister() {
-    setLoading(true);
+    if (!fullName || !email || !password) return;
+    if (password.length < 6) { toast.error('Le mot de passe doit faire au moins 6 caractères.'); return; }
+    setBusy(true);
     try {
-      await signUp(form.email, form.password, { full_name: form.full_name, role: form.role, ville: form.ville });
-      toast.success('Compte créé ! Complétez votre profil pour continuer.');
-      setMode('complete');
+      await signUp(email, password, { full_name: fullName, role, ville });
+      toast.success('Compte créé ! Complétez votre profil.');
+      setStep(2); // passer à la complétion
     } catch (e: unknown) {
       const msg = (e as Error).message || '';
-      if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already exists')) {
+      if (msg.includes('already registered') || msg.includes('already exists')) {
         toast.error('Cet email est déjà utilisé. Connectez-vous.');
         setMode('login');
+        setStep(0);
+      } else if (msg.includes('rate limit') || msg.includes('email rate')) {
+        toast.error('Trop de tentatives. Désactivez la confirmation email dans Supabase ou attendez quelques minutes.');
       } else {
-        toast.error(msg || "Erreur lors de l'inscription");
+        toast.error(msg || "Erreur lors de l'inscription.");
       }
-    } finally { setLoading(false); }
+    } finally { setBusy(false); }
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // COMPLÉTION DU PROFIL
+  // ─────────────────────────────────────────────────────────────────────────
   async function handleComplete() {
-    setLoading(true);
+    setBusy(true);
     try {
+      const currentRole = profile?.role || role;
       await updateProfile({
-        full_name: form.full_name || profile?.full_name,
-        phone: form.phone,
-        ville: form.ville || profile?.ville,
-        quartier: form.quartier,
-        bio: form.bio,
-        skills: form.skills,
-        hourly_rate: form.hourly_rate,
-        experience_years: form.experience_years,
-        company_name: form.company_name,
-        company_sector: form.company_sector,
-        rccm: form.rccm,
+        full_name:       fullName || profile?.full_name,
+        phone:           phone    || undefined,
+        ville:           ville    || profile?.ville,
+        quartier:        quartier || undefined,
+        bio:             bio      || undefined,
+        skills:          skills.length ? skills : undefined,
+        hourly_rate:     currentRole === 'freelance' ? hourlyRate : undefined,
+        experience_years: currentRole === 'freelance' ? expYears : undefined,
+        company_name:    currentRole === 'organisateur' ? companyName  : undefined,
+        company_sector:  currentRole === 'organisateur' ? companySector : undefined,
         onboarding_done: true,
       });
-      toast.success('Profil complété ! Bienvenue sur EventBridge');
-      navigate('/dashboard');
-    } catch {
-      toast.error('Erreur lors de la mise à jour du profil');
-    } finally { setLoading(false); }
+      toast.success('Bienvenue sur EventBridge !');
+      const r = profile?.role || role;
+      if (r === 'freelance')        navigate('/freelance-dashboard',    { replace: true });
+      else if (r === 'organisateur') navigate('/organisateur-dashboard', { replace: true });
+      else                           navigate('/dashboard',              { replace: true });
+    } catch (e: unknown) {
+      const msg = (e as Error).message || JSON.stringify(e);
+      console.error('[handleComplete] Supabase error:', e);
+      toast.error(`Erreur : ${msg}`);
+    } finally { setBusy(false); }
   }
 
-  const inputClass = "w-full px-4 py-3 rounded-xl text-sm outline-none transition-all";
-  const inputStyle = {
-    background: 'rgba(61,36,96,0.5)',
-    border: '1px solid rgba(201,168,76,0.2)',
-    color: '#f0e6d3',
-  };
+  // ─────────────────────────────────────────────────────────────────────────
+  // Détermine si on doit montrer la complétion
+  // ─────────────────────────────────────────────────────────────────────────
+  const needsCompletion = (profile && profile.onboarding_done === false) || (mode === 'register' && step === 2);
 
-  // ── Détermine quel formulaire afficher ──────────────────────────────────────
-  // Priorité 1 : utilisateur connecté sans onboarding → formulaire de complétion
-  const needsCompletion = profile && !profile.onboarding_done;
-  // Priorité 2 : flux inscription juste terminée → formulaire de complétion
-  const showCompletion = needsCompletion || mode === 'complete';
-
-  const title = showCompletion
-    ? 'Complétez votre profil'
+  // Titre dynamique
+  const title    = needsCompletion ? 'Complétez votre profil'
     : mode === 'login' ? 'Bienvenue !'
-    : 'Créer un compte';
+    : step === 0 ? 'Qui êtes-vous ?'
+    : 'Créer votre compte';
+  const subtitle = needsCompletion ? 'Encore quelques informations pour personnaliser votre expérience'
+    : mode === 'login' ? 'Connectez-vous à votre espace EventBridge'
+    : step === 0 ? 'Choisissez votre profil'
+    : 'Renseignez vos informations';
 
-  const subtitle = showCompletion
-    ? 'Encore quelques infos pour personnaliser votre expérience'
-    : mode === 'login' ? 'Connectez-vous à votre compte'
-    : 'Rejoignez EventBridge gratuitement';
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f0a1e' }}>
+        <div style={{ width: 36, height: 36, borderRadius: '50%', border: '2px solid #c9a84c',
+          borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
+  const currentRole = profile?.role || role;
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12"
-      style={{ background: 'linear-gradient(135deg, #120720 0%, #1a0a2e 50%, #2d1b4e 100%)' }}>
+    <div style={{
+      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '40px 16px',
+      fontFamily: 'Inter, system-ui, sans-serif',
+      position: 'relative',
+      backgroundImage: 'url(/images/img-de-fond-page-connexion.jpg)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+    }}>
+      {/* Overlay sombre pour lisibilité */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: 'linear-gradient(135deg, rgba(10,5,24,0.82) 0%, rgba(19,8,40,0.85) 50%, rgba(30,16,64,0.82) 100%)',
+      }} />
+      <div className="onboarding-wrap" style={{ width: '100%', maxWidth: 440, position: 'relative', zIndex: 1 }}>
 
-      <div className="w-full max-w-lg">
-        <div className="text-center mb-8">
-          <img src={LOGO} className="h-16 w-auto mx-auto mb-4 animate-float" alt="EventBridge" />
-          <h1 className="font-display text-2xl font-bold" style={{ color: '#f0e6d3' }}>{title}</h1>
-          <p className="text-sm mt-1" style={{ color: '#b8a898' }}>{subtitle}</p>
+        {/* Logo + titre */}
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <img src={LOGO} style={{ height: 56, width: 'auto', marginBottom: 16, display: 'block', margin: '0 auto 16px' }} alt="EventBridge" />
+          <h1 style={{ fontSize: 22, fontWeight: 600, color: '#f0e6d3', margin: '0 0 6px' }}>{title}</h1>
+          <p style={{ fontSize: 14, color: 'rgba(240,230,211,0.5)', margin: 0 }}>{subtitle}</p>
         </div>
 
-        <div className="card-glass p-8">
+        {/* Card formulaire */}
+        <div className="onboarding-card" style={{
+          background: 'rgba(255,255,255,0.04)',
+          border: '1px solid rgba(201,168,76,0.15)',
+          borderRadius: 20,
+          padding: '32px 28px',
+          backdropFilter: 'blur(20px)',
+        }}>
 
-          {/* ── COMPLÉTION PROFIL (prioritaire) ────────────────────────────── */}
-          {showCompletion && (
-            <div className="space-y-4">
-              <input className={inputClass} style={inputStyle} placeholder="Téléphone (+225)"
-                value={form.phone} onChange={e => updateForm('phone', e.target.value)} />
-              <input className={inputClass} style={inputStyle} placeholder="Quartier"
-                value={form.quartier} onChange={e => updateForm('quartier', e.target.value)} />
-              <textarea className={inputClass} style={{ ...inputStyle, resize: 'none' }} rows={3}
-                placeholder="Bio / Présentation"
-                value={form.bio} onChange={e => updateForm('bio', e.target.value)} />
+          {/* ══════════════════════════════════════════════════════════
+              COMPLÉTION DU PROFIL (prioritaire)
+          ══════════════════════════════════════════════════════════ */}
+          {needsCompletion && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-              {(form.role === 'freelance' || profile?.role === 'freelance') && (
+              <input style={inp} placeholder="Téléphone (+225 XX XX XX XX)"
+                value={phone} onChange={e => setPhone(e.target.value)} />
+
+              <input style={inp} placeholder="Quartier"
+                value={quartier} onChange={e => setQuartier(e.target.value)} />
+
+              <textarea style={{ ...inp, resize: 'none', height: 90 }}
+                placeholder="Présentez-vous en quelques mots…"
+                value={bio} onChange={e => setBio(e.target.value)} />
+
+              {/* Freelance : compétences + tarif */}
+              {currentRole === 'freelance' && (
                 <>
                   <div>
-                    <p className="text-sm mb-2" style={{ color: '#b8a898' }}>Compétences</p>
-                    <div className="flex flex-wrap gap-2">
+                    <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.5)', marginBottom: 10 }}>
+                      Compétences (choisissez vos spécialités)
+                    </p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                       {COMPETENCES.map(c => (
-                        <button key={c} onClick={() => toggleSkill(c)}
-                          className="px-3 py-1 rounded-full text-xs transition-all border"
+                        <button key={c} type="button" onClick={() => toggleSkill(c)}
                           style={{
-                            background: form.skills.includes(c) ? 'rgba(201,168,76,0.2)' : 'transparent',
-                            borderColor: form.skills.includes(c) ? '#c9a84c' : 'rgba(201,168,76,0.2)',
-                            color: form.skills.includes(c) ? '#c9a84c' : '#b8a898',
+                            padding: '6px 12px', borderRadius: 20, fontSize: 12, cursor: 'pointer',
+                            transition: 'all 0.15s',
+                            background: skills.includes(c) ? 'rgba(201,168,76,0.2)' : 'transparent',
+                            border: `1px solid ${skills.includes(c) ? '#c9a84c' : 'rgba(201,168,76,0.2)'}`,
+                            color: skills.includes(c) ? '#c9a84c' : 'rgba(240,230,211,0.5)',
                           }}>
                           {c}
                         </button>
                       ))}
                     </div>
                   </div>
-                  <div className="flex gap-3">
-                    <div className="flex-1">
-                      <p className="text-xs mb-1" style={{ color: '#b8a898' }}>Tarif horaire (FCFA)</p>
-                      <input className={inputClass} style={inputStyle} type="number"
-                        value={form.hourly_rate} onChange={e => updateForm('hourly_rate', Number(e.target.value))} />
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div>
+                      <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.5)', marginBottom: 6 }}>
+                        Tarif horaire (FCFA)
+                      </p>
+                      <input style={inp} type="number" min={0}
+                        value={hourlyRate} onChange={e => setHourlyRate(Number(e.target.value))} />
                     </div>
-                    <div className="flex-1">
-                      <p className="text-xs mb-1" style={{ color: '#b8a898' }}>Années d'expérience</p>
-                      <input className={inputClass} style={inputStyle} type="number"
-                        value={form.experience_years} onChange={e => updateForm('experience_years', Number(e.target.value))} />
+                    <div>
+                      <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.5)', marginBottom: 6 }}>
+                        Années d'expérience
+                      </p>
+                      <input style={inp} type="number" min={0}
+                        value={expYears} onChange={e => setExpYears(Number(e.target.value))} />
                     </div>
                   </div>
                 </>
               )}
 
-              {(form.role === 'organisateur' || profile?.role === 'organisateur') && (
+              {/* Organisateur : structure */}
+              {currentRole === 'organisateur' && (
                 <>
-                  <input className={inputClass} style={inputStyle} placeholder="Nom de la structure *"
-                    value={form.company_name} onChange={e => updateForm('company_name', e.target.value)} />
-                  <input className={inputClass} style={inputStyle} placeholder="Secteur d'activité"
-                    value={form.company_sector} onChange={e => updateForm('company_sector', e.target.value)} />
-                  <input className={inputClass} style={inputStyle} placeholder="RCCM (optionnel)"
-                    value={form.rccm} onChange={e => updateForm('rccm', e.target.value)} />
+                  <input style={inp} placeholder="Nom de la structure *"
+                    value={companyName} onChange={e => setCompanyName(e.target.value)} />
+                  <input style={inp} placeholder="Secteur d'activité"
+                    value={companySector} onChange={e => setCompanySector(e.target.value)} />
                 </>
               )}
 
-              <button onClick={handleComplete} disabled={loading}
-                className="btn-gold w-full py-3 rounded-xl font-bold text-[#1a0a2e]">
-                {loading ? 'Enregistrement...' : 'Accéder à la plateforme →'}
+              <button onClick={handleComplete} disabled={busy} style={{ ...btnGold, opacity: busy ? 0.7 : 1, marginTop: 4 }}>
+                {busy ? 'Enregistrement…' : 'Accéder à la plateforme →'}
               </button>
             </div>
           )}
 
-          {/* ── CONNEXION ───────────────────────────────────────────────────── */}
-          {!showCompletion && mode === 'login' && (
-            <div className="space-y-4">
-              <input className={inputClass} style={inputStyle} type="email" placeholder="Email"
-                value={form.email} onChange={e => updateForm('email', e.target.value)} />
-              <input className={inputClass} style={inputStyle} type="password" placeholder="Mot de passe"
-                value={form.password} onChange={e => updateForm('password', e.target.value)}
+          {/* ══════════════════════════════════════════════════════════
+              CONNEXION
+          ══════════════════════════════════════════════════════════ */}
+          {!needsCompletion && mode === 'login' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <input style={inp} type="email" placeholder="Adresse email"
+                value={email} onChange={e => setEmail(e.target.value)} />
+              <input style={inp} type="password" placeholder="Mot de passe"
+                value={password} onChange={e => setPassword(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleLogin()} />
-              <button onClick={handleLogin} disabled={loading || !form.email || !form.password}
-                className="btn-gold w-full py-3 rounded-xl font-bold text-[#1a0a2e]">
-                {loading ? 'Connexion...' : 'Se connecter →'}
+
+              <button onClick={handleLogin}
+                disabled={busy || !email || !password}
+                style={{ ...btnGold, opacity: (busy || !email || !password) ? 0.6 : 1, marginTop: 4 }}>
+                {busy ? 'Connexion…' : 'Se connecter →'}
               </button>
-              <p className="text-center text-sm" style={{ color: '#b8a898' }}>
-                Pas de compte ?{' '}
-                <button onClick={() => { setMode('register'); setStep(0); }} className="font-medium" style={{ color: '#c9a84c' }}>
+
+              <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(240,230,211,0.45)', margin: 0 }}>
+                Pas encore de compte ?{' '}
+                <button type="button"
+                  onClick={() => { setMode('register'); setStep(0); }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#c9a84c', fontWeight: 600, fontSize: 13 }}>
                   S'inscrire gratuitement
                 </button>
               </p>
             </div>
           )}
 
-          {/* ── INSCRIPTION — Étape 1 : choix du rôle ──────────────────────── */}
-          {!showCompletion && mode === 'register' && step === 0 && (
-            <div className="space-y-6">
-              <h2 className="text-center font-semibold" style={{ color: '#f0e6d3' }}>Qui êtes-vous ?</h2>
-              <div className="grid grid-cols-2 gap-4">
+          {/* ══════════════════════════════════════════════════════════
+              INSCRIPTION — Étape 0 : choix du rôle
+          ══════════════════════════════════════════════════════════ */}
+          {!needsCompletion && mode === 'register' && step === 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 {(['freelance', 'organisateur'] as UserRole[]).map(r => (
-                  <button key={r} onClick={() => updateForm('role', r)}
-                    className="p-6 rounded-xl text-center transition-all duration-200 border"
+                  <button key={r} type="button" onClick={() => setRole(r)}
                     style={{
-                      background: form.role === r ? 'rgba(201,168,76,0.15)' : 'rgba(61,36,96,0.3)',
-                      borderColor: form.role === r ? '#c9a84c' : 'rgba(201,168,76,0.2)',
-                      color: form.role === r ? '#c9a84c' : '#b8a898',
+                      padding: '20px 12px', borderRadius: 14, textAlign: 'center',
+                      cursor: 'pointer', transition: 'all 0.15s',
+                      background: role === r ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
+                      border: `1.5px solid ${role === r ? '#c9a84c' : 'rgba(201,168,76,0.15)'}`,
+                      color: role === r ? '#c9a84c' : 'rgba(240,230,211,0.5)',
                     }}>
-                    <div className="text-3xl mb-2">{r === 'freelance' ? '🎯' : '🏢'}</div>
-                    <div className="font-semibold capitalize">{r}</div>
-                    <div className="text-xs mt-1">
+                    <p style={{ fontSize: 15, fontWeight: 600, margin: '0 0 4px', textTransform: 'capitalize' }}>{r}</p>
+                    <p style={{ fontSize: 12, margin: 0, color: role === r ? 'rgba(201,168,76,0.7)' : 'rgba(240,230,211,0.35)' }}>
                       {r === 'freelance' ? 'Je propose mes services' : 'Je recrute des talents'}
-                    </div>
+                    </p>
                   </button>
                 ))}
               </div>
-              <button onClick={() => setStep(1)} className="btn-gold w-full py-3 rounded-xl font-bold text-[#1a0a2e]">
+
+              <button onClick={() => setStep(1)} style={btnGold}>
                 Continuer →
               </button>
-              <p className="text-center text-sm" style={{ color: '#b8a898' }}>
+
+              <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(240,230,211,0.45)', margin: 0 }}>
                 Déjà un compte ?{' '}
-                <button onClick={() => setMode('login')} style={{ color: '#c9a84c' }}>Se connecter</button>
+                <button type="button" onClick={() => setMode('login')}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#c9a84c', fontWeight: 600, fontSize: 13 }}>
+                  Se connecter
+                </button>
               </p>
             </div>
           )}
 
-          {/* ── INSCRIPTION — Étape 2 : informations personnelles ───────────── */}
-          {!showCompletion && mode === 'register' && step === 1 && (
-            <div className="space-y-4">
-              <h2 className="text-center font-semibold mb-2" style={{ color: '#f0e6d3' }}>Informations personnelles</h2>
-              <input className={inputClass} style={inputStyle} placeholder="Nom complet *"
-                value={form.full_name} onChange={e => updateForm('full_name', e.target.value)} />
-              <input className={inputClass} style={inputStyle} type="email" placeholder="Email *"
-                value={form.email} onChange={e => updateForm('email', e.target.value)} />
-              <input className={inputClass} style={inputStyle} type="password" placeholder="Mot de passe (min. 6 caractères) *"
-                value={form.password} onChange={e => updateForm('password', e.target.value)} />
-              <select className={inputClass} style={inputStyle}
-                value={form.ville} onChange={e => updateForm('ville', e.target.value)}>
+          {/* ══════════════════════════════════════════════════════════
+              INSCRIPTION — Étape 1 : informations du compte
+          ══════════════════════════════════════════════════════════ */}
+          {!needsCompletion && mode === 'register' && step === 1 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <input style={inp} placeholder="Nom complet *"
+                value={fullName} onChange={e => setFullName(e.target.value)} />
+              <input style={inp} type="email" placeholder="Adresse email *"
+                value={email} onChange={e => setEmail(e.target.value)} />
+              <input style={inp} type="password" placeholder="Mot de passe (min. 6 caractères) *"
+                value={password} onChange={e => setPassword(e.target.value)} />
+              <select style={{ ...inp, cursor: 'pointer' }}
+                value={ville} onChange={e => setVille(e.target.value)}>
                 {VILLES.map(v => <option key={v} value={v}>{v}</option>)}
               </select>
-              <div className="flex gap-3">
-                <button onClick={() => setStep(0)} className="btn-outline-gold flex-1 py-3 rounded-xl">← Retour</button>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 4 }}>
+                <button type="button" onClick={() => setStep(0)} style={btnOutline}>
+                  ← Retour
+                </button>
                 <button onClick={handleRegister}
-                  disabled={loading || !form.full_name || !form.email || !form.password || form.password.length < 6}
-                  className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#1a0a2e]">
-                  {loading ? 'Création...' : "S'inscrire →"}
+                  disabled={busy || !fullName || !email || !password || password.length < 6}
+                  style={{ ...btnGold, opacity: (busy || !fullName || !email || !password || password.length < 6) ? 0.6 : 1 }}>
+                  {busy ? 'Création…' : "S'inscrire →"}
                 </button>
               </div>
             </div>
           )}
 
         </div>
+
+        {/* Lien retour accueil */}
+        <p style={{ textAlign: 'center', marginTop: 20, fontSize: 13, color: 'rgba(240,230,211,0.3)' }}>
+          <button type="button" onClick={() => navigate('/')}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(240,230,211,0.3)', fontSize: 13 }}>
+            ← Retour à l'accueil
+          </button>
+        </p>
+
       </div>
     </div>
   );

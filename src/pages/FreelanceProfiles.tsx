@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
+import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { type Profile } from '../types';
 import { formatCFA, getInitials, COMPETENCES } from '../lib/utils';
+import { distanceKm, formatDistance } from '../lib/geo';
 
 export default function FreelanceProfiles() {
+  const { profile: me } = useAuth();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -67,14 +71,25 @@ export default function FreelanceProfiles() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-          {filtered.map(p => <FreelanceCard key={p.id} profile={p} />)}
+          {filtered.map(p => (
+            <FreelanceCard key={p.id} profile={p}
+              userLat={me?.latitude}
+              userLng={me?.longitude}
+            />
+          ))}
         </div>
       )}
     </DashboardLayout>
   );
 }
 
-function FreelanceCard({ profile: p }: { profile: Profile }) {
+function FreelanceCard({ profile: p, userLat, userLng }: {
+  profile: Profile; userLat?: number | null; userLng?: number | null;
+}) {
+  const navigate = useNavigate();
+  const dist = (userLat && userLng && p.latitude && p.longitude)
+    ? distanceKm(userLat, userLng, p.latitude, p.longitude)
+    : null;
   return (
     <div className="card-glass p-6 hover:-translate-y-1 transition-all duration-300">
       <div className="flex items-center gap-4 mb-4">
@@ -125,14 +140,22 @@ function FreelanceCard({ profile: p }: { profile: Profile }) {
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="text-xs px-2 py-1 rounded-full"
-          style={{
-            background: p.is_available ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)',
-            color: p.is_available ? '#10b981' : '#f59e0b',
-          }}>
-          {p.is_available ? '🟢 Disponible' : '🟡 Sur demande'}
-        </span>
-        <button className="btn-outline-gold px-4 py-1.5 rounded-lg text-sm">Voir profil</button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <span className="text-xs px-2 py-1 rounded-full"
+            style={{
+              background: p.is_available ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)',
+              color: p.is_available ? '#10b981' : '#f59e0b',
+            }}>
+            {p.is_available ? '🟢 Disponible' : '🟡 Sur demande'}
+          </span>
+          {dist !== null && (
+            <span style={{ fontSize: 11, color: '#c9a84c', fontWeight: 600, paddingLeft: 8 }}>
+              📍 à {formatDistance(dist)}
+            </span>
+          )}
+        </div>
+        <button onClick={() => navigate(`/public-profile?id=${p.id}`)}
+          className="btn-outline-gold px-4 py-1.5 rounded-lg text-sm">Voir profil</button>
       </div>
     </div>
   );

@@ -44,7 +44,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function fetchProfile(userId: string) {
     const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
-    setProfile(data);
+
+    if (data) {
+      setProfile(data);
+      setLoading(false);
+      return;
+    }
+
+    // Aucune ligne trouvée — le trigger handle_new_user() n'a pas fonctionné.
+    // On crée le profil depuis les métadonnées auth.
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (authUser) {
+      const meta = authUser.user_metadata || {};
+      await supabase.from('profiles').upsert({
+        id: userId,
+        full_name: meta.full_name || '',
+        email: authUser.email || '',
+        role: (meta.role as Profile['role']) || 'freelance',
+        ville: meta.ville || 'Abidjan - Cocody',
+        status: 'active' as const,
+        onboarding_done: false,
+      });
+      const { data: created } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      setProfile(created);
+    } else {
+      setProfile(null);
+    }
     setLoading(false);
   }
 
@@ -76,7 +101,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function updateProfile(data: Partial<Profile>) {
     if (!user) return;
-    const { error } = await supabase.from('profiles').update(data).eq('id', user.id);
+    const { error } = await supabase.from('profiles').upsert({
+      id: user.id,
+      email: user.email ?? '',   // NOT NULL dans la table → toujours inclus
+      ...data,
+    });
     if (error) throw error;
     await fetchProfile(user.id);
   }

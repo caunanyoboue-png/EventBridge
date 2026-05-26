@@ -21,6 +21,9 @@ import FreelanceProfiles from './pages/FreelanceProfiles';
 import Profile from './pages/Profile';
 import Messages from './pages/Messages';
 import SosBrigade from './pages/SosBrigade';
+import Settings from './pages/Settings';
+import EditMission from './pages/EditMission';
+import PublicProfile from './pages/PublicProfile';
 
 // Pages admin
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -47,12 +50,24 @@ function ProtectedRoute({ children, role }: { children: ReactNode; role?: string
 
   if (!user) return <Navigate to="/" replace />;
 
-  // Rediriger vers onboarding uniquement si explicitement false (pas undefined)
-  if (profile && profile.onboarding_done === false) {
+  // User connecté mais profil introuvable → onboarding pour créer le profil
+  if (!profile) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f0a1e' }}>
+        <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #c9a84c',
+          borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
+  // Onboarding non terminé → forcer la complétion du profil
+  if (profile.onboarding_done === false) {
     return <Navigate to="/onboarding" replace />;
   }
 
-  if (role && profile?.role !== role && profile?.role !== 'admin') {
+  // Mauvais rôle pour cette route
+  if (role && profile.role !== role && profile.role !== 'admin') {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -79,6 +94,9 @@ function AppRoutes() {
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
       <Route path="/sos-brigade" element={<ProtectedRoute><SosBrigade /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+      <Route path="/edit-mission" element={<ProtectedRoute role="organisateur"><EditMission /></ProtectedRoute>} />
+      <Route path="/public-profile" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
 
       <Route path="/admin/AdminDashboard" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
       <Route path="/admin/AdminProfiles" element={<ProtectedRoute role="admin"><AdminProfiles /></ProtectedRoute>} />

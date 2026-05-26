@@ -114,6 +114,13 @@ export default function MyMissions() {
                   className="btn-outline-gold px-4 py-2 rounded-lg text-sm">
                   Voir détails
                 </button>
+                {(m.status === 'open' || m.status === 'draft') && (
+                  <button onClick={() => navigate(`/edit-mission?id=${m.id}`)}
+                    className="px-4 py-2 rounded-lg text-sm border transition-all hover:opacity-80"
+                    style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#c9a84c' }}>
+                    Modifier
+                  </button>
+                )}
                 <button onClick={() => navigate('/messages')}
                   className="px-4 py-2 rounded-lg text-sm border transition-all hover:opacity-80"
                   style={{ borderColor: 'rgba(201,168,76,0.2)', color: '#b8a898' }}>

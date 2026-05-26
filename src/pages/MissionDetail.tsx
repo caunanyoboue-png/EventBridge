@@ -3,8 +3,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { getOrCreateConversation } from '../lib/messaging';
 import { type Mission, type Profile } from '../types';
 import { formatDate, formatCFA, SERVICE_ICONS } from '../lib/utils';
+import { distanceKm, formatDistance } from '../lib/geo';
+import MapView from '../components/MapView';
 import toast from 'react-hot-toast';
 
 export default function MissionDetail() {
@@ -16,6 +19,7 @@ export default function MissionDetail() {
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
   const [alreadyApplied, setAlreadyApplied] = useState(false);
+  const [contacting, setContacting] = useState(false);
 
   useEffect(() => {
     if (missionId) fetchMission();
@@ -32,6 +36,18 @@ export default function MissionDetail() {
       setAlreadyApplied(!!app);
     }
     setLoading(false);
+  }
+
+  async function contacter() {
+    if (!profile || !mission?.organisateur_id) return;
+    setContacting(true);
+    try {
+      const convId = await getOrCreateConversation(profile.id, mission.organisateur_id);
+      navigate(`/messages?conv=${convId}`);
+    } catch {
+      toast.error('Impossible de contacter cet organisateur');
+      setContacting(false);
+    }
   }
 
   async function postuler() {
@@ -61,6 +77,14 @@ export default function MissionDetail() {
           <h1 className="font-display text-2xl font-bold flex-1" style={{ color: '#f0e6d3' }}>{mission.title}</h1>
           {mission.is_urgent && <span className="badge-urgent px-3 py-1 rounded-full text-sm font-bold">⚡ URGENT</span>}
         </div>
+
+        {/* Photo du lieu */}
+        {mission.venue_photo_url && (
+          <div className="mb-6 rounded-2xl overflow-hidden" style={{ height: 240 }}>
+            <img src={mission.venue_photo_url} alt="Photo du lieu"
+              className="w-full h-full object-cover" />
+          </div>
+        )}
 
         <div className="card-glass p-8 mb-6">
           {/* Infos principales */}
@@ -120,21 +144,50 @@ export default function MissionDetail() {
             </div>
           )}
 
+          {/* Carte de localisation */}
+          {mission.latitude && mission.longitude && (
+            <div className="mb-6">
+              <h3 className="font-semibold mb-3" style={{ color: '#f0e6d3' }}>
+                📍 Localisation
+                {profile?.latitude && profile?.longitude && (
+                  <span style={{ marginLeft: 10, fontSize: 12, fontWeight: 400, color: '#c9a84c' }}>
+                    · à {formatDistance(distanceKm(profile.latitude, profile.longitude, mission.latitude!, mission.longitude!))} de vous
+                  </span>
+                )}
+              </h3>
+              <MapView
+                lat={mission.latitude!}
+                lng={mission.longitude!}
+                label={`${mission.title} — ${mission.location}`}
+              />
+            </div>
+          )}
+
           {/* Organisateur */}
           {org && (
             <div className="p-4 rounded-xl mb-6" style={{ background: 'rgba(61,36,96,0.4)', border: '1px solid rgba(201,168,76,0.1)' }}>
               <h3 className="font-semibold mb-3" style={{ color: '#f0e6d3' }}>Organisateur</h3>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm"
-                  style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#1a0a2e' }}>
-                  {org.full_name?.[0]}
-                </div>
-                <div>
+                {org.avatar_url ? (
+                  <img src={org.avatar_url} alt=""
+                    style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover',
+                      border: '1.5px solid rgba(201,168,76,0.3)', flexShrink: 0 }} />
+                ) : (
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0"
+                    style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#1a0a2e' }}>
+                    {org.full_name?.[0]}
+                  </div>
+                )}
+                <div style={{ flex: 1 }}>
                   <p className="font-medium text-sm" style={{ color: '#f0e6d3' }}>{org.company_name || org.full_name}</p>
                   <p className="text-xs" style={{ color: '#b8a898' }}>
                     ⭐ {org.avg_rating || '–'} · {org.total_missions || 0} mission(s)
                   </p>
                 </div>
+                <button onClick={() => navigate(`/public-profile?id=${org.id}`)}
+                  className="btn-outline-gold px-3 py-1.5 rounded-lg text-xs shrink-0">
+                  Voir profil
+                </button>
               </div>
             </div>
           )}
@@ -146,9 +199,10 @@ export default function MissionDetail() {
                 className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#1a0a2e]">
                 {alreadyApplied ? '✅ Candidature envoyée' : applying ? 'Envoi...' : 'Postuler à cette mission'}
               </button>
-              <button onClick={() => navigate('/messages')}
-                className="btn-outline-gold px-5 py-3 rounded-xl font-medium">
-                💬 Contacter
+              <button onClick={contacter} disabled={contacting}
+                className="btn-outline-gold px-5 py-3 rounded-xl font-medium"
+                style={{ opacity: contacting ? 0.7 : 1 }}>
+                {contacting ? '…' : '💬 Contacter'}
               </button>
             </div>
           )}

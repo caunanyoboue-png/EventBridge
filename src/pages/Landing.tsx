@@ -200,13 +200,13 @@ export default function Landing() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button onClick={() => navigate('/pour-les-freelances')}
-              className="btn-gold px-10 py-4 rounded-xl font-bold text-sm flex items-center gap-3 justify-center"
+            <button onClick={() => navigate('/onboarding')}
+              className="btn-gold px-8 py-4 rounded-xl font-bold text-sm flex items-center gap-3 justify-center w-full sm:w-auto"
               style={{ color: '#1a0a2e', letterSpacing: '0.04em' }}>
               Je suis Freelance <IconArrow />
             </button>
             <button onClick={() => navigate('/pour-les-organisateurs')}
-              className="px-10 py-4 rounded-xl font-bold text-sm flex items-center gap-3 justify-center transition-all hover:bg-white/10"
+              className="px-8 py-4 rounded-xl font-bold text-sm flex items-center gap-3 justify-center transition-all hover:bg-white/10 w-full sm:w-auto"
               style={{ background: 'rgba(255,255,255,0.05)', border: '1.5px solid rgba(255,255,255,0.18)', color: '#f0e6d3', backdropFilter: 'blur(8px)', letterSpacing: '0.04em' }}>
               Je suis Organisateur
             </button>
@@ -246,7 +246,7 @@ export default function Landing() {
             <p className="mt-3 text-base" style={{ color: '#5a4a6a' }}>En 3 étapes, votre mission est lancée</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 relative">
+          <div className="landing-steps-gap grid grid-cols-1 md:grid-cols-3 gap-10 relative">
             {/* Ligne connectrice desktop */}
             <div className="hidden md:block absolute top-[3.25rem] left-[calc(16.67%+3rem)] right-[calc(16.67%+3rem)] h-px"
               style={{ background: 'linear-gradient(to right, rgba(201,168,76,0.5), rgba(201,168,76,0.15), rgba(201,168,76,0.5))' }} />
@@ -286,7 +286,7 @@ export default function Landing() {
             <img src={IMG_FREE} alt="Freelance événementiel" className="w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, transparent 55%, #1a0a2e)' }} />
           </div>
-          <div className="flex flex-col justify-center px-10 py-16">
+          <div className="landing-px flex flex-col justify-center px-10 py-12 md:py-16">
             <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: '#c9a84c', letterSpacing: '0.15em' }}>
               Pour les Freelances
             </p>
@@ -361,7 +361,8 @@ export default function Landing() {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {SERVICES.map(s => (
               <div key={s.label} className="group relative overflow-hidden rounded-2xl cursor-pointer"
-                style={{ height: '200px', border: '1px solid rgba(201,168,76,0.08)' }}>
+                style={{ height: '200px', border: '1px solid rgba(201,168,76,0.08)' }}
+                onClick={() => navigate('/onboarding')}>
                 <img src={s.img} alt={s.label}
                   className="w-full h-full object-cover transition-transform duration-600 group-hover:scale-110" />
                 <div className="absolute inset-0"

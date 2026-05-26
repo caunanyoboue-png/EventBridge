@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { type Mission } from '../types';
 import { formatDateShort, formatCFA, SERVICE_ICONS } from '../lib/utils';
+import { distanceKm, formatDistance } from '../lib/geo';
 import toast from 'react-hot-toast';
 
 export default function Missions() {
@@ -96,7 +97,10 @@ export default function Missions() {
           {filtered.map(m => (
             <MissionCard key={m.id} mission={m} onApply={() => postuler(m.id)}
               onView={() => navigate(`/MissionDetail?id=${m.id}`)}
-              isFreelance={profile?.role === 'freelance'} />
+              isFreelance={profile?.role === 'freelance'}
+              userLat={profile?.latitude}
+              userLng={profile?.longitude}
+            />
           ))}
         </div>
       )}
@@ -104,11 +108,15 @@ export default function Missions() {
   );
 }
 
-function MissionCard({ mission: m, onApply, onView, isFreelance }: {
+function MissionCard({ mission: m, onApply, onView, isFreelance, userLat, userLng }: {
   mission: Mission; onApply: () => void; onView: () => void; isFreelance: boolean;
+  userLat?: number | null; userLng?: number | null;
 }) {
   const slots_filled = m.slots_filled || 0;
   const pct = Math.round((slots_filled / m.slots_total) * 100);
+  const dist = (userLat && userLng && m.latitude && m.longitude)
+    ? distanceKm(userLat, userLng, m.latitude, m.longitude)
+    : null;
 
   return (
     <div className="card-glass p-5 hover:-translate-y-1 transition-all duration-300 hover:border-[rgba(201,168,76,0.4)] cursor-pointer flex flex-col"
@@ -131,7 +139,13 @@ function MissionCard({ mission: m, onApply, onView, isFreelance }: {
           <span>📅</span><span>{formatDateShort(m.event_date)} · {m.start_time?.substring(0,5)} - {m.end_time?.substring(0,5)}</span>
         </div>
         <div className="flex items-center gap-2 text-xs" style={{ color: '#b8a898' }}>
-          <span>📍</span><span>{m.location}{m.ville ? `, ${m.ville}` : ''}</span>
+          <span>📍</span>
+          <span>{m.location}{m.ville ? `, ${m.ville}` : ''}</span>
+          {dist !== null && (
+            <span style={{ marginLeft: 4, color: '#c9a84c', fontWeight: 600 }}>
+              · {formatDistance(dist)}
+            </span>
+          )}
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-xs" style={{ color: '#b8a898' }}>

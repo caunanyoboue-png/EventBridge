@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { getOrCreateConversation } from '../lib/messaging';
 import { type Application, type Mission, type ApplicationStatus } from '../types';
 import { formatDateShort, formatCFA, SERVICE_ICONS } from '../lib/utils';
 import toast from 'react-hot-toast';
@@ -26,11 +27,21 @@ export default function MyApplications() {
 
   async function fetchApplications() {
     const { data } = await supabase.from('applications')
-      .select('*, mission:missions(*)')
+      .select('*, mission:missions(*, organisateur:profiles!organisateur_id(id, full_name, avatar_url))')
       .eq('freelance_id', profile!.id)
       .order('applied_at', { ascending: false });
     setApplications(data || []);
     setLoading(false);
+  }
+
+  async function contacterOrg(orgId: string) {
+    if (!profile) return;
+    try {
+      const convId = await getOrCreateConversation(profile.id, orgId);
+      navigate(`/messages?conv=${convId}`);
+    } catch {
+      toast.error("Impossible de contacter l'organisateur");
+    }
   }
 
   async function retirer(id: string) {
@@ -84,8 +95,9 @@ export default function MyApplications() {
       ) : (
         <div className="space-y-4">
           {filtered.map(a => {
-            const m = a.mission as Mission;
+            const m = a.mission as Mission & { organisateur?: { id: string } };
             const info = statusInfo[a.status] || statusInfo.pending;
+            const orgId = m?.organisateur?.id;
             return (
               <div key={a.id} className="card-glass p-5">
                 <div className="flex items-start justify-between mb-3">
@@ -105,15 +117,22 @@ export default function MyApplications() {
                   Postulée le {a.applied_at ? new Date(a.applied_at).toLocaleDateString('fr-CI') : '–'}
                 </p>
 
-                <div className="flex gap-3">
+                <div className="flex gap-3 flex-wrap">
                   <button onClick={() => navigate(`/MissionDetail?id=${m?.id}`)}
                     className="btn-outline-gold px-4 py-2 rounded-lg text-sm">
                     Voir la mission
                   </button>
-                  {a.status === 'accepted' && (
-                    <button onClick={() => navigate('/messages')}
+                  {orgId && (
+                    <button onClick={() => navigate(`/public-profile?id=${orgId}`)}
+                      className="px-4 py-2 rounded-lg text-sm border transition-all hover:opacity-80"
+                      style={{ borderColor: 'rgba(201,168,76,0.25)', color: '#c9a84c' }}>
+                      Voir l'organisateur
+                    </button>
+                  )}
+                  {orgId && (
+                    <button onClick={() => contacterOrg(orgId)}
                       className="btn-gold px-4 py-2 rounded-lg text-sm font-bold text-[#1a0a2e]">
-                      💬 Contacter l'organisateur
+                      💬 Contacter
                     </button>
                   )}
                   {a.status === 'pending' && (
