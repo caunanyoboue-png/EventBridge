@@ -92,7 +92,7 @@ export default function Settings() {
                 padding: '11px', borderRadius: 10, fontSize: 14, fontWeight: 500,
                 border: 'none', cursor: (busy || !newPwd || !confirmPwd) ? 'not-allowed' : 'pointer',
                 background: `linear-gradient(135deg,${C.gold},${C.goldLt})`,
-                color: '#1a0a2e',
+                color: '#261642',
                 opacity: (busy || !newPwd || !confirmPwd) ? 0.6 : 1,
                 transition: 'opacity 0.15s',
               }}>

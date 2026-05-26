@@ -110,7 +110,7 @@ export default function MissionDetail() {
 
           {/* Progress bar */}
           <div className="mb-6">
-            <div className="w-full h-2 rounded-full" style={{ background: '#3d2460' }}>
+            <div className="w-full h-2 rounded-full" style={{ background: '#52367c' }}>
               <div className="h-full rounded-full" style={{ width: `${(slots_filled / mission.slots_total) * 100}%`, background: 'linear-gradient(to right,#c9a84c,#e8c97a)' }} />
             </div>
           </div>
@@ -165,7 +165,7 @@ export default function MissionDetail() {
 
           {/* Organisateur */}
           {org && (
-            <div className="p-4 rounded-xl mb-6" style={{ background: 'rgba(61,36,96,0.4)', border: '1px solid rgba(201,168,76,0.1)' }}>
+            <div className="p-4 rounded-xl mb-6" style={{ background: 'rgba(82,54,124,0.4)', border: '1px solid rgba(201,168,76,0.1)' }}>
               <h3 className="font-semibold mb-3" style={{ color: '#f0e6d3' }}>Organisateur</h3>
               <div className="flex items-center gap-3">
                 {org.avatar_url ? (
@@ -174,7 +174,7 @@ export default function MissionDetail() {
                       border: '1.5px solid rgba(201,168,76,0.3)', flexShrink: 0 }} />
                 ) : (
                   <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0"
-                    style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#1a0a2e' }}>
+                    style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642' }}>
                     {org.full_name?.[0]}
                   </div>
                 )}
@@ -196,7 +196,7 @@ export default function MissionDetail() {
           {profile?.role === 'freelance' && (
             <div className="flex gap-3">
               <button onClick={postuler} disabled={applying || alreadyApplied}
-                className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#1a0a2e]">
+                className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#261642]">
                 {alreadyApplied ? '✅ Candidature envoyée' : applying ? 'Envoi...' : 'Postuler à cette mission'}
               </button>
               <button onClick={contacter} disabled={contacting}

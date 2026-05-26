@@ -53,7 +53,7 @@ export default function Missions() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-3xl font-bold" style={{ color: '#f0e6d3' }}>🎯 Missions disponibles</h1>
         {profile?.role === 'organisateur' && (
-          <button onClick={() => navigate('/create-mission')} className="btn-gold px-5 py-2 rounded-xl text-sm font-bold text-[#1a0a2e]">
+          <button onClick={() => navigate('/create-mission')} className="btn-gold px-5 py-2 rounded-xl text-sm font-bold text-[#261642]">
             + Nouvelle mission
           </button>
         )}
@@ -63,12 +63,12 @@ export default function Missions() {
       <div className="card-glass p-4 mb-6 flex flex-wrap gap-3 items-center">
         <input
           className="px-3 py-2 rounded-lg text-sm outline-none flex-1 min-w-40"
-          style={{ background: 'rgba(61,36,96,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
+          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
           placeholder="🔍 Rechercher..."
           value={search} onChange={e => setSearch(e.target.value)}
         />
         <select className="px-3 py-2 rounded-lg text-sm outline-none"
-          style={{ background: 'rgba(61,36,96,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
+          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
           value={filterType} onChange={e => setFilterType(e.target.value)}>
           <option value="">Tous les types</option>
           {types.map(t => <option key={t} value={t}>{t}</option>)}
@@ -156,13 +156,13 @@ function MissionCard({ mission: m, onApply, onView, isFreelance, userLat, userLn
       </div>
 
       <div className="mb-4">
-        <div className="w-full h-1 rounded-full" style={{ background: '#3d2460' }}>
+        <div className="w-full h-1 rounded-full" style={{ background: '#52367c' }}>
           <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: 'linear-gradient(to right,#c9a84c,#e8c97a)' }} />
         </div>
       </div>
 
       {isFreelance && (
-        <button className="btn-gold w-full py-2 rounded-lg text-sm font-bold text-[#1a0a2e]"
+        <button className="btn-gold w-full py-2 rounded-lg text-sm font-bold text-[#261642]"
           onClick={e => { e.stopPropagation(); onApply(); }}>
           Postuler →
         </button>

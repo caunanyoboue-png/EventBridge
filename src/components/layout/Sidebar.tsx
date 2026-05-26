@@ -167,14 +167,14 @@ export default function Sidebar({ glassy, isOpen, onClose }: SidebarProps) {
       {profile && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
           borderRadius: 12, marginBottom: 20,
-          background: glassy ? 'rgba(255,255,255,0.05)' : 'rgba(45,27,78,0.6)',
+          background: glassy ? 'rgba(255,255,255,0.05)' : 'rgba(61,39,100,0.6)',
           border: '1px solid rgba(201,168,76,0.1)' }}>
           {profile.avatar_url ? (
             <img src={profile.avatar_url} style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} alt="" />
           ) : (
             <div style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 13, fontWeight: 800, color: '#1a0a2e',
+              fontSize: 13, fontWeight: 800, color: '#261642',
               background: 'linear-gradient(135deg,#c9a84c,#e8c97a)' }}>
               {getInitials(profile.full_name || 'U')}
             </div>

@@ -46,10 +46,10 @@ export default function AdminProfiles() {
 
       <div className="card-glass p-4 mb-6 flex flex-wrap gap-3">
         <input className="px-3 py-2 rounded-lg text-sm outline-none flex-1 min-w-40"
-          style={{ background: 'rgba(61,36,96,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
+          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
           placeholder="🔍 Rechercher..." value={search} onChange={e => setSearch(e.target.value)} />
         <select className="px-3 py-2 rounded-lg text-sm outline-none"
-          style={{ background: 'rgba(61,36,96,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
+          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
           value={filterRole} onChange={e => setFilterRole(e.target.value)}>
           <option value="">Tous les rôles</option>
           <option value="freelance">Freelance</option>
@@ -65,7 +65,7 @@ export default function AdminProfiles() {
         <div className="card-glass overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ background: 'rgba(61,36,96,0.4)', color: '#7a6a7a' }}>
+              <tr style={{ background: 'rgba(82,54,124,0.4)', color: '#7a6a7a' }}>
                 <th className="text-left py-3 px-4">Utilisateur</th>
                 <th className="text-left py-3 px-4">Rôle</th>
                 <th className="text-left py-3 px-4">Statut</th>
@@ -79,7 +79,7 @@ export default function AdminProfiles() {
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                        style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#1a0a2e' }}>
+                        style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642' }}>
                         {getInitials(p.full_name)}
                       </div>
                       <div>

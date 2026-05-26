@@ -69,7 +69,7 @@ function NavItem({
       </span>
       {!!badge && (
         <span style={{
-          background: C.gold, color: '#1a0a2e',
+          background: C.gold, color: '#261642',
           borderRadius: 10, fontSize: 10, fontWeight: 600,
           padding: '1px 6px',
         }}>
@@ -247,7 +247,7 @@ export default function FreelanceDashboard() {
               width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
               background: `linear-gradient(135deg,${C.gold},${C.goldLt})`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 13, fontWeight: 600, color: '#1a0a2e',
+              fontSize: 13, fontWeight: 600, color: '#261642',
             }}>
               {initials}
             </div>
@@ -403,7 +403,7 @@ export default function FreelanceDashboard() {
                       padding: '10px 22px', borderRadius: 10,
                       fontSize: 13, fontWeight: 500,
                       background: `linear-gradient(135deg,${C.gold},${C.goldLt})`,
-                      color: '#1a0a2e', border: 'none', cursor: 'pointer',
+                      color: '#261642', border: 'none', cursor: 'pointer',
                     }}
                   >
                     Voir les missions disponibles

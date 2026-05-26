@@ -96,7 +96,7 @@ export default function NotificationBell() {
             background: '#ef4444', color: '#fff',
             fontSize: 9, fontWeight: 700,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '0 3px', border: '2px solid #1a0a2e',
+            padding: '0 3px', border: '2px solid #261642',
           }}>
             {unread > 9 ? '9+' : unread}
           </span>

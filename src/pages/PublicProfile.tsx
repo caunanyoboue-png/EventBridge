@@ -118,7 +118,7 @@ export default function PublicProfile() {
             ) : (
               <div style={{ width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 26, fontWeight: 700, color: '#1a0a2e',
+                fontSize: 26, fontWeight: 700, color: '#261642',
                 background: `linear-gradient(135deg, ${C.gold}, ${C.goldLt})` }}>
                 {initials}
               </div>
@@ -171,7 +171,7 @@ export default function PublicProfile() {
               {!isSelf && me && (
                 <button onClick={handleMessage} disabled={messaging}
                   style={{ padding: '10px 20px', borderRadius: 10, fontSize: 13, fontWeight: 500,
-                    cursor: messaging ? 'wait' : 'pointer', color: '#1a0a2e', whiteSpace: 'nowrap',
+                    cursor: messaging ? 'wait' : 'pointer', color: '#261642', whiteSpace: 'nowrap',
                     background: `linear-gradient(135deg, ${C.gold}, ${C.goldLt})`,
                     border: 'none', opacity: messaging ? 0.75 : 1, transition: 'opacity 0.15s' }}>
                   {messaging ? 'Ouverture…' : '✉ Envoyer un message'}
@@ -197,7 +197,7 @@ export default function PublicProfile() {
               { l: 'Tarif/heure', v: isFreelance && viewed.hourly_rate ? formatCFA(viewed.hourly_rate) : '—' },
             ].map(s => (
               <div key={s.l} style={{ textAlign: 'center', padding: '14px 8px',
-                background: 'rgba(61,36,96,0.3)', borderRadius: 10,
+                background: 'rgba(82,54,124,0.3)', borderRadius: 10,
                 border: '1px solid rgba(201,168,76,0.06)' }}>
                 <div style={{ fontSize: 18, fontWeight: 700, color: C.gold }}>{s.v}</div>
                 <div style={{ fontSize: 11, color: C.sec, marginTop: 5 }}>{s.l}</div>

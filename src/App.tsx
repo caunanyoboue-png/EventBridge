@@ -38,7 +38,7 @@ function ProtectedRoute({ children, role }: { children: ReactNode; role?: string
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#1a0a2e' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#261642' }}>
         <div className="text-center">
           <div className="w-16 h-16 rounded-full border-2 border-t-transparent animate-spin mx-auto mb-4"
             style={{ borderColor: '#c9a84c', borderTopColor: 'transparent' }} />

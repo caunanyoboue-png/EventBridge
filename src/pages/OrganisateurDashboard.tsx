@@ -321,7 +321,7 @@ export default function OrganisateurDashboard() {
             ) : (
               <div style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 13, fontWeight: 500, color: '#1a0a2e',
+                fontSize: 13, fontWeight: 500, color: '#261642',
                 background: `linear-gradient(135deg, ${C.gold}, ${C.goldLt})` }}>
                 {initials}
               </div>
@@ -389,7 +389,7 @@ export default function OrganisateurDashboard() {
                 style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 16px',
                   borderRadius: 20, fontSize: 12, fontWeight: 500, cursor: 'pointer',
                   background: `linear-gradient(135deg, ${C.gold}, ${C.goldLt})`,
-                  border: 'none', color: '#1a0a2e', transition: 'all 0.2s' }}>
+                  border: 'none', color: '#261642', transition: 'all 0.2s' }}>
                 <PlusCircle size={14} />
                 Publier une mission
               </button>
@@ -455,7 +455,7 @@ export default function OrganisateurDashboard() {
                           ) : (
                             <div style={{ width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              fontSize: 13, fontWeight: 500, color: '#1a0a2e',
+                              fontSize: 13, fontWeight: 500, color: '#261642',
                               background: `linear-gradient(135deg, ${C.gold}, ${C.goldLt})` }}>
                               {fl?.full_name?.charAt(0) || '?'}
                             </div>
@@ -544,7 +544,7 @@ export default function OrganisateurDashboard() {
                     </div>
                     <button onClick={() => navigate('/create-mission')}
                       style={{ padding: '9px 22px', borderRadius: 9, fontSize: 13, fontWeight: 500,
-                        color: '#1a0a2e', background: `linear-gradient(135deg, ${C.gold}, ${C.goldLt})`,
+                        color: '#261642', background: `linear-gradient(135deg, ${C.gold}, ${C.goldLt})`,
                         border: 'none', cursor: 'pointer' }}>
                       Publier une mission
                     </button>
@@ -623,7 +623,7 @@ export default function OrganisateurDashboard() {
                           onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.background = 'transparent'}>
                           <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 11, fontWeight: 500, color: '#1a0a2e',
+                            fontSize: 11, fontWeight: 500, color: '#261642',
                             background: `linear-gradient(135deg, ${C.gold}80, ${C.goldLt}80)` }}>
                             {fl?.full_name?.charAt(0) || '?'}
                           </div>

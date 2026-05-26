@@ -58,7 +58,7 @@ export default function AdminReviews() {
     return (
       <span>
         {[1, 2, 3, 4, 5].map(i => (
-          <span key={i} style={{ color: i <= rating ? '#c9a84c' : '#3d2460' }}>★</span>
+          <span key={i} style={{ color: i <= rating ? '#c9a84c' : '#52367c' }}>★</span>
         ))}
       </span>
     );
@@ -87,10 +87,10 @@ export default function AdminReviews() {
 
       <div className="card-glass p-4 mb-6 flex flex-wrap gap-3">
         <input className="px-3 py-2 rounded-lg text-sm outline-none flex-1 min-w-40"
-          style={{ background: 'rgba(61,36,96,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
+          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
           placeholder="🔍 Rechercher..." value={search} onChange={e => setSearch(e.target.value)} />
         <select className="px-3 py-2 rounded-lg text-sm outline-none"
-          style={{ background: 'rgba(61,36,96,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
+          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
           value={filterRating} onChange={e => setFilterRating(Number(e.target.value))}>
           <option value={0}>Toutes les notes</option>
           {[5, 4, 3, 2, 1].map(n => <option key={n} value={n}>{n} ★</option>)}
@@ -109,7 +109,7 @@ export default function AdminReviews() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3 flex-1">
                   <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                    style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#1a0a2e' }}>
+                    style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642' }}>
                     {getInitials(r.reviewer?.full_name || '?')}
                   </div>
                   <div className="flex-1">

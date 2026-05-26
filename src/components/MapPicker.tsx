@@ -123,7 +123,7 @@ export default function MapPicker({ lat, lng, onSelect }: Props) {
             padding: '5px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
             cursor: locating ? 'wait' : 'pointer',
             background: 'linear-gradient(135deg,#c9a84c,#e8c97a)',
-            color: '#1a0a2e', border: 'none', opacity: locating ? 0.7 : 1,
+            color: '#261642', border: 'none', opacity: locating ? 0.7 : 1,
             transition: 'opacity 0.15s',
           }}
         >

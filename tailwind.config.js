@@ -4,10 +4,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        'bg-primary': '#1a0a2e',
-        'bg-secondary': '#2d1b4e',
-        'bg-card': '#3d2460',
-        'bg-overlay': '#120720',
+        'bg-primary': '#261642',
+        'bg-secondary': '#3d2764',
+        'bg-card': '#52367c',
+        'bg-overlay': '#1c1132',
         'gold-primary': '#c9a84c',
         'gold-light': '#e8c97a',
         'gold-dark': '#a07830',

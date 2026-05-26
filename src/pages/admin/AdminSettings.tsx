@@ -24,7 +24,7 @@ export default function AdminSettings() {
   }
 
   const inputClass = "w-full px-4 py-2.5 rounded-xl text-sm outline-none";
-  const inputStyle = { background: 'rgba(61,36,96,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
+  const inputStyle = { background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
 
   function Field({ label, children }: { label: string; children: React.ReactNode }) {
     return (
@@ -85,7 +85,7 @@ export default function AdminSettings() {
             </div>
             <button onClick={() => setSettings(p => ({ ...p, auto_certify: !p.auto_certify }))}
               className="relative w-12 h-6 rounded-full transition-all"
-              style={{ background: settings.auto_certify ? '#c9a84c' : 'rgba(61,36,96,0.8)' }}>
+              style={{ background: settings.auto_certify ? '#c9a84c' : 'rgba(82,54,124,0.8)' }}>
               <span className="absolute top-1 w-4 h-4 rounded-full bg-white transition-all"
                 style={{ left: settings.auto_certify ? '26px' : '4px' }} />
             </button>
@@ -97,7 +97,7 @@ export default function AdminSettings() {
             </div>
             <button onClick={() => setSettings(p => ({ ...p, require_id_verification: !p.require_id_verification }))}
               className="relative w-12 h-6 rounded-full transition-all"
-              style={{ background: settings.require_id_verification ? '#c9a84c' : 'rgba(61,36,96,0.8)' }}>
+              style={{ background: settings.require_id_verification ? '#c9a84c' : 'rgba(82,54,124,0.8)' }}>
               <span className="absolute top-1 w-4 h-4 rounded-full bg-white transition-all"
                 style={{ left: settings.require_id_verification ? '26px' : '4px' }} />
             </button>
@@ -122,7 +122,7 @@ export default function AdminSettings() {
 
       <div className="flex justify-end mt-6">
         <button onClick={saveSettings} disabled={saving}
-          className="btn-gold px-8 py-3 rounded-xl font-bold text-[#1a0a2e]">
+          className="btn-gold px-8 py-3 rounded-xl font-bold text-[#261642]">
           {saving ? 'Sauvegarde...' : '💾 Sauvegarder les paramètres'}
         </button>
       </div>

@@ -164,7 +164,7 @@ export default function Landing() {
 
         <button onClick={() => navigate('/onboarding')}
           className="btn-gold px-6 py-2.5 rounded-lg text-sm font-bold"
-          style={{ color: '#1a0a2e' }}>
+          style={{ color: '#261642' }}>
           Connexion
         </button>
       </nav>
@@ -202,7 +202,7 @@ export default function Landing() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button onClick={() => navigate('/onboarding')}
               className="btn-gold px-8 py-4 rounded-xl font-bold text-sm flex items-center gap-3 justify-center w-full sm:w-auto"
-              style={{ color: '#1a0a2e', letterSpacing: '0.04em' }}>
+              style={{ color: '#261642', letterSpacing: '0.04em' }}>
               Je suis Freelance <IconArrow />
             </button>
             <button onClick={() => navigate('/pour-les-organisateurs')}
@@ -258,14 +258,14 @@ export default function Landing() {
                   <div className="w-28 h-28 rounded-full flex items-center justify-center transition-all duration-500 group-hover:scale-105"
                     style={{ background: 'rgba(201,168,76,0.04)', border: '1.5px solid rgba(201,168,76,0.18)' }}>
                     <div className="w-20 h-20 rounded-full flex items-center justify-center"
-                      style={{ background: 'linear-gradient(135deg,rgba(45,27,78,0.9),rgba(26,10,46,0.95))', border: '1px solid rgba(201,168,76,0.2)' }}>
+                      style={{ background: 'linear-gradient(135deg,rgba(61,39,100,0.9),rgba(26,10,46,0.95))', border: '1px solid rgba(201,168,76,0.2)' }}>
                       {idx === 0 && <IconStepPost />}
                       {idx === 1 && <IconStepMatch />}
                       {idx === 2 && <IconStepDone />}
                     </div>
                   </div>
                   <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                    style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#1a0a2e', boxShadow: '0 0 18px rgba(201,168,76,0.45)' }}>
+                    style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642', boxShadow: '0 0 18px rgba(201,168,76,0.45)' }}>
                     {s.n}
                   </div>
                 </div>
@@ -280,11 +280,11 @@ export default function Landing() {
       </section>
 
       {/* ── POUR LES FREELANCES ── */}
-      <section style={{ background: '#1a0a2e' }}>
+      <section style={{ background: '#261642' }}>
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 min-h-[520px]">
           <div className="relative overflow-hidden min-h-72">
             <img src={IMG_FREE} alt="Freelance événementiel" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, transparent 55%, #1a0a2e)' }} />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, transparent 55%, #261642)' }} />
           </div>
           <div className="landing-px flex flex-col justify-center px-10 py-12 md:py-16">
             <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: '#c9a84c', letterSpacing: '0.15em' }}>
@@ -306,7 +306,7 @@ export default function Landing() {
             </div>
             <button onClick={() => navigate('/onboarding')}
               className="btn-gold px-8 py-3 rounded-xl font-bold self-start flex items-center gap-2 text-sm"
-              style={{ color: '#1a0a2e' }}>
+              style={{ color: '#261642' }}>
               Créer mon profil <IconArrow />
             </button>
           </div>
@@ -314,7 +314,7 @@ export default function Landing() {
       </section>
 
       {/* ── POUR LES ORGANISATEURS ── */}
-      <section style={{ background: '#120720' }}>
+      <section style={{ background: '#1c1132' }}>
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 min-h-[520px]">
           <div className="flex flex-col justify-center px-10 py-16 order-2 md:order-1">
             <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: '#c9a84c', letterSpacing: '0.15em' }}>
@@ -342,7 +342,7 @@ export default function Landing() {
           </div>
           <div className="relative overflow-hidden min-h-72 order-1 md:order-2">
             <img src={IMG_ORG} alt="Organisateur événementiel" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(to left, transparent 55%, #120720)' }} />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to left, transparent 55%, #1c1132)' }} />
           </div>
         </div>
       </section>
@@ -489,7 +489,7 @@ export default function Landing() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button onClick={() => navigate('/onboarding')}
               className="btn-gold px-10 py-4 rounded-xl font-bold text-sm flex items-center gap-2 justify-center"
-              style={{ color: '#1a0a2e', letterSpacing: '0.04em' }}>
+              style={{ color: '#261642', letterSpacing: '0.04em' }}>
               Commencer maintenant <IconArrow />
             </button>
             <button onClick={() => navigate('/onboarding')}

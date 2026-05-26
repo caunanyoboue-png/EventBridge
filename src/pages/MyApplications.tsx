@@ -88,7 +88,7 @@ export default function MyApplications() {
           <p className="text-4xl mb-4">📩</p>
           <p style={{ color: '#b8a898' }}>Aucune candidature ici</p>
           <button onClick={() => navigate('/missions')}
-            className="btn-gold mt-4 px-6 py-2 rounded-xl text-sm font-bold text-[#1a0a2e]">
+            className="btn-gold mt-4 px-6 py-2 rounded-xl text-sm font-bold text-[#261642]">
             Voir les missions
           </button>
         </div>
@@ -131,7 +131,7 @@ export default function MyApplications() {
                   )}
                   {orgId && (
                     <button onClick={() => contacterOrg(orgId)}
-                      className="btn-gold px-4 py-2 rounded-lg text-sm font-bold text-[#1a0a2e]">
+                      className="btn-gold px-4 py-2 rounded-lg text-sm font-bold text-[#261642]">
                       💬 Contacter
                     </button>
                   )}

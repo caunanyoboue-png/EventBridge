@@ -17,7 +17,7 @@ const C = {
 const inp: React.CSSProperties = {
   width: '100%', padding: '10px 14px', borderRadius: 9, fontSize: 13,
   outline: 'none', boxSizing: 'border-box',
-  background: 'rgba(61,36,96,0.5)', border: '1px solid rgba(201,168,76,0.18)',
+  background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.18)',
   color: C.text,
 };
 
@@ -165,7 +165,7 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
                   pointerEvents: 'none' }}>
                   {item.category && (
                     <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 999,
-                      background: `${C.gold}cc`, color: '#1a0a2e', display: 'inline-block', marginBottom: 3 }}>
+                      background: `${C.gold}cc`, color: '#261642', display: 'inline-block', marginBottom: 3 }}>
                       {item.category}
                     </span>
                   )}
@@ -246,7 +246,7 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
               </label>
               <select value={mCategory} onChange={e => setMCategory(e.target.value)} style={inp}>
                 <option value="">Sélectionner...</option>
-                {CATEGORIES.map(c => <option key={c} value={c} style={{ background: '#1a0a2e' }}>{c}</option>)}
+                {CATEGORIES.map(c => <option key={c} value={c} style={{ background: '#261642' }}>{c}</option>)}
               </select>
             </div>
 
@@ -258,7 +258,7 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
               </button>
               <button onClick={handleUpload} disabled={uploading}
                 style={{ flex: 2, padding: '11px', borderRadius: 10, fontSize: 13, fontWeight: 600,
-                  cursor: uploading ? 'wait' : 'pointer', color: '#1a0a2e',
+                  cursor: uploading ? 'wait' : 'pointer', color: '#261642',
                   background: `linear-gradient(135deg, ${C.gold}, ${C.goldLt})`,
                   border: 'none', opacity: uploading ? 0.75 : 1, transition: 'opacity 0.15s' }}>
                 {uploading ? 'Upload en cours…' : 'Publier dans mon portfolio'}

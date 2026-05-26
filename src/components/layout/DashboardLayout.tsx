@@ -14,7 +14,7 @@ export default function DashboardLayout({ children, bgImage }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#1a0a2e', position: 'relative' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#261642', position: 'relative' }}>
       {bgImage && (
         <>
           <img src={bgImage} alt="" style={{ position: 'fixed', inset: 0, width: '100%', height: '100%',

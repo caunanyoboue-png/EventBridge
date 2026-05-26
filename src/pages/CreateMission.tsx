@@ -65,7 +65,7 @@ export default function CreateMission() {
   const net = total - commission;
 
   const inputClass = "w-full px-4 py-3 rounded-xl text-sm outline-none";
-  const inputStyle = { background: 'rgba(61,36,96,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
+  const inputStyle = { background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
 
   async function submit(status: 'draft' | 'open') {
     setLoading(true);
@@ -120,7 +120,7 @@ export default function CreateMission() {
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all"
                   style={i <= step
-                    ? { background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#1a0a2e' }
+                    ? { background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642' }
                     : { border: '1px solid rgba(201,168,76,0.3)', color: '#7a6a7a' }}>
                   {i < step ? '✓' : i + 1}
                 </div>
@@ -161,14 +161,14 @@ export default function CreateMission() {
               <label className="flex items-center gap-3 cursor-pointer">
                 <div onClick={() => upd('is_urgent', !form.is_urgent)}
                   className="w-11 h-6 rounded-full transition-all relative"
-                  style={{ background: form.is_urgent ? '#ef4444' : 'rgba(61,36,96,0.5)' }}>
+                  style={{ background: form.is_urgent ? '#ef4444' : 'rgba(82,54,124,0.5)' }}>
                   <div className="absolute w-4 h-4 bg-white rounded-full top-1 transition-all"
                     style={{ left: form.is_urgent ? '24px' : '4px' }} />
                 </div>
                 <span className="text-sm" style={{ color: '#b8a898' }}>Mission urgente ⚡</span>
               </label>
               <button onClick={() => setStep(1)} disabled={!form.title || !form.service_type || !form.description}
-                className="btn-gold w-full py-3 rounded-xl font-bold text-[#1a0a2e]">Continuer →</button>
+                className="btn-gold w-full py-3 rounded-xl font-bold text-[#261642]">Continuer →</button>
             </>
           )}
 
@@ -256,10 +256,10 @@ export default function CreateMission() {
                   <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Nombre d'extras</label>
                   <div className="flex items-center gap-3">
                     <button onClick={() => upd('slots_total', Math.max(1, form.slots_total - 1))}
-                      className="w-10 h-10 rounded-lg font-bold text-lg" style={{ background: 'rgba(61,36,96,0.5)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}>-</button>
+                      className="w-10 h-10 rounded-lg font-bold text-lg" style={{ background: 'rgba(82,54,124,0.5)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}>-</button>
                     <span className="text-xl font-bold" style={{ color: '#f0e6d3' }}>{form.slots_total}</span>
                     <button onClick={() => upd('slots_total', form.slots_total + 1)}
-                      className="w-10 h-10 rounded-lg font-bold text-lg" style={{ background: 'rgba(61,36,96,0.5)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}>+</button>
+                      className="w-10 h-10 rounded-lg font-bold text-lg" style={{ background: 'rgba(82,54,124,0.5)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}>+</button>
                   </div>
                 </div>
                 <div>
@@ -286,7 +286,7 @@ export default function CreateMission() {
               <div className="flex gap-3">
                 <button onClick={() => setStep(0)} className="btn-outline-gold flex-1 py-3 rounded-xl">← Retour</button>
                 <button onClick={() => setStep(2)} disabled={!form.event_date || !form.start_time || !form.end_time || !form.location}
-                  className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#1a0a2e]">Continuer →</button>
+                  className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#261642]">Continuer →</button>
               </div>
             </>
           )}
@@ -316,7 +316,7 @@ export default function CreateMission() {
                   Brouillon
                 </button>
                 <button onClick={() => submit('open')} disabled={loading || uploadingVenue}
-                  className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#1a0a2e]">
+                  className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#261642]">
                   {uploadingVenue ? 'Photo en cours...' : loading ? 'Publication...' : 'Publier 🚀'}
                 </button>
               </div>

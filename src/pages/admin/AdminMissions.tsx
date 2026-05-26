@@ -39,7 +39,7 @@ export default function AdminMissions() {
 
       <div className="card-glass p-4 mb-6 flex gap-3">
         <input className="px-3 py-2 rounded-lg text-sm outline-none flex-1"
-          style={{ background: 'rgba(61,36,96,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
+          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
           placeholder="🔍 Rechercher..." value={search} onChange={e => setSearch(e.target.value)} />
         <span className="text-sm my-auto" style={{ color: '#b8a898' }}>{filtered.length} mission(s)</span>
       </div>

@@ -40,7 +40,7 @@ export default function SosBrigade() {
   }
 
   const inputClass = "w-full px-4 py-3 rounded-xl text-sm outline-none";
-  const inputStyle = { background: 'rgba(61,36,96,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
+  const inputStyle = { background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
 
   return (
     <DashboardLayout>
@@ -75,10 +75,10 @@ export default function SosBrigade() {
               <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>Nombre d'extras requis</label>
               <div className="flex items-center gap-4">
                 <button onClick={() => setForm(p => ({ ...p, slots_needed: Math.max(1, p.slots_needed - 1) }))}
-                  className="w-12 h-12 rounded-xl font-bold text-xl" style={{ background: 'rgba(61,36,96,0.5)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}>-</button>
+                  className="w-12 h-12 rounded-xl font-bold text-xl" style={{ background: 'rgba(82,54,124,0.5)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}>-</button>
                 <span className="text-3xl font-bold text-gold-gradient">{form.slots_needed}</span>
                 <button onClick={() => setForm(p => ({ ...p, slots_needed: p.slots_needed + 1 }))}
-                  className="w-12 h-12 rounded-xl font-bold text-xl" style={{ background: 'rgba(61,36,96,0.5)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}>+</button>
+                  className="w-12 h-12 rounded-xl font-bold text-xl" style={{ background: 'rgba(82,54,124,0.5)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}>+</button>
               </div>
             </div>
 
@@ -168,7 +168,7 @@ function SosTracker({ session, onReset }: { session: SosSession; onReset: () => 
       </div>
 
       <div className="mb-4">
-        <div className="w-full h-3 rounded-full" style={{ background: '#3d2460' }}>
+        <div className="w-full h-3 rounded-full" style={{ background: '#52367c' }}>
           <div className="h-full rounded-full transition-all"
             style={{
               width: `${(session.slots_confirmed / session.slots_needed) * 100}%`,

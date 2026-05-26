@@ -93,7 +93,7 @@ export default function OrganisateurPage() {
         </div>
         <button onClick={() => navigate('/onboarding')}
           className="btn-gold px-6 py-2.5 rounded-lg text-sm font-bold"
-          style={{ color: '#1a0a2e' }}>
+          style={{ color: '#261642' }}>
           Publier une mission
         </button>
       </nav>
@@ -125,7 +125,7 @@ export default function OrganisateurPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button onClick={() => navigate('/onboarding')}
               className="btn-gold px-10 py-4 rounded-xl font-bold text-sm flex items-center gap-3 justify-center"
-              style={{ color: '#1a0a2e', letterSpacing: '0.04em' }}>
+              style={{ color: '#261642', letterSpacing: '0.04em' }}>
               Publier ma première mission <IconArrow />
             </button>
             <button onClick={() => navigate('/onboarding')}
@@ -176,7 +176,7 @@ export default function OrganisateurPage() {
       </section>
 
       {/* COMMENT ÇA MARCHE */}
-      <section className="py-24 px-6" style={{ background: '#120720' }}>
+      <section className="py-24 px-6" style={{ background: '#1c1132' }}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: '#c9a84c', letterSpacing: '0.15em' }}>Simple & Rapide</p>
@@ -280,7 +280,7 @@ export default function OrganisateurPage() {
       </section>
 
       {/* CTA FINAL */}
-      <section className="py-28 px-6 text-center" style={{ background: '#120720' }}>
+      <section className="py-28 px-6 text-center" style={{ background: '#1c1132' }}>
         <div className="max-w-xl mx-auto">
           <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: '#c9a84c', letterSpacing: '0.15em' }}>Commencez aujourd'hui</p>
           <h2 className="font-display text-4xl font-bold mb-4" style={{ color: '#f0e6d3' }}>
@@ -293,7 +293,7 @@ export default function OrganisateurPage() {
           </p>
           <button onClick={() => navigate('/onboarding')}
             className="btn-gold px-12 py-4 rounded-xl font-bold text-sm flex items-center gap-2 justify-center mx-auto"
-            style={{ color: '#1a0a2e', letterSpacing: '0.04em' }}>
+            style={{ color: '#261642', letterSpacing: '0.04em' }}>
             Publier une mission <IconArrow />
           </button>
         </div>

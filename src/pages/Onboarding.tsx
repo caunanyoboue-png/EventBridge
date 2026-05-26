@@ -28,7 +28,7 @@ const btnGold: React.CSSProperties = {
   cursor: 'pointer',
   border: 'none',
   background: 'linear-gradient(135deg,#c9a84c,#e8c97a)',
-  color: '#1a0a2e',
+  color: '#261642',
   transition: 'opacity 0.15s',
 };
 const btnOutline: React.CSSProperties = {

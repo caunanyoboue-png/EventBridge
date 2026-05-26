@@ -48,7 +48,7 @@ export default function MyMissions() {
     <DashboardLayout>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-3xl font-bold" style={{ color: '#f0e6d3' }}>📋 Mes missions</h1>
-        <button onClick={() => navigate('/create-mission')} className="btn-gold px-5 py-2 rounded-xl text-sm font-bold text-[#1a0a2e]">
+        <button onClick={() => navigate('/create-mission')} className="btn-gold px-5 py-2 rounded-xl text-sm font-bold text-[#261642]">
           + Nouvelle mission
         </button>
       </div>
@@ -78,7 +78,7 @@ export default function MyMissions() {
           <p className="text-4xl mb-4">📋</p>
           <p style={{ color: '#b8a898' }}>Aucune mission dans cette catégorie</p>
           <button onClick={() => navigate('/create-mission')}
-            className="btn-gold mt-4 px-6 py-2 rounded-xl text-sm font-bold text-[#1a0a2e]">
+            className="btn-gold mt-4 px-6 py-2 rounded-xl text-sm font-bold text-[#261642]">
             Publier une mission
           </button>
         </div>

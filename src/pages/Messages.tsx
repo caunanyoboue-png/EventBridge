@@ -211,7 +211,7 @@ export default function Messages() {
                       borderColor: 'rgba(201,168,76,0.05)',
                     }}>
                     <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-                      style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#1a0a2e' }}>
+                      style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642' }}>
                       {other ? getInitials(other.full_name) : '?'}
                     </div>
                     <div className="overflow-hidden flex-1">
@@ -260,7 +260,7 @@ export default function Messages() {
                   Retour
                 </button>
                 <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-                  style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#1a0a2e' }}>
+                  style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642' }}>
                   {selected.other_user ? getInitials((selected.other_user as Profile).full_name) : '?'}
                 </div>
                 <div style={{ flex: 1 }}>
@@ -289,8 +289,8 @@ export default function Messages() {
                       <div className="max-w-xs lg:max-w-md">
                         <div className="rounded-2xl text-sm overflow-hidden"
                           style={isMe
-                            ? { background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#1a0a2e', borderBottomRightRadius: 4 }
-                            : { background: 'rgba(61,36,96,0.7)', color: '#f0e6d3', border: '1px solid rgba(201,168,76,0.1)', borderBottomLeftRadius: 4 }
+                            ? { background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642', borderBottomRightRadius: 4 }
+                            : { background: 'rgba(82,54,124,0.7)', color: '#f0e6d3', border: '1px solid rgba(201,168,76,0.1)', borderBottomLeftRadius: 4 }
                           }>
                           {/* Pièce jointe image */}
                           {m.attachment_type === 'image' && m.attachment_url && (
@@ -304,7 +304,7 @@ export default function Messages() {
                           {m.attachment_type === 'file' && m.attachment_url && (
                             <a href={m.attachment_url} target="_blank" rel="noreferrer" download={m.attachment_name}
                               className="flex items-center gap-2 px-4 py-3"
-                              style={{ color: isMe ? '#1a0a2e' : '#c9a84c', textDecoration: 'none' }}>
+                              style={{ color: isMe ? '#261642' : '#c9a84c', textDecoration: 'none' }}>
                               <span className="text-lg">📎</span>
                               <span className="text-xs font-medium truncate max-w-[160px]">{m.attachment_name}</span>
                               <span className="text-xs shrink-0 opacity-70">↓</span>
@@ -329,12 +329,12 @@ export default function Messages() {
               {/* Prévisualisation pièce jointe */}
               {attachFile && (
                 <div className="px-3 py-2 border-t flex items-center gap-3"
-                  style={{ borderColor: 'rgba(201,168,76,0.1)', background: 'rgba(61,36,96,0.3)' }}>
+                  style={{ borderColor: 'rgba(201,168,76,0.1)', background: 'rgba(82,54,124,0.3)' }}>
                   {attachPreview ? (
                     <img src={attachPreview} alt="" className="h-14 w-14 object-cover rounded-lg" />
                   ) : (
                     <div className="h-14 w-14 rounded-lg flex items-center justify-center text-2xl"
-                      style={{ background: 'rgba(61,36,96,0.5)' }}>📎</div>
+                      style={{ background: 'rgba(82,54,124,0.5)' }}>📎</div>
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium truncate" style={{ color: '#f0e6d3' }}>{attachFile.name}</p>
@@ -374,7 +374,7 @@ export default function Messages() {
                 <button onClick={() => setShowEmoji(v => !v)}
                   className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all"
                   style={{
-                    background: showEmoji ? 'rgba(201,168,76,0.15)' : 'rgba(61,36,96,0.5)',
+                    background: showEmoji ? 'rgba(201,168,76,0.15)' : 'rgba(82,54,124,0.5)',
                     border: '1px solid rgba(201,168,76,0.2)',
                     fontSize: 18,
                   }}
@@ -386,7 +386,7 @@ export default function Messages() {
                 <button onClick={() => fileRef.current?.click()}
                   className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all"
                   style={{
-                    background: attachFile ? 'rgba(201,168,76,0.15)' : 'rgba(61,36,96,0.5)',
+                    background: attachFile ? 'rgba(201,168,76,0.15)' : 'rgba(82,54,124,0.5)',
                     border: `1px solid ${attachFile ? 'rgba(201,168,76,0.5)' : 'rgba(201,168,76,0.2)'}`,
                     fontSize: 18,
                   }}
@@ -396,7 +396,7 @@ export default function Messages() {
 
                 <input
                   className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none"
-                  style={{ background: 'rgba(61,36,96,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
+                  style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
                   placeholder="Tapez votre message..."
                   value={text} onChange={e => setText(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
@@ -406,11 +406,11 @@ export default function Messages() {
                   className="btn-gold w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                   style={{ opacity: (sending || (!text.trim() && !attachFile)) ? 0.5 : 1 }}>
                   {sending ? (
-                    <div style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid #1a0a2e',
+                    <div style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid #261642',
                       borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
                   ) : (
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                      <path d="M14 2L1 7l5 3 3 5 5-13Z" stroke="#1a0a2e" strokeWidth="1.6" strokeLinejoin="round"/>
+                      <path d="M14 2L1 7l5 3 3 5 5-13Z" stroke="#261642" strokeWidth="1.6" strokeLinejoin="round"/>
                     </svg>
                   )}
                 </button>

@@ -146,7 +146,7 @@ export default function Profile() {
       ) : type === 'select' ? (
         <select style={inputSt} value={form[key] as string}
           onChange={e => setForm(p => ({ ...p, [key]: e.target.value }))}>
-          {VILLES.map(v => <option key={v} value={v} style={{ background: '#1a0a2e' }}>{v}</option>)}
+          {VILLES.map(v => <option key={v} value={v} style={{ background: '#261642' }}>{v}</option>)}
         </select>
       ) : (
         <input type={type} style={inputSt}
@@ -172,7 +172,7 @@ export default function Profile() {
             {editing && (
               <button onClick={() => setEditing(false)}
                 style={{ padding: '10px 18px', borderRadius: 10, fontSize: 13, fontWeight: 600,
-                  background: 'rgba(61,36,96,0.5)', color: '#9a8a9a',
+                  background: 'rgba(82,54,124,0.5)', color: '#9a8a9a',
                   border: '1px solid rgba(201,168,76,0.12)', cursor: 'pointer' }}>
                 Annuler
               </button>
@@ -180,7 +180,7 @@ export default function Profile() {
             <button onClick={() => editing ? save() : setEditing(true)} disabled={saving}
               className="btn-gold"
               style={{ padding: '10px 22px', borderRadius: 10, fontSize: 13, fontWeight: 700,
-                color: '#1a0a2e', opacity: saving ? 0.7 : 1 }}>
+                color: '#261642', opacity: saving ? 0.7 : 1 }}>
               {editing ? (saving ? 'Enregistrement…' : 'Sauvegarder') : 'Modifier'}
             </button>
           </div>
@@ -199,7 +199,7 @@ export default function Profile() {
               ) : (
                 <div style={{ width: 88, height: 88, borderRadius: '50%', display: 'flex',
                   alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 800,
-                  color: '#1a0a2e', background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', flexShrink: 0 }}>
+                  color: '#261642', background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', flexShrink: 0 }}>
                   {initials}
                 </div>
               )}
@@ -207,13 +207,13 @@ export default function Profile() {
                 style={{ position: 'absolute', bottom: 0, right: 0, width: 26, height: 26,
                   borderRadius: '50%', background: '#c9a84c', cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  border: '2px solid #1a0a2e' }}>
+                  border: '2px solid #261642' }}>
                 <input type="file" accept="image/*" style={{ display: 'none' }} onChange={uploadAvatar} />
                 {uploading
-                  ? <div style={{ width: 10, height: 10, borderRadius: '50%', border: '2px solid #1a0a2e',
+                  ? <div style={{ width: 10, height: 10, borderRadius: '50%', border: '2px solid #261642',
                       borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
                   : <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
-                      <path d="M5.5 1v7M3 3l2.5-2.5L8 3M1.5 9.5h8" stroke="#1a0a2e" strokeWidth="1.4"
+                      <path d="M5.5 1v7M3 3l2.5-2.5L8 3M1.5 9.5h8" stroke="#261642" strokeWidth="1.4"
                         strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                 }
@@ -269,13 +269,13 @@ export default function Profile() {
 
             {/* Complétion */}
             <div style={{ flexShrink: 0, minWidth: 150 }}>
-              <div style={{ background: 'rgba(61,36,96,0.4)', borderRadius: 12, padding: '16px 18px',
+              <div style={{ background: 'rgba(82,54,124,0.4)', borderRadius: 12, padding: '16px 18px',
                 border: '1px solid rgba(201,168,76,0.1)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
                   <span style={{ fontSize: 11, color: '#6a5a7a', fontWeight: 600 }}>Profil</span>
                   <span style={{ fontSize: 14, fontWeight: 800, color: '#c9a84c' }}>{completionPct}%</span>
                 </div>
-                <div style={{ height: 5, background: 'rgba(61,36,96,0.9)', borderRadius: 99 }}>
+                <div style={{ height: 5, background: 'rgba(82,54,124,0.9)', borderRadius: 99 }}>
                   <div style={{ height: '100%', borderRadius: 99, width: `${completionPct}%`,
                     background: 'linear-gradient(to right,#c9a84c,#e8c97a)' }} />
                 </div>
@@ -297,7 +297,7 @@ export default function Profile() {
               { l: 'Tarif/heure', v: isFreelance && profile.hourly_rate ? formatCFA(profile.hourly_rate) : '—' },
             ].map(s => (
               <div key={s.l} style={{ textAlign: 'center', padding: '14px 8px',
-                background: 'rgba(61,36,96,0.3)', borderRadius: 10,
+                background: 'rgba(82,54,124,0.3)', borderRadius: 10,
                 border: '1px solid rgba(201,168,76,0.06)' }}>
                 <div className="text-gold-gradient" style={{ fontSize: 18, fontWeight: 800 }}>{s.v}</div>
                 <div style={{ fontSize: 11, color: '#4a3a5a', marginTop: 5 }}>{s.l}</div>
@@ -351,7 +351,7 @@ export default function Profile() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   <button onClick={() => setForm(p => ({ ...p, is_available: !p.is_available }))}
                     style={{ width: 44, height: 24, borderRadius: 999, border: 'none', cursor: 'pointer',
-                      background: form.is_available ? '#10b981' : 'rgba(61,36,96,0.8)',
+                      background: form.is_available ? '#10b981' : 'rgba(82,54,124,0.8)',
                       position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
                     <div style={{ position: 'absolute', top: 2, width: 20, height: 20, borderRadius: '50%',
                       background: '#fff', transition: 'left 0.2s',
@@ -399,7 +399,7 @@ export default function Profile() {
                   padding: '10px 18px', borderRadius: 10, fontSize: 13, fontWeight: 600,
                   cursor: locating ? 'wait' : 'pointer',
                   background: 'linear-gradient(135deg,#c9a84c,#e8c97a)',
-                  color: '#1a0a2e', border: 'none',
+                  color: '#261642', border: 'none',
                   opacity: locating ? 0.7 : 1, transition: 'opacity 0.15s',
                 }}
               >
@@ -565,7 +565,7 @@ export default function Profile() {
 }
 
 const inputSt: React.CSSProperties = {
-  background: 'rgba(61,36,96,0.5)',
+  background: 'rgba(82,54,124,0.5)',
   border: '1px solid rgba(201,168,76,0.18)',
   color: '#f0e6d3',
   width: '100%',

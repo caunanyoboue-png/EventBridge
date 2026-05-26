@@ -62,7 +62,7 @@ export default function AdminDisputes() {
             className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
             style={filterStatus === s
               ? { background: 'rgba(201,168,76,0.2)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.4)' }
-              : { background: 'rgba(61,36,96,0.4)', color: '#7a6a7a', border: '1px solid rgba(201,168,76,0.1)' }}>
+              : { background: 'rgba(82,54,124,0.4)', color: '#7a6a7a', border: '1px solid rgba(201,168,76,0.1)' }}>
             {s === '' ? 'Tous' : statusLabel[s]}
           </button>
         ))}
@@ -125,13 +125,13 @@ export default function AdminDisputes() {
             </p>
             <textarea
               className="w-full px-4 py-3 rounded-xl text-sm outline-none mb-4"
-              style={{ background: 'rgba(61,36,96,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3', resize: 'none' }}
+              style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3', resize: 'none' }}
               rows={4} placeholder="Décision de l'admin..."
               value={resolution} onChange={e => setResolution(e.target.value)} />
             <div className="flex gap-3">
               <button onClick={() => resolve(selected.id, 'resolved')}
                 className="flex-1 py-2 rounded-xl text-sm font-bold"
-                style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#1a0a2e' }}>
+                style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642' }}>
                 Résoudre
               </button>
               <button onClick={() => resolve(selected.id, 'closed')}
