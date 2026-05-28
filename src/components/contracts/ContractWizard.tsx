@@ -83,8 +83,8 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(15,10,30,0.85)', backdropFilter: 'blur(6px)' }}>
+    <div className="fixed inset-0 flex items-center justify-center p-4"
+      style={{ background: 'rgba(15,10,30,0.85)', backdropFilter: 'blur(6px)', zIndex: 1000 }}>
       <div className="w-full max-w-xl card-glass p-0 overflow-hidden" style={{ maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
 
         {/* Header */}
