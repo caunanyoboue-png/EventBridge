@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { type Mission, type MissionStatus } from '../types';
 import { formatDateShort, formatCFA, SERVICE_ICONS } from '../lib/utils';
+import toast from 'react-hot-toast';
 
 const TABS: { key: MissionStatus | 'all'; label: string }[] = [
   { key: 'all', label: 'Toutes' },
@@ -20,6 +21,8 @@ export default function MyMissions() {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [tab, setTab] = useState<MissionStatus | 'all'>('all');
   const [loading, setLoading] = useState(true);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [actionBusy, setActionBusy] = useState(false);
 
   useEffect(() => {
     if (profile) fetchMissions();
@@ -31,6 +34,39 @@ export default function MyMissions() {
       .order('created_at', { ascending: false });
     setMissions(data || []);
     setLoading(false);
+  }
+
+  async function publishMission(m: Mission) {
+    setActionBusy(true);
+    const { error } = await supabase.from('missions').update({ status: 'open' }).eq('id', m.id);
+    if (error) { toast.error(error.message || 'Erreur publication'); setActionBusy(false); return; }
+    setMissions(prev => prev.map(x => x.id === m.id ? { ...x, status: 'open' as MissionStatus } : x));
+    try {
+      const { data: count } = await supabase.rpc('notify_matching_freelances', {
+        p_mission_id:      m.id,
+        p_mission_title:   m.title,
+        p_hourly_rate:     m.hourly_rate,
+        p_ville:           m.ville || 'Abidjan - Cocody',
+        p_skills_required: (m.skills_required || []).length > 0 ? m.skills_required : null,
+      });
+      toast.success(`Mission publiée ! ${count ?? 0} freelance(s) notifié(s) 🎯`);
+    } catch { toast.success('Mission publiée !'); }
+    setActionBusy(false);
+  }
+
+  async function handleDelete(m: Mission) {
+    setActionBusy(true);
+    if (m.status === 'draft') {
+      const { error } = await supabase.from('missions').delete().eq('id', m.id);
+      if (error) toast.error(error.message || 'Erreur suppression');
+      else { toast.success('Mission supprimée'); setMissions(prev => prev.filter(x => x.id !== m.id)); }
+    } else {
+      const { error } = await supabase.from('missions').update({ status: 'cancelled' }).eq('id', m.id);
+      if (error) toast.error(error.message || 'Erreur annulation');
+      else { toast.success('Mission annulée'); setMissions(prev => prev.map(x => x.id === m.id ? { ...x, status: 'cancelled' as MissionStatus } : x)); }
+    }
+    setConfirmId(null);
+    setActionBusy(false);
   }
 
   const filtered = tab === 'all' ? missions : missions.filter(m => m.status === tab);
@@ -109,11 +145,18 @@ export default function MyMissions() {
                 </span>
               </div>
 
-              <div className="flex gap-3 mt-4">
+              <div className="flex gap-3 mt-4 flex-wrap">
                 <button onClick={() => navigate(`/MissionDetail?id=${m.id}`)}
                   className="btn-outline-gold px-4 py-2 rounded-lg text-sm">
                   Voir détails
                 </button>
+                {m.status === 'draft' && (
+                  <button onClick={() => publishMission(m)} disabled={actionBusy}
+                    className="btn-gold px-4 py-2 rounded-lg text-sm font-bold text-[#261642]"
+                    style={{ opacity: actionBusy ? 0.7 : 1 }}>
+                    🚀 Publier
+                  </button>
+                )}
                 {(m.status === 'open' || m.status === 'draft') && (
                   <button onClick={() => navigate(`/edit-mission?id=${m.id}`)}
                     className="px-4 py-2 rounded-lg text-sm border transition-all hover:opacity-80"
@@ -126,6 +169,31 @@ export default function MyMissions() {
                   style={{ borderColor: 'rgba(201,168,76,0.2)', color: '#b8a898' }}>
                   💬 Messages
                 </button>
+                {(m.status === 'draft' || m.status === 'open') && (
+                  confirmId === m.id ? (
+                    <div className="flex items-center gap-2 ml-auto">
+                      <span className="text-xs" style={{ color: '#b8a898' }}>
+                        {m.status === 'draft' ? 'Supprimer définitivement ?' : 'Annuler cette mission ?'}
+                      </span>
+                      <button onClick={() => handleDelete(m)} disabled={actionBusy}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold border"
+                        style={{ borderColor: '#ef4444', color: '#ef4444', background: 'rgba(239,68,68,0.1)', opacity: actionBusy ? 0.6 : 1 }}>
+                        {actionBusy ? '…' : 'Oui'}
+                      </button>
+                      <button onClick={() => setConfirmId(null)}
+                        className="px-3 py-1.5 rounded-lg text-xs border"
+                        style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#b8a898' }}>
+                        Non
+                      </button>
+                    </div>
+                  ) : (
+                    <button onClick={() => setConfirmId(m.id)}
+                      className="px-4 py-2 rounded-lg text-sm border ml-auto transition-all hover:opacity-80"
+                      style={{ borderColor: 'rgba(239,68,68,0.3)', color: '#ef4444' }}>
+                      {m.status === 'draft' ? '🗑 Supprimer' : '✗ Annuler'}
+                    </button>
+                  )
+                )}
               </div>
             </div>
           ))}

@@ -24,6 +24,7 @@ import SosBrigade from './pages/SosBrigade';
 import Settings from './pages/Settings';
 import EditMission from './pages/EditMission';
 import PublicProfile from './pages/PublicProfile';
+import ContractDetail from './pages/ContractDetail';
 
 // Pages admin
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -97,6 +98,7 @@ function AppRoutes() {
       <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       <Route path="/edit-mission" element={<ProtectedRoute role="organisateur"><EditMission /></ProtectedRoute>} />
       <Route path="/public-profile" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
+      <Route path="/contracts/:id" element={<ProtectedRoute><ContractDetail /></ProtectedRoute>} />
 
       <Route path="/admin/AdminDashboard" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
       <Route path="/admin/AdminProfiles" element={<ProtectedRoute role="admin"><AdminProfiles /></ProtectedRoute>} />

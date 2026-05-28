@@ -106,6 +106,8 @@ export default function OrganisateurDashboard() {
   const [hovKpi, setHovKpi] = useState<number | null>(null);
   const [hovBtn, setHovBtn] = useState<number | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Stats dérivées
   const totalMissions    = missions.length;
@@ -184,12 +186,48 @@ export default function OrganisateurDashboard() {
     const { error } = await supabase.from('applications')
       .update({ status: action, responded_at: new Date().toISOString() })
       .eq('id', appId);
-    if (error) { console.error('[handleApplication]', error); toast.error(error.message || 'Erreur lors de la mise à jour'); }
-    else {
+    if (error) {
+      console.error('[handleApplication]', error);
+      toast.error(error.message || 'Erreur lors de la mise à jour');
+    } else {
       toast.success(action === 'accepted' ? 'Candidature acceptée !' : 'Candidature refusée');
+      const app = pendingApps.find(a => a.id === appId);
+      if (app) {
+        const fl = app.freelance as { id?: string; full_name?: string } | undefined;
+        const m = app.mission as Mission | undefined;
+        if (fl?.id && m) {
+          try {
+            await supabase.from('notifications').insert({
+              user_id: fl.id,
+              type: action === 'accepted' ? 'application_accepted' : 'application_rejected',
+              title: action === 'accepted' ? '✅ Candidature acceptée !' : '❌ Candidature refusée',
+              body: action === 'accepted'
+                ? `Votre candidature pour "${m.title}" a été acceptée !`
+                : `Votre candidature pour "${m.title}" a été refusée.`,
+              data: { mission_id: m.id, application_id: appId },
+              is_read: false,
+            });
+          } catch { /* notification failure must never block */ }
+        }
+      }
       fetchAll();
     }
     setActionLoading(null);
+  }
+
+  async function deleteMission(m: Mission) {
+    setDeleteLoading(true);
+    if (m.status === 'draft') {
+      const { error } = await supabase.from('missions').delete().eq('id', m.id);
+      if (error) toast.error(error.message || 'Erreur suppression');
+      else { toast.success('Mission supprimée'); setMissions(prev => prev.filter(x => x.id !== m.id)); }
+    } else {
+      const { error } = await supabase.from('missions').update({ status: 'cancelled' }).eq('id', m.id);
+      if (error) toast.error(error.message || 'Erreur annulation');
+      else { toast.success('Mission annulée'); setMissions(prev => prev.map(x => x.id === m.id ? { ...x, status: 'cancelled' as Mission['status'] } : x)); }
+    }
+    setConfirmDeleteId(null);
+    setDeleteLoading(false);
   }
 
   const MSTATUS: Record<string, { label: string; color: string }> = {
@@ -599,6 +637,41 @@ export default function OrganisateurDashboard() {
                               Modifier
                             </button>
                           )}
+                          {(m.status === 'open' || m.status === 'draft') && (
+                            confirmDeleteId === m.id ? (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}
+                                onClick={e => e.stopPropagation()}>
+                                <span style={{ fontSize: 10, color: 'rgba(239,68,68,0.7)', whiteSpace: 'nowrap' }}>
+                                  {m.status === 'draft' ? 'Supprimer ?' : 'Annuler ?'}
+                                </span>
+                                <button
+                                  onClick={e => { e.stopPropagation(); deleteMission(m); }}
+                                  disabled={deleteLoading}
+                                  style={{ flexShrink: 0, fontSize: 11, fontWeight: 700, padding: '3px 9px',
+                                    borderRadius: 8, cursor: 'pointer', border: '1px solid rgba(239,68,68,0.5)',
+                                    color: '#ef4444', background: 'rgba(239,68,68,0.1)' }}>
+                                  {deleteLoading ? '…' : 'Oui'}
+                                </button>
+                                <button
+                                  onClick={e => { e.stopPropagation(); setConfirmDeleteId(null); }}
+                                  style={{ flexShrink: 0, fontSize: 11, fontWeight: 500, padding: '3px 9px',
+                                    borderRadius: 8, cursor: 'pointer', border: `1px solid ${C.gold}30`,
+                                    color: C.sec, background: 'transparent' }}>
+                                  Non
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={e => { e.stopPropagation(); setConfirmDeleteId(m.id); }}
+                                style={{ flexShrink: 0, fontSize: 11, fontWeight: 500, padding: '3px 10px',
+                                  borderRadius: 8, cursor: 'pointer', border: '1px solid rgba(239,68,68,0.25)',
+                                  color: 'rgba(239,68,68,0.65)', background: 'transparent', transition: 'all 0.15s' }}
+                                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)'; (e.currentTarget as HTMLButtonElement).style.color = '#ef4444'; }}
+                                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = 'rgba(239,68,68,0.65)'; }}>
+                                {m.status === 'draft' ? '🗑' : '✗'}
+                              </button>
+                            )
+                          )}
                         </div>
                       );
                     })}
@@ -642,6 +715,15 @@ export default function OrganisateurDashboard() {
                             background: `${as_.color}18`, color: as_.color }}>
                             {as_.label}
                           </span>
+                          {a.status === 'accepted' && m?.id && (
+                            <button
+                              onClick={() => navigate(`/MissionDetail?id=${m.id}`)}
+                              style={{ flexShrink: 0, fontSize: 11, fontWeight: 500, padding: '3px 9px',
+                                borderRadius: 7, cursor: 'pointer', border: `1px solid ${C.gold}40`,
+                                color: C.gold, background: 'transparent', whiteSpace: 'nowrap' }}>
+                              📄 Contrat
+                            </button>
+                          )}
                         </div>
                       );
                     })}

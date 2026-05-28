@@ -280,7 +280,7 @@ export default function FreelanceDashboard() {
         {/* Hero band */}
         <div className="eb-hero-band" style={{
           height: 180, position: 'relative', overflow: 'hidden', flexShrink: 0,
-          backgroundImage: 'url(/images/Dashboard-freelance.jpg)',
+          backgroundImage: 'url(/images/imgdefonddashboardfreelance.png)',
           backgroundSize: 'cover', backgroundPosition: 'center',
         }}>
           <div style={{

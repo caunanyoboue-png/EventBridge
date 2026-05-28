@@ -22,6 +22,8 @@ export default function MyApplications() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [tab, setTab] = useState<ApplicationStatus | 'all'>('all');
   const [loading, setLoading] = useState(true);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [withdrawBusy, setWithdrawBusy] = useState(false);
 
   useEffect(() => { if (profile) fetchApplications(); }, [profile]);
 
@@ -45,9 +47,30 @@ export default function MyApplications() {
   }
 
   async function retirer(id: string) {
+    setWithdrawBusy(true);
+    const app = applications.find(a => a.id === id);
     const { error } = await supabase.from('applications').update({ status: 'withdrawn' }).eq('id', id);
-    if (error) toast.error('Erreur');
-    else { toast.success('Candidature retirée'); fetchApplications(); }
+    if (error) { toast.error(error.message || 'Erreur'); setWithdrawBusy(false); return; }
+    toast.success('Candidature annulée');
+    setConfirmId(null);
+    if (app) {
+      const m = app.mission as Mission & { organisateur_id?: string };
+      const orgId = m?.organisateur_id || (m as Mission & { organisateur?: { id: string } })?.organisateur?.id;
+      if (orgId) {
+        try {
+          await supabase.from('notifications').insert({
+            user_id: orgId,
+            type: 'application_withdrawn',
+            title: '↩️ Candidature annulée',
+            body: `${profile!.full_name} a annulé sa candidature pour "${m?.title}"`,
+            data: { mission_id: m?.id, application_id: id },
+            is_read: false,
+          });
+        } catch { /* notification failure must never block */ }
+      }
+    }
+    setWithdrawBusy(false);
+    fetchApplications();
   }
 
   const filtered = tab === 'all' ? applications : applications.filter(a => a.status === tab);
@@ -117,7 +140,7 @@ export default function MyApplications() {
                   Postulée le {a.applied_at ? new Date(a.applied_at).toLocaleDateString('fr-CI') : '–'}
                 </p>
 
-                <div className="flex gap-3 flex-wrap">
+                <div className="flex gap-3 flex-wrap items-center">
                   <button onClick={() => navigate(`/MissionDetail?id=${m?.id}`)}
                     className="btn-outline-gold px-4 py-2 rounded-lg text-sm">
                     Voir la mission
@@ -135,12 +158,38 @@ export default function MyApplications() {
                       💬 Contacter
                     </button>
                   )}
-                  {a.status === 'pending' && (
-                    <button onClick={() => retirer(a.id)}
-                      className="px-4 py-2 rounded-lg text-sm border transition-all hover:opacity-80"
-                      style={{ borderColor: 'rgba(239,68,68,0.3)', color: '#ef4444' }}>
-                      Retirer
-                    </button>
+
+                  {(a.status === 'pending' || a.status === 'accepted') && (
+                    confirmId === a.id ? (
+                      <div className="flex items-center gap-2 ml-auto">
+                        {a.status === 'accepted' && (
+                          <span className="text-xs font-medium" style={{ color: '#f59e0b' }}>
+                            ⚠ Candidature acceptée — confirmer l'annulation ?
+                          </span>
+                        )}
+                        {a.status === 'pending' && (
+                          <span className="text-xs" style={{ color: '#b8a898' }}>
+                            Annuler cette candidature ?
+                          </span>
+                        )}
+                        <button onClick={() => retirer(a.id)} disabled={withdrawBusy}
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold border"
+                          style={{ borderColor: '#ef4444', color: '#ef4444', background: 'rgba(239,68,68,0.1)', opacity: withdrawBusy ? 0.6 : 1 }}>
+                          {withdrawBusy ? '…' : 'Oui, annuler'}
+                        </button>
+                        <button onClick={() => setConfirmId(null)}
+                          className="px-3 py-1.5 rounded-lg text-xs border"
+                          style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#b8a898' }}>
+                          Non
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={() => setConfirmId(a.id)}
+                        className="px-4 py-2 rounded-lg text-sm border ml-auto transition-all hover:opacity-80"
+                        style={{ borderColor: 'rgba(239,68,68,0.3)', color: '#ef4444' }}>
+                        ✗ Annuler
+                      </button>
+                    )
                   )}
                 </div>
               </div>

@@ -4,10 +4,13 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { getOrCreateConversation } from '../lib/messaging';
-import { type Mission, type Profile } from '../types';
+import { type Mission, type Profile, type Contract } from '../types';
 import { formatDate, formatCFA, SERVICE_ICONS } from '../lib/utils';
 import { distanceKm, formatDistance } from '../lib/geo';
 import MapView from '../components/MapView';
+import { fetchContractByMission } from '../services/contractService';
+import ContractWizard from '../components/contracts/ContractWizard';
+import ContractCard from '../components/contracts/ContractCard';
 import toast from 'react-hot-toast';
 
 export default function MissionDetail() {
@@ -19,11 +22,32 @@ export default function MissionDetail() {
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
   const [alreadyApplied, setAlreadyApplied] = useState(false);
+  const [withdrawing, setWithdrawing] = useState(false);
+  const [confirmWithdraw, setConfirmWithdraw] = useState(false);
   const [contacting, setContacting] = useState(false);
+  const [contract, setContract] = useState<Contract | null>(null);
+  const [showWizard, setShowWizard] = useState(false);
+  const [acceptedFreelances, setAcceptedFreelances] = useState<Profile[]>([]);
+  const [selectedFreelance, setSelectedFreelance] = useState<Profile | null>(null);
 
   useEffect(() => {
     if (missionId) fetchMission();
   }, [missionId]);
+
+  useEffect(() => {
+    if (!missionId || !profile) return;
+    fetchContractByMission(missionId).then(c => setContract(c));
+    if (profile.role === 'organisateur') {
+      supabase
+        .from('applications')
+        .select('freelance:profiles!freelance_id(*)')
+        .eq('mission_id', missionId)
+        .eq('status', 'accepted')
+        .then(({ data }) => {
+          setAcceptedFreelances((data || []).map(a => (a.freelance as unknown) as Profile));
+        });
+    }
+  }, [missionId, profile]);
 
   async function fetchMission() {
     const { data } = await supabase.from('missions')
@@ -52,13 +76,64 @@ export default function MissionDetail() {
 
   async function postuler() {
     if (!profile || !mission) return;
+
+    const required = mission.skills_required || [];
+    if (required.length > 0) {
+      const mySkills: string[] = (profile as Profile & { skills?: string[] }).skills || [];
+      const hasMatch = mySkills.some(s => required.includes(s));
+      if (!hasMatch) {
+        toast.error(`Ce poste requiert : ${required.join(', ')}. Vos compétences ne correspondent pas.`);
+        return;
+      }
+    }
+
     setApplying(true);
     const { error } = await supabase.from('applications').insert({
       mission_id: mission.id, freelance_id: profile.id, status: 'pending',
     });
-    if (error) toast.error(error.code === '23505' ? 'Déjà postulé' : 'Erreur');
-    else { toast.success('Candidature envoyée !'); setAlreadyApplied(true); }
+    if (error) {
+      toast.error(error.code === '23505' ? 'Déjà postulé' : error.message || 'Erreur');
+    } else {
+      toast.success('Candidature envoyée !');
+      setAlreadyApplied(true);
+      try {
+        await supabase.from('notifications').insert({
+          user_id: mission.organisateur_id,
+          type: 'new_application',
+          title: '📩 Nouvelle candidature',
+          body: `${profile.full_name} a postulé à votre mission "${mission.title}"`,
+          data: { mission_id: mission.id, freelance_id: profile.id },
+          is_read: false,
+        });
+      } catch { /* notification failure must never block */ }
+    }
     setApplying(false);
+  }
+
+  async function withdrawApplication() {
+    if (!profile || !mission || withdrawing) return;
+    setWithdrawing(true);
+    const { data: appRow } = await supabase.from('applications')
+      .select('id').eq('mission_id', mission.id).eq('freelance_id', profile.id).single();
+    if (!appRow) { setWithdrawing(false); return; }
+    const { error } = await supabase.from('applications').update({ status: 'withdrawn' }).eq('id', appRow.id);
+    if (error) { toast.error(error.message || 'Erreur'); }
+    else {
+      toast.success('Candidature retirée');
+      setAlreadyApplied(false);
+      setConfirmWithdraw(false);
+      try {
+        await supabase.from('notifications').insert({
+          user_id: mission.organisateur_id,
+          type: 'application_withdrawn',
+          title: '↩️ Candidature retirée',
+          body: `${profile.full_name} a retiré sa candidature pour "${mission.title}"`,
+          data: { mission_id: mission.id, application_id: appRow.id },
+          is_read: false,
+        });
+      } catch { /* notification failure must never block */ }
+    }
+    setWithdrawing(false);
   }
 
   if (loading) return <DashboardLayout><div className="text-center py-20" style={{ color: '#b8a898' }}>Chargement...</div></DashboardLayout>;
@@ -192,21 +267,107 @@ export default function MissionDetail() {
             </div>
           )}
 
-          {/* Actions */}
+          {/* Actions freelance */}
           {profile?.role === 'freelance' && (
-            <div className="flex gap-3">
-              <button onClick={postuler} disabled={applying || alreadyApplied}
-                className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#261642]">
-                {alreadyApplied ? '✅ Candidature envoyée' : applying ? 'Envoi...' : 'Postuler à cette mission'}
-              </button>
-              <button onClick={contacter} disabled={contacting}
-                className="btn-outline-gold px-5 py-3 rounded-xl font-medium"
-                style={{ opacity: contacting ? 0.7 : 1 }}>
-                {contacting ? '…' : '💬 Contacter'}
-              </button>
+            <div className="space-y-3">
+              <div className="flex gap-3">
+                {alreadyApplied ? (
+                  <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl"
+                    style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.25)' }}>
+                    <span className="text-sm font-medium flex-1" style={{ color: '#10b981' }}>✅ Candidature envoyée</span>
+                    {confirmWithdraw ? (
+                      <>
+                        <span className="text-xs" style={{ color: '#b8a898' }}>Retirer ?</span>
+                        <button onClick={withdrawApplication} disabled={withdrawing}
+                          className="px-3 py-1 rounded-lg text-xs font-bold border"
+                          style={{ borderColor: '#ef4444', color: '#ef4444', background: 'rgba(239,68,68,0.1)' }}>
+                          {withdrawing ? '…' : 'Oui'}
+                        </button>
+                        <button onClick={() => setConfirmWithdraw(false)}
+                          className="px-3 py-1 rounded-lg text-xs border"
+                          style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#b8a898' }}>
+                          Non
+                        </button>
+                      </>
+                    ) : (
+                      <button onClick={() => setConfirmWithdraw(true)}
+                        className="px-3 py-1 rounded-lg text-xs border"
+                        style={{ borderColor: 'rgba(239,68,68,0.3)', color: '#ef4444' }}>
+                        Retirer
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <button onClick={postuler} disabled={applying}
+                    className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#261642]">
+                    {applying ? 'Envoi...' : 'Postuler à cette mission'}
+                  </button>
+                )}
+                <button onClick={contacter} disabled={contacting}
+                  className="btn-outline-gold px-5 py-3 rounded-xl font-medium"
+                  style={{ opacity: contacting ? 0.7 : 1 }}>
+                  {contacting ? '…' : '💬 Contacter'}
+                </button>
+              </div>
             </div>
           )}
         </div>
+
+        {/* Section contrat (organisateur) */}
+        {profile?.role === 'organisateur' && (
+          <div className="card-glass p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-semibold" style={{ color: '#f0e6d3' }}>📄 Contrat CDD</h2>
+              {!contract && acceptedFreelances.length > 0 && !showWizard && (
+                <button onClick={() => setShowWizard(true)}
+                  className="btn-gold px-4 py-2 rounded-xl text-sm font-bold text-[#261642]">
+                  + Générer un contrat
+                </button>
+              )}
+            </div>
+            {contract ? (
+              <ContractCard contract={contract} myRole="organizer" />
+            ) : acceptedFreelances.length === 0 ? (
+              <p className="text-sm" style={{ color: '#b8a898' }}>
+                Acceptez au moins une candidature pour générer un contrat.
+              </p>
+            ) : showWizard && !selectedFreelance ? (
+              <div className="space-y-2">
+                <p className="text-xs mb-2" style={{ color: '#b8a898' }}>Sélectionnez le freelance :</p>
+                {acceptedFreelances.map(fl => (
+                  <button key={fl.id} onClick={() => setSelectedFreelance(fl)}
+                    className="w-full text-left px-4 py-3 rounded-xl text-sm"
+                    style={{ background: 'rgba(82,54,124,0.4)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}>
+                    {fl.full_name}
+                  </button>
+                ))}
+                <button onClick={() => setShowWizard(false)} className="btn-outline-gold w-full py-2 rounded-xl text-sm mt-1">
+                  Annuler
+                </button>
+              </div>
+            ) : null}
+          </div>
+        )}
+
+        {/* Section contrat (freelance) */}
+        {profile?.role === 'freelance' && contract && (
+          <div className="card-glass p-6 mb-6">
+            <h2 className="font-semibold mb-4" style={{ color: '#f0e6d3' }}>📄 Contrat CDD</h2>
+            <ContractCard contract={contract} myRole="freelance" />
+          </div>
+        )}
+
+        {/* Wizard création contrat */}
+        {showWizard && selectedFreelance && mission && profile && (
+          <ContractWizard
+            mission={mission}
+            organizer={profile}
+            freelance={selectedFreelance}
+            myRole="organizer"
+            onDone={(c: Contract) => { setContract(c); setShowWizard(false); setSelectedFreelance(null); }}
+            onCancel={() => { setShowWizard(false); setSelectedFreelance(null); }}
+          />
+        )}
       </div>
     </DashboardLayout>
   );

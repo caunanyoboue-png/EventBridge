@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { COMPETENCES, VILLES } from '../lib/utils';
 import MapPicker from '../components/MapPicker';
 import toast from 'react-hot-toast';
 
@@ -21,7 +20,8 @@ export default function CreateMission() {
 
   const [form, setForm] = useState({
     title: '', service_type: '', description: '', dress_code: '', is_urgent: false,
-    event_date: '', start_time: '', end_time: '', location: '', ville: 'Abidjan - Cocody',
+    event_date: '', start_time: '', end_time: '', location: '',
+    ville: 'Abidjan - Cocody',
     slots_total: 1, hourly_rate: 3000, skills_required: [] as string[],
     latitude: null as number | null,
     longitude: null as number | null,
@@ -32,6 +32,15 @@ export default function CreateMission() {
   const [uploadingVenue, setUploadingVenue] = useState(false);
 
   function upd(k: string, v: unknown) { setForm(p => ({ ...p, [k]: v })); }
+
+  function toggleServiceType(t: string) {
+    setForm(p => {
+      const next = p.skills_required.includes(t)
+        ? p.skills_required.filter(x => x !== t)
+        : [...p.skills_required, t];
+      return { ...p, skills_required: next, service_type: next[0] || '' };
+    });
+  }
 
   function handleVenueFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -53,13 +62,14 @@ export default function CreateMission() {
       return data.publicUrl;
     } finally { setUploadingVenue(false); }
   }
-  function toggleSkill(s: string) {
-    setForm(p => ({ ...p, skills_required: p.skills_required.includes(s) ? p.skills_required.filter(x => x !== s) : [...p.skills_required, s] }));
-  }
 
-  const duration = form.start_time && form.end_time
-    ? Math.max(0, (new Date(`2000-01-01T${form.end_time}`).getTime() - new Date(`2000-01-01T${form.start_time}`).getTime()) / 3600000)
-    : 0;
+  const duration = (() => {
+    if (!form.start_time || !form.end_time) return 0;
+    const start = new Date(`2000-01-01T${form.start_time}`).getTime();
+    let end   = new Date(`2000-01-01T${form.end_time}`).getTime();
+    if (end <= start) end += 24 * 3600 * 1000; // mission nocturne (minuit+)
+    return (end - start) / 3600000;
+  })();
   const total = form.hourly_rate * duration * form.slots_total;
   const commission = total * 0.10;
   const net = total - commission;
@@ -88,19 +98,21 @@ export default function CreateMission() {
 
       if (status === 'open' && mission) {
         const { data: count } = await supabase.rpc('notify_matching_freelances', {
-          p_mission_id:       mission.id,
-          p_mission_title:    form.title,
-          p_hourly_rate:      form.hourly_rate,
-          p_ville:            form.ville,
-          p_skills_required:  form.skills_required.length > 0 ? form.skills_required : null,
+          p_mission_id:      mission.id,
+          p_mission_title:   form.title,
+          p_hourly_rate:     form.hourly_rate,
+          p_ville:           form.ville,
+          p_skills_required: form.skills_required.length > 0 ? form.skills_required : null,
         });
         toast.success(`Mission publiée ! ${count ?? 0} freelance(s) notifié(s) 🎯`);
       } else {
         toast.success('Brouillon enregistré');
       }
       navigate('/my-missions');
-    } catch { toast.error('Erreur lors de la publication'); }
-    finally { setLoading(false); }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : (err as { message?: string })?.message ?? 'Erreur inconnue';
+      toast.error(msg);
+    } finally { setLoading(false); }
   }
 
   const steps = ['Informations', 'Détails & Tarif', 'Récapitulatif'];
@@ -132,7 +144,8 @@ export default function CreateMission() {
         </div>
 
         <div className="card-glass p-8 space-y-5">
-          {/* Étape 1 */}
+
+          {/* ── Étape 1 : Informations ── */}
           {step === 0 && (
             <>
               <div>
@@ -140,24 +153,45 @@ export default function CreateMission() {
                 <input className={inputClass} style={inputStyle} placeholder="Ex: Service en salle – Gala annuel"
                   value={form.title} onChange={e => upd('title', e.target.value)} />
               </div>
+
               <div>
-                <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Type de prestation *</label>
-                <select className={inputClass} style={inputStyle} value={form.service_type} onChange={e => upd('service_type', e.target.value)}>
-                  <option value="">Sélectionner...</option>
-                  {SERVICE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
+                <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>
+                  Type(s) de prestation * &nbsp;
+                  <span style={{ color: '#7a6a7a' }}>(sélectionnez un ou plusieurs)</span>
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {SERVICE_TYPES.map(t => (
+                    <button key={t} type="button" onClick={() => toggleServiceType(t)}
+                      className="px-3 py-1.5 rounded-full text-xs font-medium transition-all border"
+                      style={{
+                        background: form.skills_required.includes(t) ? 'rgba(201,168,76,0.2)' : 'transparent',
+                        borderColor: form.skills_required.includes(t) ? '#c9a84c' : 'rgba(201,168,76,0.2)',
+                        color: form.skills_required.includes(t) ? '#c9a84c' : '#b8a898',
+                      }}>
+                      {t}
+                    </button>
+                  ))}
+                </div>
+                {form.skills_required.length > 0 && (
+                  <p className="text-xs mt-2" style={{ color: 'rgba(201,168,76,0.7)' }}>
+                    ✓ {form.skills_required.length} sélectionné(s) — icône : {form.service_type}
+                  </p>
+                )}
               </div>
+
               <div>
                 <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Description *</label>
                 <textarea className={inputClass} style={{ ...inputStyle, resize: 'none' }} rows={4}
                   placeholder="Décrivez la mission, les tâches, le contexte..."
                   value={form.description} onChange={e => upd('description', e.target.value)} />
               </div>
+
               <div>
                 <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Dress code (optionnel)</label>
                 <input className={inputClass} style={inputStyle} placeholder="Ex: Tenue noire exigée"
                   value={form.dress_code} onChange={e => upd('dress_code', e.target.value)} />
               </div>
+
               <label className="flex items-center gap-3 cursor-pointer">
                 <div onClick={() => upd('is_urgent', !form.is_urgent)}
                   className="w-11 h-6 rounded-full transition-all relative"
@@ -167,34 +201,37 @@ export default function CreateMission() {
                 </div>
                 <span className="text-sm" style={{ color: '#b8a898' }}>Mission urgente ⚡</span>
               </label>
-              <button onClick={() => setStep(1)} disabled={!form.title || !form.service_type || !form.description}
-                className="btn-gold w-full py-3 rounded-xl font-bold text-[#261642]">Continuer →</button>
+
+              <button onClick={() => setStep(1)}
+                disabled={!form.title || form.skills_required.length === 0 || !form.description}
+                className="btn-gold w-full py-3 rounded-xl font-bold text-[#261642]">
+                Continuer →
+              </button>
             </>
           )}
 
-          {/* Étape 2 */}
+          {/* ── Étape 2 : Détails & Tarif ── */}
           {step === 1 && (
             <>
+              <div>
+                <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Date *</label>
+                <input type="date" className={inputClass} style={inputStyle}
+                  value={form.event_date} onChange={e => upd('event_date', e.target.value)} />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Date *</label>
-                  <input type="date" className={inputClass} style={inputStyle} value={form.event_date} onChange={e => upd('event_date', e.target.value)} />
-                </div>
-                <div>
-                  <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Ville *</label>
-                  <select className={inputClass} style={inputStyle} value={form.ville} onChange={e => upd('ville', e.target.value)}>
-                    {VILLES.map(v => <option key={v} value={v}>{v}</option>)}
-                  </select>
-                </div>
-                <div>
                   <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Heure début *</label>
-                  <input type="time" className={inputClass} style={inputStyle} value={form.start_time} onChange={e => upd('start_time', e.target.value)} />
+                  <input type="time" className={inputClass} style={inputStyle}
+                    value={form.start_time} onChange={e => upd('start_time', e.target.value)} />
                 </div>
                 <div>
                   <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Heure fin *</label>
-                  <input type="time" className={inputClass} style={inputStyle} value={form.end_time} onChange={e => upd('end_time', e.target.value)} />
+                  <input type="time" className={inputClass} style={inputStyle}
+                    value={form.end_time} onChange={e => upd('end_time', e.target.value)} />
                 </div>
               </div>
+
               <div>
                 <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Adresse exacte *</label>
                 <input className={inputClass} style={inputStyle} placeholder="Ex: Avenue Delafosse, Plateau"
@@ -208,7 +245,8 @@ export default function CreateMission() {
                 </label>
                 {venuePreview ? (
                   <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 8 }}>
-                    <img src={venuePreview} alt="Lieu" style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block' }} />
+                    <img src={venuePreview} alt="Lieu"
+                      style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block' }} />
                     <button type="button" onClick={() => { setVenueFile(null); setVenuePreview(''); }}
                       style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28,
                         borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: 'none',
@@ -251,77 +289,105 @@ export default function CreateMission() {
                   }}
                 />
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Nombre d'extras</label>
                   <div className="flex items-center gap-3">
                     <button onClick={() => upd('slots_total', Math.max(1, form.slots_total - 1))}
-                      className="w-10 h-10 rounded-lg font-bold text-lg" style={{ background: 'rgba(82,54,124,0.5)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}>-</button>
+                      className="w-10 h-10 rounded-lg font-bold text-lg"
+                      style={{ background: 'rgba(82,54,124,0.5)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}>-</button>
                     <span className="text-xl font-bold" style={{ color: '#f0e6d3' }}>{form.slots_total}</span>
                     <button onClick={() => upd('slots_total', form.slots_total + 1)}
-                      className="w-10 h-10 rounded-lg font-bold text-lg" style={{ background: 'rgba(82,54,124,0.5)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}>+</button>
+                      className="w-10 h-10 rounded-lg font-bold text-lg"
+                      style={{ background: 'rgba(82,54,124,0.5)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}>+</button>
                   </div>
                 </div>
                 <div>
                   <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Tarif horaire (FCFA)</label>
-                  <input type="number" className={inputClass} style={inputStyle} value={form.hourly_rate} onChange={e => upd('hourly_rate', Number(e.target.value))} />
+                  <input type="number" className={inputClass} style={inputStyle}
+                    value={form.hourly_rate} onChange={e => upd('hourly_rate', Number(e.target.value))} />
                 </div>
               </div>
-              <div>
-                <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>Compétences requises</label>
-                <div className="flex flex-wrap gap-2">
-                  {COMPETENCES.map(c => (
-                    <button key={c} onClick={() => toggleSkill(c)}
-                      className="px-3 py-1 rounded-full text-xs transition-all border"
-                      style={{
-                        background: form.skills_required.includes(c) ? 'rgba(201,168,76,0.2)' : 'transparent',
-                        borderColor: form.skills_required.includes(c) ? '#c9a84c' : 'rgba(201,168,76,0.2)',
-                        color: form.skills_required.includes(c) ? '#c9a84c' : '#b8a898',
-                      }}>
-                      {c}
-                    </button>
-                  ))}
-                </div>
-              </div>
+
               <div className="flex gap-3">
                 <button onClick={() => setStep(0)} className="btn-outline-gold flex-1 py-3 rounded-xl">← Retour</button>
-                <button onClick={() => setStep(2)} disabled={!form.event_date || !form.start_time || !form.end_time || !form.location}
-                  className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#261642]">Continuer →</button>
+                <button onClick={() => setStep(2)}
+                  disabled={!form.event_date || !form.start_time || !form.end_time || !form.location}
+                  className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#261642]">
+                  Continuer →
+                </button>
               </div>
             </>
           )}
 
-          {/* Étape 3 — Récapitulatif */}
+          {/* ── Étape 3 : Récapitulatif ── */}
           {step === 2 && (
             <>
               <h2 className="font-semibold text-lg" style={{ color: '#f0e6d3' }}>Récapitulatif</h2>
               <div className="space-y-3 text-sm" style={{ color: '#b8a898' }}>
-                <div className="flex justify-between"><span>Mission</span><span style={{ color: '#f0e6d3' }} className="font-medium">{form.title}</span></div>
-                <div className="flex justify-between"><span>Type</span><span style={{ color: '#f0e6d3' }}>{form.service_type}</span></div>
-                <div className="flex justify-between"><span>Date</span><span style={{ color: '#f0e6d3' }}>{form.event_date} · {form.start_time} - {form.end_time}</span></div>
-                <div className="flex justify-between"><span>Lieu</span><span style={{ color: '#f0e6d3' }}>{form.location}, {form.ville}</span></div>
-                <div className="flex justify-between"><span>Extras</span><span style={{ color: '#f0e6d3' }}>{form.slots_total} personne(s)</span></div>
-                <div className="flex justify-between"><span>Durée</span><span style={{ color: '#f0e6d3' }}>{duration}h</span></div>
+                <div className="flex justify-between">
+                  <span>Mission</span>
+                  <span style={{ color: '#f0e6d3' }} className="font-medium">{form.title}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="shrink-0">Type(s)</span>
+                  <span style={{ color: '#f0e6d3', textAlign: 'right' }}>{form.skills_required.join(', ')}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Date</span>
+                  <span style={{ color: '#f0e6d3' }}>{form.event_date} · {form.start_time} - {form.end_time}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Lieu</span>
+                  <span style={{ color: '#f0e6d3' }}>{form.location}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Extras</span>
+                  <span style={{ color: '#f0e6d3' }}>{form.slots_total} personne(s)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Durée</span>
+                  <span style={{ color: '#f0e6d3' }}>{Math.round(duration * 100) / 100}h</span>
+                </div>
                 <div className="h-px" style={{ background: 'rgba(201,168,76,0.15)' }} />
-                <div className="flex justify-between"><span>Tarif horaire</span><span style={{ color: '#f0e6d3' }}>{form.hourly_rate.toLocaleString('fr-CI')} FCFA/h</span></div>
-                <div className="flex justify-between"><span>Montant brut</span><span style={{ color: '#f0e6d3' }}>{total.toLocaleString('fr-CI')} FCFA</span></div>
-                <div className="flex justify-between"><span>Commission (10%)</span><span style={{ color: '#ef4444' }}>-{commission.toLocaleString('fr-CI')} FCFA</span></div>
-                <div className="flex justify-between font-bold"><span>Net freelances</span><span className="text-gold-gradient">{net.toLocaleString('fr-CI')} FCFA</span></div>
+                <div className="flex justify-between">
+                  <span>Tarif horaire</span>
+                  <span style={{ color: '#f0e6d3' }}>{form.hourly_rate.toLocaleString('fr-CI')} FCFA/h</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Montant brut</span>
+                  <span style={{ color: '#f0e6d3' }}>{total.toLocaleString('fr-CI')} FCFA</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Commission (10%)</span>
+                  <span style={{ color: '#ef4444' }}>-{commission.toLocaleString('fr-CI')} FCFA</span>
+                </div>
+                <div className="flex justify-between font-bold">
+                  <span>Net freelances</span>
+                  <span className="text-gold-gradient">{net.toLocaleString('fr-CI')} FCFA</span>
+                </div>
               </div>
-              {form.is_urgent && <div className="badge-urgent px-3 py-2 rounded-lg text-sm text-center">⚡ Mission marquée comme URGENTE</div>}
+              {form.is_urgent && (
+                <div className="badge-urgent px-3 py-2 rounded-lg text-sm text-center">
+                  ⚡ Mission marquée comme URGENTE
+                </div>
+              )}
               <div className="flex gap-3 pt-2">
                 <button onClick={() => setStep(1)} className="btn-outline-gold flex-1 py-3 rounded-xl">← Retour</button>
                 <button onClick={() => submit('draft')} disabled={loading}
-                  className="flex-1 py-3 rounded-xl text-sm font-medium border" style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#b8a898' }}>
+                  className="flex-1 py-3 rounded-xl text-sm font-medium border"
+                  style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#b8a898' }}>
                   Brouillon
                 </button>
                 <button onClick={() => submit('open')} disabled={loading || uploadingVenue}
                   className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#261642]">
-                  {uploadingVenue ? 'Photo en cours...' : loading ? 'Publication...' : 'Publier 🚀'}
+                  {uploadingVenue ? 'Photo...' : loading ? 'Publication...' : 'Publier 🚀'}
                 </button>
               </div>
             </>
           )}
+
         </div>
       </div>
     </DashboardLayout>

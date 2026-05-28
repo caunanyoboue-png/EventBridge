@@ -3,6 +3,25 @@ export type UserStatus = 'pending' | 'active' | 'suspended' | 'banned';
 export type MissionStatus = 'draft' | 'open' | 'in_progress' | 'completed' | 'cancelled' | 'disputed';
 export type ApplicationStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn';
 export type PaymentStatus = 'pending' | 'escrow' | 'released' | 'refunded' | 'failed';
+export type CinetPayStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
+
+export interface Payment {
+  id: string;
+  contract_id?: string;
+  mission_id?: string;
+  payer_id: string;
+  payee_id: string;
+  amount: number;
+  currency: string;
+  description?: string;
+  transaction_id: string;
+  cinetpay_token?: string;
+  payment_url?: string;
+  status: CinetPayStatus;
+  paid_at?: string;
+  created_at: string;
+  updated_at: string;
+}
 export type PaymentMethod = 'orange_money' | 'mtn_momo' | 'wave' | 'cash';
 export type DisputeStatus = 'open' | 'investigating' | 'resolved' | 'closed';
 export type SosStatus = 'active' | 'fulfilled' | 'expired' | 'cancelled';
@@ -32,6 +51,7 @@ export interface Profile {
   company_sector?: string;
   rccm?: string;
   onboarding_done?: boolean;
+  banner_url?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -139,8 +159,69 @@ export interface PortfolioItem {
   freelance_id: string;
   image_url: string;
   title: string;
+  description?: string;
   category: string;
   created_at?: string;
+}
+
+// ── Contrats ──────────────────────────────────────────────────────────────────
+export type ContractStatus =
+  | 'draft' | 'proposed_by_organizer' | 'proposed_by_freelance'
+  | 'counter_proposed' | 'accepted_by_both' | 'rejected' | 'signed' | 'expired';
+
+export type CddReason = 'surcroi' | 'saisonnier' | 'chantier' | 'remplacement';
+
+export interface Contract {
+  id: string;
+  mission_id: string;
+  organizer_id: string;
+  freelance_id: string;
+  organizer_name: string;
+  organizer_address: string;
+  organizer_rccm: string;
+  freelance_name: string;
+  freelance_address: string;
+  freelance_cni: string;
+  job_title: string;
+  job_description: string;
+  location: string;
+  start_date: string;
+  end_date: string;
+  cdd_reason: CddReason;
+  hourly_rate: number;
+  daily_hours: number;
+  total_days: number;
+  total_gross: number;
+  end_of_contract_indemnity: number;
+  payment_method: PaymentMethod;
+  trial_period_days: number | null;
+  has_telework_clause: boolean;
+  has_confidentiality_clause: boolean;
+  status: ContractStatus;
+  proposed_by: 'organizer' | 'freelance' | 'system';
+  organizer_signed_at: string | null;
+  freelance_signed_at: string | null;
+  rejection_reason: string | null;
+  version: number;
+  previous_version_id: string | null;
+  pdf_url: string | null;
+  created_at: string;
+  updated_at: string;
+  mission?: Mission;
+  organizer?: Profile;
+  freelance?: Profile;
+}
+
+export interface ContractNegotiationEntry {
+  id: string;
+  contract_id: string;
+  version: number;
+  snapshot: Contract;
+  action: 'proposed' | 'counter_proposed' | 'accepted' | 'rejected' | 'signed';
+  actor_id: string;
+  actor_role: 'organizer' | 'freelance';
+  message?: string;
+  created_at: string;
 }
 
 export interface Notification {

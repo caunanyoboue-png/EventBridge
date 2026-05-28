@@ -3,8 +3,10 @@
 -- Exécuter dans Supabase → SQL Editor → New query → Run
 -- ═══════════════════════════════════════════════════════════════
 
--- ─── 1. Colonne photo lieu sur missions ─────────────────────────
+-- ─── 1. Colonnes géolocalisation + photo lieu sur missions ──────
 ALTER TABLE public.missions
+  ADD COLUMN IF NOT EXISTS latitude       DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS longitude      DOUBLE PRECISION,
   ADD COLUMN IF NOT EXISTS venue_photo_url TEXT;
 
 -- ─── 2. Colonnes pièces jointes sur messages ────────────────────
