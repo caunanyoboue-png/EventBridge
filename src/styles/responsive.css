@@ -24,6 +24,13 @@
 .eb-sidebar-close { display: none !important; }
 
 /* ─── Tablet/Mobile ≤ 1023px ─────────────────────────────── */
+/* ─── CSS Grid min-width fix (all breakpoints) ─────────────── */
+/* Grid cells default to min-width:auto which causes overflow    */
+.eb-kpi-grid > *,
+.eb-org-two-col > * {
+  min-width: 0;
+}
+
 @media (max-width: 1023px) {
   /* Sidebar → drawer fixe */
   .eb-sidebar {
@@ -104,6 +111,15 @@
   }
   .eb-hero-band {
     height: 140px !important;
+  }
+  /* Mission actions: plus compact sur petit écran */
+  .eb-mission-actions {
+    gap: 4px !important;
+  }
+  .eb-mission-actions span,
+  .eb-mission-actions button {
+    font-size: 10px !important;
+    padding: 2px 7px !important;
   }
 }
 

@@ -622,57 +622,59 @@ export default function OrganisateurDashboard() {
                               <span style={{ fontSize: 10, color: C.sec, flexShrink: 0 }}>{filled}/{total}</span>
                             </div>
                           </div>
-                          <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 9px',
-                            borderRadius: 999, whiteSpace: 'nowrap', flexShrink: 0,
-                            background: `${ms.color}18`, color: ms.color }}>
-                            {ms.label}
-                          </span>
-                          {(m.status === 'open' || m.status === 'draft') && (
-                            <button
-                              onClick={e => { e.stopPropagation(); navigate(`/edit-mission?id=${m.id}`); }}
-                              style={{ flexShrink: 0, fontSize: 11, fontWeight: 500, padding: '3px 10px',
-                                borderRadius: 8, cursor: 'pointer', border: `1px solid ${C.gold}40`,
-                                color: C.gold, background: 'transparent', transition: 'background 0.15s' }}
-                              onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = `${C.gold}10`}
-                              onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = 'transparent'}>
-                              Modifier
-                            </button>
-                          )}
-                          {(m.status === 'open' || m.status === 'draft') && (
-                            confirmDeleteId === m.id ? (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}
-                                onClick={e => e.stopPropagation()}>
-                                <span style={{ fontSize: 10, color: 'rgba(239,68,68,0.7)', whiteSpace: 'nowrap' }}>
-                                  {m.status === 'draft' ? 'Supprimer ?' : 'Annuler ?'}
-                                </span>
-                                <button
-                                  onClick={e => { e.stopPropagation(); deleteMission(m); }}
-                                  disabled={deleteLoading}
-                                  style={{ flexShrink: 0, fontSize: 11, fontWeight: 700, padding: '3px 9px',
-                                    borderRadius: 8, cursor: 'pointer', border: '1px solid rgba(239,68,68,0.5)',
-                                    color: '#ef4444', background: 'rgba(239,68,68,0.1)' }}>
-                                  {deleteLoading ? '…' : 'Oui'}
-                                </button>
-                                <button
-                                  onClick={e => { e.stopPropagation(); setConfirmDeleteId(null); }}
-                                  style={{ flexShrink: 0, fontSize: 11, fontWeight: 500, padding: '3px 9px',
-                                    borderRadius: 8, cursor: 'pointer', border: `1px solid ${C.gold}30`,
-                                    color: C.sec, background: 'transparent' }}>
-                                  Non
-                                </button>
-                              </div>
-                            ) : (
+                          <div className="eb-mission-actions" style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                            <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 9px',
+                              borderRadius: 999, whiteSpace: 'nowrap',
+                              background: `${ms.color}18`, color: ms.color }}>
+                              {ms.label}
+                            </span>
+                            {(m.status === 'open' || m.status === 'draft') && (
                               <button
-                                onClick={e => { e.stopPropagation(); setConfirmDeleteId(m.id); }}
-                                style={{ flexShrink: 0, fontSize: 11, fontWeight: 500, padding: '3px 10px',
-                                  borderRadius: 8, cursor: 'pointer', border: '1px solid rgba(239,68,68,0.25)',
-                                  color: 'rgba(239,68,68,0.65)', background: 'transparent', transition: 'all 0.15s' }}
-                                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)'; (e.currentTarget as HTMLButtonElement).style.color = '#ef4444'; }}
-                                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = 'rgba(239,68,68,0.65)'; }}>
-                                {m.status === 'draft' ? '🗑' : '✗'}
+                                onClick={e => { e.stopPropagation(); navigate(`/edit-mission?id=${m.id}`); }}
+                                style={{ fontSize: 11, fontWeight: 500, padding: '3px 10px',
+                                  borderRadius: 8, cursor: 'pointer', border: `1px solid ${C.gold}40`,
+                                  color: C.gold, background: 'transparent', transition: 'background 0.15s' }}
+                                onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = `${C.gold}10`}
+                                onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = 'transparent'}>
+                                Modifier
                               </button>
-                            )
-                          )}
+                            )}
+                            {(m.status === 'open' || m.status === 'draft') && (
+                              confirmDeleteId === m.id ? (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                                  onClick={e => e.stopPropagation()}>
+                                  <span style={{ fontSize: 10, color: 'rgba(239,68,68,0.7)', whiteSpace: 'nowrap' }}>
+                                    {m.status === 'draft' ? 'Suppr.?' : 'Annuler?'}
+                                  </span>
+                                  <button
+                                    onClick={e => { e.stopPropagation(); deleteMission(m); }}
+                                    disabled={deleteLoading}
+                                    style={{ fontSize: 11, fontWeight: 700, padding: '3px 8px',
+                                      borderRadius: 8, cursor: 'pointer', border: '1px solid rgba(239,68,68,0.5)',
+                                      color: '#ef4444', background: 'rgba(239,68,68,0.1)' }}>
+                                    {deleteLoading ? '…' : 'Oui'}
+                                  </button>
+                                  <button
+                                    onClick={e => { e.stopPropagation(); setConfirmDeleteId(null); }}
+                                    style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px',
+                                      borderRadius: 8, cursor: 'pointer', border: `1px solid ${C.gold}30`,
+                                      color: C.sec, background: 'transparent' }}>
+                                    Non
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={e => { e.stopPropagation(); setConfirmDeleteId(m.id); }}
+                                  style={{ fontSize: 11, fontWeight: 500, padding: '3px 10px',
+                                    borderRadius: 8, cursor: 'pointer', border: '1px solid rgba(239,68,68,0.25)',
+                                    color: 'rgba(239,68,68,0.65)', background: 'transparent', transition: 'all 0.15s' }}
+                                  onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)'; (e.currentTarget as HTMLButtonElement).style.color = '#ef4444'; }}
+                                  onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = 'rgba(239,68,68,0.65)'; }}>
+                                  {m.status === 'draft' ? '🗑' : '✗'}
+                                </button>
+                              )
+                            )}
+                          </div>
                         </div>
                       );
                     })}
