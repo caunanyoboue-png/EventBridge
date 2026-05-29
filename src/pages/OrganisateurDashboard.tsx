@@ -386,7 +386,7 @@ export default function OrganisateurDashboard() {
       </aside>
 
       {/* ── MAIN ────────────────────────────────────────────────────────────── */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', minHeight: '100vh' }}>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflowY: 'auto', overflowX: 'hidden', minHeight: '100vh' }}>
 
         {/* Top bar hamburger (mobile uniquement) */}
         <div className="eb-topbar">

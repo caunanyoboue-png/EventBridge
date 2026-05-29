@@ -320,7 +320,7 @@ export default function FreelanceDashboard() {
         </div>
 
         {/* Content */}
-        <div className="eb-content-pad" style={{ padding: '24px 32px', flex: 1, overflowY: 'auto' }}>
+        <div className="eb-content-pad" style={{ padding: '24px 32px', flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
 
           {/* Incomplete profile banner */}
           {profileIncomplete && (
