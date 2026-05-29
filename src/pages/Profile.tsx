@@ -114,11 +114,18 @@ export default function Profile() {
     try {
       const ext = file.name.split('.').pop();
       const path = `avatars/${profile.id}.${ext}`;
-      await supabase.storage.from('avatars').upload(path, file, { upsert: true });
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(path, file, { upsert: true });
+      if (uploadError) throw uploadError;
       const { data } = supabase.storage.from('avatars').getPublicUrl(path);
-      await updateProfile({ avatar_url: data.publicUrl });
-      toast.success('Photo mise à jour !');
-    } catch { toast.error("Erreur lors de l'upload"); }
+      // Cache-bust so browser forces a reload of the new image
+      await updateProfile({ avatar_url: `${data.publicUrl}?t=${Date.now()}` });
+      toast.success('Photo de profil mise à jour !');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Erreur lors de l'upload";
+      toast.error(msg);
+    }
     finally { setUploading(false); }
   }
 
@@ -129,11 +136,17 @@ export default function Profile() {
     try {
       const ext = file.name.split('.').pop();
       const path = `banners/${profile.id}.${ext}`;
-      await supabase.storage.from('avatars').upload(path, file, { upsert: true });
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(path, file, { upsert: true });
+      if (uploadError) throw uploadError;
       const { data } = supabase.storage.from('avatars').getPublicUrl(path);
-      await updateProfile({ banner_url: data.publicUrl });
+      await updateProfile({ banner_url: `${data.publicUrl}?t=${Date.now()}` });
       toast.success('Bannière mise à jour !');
-    } catch { toast.error("Erreur lors de l'upload de la bannière"); }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Erreur lors de l'upload de la bannière";
+      toast.error(msg);
+    }
     finally { setBannerUploading(false); }
   }
 
