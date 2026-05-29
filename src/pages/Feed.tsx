@@ -353,7 +353,7 @@ export default function Feed() {
 
   const feedItems: FeedItem[] = [];
   if (tab !== 'missions') posts.forEach(p => feedItems.push({ kind: 'post', ts: p.created_at, post: p }));
-  if (tab !== 'posts')    missions.forEach(m => feedItems.push({ kind: 'mission', ts: m.created_at, mission: m }));
+  if (tab !== 'posts')    missions.forEach(m => feedItems.push({ kind: 'mission', ts: m.created_at ?? new Date(0).toISOString(), mission: m }));
   feedItems.sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
 
   return (
