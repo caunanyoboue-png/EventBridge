@@ -122,7 +122,7 @@ function MissionCard({ mission: m, onApply, onView, isFreelance, userLat, userLn
     <div className="card-glass overflow-hidden hover:-translate-y-1 transition-all duration-300 hover:border-[rgba(201,168,76,0.4)] cursor-pointer flex flex-col"
       onClick={onView}>
       {m.venue_photo_url && (
-        <div style={{ height: 160, overflow: 'hidden', flexShrink: 0 }}>
+        <div style={{ aspectRatio: '16/9', overflow: 'hidden', flexShrink: 0 }}>
           <img
             src={m.venue_photo_url}
             alt="Photo du lieu"
