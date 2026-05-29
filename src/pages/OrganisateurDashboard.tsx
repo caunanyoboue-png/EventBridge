@@ -402,7 +402,7 @@ export default function OrganisateurDashboard() {
             style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%' }} />
           <div style={{ position: 'absolute', inset: 0,
             background: 'linear-gradient(to bottom, rgba(15,10,30,0.25) 0%, rgba(15,10,30,0.82) 65%, #0f0a1e 100%)' }} />
-          <div style={{ position: 'absolute', bottom: 20, left: 32, right: 24,
+          <div className="eb-hero-content" style={{ position: 'absolute', bottom: 20, left: 32, right: 24,
             display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
             <div>
               <h1 style={{ fontSize: 22, fontWeight: 500, color: C.text, margin: 0, lineHeight: 1.2 }}>
@@ -410,7 +410,7 @@ export default function OrganisateurDashboard() {
               </h1>
               <p style={{ fontSize: 12, color: C.sec, margin: '4px 0 0' }}>{today}</p>
             </div>
-            <div style={{ display: 'flex', gap: 10 }}>
+            <div className="eb-hero-btns" style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => navigate('/sos-brigade')}
                 style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 14px',
                   borderRadius: 20, fontSize: 12, fontWeight: 500, cursor: 'pointer',

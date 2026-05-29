@@ -125,10 +125,10 @@ export default function PublicProfile() {
         </button>
 
         {/* ── BANNER + AVATAR ──────────────────────────────── */}
-        <div style={{ position: 'relative', marginBottom: 72 }}>
+        <div className="profile-banner-wrap" style={{ position: 'relative', marginBottom: 72 }}>
 
           {/* Banner */}
-          <div style={{ height: 200, borderRadius: 16, overflow: 'hidden', position: 'relative',
+          <div className="profile-banner-inner" style={{ height: 200, borderRadius: 16, overflow: 'hidden', position: 'relative',
             background: viewed.banner_url ? undefined : bannerGradient }}>
             {viewed.banner_url && (
               <img src={viewed.banner_url} alt=""
@@ -177,7 +177,7 @@ export default function PublicProfile() {
         </div>
 
         {/* ── PROFILE HEADER ───────────────────────────────── */}
-        <div style={{ paddingLeft: 152, marginBottom: 28 }}>
+        <div className="profile-header" style={{ paddingLeft: 152, marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 6 }}>
             <h1 style={{ fontSize: 24, fontWeight: 800, color: '#f0e6d3', margin: 0 }}>{viewed.full_name}</h1>
             <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 999,
@@ -224,7 +224,7 @@ export default function PublicProfile() {
         </div>
 
         {/* ── TWO-COLUMN LAYOUT ────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 20, alignItems: 'flex-start' }}>
+        <div className="profile-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 20, alignItems: 'flex-start' }}>
 
           {/* MAIN COLUMN */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

@@ -121,6 +121,41 @@
   }
 }
 
+/* ─── Profile / PublicProfile ───────────────────────────────── */
+@media (max-width: 768px) {
+  /* Two-column sidebar grid collapses to single column */
+  .profile-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Name/badges appear below the avatar instead of beside it */
+  .profile-header {
+    padding-left: 0 !important;
+  }
+  /* Reduce avatar margin-bottom since we no longer need offset space */
+  .profile-banner-wrap {
+    margin-bottom: 56px !important;
+  }
+  /* Shrink banner height on very small screens */
+  .profile-banner-inner {
+    height: 150px !important;
+  }
+}
+
+/* ─── OrganisateurDashboard hero content ─────────────────────── */
+@media (max-width: 768px) {
+  .eb-hero-content {
+    left: 18px !important;
+    right: 14px !important;
+  }
+  /* Hide hero action buttons — duplicated in quick-actions section */
+  .eb-hero-btns {
+    display: none !important;
+  }
+}
+
 /* ─── Landing ─────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .landing-px { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }

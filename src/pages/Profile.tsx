@@ -193,10 +193,10 @@ export default function Profile() {
       <div style={{ maxWidth: 960, margin: '0 auto', paddingBottom: 48 }}>
 
         {/* ── BANNER + AVATAR ──────────────────────────────── */}
-        <div style={{ position: 'relative', marginBottom: 72 }}>
+        <div className="profile-banner-wrap" style={{ position: 'relative', marginBottom: 72 }}>
 
           {/* Banner */}
-          <div style={{ height: 200, borderRadius: 16, overflow: 'hidden', position: 'relative',
+          <div className="profile-banner-inner" style={{ height: 200, borderRadius: 16, overflow: 'hidden', position: 'relative',
             background: profile.banner_url ? undefined : bannerGradient }}>
             {profile.banner_url && (
               <img src={profile.banner_url} alt=""
@@ -271,7 +271,7 @@ export default function Profile() {
         </div>
 
         {/* ── PROFILE HEADER ───────────────────────────────── */}
-        <div style={{ paddingLeft: 152, marginBottom: 28 }}>
+        <div className="profile-header" style={{ paddingLeft: 152, marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 6 }}>
             <h1 style={{ fontSize: 24, fontWeight: 800, color: '#f0e6d3', margin: 0 }}>
               {profile.full_name || 'Mon profil'}
@@ -320,7 +320,7 @@ export default function Profile() {
         </div>
 
         {/* ── TWO-COLUMN LAYOUT ────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 20, alignItems: 'flex-start' }}>
+        <div className="profile-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 20, alignItems: 'flex-start' }}>
 
           {/* MAIN COLUMN */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
