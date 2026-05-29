@@ -177,7 +177,7 @@ export default function Landing() {
             style={{ background: 'linear-gradient(160deg, rgba(8,3,18,0.9) 0%, rgba(20,8,40,0.82) 45%, rgba(8,3,18,0.92) 100%)' }} />
         </div>
 
-        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center pt-24 pb-44">
+        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center pt-24 pb-56 sm:pb-44">
           {/* Badge */}
           <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full mb-10"
             style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.3)' }}>

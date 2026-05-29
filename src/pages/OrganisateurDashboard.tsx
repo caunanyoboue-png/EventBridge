@@ -285,7 +285,8 @@ export default function OrganisateurDashboard() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: C.bg,
-      fontFamily: 'Inter, system-ui, -apple-system, sans-serif', color: C.text, position: 'relative' }}>
+      fontFamily: 'Inter, system-ui, -apple-system, sans-serif', color: C.text, position: 'relative',
+      overflowX: 'hidden' }}>
 
       {/* Overlay mobile */}
       <div className={`eb-overlay${sidebarOpen ? ' open' : ''}`} onClick={() => setSidebarOpen(false)} />

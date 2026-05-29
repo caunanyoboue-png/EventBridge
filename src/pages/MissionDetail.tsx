@@ -270,7 +270,7 @@ export default function MissionDetail() {
           {/* Actions freelance */}
           {profile?.role === 'freelance' && (
             <div className="space-y-3">
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 {alreadyApplied ? (
                   <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl"
                     style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.25)' }}>

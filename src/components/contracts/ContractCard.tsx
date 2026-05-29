@@ -39,7 +39,7 @@ export default function ContractCard({ contract, myRole }: {
         <div className="flex items-center gap-2">
           <span>💰</span>
           <span style={{ color: '#c9a84c', fontWeight: 600 }}>
-            {formatCFA(contract.total_gross)} FCFA brut
+            {formatCFA(contract.total_gross)} brut
           </span>
         </div>
       </div>
