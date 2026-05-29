@@ -121,7 +121,17 @@ export default function MyMissions() {
       ) : (
         <div className="space-y-4">
           {filtered.map(m => (
-            <div key={m.id} className="card-glass p-5">
+            <div key={m.id} className="card-glass overflow-hidden">
+              {m.venue_photo_url && (
+                <div style={{ height: 200, overflow: 'hidden' }}>
+                  <img
+                    src={m.venue_photo_url}
+                    alt="Photo du lieu"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                </div>
+              )}
+              <div className="p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{SERVICE_ICONS[m.service_type] || '🎯'}</span>
@@ -194,6 +204,7 @@ export default function MyMissions() {
                     </button>
                   )
                 )}
+              </div>
               </div>
             </div>
           ))}
