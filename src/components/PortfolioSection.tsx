@@ -104,9 +104,21 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
         .select('*').single();
       if (insErr) throw insErr;
 
+      // Publier automatiquement dans le fil d'actualité
+      const feedContent = [
+        mTitle.trim(),
+        mCategory ? `📌 ${mCategory}` : '',
+        mDesc.trim(),
+      ].filter(Boolean).join('\n');
+      await supabase.from('posts').insert({
+        author_id: currentUserId,
+        content: feedContent || 'Nouvelle publication portfolio',
+        image_url: publicUrl,
+      });
+
       setItems(prev => [item, ...prev]);
       closeModal();
-      toast.success('Publication ajoutée !');
+      toast.success('Publication ajoutée et partagée dans le fil !');
     } catch (e: unknown) {
       toast.error((e as Error).message || "Erreur lors de l'upload");
     } finally { setUploading(false); }
