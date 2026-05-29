@@ -123,7 +123,10 @@ export default function MyMissions() {
           {filtered.map(m => (
             <div key={m.id} className="card-glass overflow-hidden">
               {m.venue_photo_url && (
-                <div style={{ aspectRatio: '16/7', maxHeight: 260, overflow: 'hidden' }}>
+                <div
+                  onClick={() => navigate(`/MissionDetail?id=${m.id}`)}
+                  style={{ aspectRatio: '16/7', maxHeight: 260, overflow: 'hidden', cursor: 'pointer' }}
+                >
                   <img
                     src={m.venue_photo_url}
                     alt="Photo du lieu"
