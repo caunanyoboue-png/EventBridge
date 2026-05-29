@@ -101,11 +101,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function updateProfile(data: Partial<Profile>) {
     if (!user) return;
-    const { error } = await supabase.from('profiles').upsert({
-      id: user.id,
-      email: user.email ?? '',   // NOT NULL dans la table → toujours inclus
-      ...data,
-    });
+    const { error } = await supabase
+      .from('profiles')
+      .update(data)
+      .eq('id', user.id);
     if (error) throw error;
     await fetchProfile(user.id);
   }
