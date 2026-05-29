@@ -8,9 +8,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!profile) return;
-    if (profile.role === 'freelance')    navigate('/freelance-dashboard',    { replace: true });
-    else if (profile.role === 'organisateur') navigate('/organisateur-dashboard', { replace: true });
-    else if (profile.role === 'admin')   navigate('/admin/AdminDashboard',   { replace: true });
+    if (profile.role === 'admin') navigate('/admin/AdminDashboard', { replace: true });
+    else navigate('/feed', { replace: true });
   }, [profile, navigate]);
 
   return (

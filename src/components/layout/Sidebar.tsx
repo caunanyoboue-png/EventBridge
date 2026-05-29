@@ -84,6 +84,13 @@ const IcoLogout = () => (
     <path d="M11 11l3-2.5L11 6M14 8.5H7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
+const IcoFeed = () => (
+  <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
+    <path d="M2 7.5L8.5 2l6.5 5.5V15a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7.5Z"
+      stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+    <path d="M6 16v-5.5h5V16" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
 const IcoSOS = () => (
   <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
     <path d="M8.5 2a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13Z" stroke="currentColor" strokeWidth="1.4"/>
@@ -94,6 +101,7 @@ const IcoSOS = () => (
 
 // ── Items de nav ──────────────────────────────────────────────────────────────
 const NAV_ITEMS_FREELANCE = [
+  { Icon: IcoFeed,       label: 'Fil d\'actualité', path: '/feed'                 },
   { Icon: IcoDashboard,  label: 'Tableau de bord',  path: '/freelance-dashboard'  },
   { Icon: IcoMissions,   label: 'Missions',          path: '/missions'             },
   { Icon: IcoUsers,      label: 'Freelances',        path: '/freelances'           },
@@ -103,6 +111,7 @@ const NAV_ITEMS_FREELANCE = [
   { Icon: IcoGear,       label: 'Paramètres',        path: '/settings'             },
 ];
 const NAV_ITEMS_ORG = [
+  { Icon: IcoFeed,       label: 'Fil d\'actualité', path: '/feed'                   },
   { Icon: IcoDashboard,  label: 'Tableau de bord',  path: '/organisateur-dashboard' },
   { Icon: IcoMissions,   label: 'Missions',          path: '/missions'               },
   { Icon: IcoUsers,      label: 'Freelances',        path: '/freelances'             },

@@ -25,6 +25,7 @@ import Settings from './pages/Settings';
 import EditMission from './pages/EditMission';
 import PublicProfile from './pages/PublicProfile';
 import ContractDetail from './pages/ContractDetail';
+import Feed from './pages/Feed';
 
 // Pages admin
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -84,6 +85,7 @@ function AppRoutes() {
       <Route path="/pour-les-organisateurs" element={<OrganisateurPage />} />
 
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
       <Route path="/freelance-dashboard" element={<ProtectedRoute role="freelance"><FreelanceDashboard /></ProtectedRoute>} />
       <Route path="/organisateur-dashboard" element={<ProtectedRoute role="organisateur"><OrganisateurDashboard /></ProtectedRoute>} />
       <Route path="/missions" element={<ProtectedRoute><Missions /></ProtectedRoute>} />
