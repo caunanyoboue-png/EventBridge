@@ -293,8 +293,11 @@ export default function OrganisateurDashboard() {
       <div className={`eb-overlay${sidebarOpen ? ' open' : ''}`} onClick={() => setSidebarOpen(false)} />
 
       {/* ── SIDEBAR ─────────────────────────────────────────────────────────── */}
-      <aside className={`eb-sidebar${sidebarOpen ? ' open' : ''}`} style={{ width: 220, flexShrink: 0, height: '100vh', position: 'sticky', top: 0,
-        background: C.side, borderRight: `1px solid ${C.sideB}`,
+      {/* Spacer desktop pour compenser la sidebar fixed */}
+      <div style={{ width: 220, flexShrink: 0 }} className="eb-desktop-spacer" />
+
+      <aside className={`eb-sidebar${sidebarOpen ? ' open' : ''}`} style={{ width: 220, height: '100vh', position: 'fixed', top: 0, left: 0,
+        background: C.side, borderRight: `1px solid ${C.sideB}`, zIndex: 40,
         display: 'flex', flexDirection: 'column', padding: '20px 14px', overflow: 'hidden' }}>
 
         {/* Bouton fermeture mobile */}
