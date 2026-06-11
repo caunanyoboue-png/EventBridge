@@ -53,6 +53,7 @@ export default function Onboarding() {
   const [mode, setMode]       = useState<Mode>('login');
   const [step, setStep]       = useState(0);   // 0=rôle, 1=infos, 2=complétion
   const [busy, setBusy]       = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   // Champs formulaire
   const [email, setEmail]         = useState('');
@@ -82,8 +83,13 @@ export default function Onboarding() {
     }
   }, [loading, user, profile, navigate]);
 
+  const MAX_SKILLS = 8;
   function toggleSkill(s: string) {
-    setSkills(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+    setSkills(prev => {
+      if (prev.includes(s)) return prev.filter(x => x !== s);
+      if (prev.length >= MAX_SKILLS) { toast.error(`Maximum ${MAX_SKILLS} compétences`); return prev; }
+      return [...prev, s];
+    });
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -117,16 +123,15 @@ export default function Onboarding() {
     setBusy(true);
     try {
       await signUp(email, password, { full_name: fullName, role, ville });
-      toast.success('Compte créé ! Complétez votre profil.');
-      setStep(2); // passer à la complétion
+      setEmailSent(true); // afficher l'écran "Vérifiez votre email"
     } catch (e: unknown) {
       const msg = (e as Error).message || '';
-      if (msg.includes('already registered') || msg.includes('already exists')) {
-        toast.error('Cet email est déjà utilisé. Connectez-vous.');
+      if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('already been registered')) {
+        toast.error('Cet email est déjà utilisé. Veuillez vous connecter.');
         setMode('login');
         setStep(0);
       } else if (msg.includes('rate limit') || msg.includes('email rate')) {
-        toast.error('Trop de tentatives. Désactivez la confirmation email dans Supabase ou attendez quelques minutes.');
+        toast.error('Trop de tentatives. Veuillez patienter quelques minutes avant de réessayer.');
       } else {
         toast.error(msg || "Erreur lors de l'inscription.");
       }
@@ -225,10 +230,35 @@ export default function Onboarding() {
           backdropFilter: 'blur(20px)',
         }}>
 
+            {/* ══════════════════════════════════════════════════════════
+              EMAIL ENVOYÉ — confirmation requise
+          ══════════════════════════════════════════════════════════ */}
+          {emailSent && (
+            <div style={{ textAlign: 'center', padding: '8px 0' }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>📧</div>
+              <h2 style={{ fontSize: 18, fontWeight: 700, color: '#f0e6d3', margin: '0 0 12px' }}>
+                Vérifiez votre boîte mail
+              </h2>
+              <p style={{ fontSize: 14, color: 'rgba(240,230,211,0.65)', lineHeight: 1.7, margin: '0 0 20px' }}>
+                Nous avons envoyé un lien de confirmation à<br/>
+                <strong style={{ color: '#c9a84c' }}>{email}</strong>.<br/>
+                Cliquez sur ce lien pour activer votre compte et accéder à la plateforme.
+              </p>
+              <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.35)', margin: '0 0 20px', lineHeight: 1.6 }}>
+                Vous ne trouvez pas l'email ? Vérifiez vos spams.<br/>
+                Le lien expire après 24h.
+              </p>
+              <button onClick={() => { setEmailSent(false); setMode('login'); setStep(0); }}
+                style={{ ...btnGold, width: 'auto', padding: '10px 28px' }}>
+                Aller à la connexion →
+              </button>
+            </div>
+          )}
+
           {/* ══════════════════════════════════════════════════════════
               COMPLÉTION DU PROFIL (prioritaire)
           ══════════════════════════════════════════════════════════ */}
-          {needsCompletion && (
+          {!emailSent && needsCompletion && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
               <input style={inp} placeholder="Téléphone (+225 XX XX XX XX)"
@@ -246,7 +276,7 @@ export default function Onboarding() {
                 <>
                   <div>
                     <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.5)', marginBottom: 10 }}>
-                      Compétences (choisissez vos spécialités)
+                      Compétences — {skills.length}/{MAX_SKILLS} sélectionnée(s)
                     </p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                       {COMPETENCES.map(c => (
@@ -269,15 +299,17 @@ export default function Onboarding() {
                       <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.5)', marginBottom: 6 }}>
                         Tarif horaire (FCFA)
                       </p>
-                      <input style={inp} type="number" min={0}
-                        value={hourlyRate} onChange={e => setHourlyRate(Number(e.target.value))} />
+                      <input style={inp} type="number" min={0} placeholder="Ex: 2500"
+                        value={hourlyRate === 0 ? '' : hourlyRate}
+                        onChange={e => setHourlyRate(e.target.value === '' ? 0 : Math.abs(parseInt(e.target.value, 10) || 0))} />
                     </div>
                     <div>
                       <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.5)', marginBottom: 6 }}>
                         Années d'expérience
                       </p>
-                      <input style={inp} type="number" min={0}
-                        value={expYears} onChange={e => setExpYears(Number(e.target.value))} />
+                      <input style={inp} type="number" min={0} placeholder="Ex: 3"
+                        value={expYears === 0 ? '' : expYears}
+                        onChange={e => setExpYears(e.target.value === '' ? 0 : Math.abs(parseInt(e.target.value, 10) || 0))} />
                     </div>
                   </div>
                 </>
@@ -302,7 +334,7 @@ export default function Onboarding() {
           {/* ══════════════════════════════════════════════════════════
               CONNEXION
           ══════════════════════════════════════════════════════════ */}
-          {!needsCompletion && mode === 'login' && (
+          {!emailSent && !needsCompletion && mode === 'login' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <input style={inp} type="email" placeholder="Adresse email"
                 value={email} onChange={e => setEmail(e.target.value)} />
@@ -330,7 +362,7 @@ export default function Onboarding() {
           {/* ══════════════════════════════════════════════════════════
               INSCRIPTION — Étape 0 : choix du rôle
           ══════════════════════════════════════════════════════════ */}
-          {!needsCompletion && mode === 'register' && step === 0 && (
+          {!emailSent && !needsCompletion && mode === 'register' && step === 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 {(['freelance', 'organisateur'] as UserRole[]).map(r => (
@@ -367,7 +399,7 @@ export default function Onboarding() {
           {/* ══════════════════════════════════════════════════════════
               INSCRIPTION — Étape 1 : informations du compte
           ══════════════════════════════════════════════════════════ */}
-          {!needsCompletion && mode === 'register' && step === 1 && (
+          {!emailSent && !needsCompletion && mode === 'register' && step === 1 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <input style={inp} placeholder="Nom complet *"
                 value={fullName} onChange={e => setFullName(e.target.value)} />
