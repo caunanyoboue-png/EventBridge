@@ -9,8 +9,32 @@ type SosData = {
   location: string;
   slots_needed: number;
   message?: string | null;
+  expires_at: string;
 };
 
+/* ── localStorage helpers ─────────────────────────────────────────── */
+const LS_KEY = 'eb_sos_dismissed'; // Set<sosSessionId>
+
+function isDismissed(sosId: string): boolean {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return false;
+    const ids: string[] = JSON.parse(raw);
+    return ids.includes(sosId);
+  } catch { return false; }
+}
+
+function dismiss(sosId: string) {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    const ids: string[] = raw ? JSON.parse(raw) : [];
+    if (!ids.includes(sosId)) ids.push(sosId);
+    // Garder uniquement les 20 derniers pour ne pas remplir le localStorage
+    localStorage.setItem(LS_KEY, JSON.stringify(ids.slice(-20)));
+  } catch {}
+}
+
+/* ── Composant ────────────────────────────────────────────────────── */
 export default function SosAlertBanner() {
   const { profile } = useAuth();
   const navigate = useNavigate();
@@ -23,7 +47,6 @@ export default function SosAlertBanner() {
     const skills = profile.skills || [];
     if (!skills.length) return;
 
-    // Vérifier si un SOS actif existe déjà au chargement
     checkExistingSos(skills);
 
     // Écouter les nouveaux SOS en temps réel
@@ -34,22 +57,25 @@ export default function SosAlertBanner() {
         schema: 'public',
         table: 'sos_sessions',
       }, (payload) => {
-        const data = payload.new as SosData & { status: string; expires_at: string };
+        const data = payload.new as SosData & { status: string };
         if (data.status !== 'active') return;
         if (!skills.includes(data.service_type)) return;
         if (new Date(data.expires_at) < new Date()) return;
+        if (isDismissed(data.id)) return; // Déjà ignoré
         setSos(data);
         setVisible(true);
       })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [profile]);
+  }, [profile?.id]);
 
   async function checkExistingSos(skills: string[]) {
+    if (!profile) return;
+
     const { data } = await supabase
       .from('sos_sessions')
-      .select('id, service_type, location, slots_needed, message')
+      .select('id, service_type, location, slots_needed, message, expires_at')
       .eq('status', 'active')
       .in('service_type', skills)
       .gt('expires_at', new Date().toISOString())
@@ -57,13 +83,32 @@ export default function SosAlertBanner() {
       .limit(1)
       .maybeSingle();
 
-    if (data) {
-      setSos(data);
-      setVisible(true);
-    }
+    if (!data) return;
+
+    // Ne pas montrer si déjà ignoré
+    if (isDismissed(data.id)) return;
+
+    // Ne pas montrer si le freelance a déjà répondu (pending ou confirmed)
+    const { data: existing } = await supabase
+      .from('sos_responses')
+      .select('id, status')
+      .eq('sos_session_id', data.id)
+      .eq('freelance_id', profile.id)
+      .maybeSingle();
+
+    if (existing) return; // Déjà répondu → ne pas réafficher
+
+    setSos(data);
+    setVisible(true);
+  }
+
+  function handleDismiss() {
+    if (sos) dismiss(sos.id);
+    setVisible(false);
   }
 
   function handleRespond() {
+    if (sos) dismiss(sos.id); // Marquer comme traité
     setVisible(false);
     navigate('/sos-brigade');
   }
@@ -74,8 +119,8 @@ export default function SosAlertBanner() {
     <>
       <style>{`
         @keyframes sosSlideDown {
-          from { transform: translateY(-100%); opacity: 0; }
-          to   { transform: translateY(0);    opacity: 1; }
+          from { transform: translate(-50%,-60%); opacity: 0; }
+          to   { transform: translate(-50%,-50%); opacity: 1; }
         }
         @keyframes sosPulse {
           0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.7); }
@@ -83,50 +128,29 @@ export default function SosAlertBanner() {
         }
       `}</style>
 
-      {/* Overlay semi-transparent */}
+      {/* Overlay */}
       <div style={{
         position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)',
         zIndex: 8000, backdropFilter: 'blur(3px)',
-      }} onClick={() => setVisible(false)} />
+      }} onClick={handleDismiss} />
 
-      {/* Carte centrale */}
+      {/* Carte */}
       <div style={{
         position: 'fixed', top: '50%', left: '50%',
         transform: 'translate(-50%, -50%)',
-        zIndex: 8001,
-        width: '90%', maxWidth: 420,
+        zIndex: 8001, width: '90%', maxWidth: 420,
         background: 'linear-gradient(135deg, #1a0a0a 0%, #2d0808 100%)',
         border: '2px solid rgba(220,38,38,0.6)',
-        borderRadius: 20,
-        padding: '32px 28px',
-        textAlign: 'center',
+        borderRadius: 20, padding: '32px 28px', textAlign: 'center',
         animation: 'sosSlideDown 0.35s ease',
         boxShadow: '0 0 60px rgba(220,38,38,0.4), 0 20px 60px rgba(0,0,0,0.6)',
       }}>
-        {/* Icône pulsante */}
         <div style={{
           width: 72, height: 72, borderRadius: '50%', margin: '0 auto 18px',
           background: 'linear-gradient(135deg, #dc2626, #b91c1c)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 32, animation: 'sosPulse 1.5s infinite',
-        }}>
-          🚨
-        </div>
-
-        {/* Ondes animées */}
-        <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-          {[1, 2, 3].map(i => (
-            <div key={i} style={{
-              position: 'absolute',
-              width: 72 + i * 40,
-              height: 72 + i * 40,
-              top: -(72 + i * 40) / 2 - 18,
-              borderRadius: '50%',
-              border: '1.5px solid rgba(220,38,38,0.3)',
-              animation: `sosPulse ${1 + i * 0.3}s ${i * 0.2}s infinite`,
-            }} />
-          ))}
-        </div>
+        }}>🚨</div>
 
         <h2 style={{ fontSize: 20, fontWeight: 800, color: '#fff', margin: '0 0 6px' }}>
           🚨 S.O.S Brigade
@@ -135,23 +159,21 @@ export default function SosAlertBanner() {
           Urgence dans votre zone !
         </p>
 
-        {/* Infos */}
         <div style={{
           background: 'rgba(220,38,38,0.12)', border: '1px solid rgba(220,38,38,0.3)',
           borderRadius: 12, padding: '14px 16px', marginBottom: 20, textAlign: 'left',
         }}>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-            <span style={{ fontSize: 12, color: 'rgba(255,200,200,0.6)', minWidth: 70 }}>Besoin</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{sos.service_type}</span>
-          </div>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-            <span style={{ fontSize: 12, color: 'rgba(255,200,200,0.6)', minWidth: 70 }}>Lieu</span>
-            <span style={{ fontSize: 13, color: '#f0e6d3' }}>{sos.location}</span>
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <span style={{ fontSize: 12, color: 'rgba(255,200,200,0.6)', minWidth: 70 }}>Postes</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: '#fca5a5' }}>{sos.slots_needed} poste(s) disponible(s)</span>
-          </div>
+          {[
+            { label: 'Besoin', val: sos.service_type, bold: true },
+            { label: 'Lieu',   val: sos.location,    bold: false },
+            { label: 'Postes', val: `${sos.slots_needed} poste(s) disponible(s)`, bold: true },
+          ].map(({ label, val, bold }) => (
+            <div key={label} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+              <span style={{ fontSize: 12, color: 'rgba(255,200,200,0.6)', minWidth: 70 }}>{label}</span>
+              <span style={{ fontSize: 13, fontWeight: bold ? 700 : 400,
+                color: bold ? '#fca5a5' : '#f0e6d3' }}>{val}</span>
+            </div>
+          ))}
           {sos.message && (
             <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(220,38,38,0.2)' }}>
               <span style={{ fontSize: 12, color: 'rgba(255,200,200,0.7)', fontStyle: 'italic' }}>
@@ -161,25 +183,20 @@ export default function SosAlertBanner() {
           )}
         </div>
 
-        {/* Boutons */}
         <button onClick={handleRespond} style={{
           width: '100%', padding: '14px',
           background: 'linear-gradient(135deg, #dc2626, #b91c1c)',
-          border: 'none', borderRadius: 12,
-          color: '#fff', fontSize: 15, fontWeight: 800,
-          cursor: 'pointer', marginBottom: 10,
+          border: 'none', borderRadius: 12, color: '#fff',
+          fontSize: 15, fontWeight: 800, cursor: 'pointer', marginBottom: 10,
           boxShadow: '0 4px 16px rgba(220,38,38,0.4)',
-          transition: 'opacity 0.15s',
         }}>
           🚀 Répondre à l'alerte →
         </button>
 
-        <button onClick={() => setVisible(false)} style={{
-          width: '100%', padding: '10px',
-          background: 'transparent',
-          border: '1px solid rgba(255,255,255,0.15)',
-          borderRadius: 12, color: 'rgba(255,255,255,0.45)',
-          fontSize: 13, cursor: 'pointer',
+        <button onClick={handleDismiss} style={{
+          width: '100%', padding: '10px', background: 'transparent',
+          border: '1px solid rgba(255,255,255,0.15)', borderRadius: 12,
+          color: 'rgba(255,255,255,0.45)', fontSize: 13, cursor: 'pointer',
         }}>
           Ignorer
         </button>
