@@ -267,6 +267,7 @@ export default function OrganisateurDashboard() {
   ];
 
   const navItems = [
+    { icon: LayoutDashboard, label: "Fil d'actualité", to: '/feed',                   badge: undefined },
     { icon: LayoutDashboard, label: 'Tableau de bord', to: '/organisateur-dashboard', badge: undefined },
     { icon: Briefcase,       label: 'Mes missions',    to: '/my-missions',            badge: undefined },
     { icon: PlusCircle,      label: 'Publier',         to: '/create-mission',         badge: undefined },
@@ -294,7 +295,7 @@ export default function OrganisateurDashboard() {
       {/* ── SIDEBAR ─────────────────────────────────────────────────────────── */}
       <aside className={`eb-sidebar${sidebarOpen ? ' open' : ''}`} style={{ width: 220, flexShrink: 0, height: '100vh', position: 'sticky', top: 0,
         background: C.side, borderRight: `1px solid ${C.sideB}`,
-        display: 'flex', flexDirection: 'column', padding: '20px 14px', overflowY: 'auto' }}>
+        display: 'flex', flexDirection: 'column', padding: '20px 14px', overflow: 'hidden' }}>
 
         {/* Bouton fermeture mobile */}
         <button className="eb-sidebar-close" onClick={() => setSidebarOpen(false)}>
@@ -306,8 +307,8 @@ export default function OrganisateurDashboard() {
           <img src="/logo.png.jpeg" alt="EventBridge" style={{ height: 52, width: 'auto', objectFit: 'contain' }} />
         </div>
 
-        {/* Nav */}
-        <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
+        {/* Nav — seul élément scrollable si contenu trop long */}
+        <nav style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 1 }}>
           {navItems.map((item, i) => (
             <NavLink key={i} to={item.to}
               style={({ isActive }) => ({
