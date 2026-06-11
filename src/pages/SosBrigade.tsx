@@ -21,6 +21,8 @@ export default function SosBrigade() {
     setLoading(true);
     try {
       const expires_at = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+
+      // 1. Créer la session SOS
       const { data, error } = await supabase.from('sos_sessions').insert({
         organisateur_id: profile.id,
         service_type: form.service_type,
@@ -31,11 +33,46 @@ export default function SosBrigade() {
         notified_count: 0,
         status: 'active',
         expires_at,
+        message: form.message || null,
       }).select().single();
       if (error) throw error;
+
+      // 2. Chercher les freelances disponibles avec la compétence requise
+      const { data: freelances } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'freelance')
+        .eq('is_available', true)
+        .contains('skills', [form.service_type])
+        .neq('id', profile.id);
+
+      const targets = freelances || [];
+
+      // 3. Envoyer une notification à chaque freelance trouvé
+      if (targets.length > 0) {
+        const notifications = targets.map(f => ({
+          user_id: f.id,
+          type: 'sos_alert',
+          title: '🚨 S.O.S Brigade — Urgence !',
+          body: `Besoin urgent de ${form.service_type} à ${form.location}. ${form.slots_needed} poste(s) disponible(s). Répondez maintenant !`,
+          data: { sos_session_id: data.id, service_type: form.service_type, location: form.location },
+          is_read: false,
+        }));
+        await supabase.from('notifications').insert(notifications);
+
+        // 4. Mettre à jour le compteur de notifiés
+        await supabase.from('sos_sessions')
+          .update({ notified_count: targets.length })
+          .eq('id', data.id);
+
+        data.notified_count = targets.length;
+      }
+
       setSession(data);
-      toast.success('Alerte S.O.S déclenchée ! Les freelances sont notifiés.');
-    } catch { toast.error('Erreur lors du déclenchement'); }
+      toast.success(`🚨 Alerte déclenchée ! ${targets.length} freelance(s) notifié(s).`);
+    } catch (e: unknown) {
+      toast.error((e as Error).message || 'Erreur lors du déclenchement');
+    }
     finally { setLoading(false); }
   }
 
