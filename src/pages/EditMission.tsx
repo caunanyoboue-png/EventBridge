@@ -237,7 +237,7 @@ export default function EditMission() {
                   <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Ville *</label>
                   <select className={inputClass} style={inputStyle}
                     value={form.ville} onChange={e => upd('ville', e.target.value)}>
-                    {VILLES.map(v => <option key={v} value={v}>{v}</option>)}
+                    {VILLES.map(v => <option key={v} value={v} style={{ background: '#1e0f3c', color: '#f0e6d3' }}>{v}</option>)}
                   </select>
                 </div>
                 <div>

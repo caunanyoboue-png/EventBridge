@@ -191,7 +191,7 @@ export default function Profile() {
       ) : type === 'select' ? (
         <select style={inputSt} value={form[key] as string}
           onChange={e => setForm(p => ({ ...p, [key]: e.target.value }))}>
-          {VILLES.map(v => <option key={v} value={v} style={{ background: '#261642' }}>{v}</option>)}
+          {VILLES.map(v => <option key={v} value={v} style={{ background: '#1e0f3c', color: '#f0e6d3' }}>{v}</option>)}
         </select>
       ) : (
         <input type={type} style={inputSt}

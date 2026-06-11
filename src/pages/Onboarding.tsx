@@ -407,9 +407,15 @@ export default function Onboarding() {
                 value={email} onChange={e => setEmail(e.target.value)} />
               <input style={inp} type="password" placeholder="Mot de passe (min. 6 caractères) *"
                 value={password} onChange={e => setPassword(e.target.value)} />
-              <select style={{ ...inp, cursor: 'pointer' }}
+              <select
+                style={{ ...inp, cursor: 'pointer', background: '#1e0f3c', color: '#f0e6d3' }}
                 value={ville} onChange={e => setVille(e.target.value)}>
-                {VILLES.map(v => <option key={v} value={v}>{v}</option>)}
+                {VILLES.map(v => (
+                  <option key={v} value={v}
+                    style={{ background: '#1e0f3c', color: '#f0e6d3', padding: '8px' }}>
+                    {v}
+                  </option>
+                ))}
               </select>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 4 }}>
