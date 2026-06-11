@@ -26,6 +26,7 @@ const LOGO = '/logo.png.jpeg';
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
 const NAV = [
+  { Icon: LayoutDashboard, label: "Fil d'actualité", path: '/feed' },
   { Icon: LayoutDashboard, label: 'Tableau de bord', path: '/freelance-dashboard' },
   { Icon: Briefcase,       label: 'Missions',        path: '/missions' },
   { Icon: Users,           label: 'Freelances',      path: '/freelances' },
@@ -212,12 +213,16 @@ export default function FreelanceDashboard() {
       {/* Overlay mobile */}
       <div className={`eb-overlay${sidebarOpen ? ' open' : ''}`} onClick={() => setSidebarOpen(false)} />
 
+      {/* Spacer desktop pour compenser la sidebar fixed */}
+      <div style={{ width: 220, flexShrink: 0 }} className="eb-desktop-spacer" />
+
       {/* ── Sidebar ─────────────────────────────────────────────────────────── */}
       <aside className={`eb-sidebar${sidebarOpen ? ' open' : ''}`} style={{
-        width: 220, flexShrink: 0,
+        width: 220,
         background: C.sidebar, borderRight: `1px solid ${C.border}`,
         display: 'flex', flexDirection: 'column',
-        position: 'sticky', top: 0, height: '100vh',
+        position: 'fixed', top: 0, left: 0, height: '100vh', zIndex: 40,
+        overflow: 'hidden',
       }}>
         {/* Bouton fermeture mobile */}
         <button className="eb-sidebar-close" onClick={() => setSidebarOpen(false)}>
@@ -230,7 +235,7 @@ export default function FreelanceDashboard() {
         </div>
 
         {/* Nav */}
-        <nav style={{ flex: 1, padding: '16px 10px', overflowY: 'auto' }}>
+        <nav style={{ flex: 1, minHeight: 0, padding: '16px 10px', overflowY: 'auto' }}>
           {NAV.map(({ Icon, label, path, badge }) => (
             <NavLink key={path} to={path} style={{ textDecoration: 'none' }}>
               {({ isActive }) => (
