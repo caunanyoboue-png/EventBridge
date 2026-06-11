@@ -83,7 +83,7 @@ export default function Onboarding() {
     }
   }, [loading, user, profile, navigate]);
 
-  const MAX_SKILLS = 8;
+  const MAX_SKILLS = 3;
   function toggleSkill(s: string) {
     setSkills(prev => {
       if (prev.includes(s)) return prev.filter(x => x !== s);
