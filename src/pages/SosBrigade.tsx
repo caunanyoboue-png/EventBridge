@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -14,7 +15,7 @@ type SosResponse = {
   id: string;
   status: 'pending' | 'confirmed' | 'rejected';
   freelance_id: string;
-  freelance?: { full_name: string | null; avatar_url: string | null; skills: string[] | null; avg_rating: number | null };
+  freelance?: { full_name: string | null; avatar_url: string | null; skills: string[] | null; avg_rating: number | null; phone?: string | null; ville?: string | null };
 };
 
 /* ──────────────────────────────────────────────────────────────────── */
@@ -148,15 +149,32 @@ function OrgView() {
   );
 }
 
-/* ── Tracker organisateur avec liste des réponses ── */
+/* ══════════════════════════════════════════════════════════════════════
+   TRACKER ORGANISATEUR — minuteur live + propositions freelances
+══════════════════════════════════════════════════════════════════════ */
 function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => void }) {
+  const navigate = useNavigate();
   const [responses, setResponses] = useState<SosResponse[]>([]);
   const [confirming, setConfirming] = useState<string | null>(null);
-  const timeLeft = Math.max(0, Math.round((new Date(session.expires_at).getTime() - Date.now()) / 60000));
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [expired, setExpired] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  /* Minuteur en temps réel */
+  useEffect(() => {
+    function tick() {
+      const secs = Math.max(0, Math.floor((new Date(session.expires_at).getTime() - Date.now()) / 1000));
+      setTimeLeft(secs);
+      if (secs === 0) { setExpired(true); clearInterval(timerRef.current!); }
+    }
+    tick();
+    timerRef.current = setInterval(tick, 1000);
+    return () => clearInterval(timerRef.current!);
+  }, [session.expires_at]);
+
+  /* Realtime : nouvelles réponses */
   useEffect(() => {
     fetchResponses();
-    // Temps réel : nouvelles réponses freelances
     const ch = supabase.channel('sos-org-tracker')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'sos_responses',
         filter: `sos_session_id=eq.${session.id}` }, () => fetchResponses())
@@ -166,7 +184,7 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
 
   async function fetchResponses() {
     const { data } = await supabase.from('sos_responses')
-      .select('id, status, freelance_id, freelance:profiles!freelance_id(full_name,avatar_url,skills,avg_rating)')
+      .select('id, status, freelance_id, freelance:profiles!freelance_id(full_name,avatar_url,skills,avg_rating,phone,ville)')
       .eq('sos_session_id', session.id)
       .order('responded_at', { ascending: true });
     setResponses((data || []) as unknown as SosResponse[]);
@@ -176,19 +194,17 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
     setConfirming(resp.id);
     try {
       await supabase.from('sos_responses').update({ status: 'confirmed' }).eq('id', resp.id);
-      await supabase.from('sos_sessions')
-        .update({ slots_confirmed: responses.filter(r => r.status === 'confirmed').length + 1 })
-        .eq('id', session.id);
-      // Notification au freelance
+      const confirmedCount = responses.filter(r => r.status === 'confirmed').length + 1;
+      await supabase.from('sos_sessions').update({ slots_confirmed: confirmedCount }).eq('id', session.id);
       await supabase.from('notifications').insert({
         user_id: resp.freelance_id,
         type: 'sos_confirmed',
         title: '✅ S.O.S Brigade — Vous êtes confirmé !',
-        body: `L'organisateur vous a confirmé pour le poste "${session.service_type}" à ${session.location}. Rendez-vous sur place !`,
+        body: `L'organisateur vous a confirmé pour "${session.service_type}" à ${session.location}. Rendez-vous sur place !`,
         data: { sos_session_id: session.id },
         is_read: false,
       });
-      toast.success('Freelance confirmé !');
+      toast.success('Freelance confirmé et notifié !');
       fetchResponses();
     } catch { toast.error('Erreur'); }
     finally { setConfirming(null); }
@@ -200,7 +216,7 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
       user_id: resp.freelance_id,
       type: 'sos_rejected',
       title: '❌ S.O.S Brigade — Non retenu',
-      body: `Vous n'avez pas été retenu pour ce poste S.O.S. Restez disponible pour les prochaines alertes !`,
+      body: `Vous n'avez pas été retenu pour ce S.O.S. Restez disponible pour les prochaines alertes !`,
       data: { sos_session_id: session.id },
       is_read: false,
     });
@@ -209,123 +225,241 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
 
   const pending   = responses.filter(r => r.status === 'pending');
   const confirmed = responses.filter(r => r.status === 'confirmed');
+  const mins = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+  const secs = String(timeLeft % 60).padStart(2, '0');
+  const urgentColor = timeLeft < 300 ? '#ef4444' : timeLeft < 600 ? '#f59e0b' : '#10b981';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* Status card */}
-      <div className="card-glass p-6 text-center">
-        <div className="relative inline-flex items-center justify-center mb-6">
-          {[1,2,3].map(i => (
-            <div key={i} className="absolute rounded-full border-2 animate-ping-slow"
-              style={{ width: `${i*60}px`, height: `${i*60}px`,
-                borderColor: 'rgba(220,38,38,0.4)', animationDelay: `${i*0.4}s` }} />
-          ))}
-          <div className="w-16 h-16 rounded-full flex items-center justify-center text-2xl relative z-10"
-            style={{ background: 'linear-gradient(135deg,#dc2626,#b91c1c)' }}>🚨</div>
+
+      {/* ── Bannière SOS active ── */}
+      <div className="card-glass overflow-hidden">
+        <div style={{ background: 'linear-gradient(135deg,#1a0505,#2d0808)', padding: '20px 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ width: 52, height: 52, borderRadius: '50%', flexShrink: 0,
+              background: 'linear-gradient(135deg,#dc2626,#b91c1c)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>
+              🚨
+            </div>
+            <div style={{ flex: 1 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 800, color: '#fff', margin: '0 0 3px' }}>
+                Alerte S.O.S active
+              </h2>
+              <p style={{ fontSize: 13, color: 'rgba(255,200,200,0.75)', margin: 0 }}>
+                {session.service_type} · 📍 {session.location}
+              </p>
+            </div>
+            {/* Minuteur */}
+            <div style={{ textAlign: 'center', flexShrink: 0 }}>
+              <div style={{ fontSize: 28, fontWeight: 800, color: urgentColor,
+                fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>
+                {mins}:{secs}
+              </div>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
+                {expired ? 'EXPIRÉ' : 'restant'}
+              </div>
+            </div>
+          </div>
         </div>
-        <h2 className="text-xl font-bold text-gold-gradient mb-1">Recherche en cours...</h2>
-        <p className="text-sm mb-4" style={{ color: '#b8a898' }}>{session.service_type} · {session.location}</p>
-        <p className="text-xs mb-6" style={{ color: '#7a6a7a' }}>
-          Rayon : {session.radius_km} km · Expire dans {timeLeft} min
-        </p>
-        <div className="grid grid-cols-3 gap-3 mb-4">
+
+        {/* Barre de progression temporelle */}
+        <div style={{ height: 4, background: 'rgba(255,255,255,0.08)' }}>
+          <div style={{
+            height: '100%', background: urgentColor,
+            width: `${(timeLeft / 1800) * 100}%`,
+            transition: 'width 1s linear, background 0.5s',
+          }} />
+        </div>
+
+        {/* KPI */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 1,
+          background: 'rgba(255,255,255,0.04)' }}>
           {[
-            { val: session.notified_count, label: 'Notifiés',  color: '#c9a84c' },
-            { val: confirmed.length,       label: 'Confirmés', color: '#10b981' },
-            { val: session.slots_needed,   label: 'Requis',    color: '#ef4444' },
+            { val: session.notified_count, label: 'Notifiés',    color: '#c9a84c' },
+            { val: pending.length,         label: 'En attente',  color: '#f59e0b' },
+            { val: confirmed.length,       label: `/${session.slots_needed} Confirmés`, color: '#10b981' },
           ].map(({ val, label, color }) => (
-            <div key={label} className="card-glass p-3 text-center">
-              <div className="text-2xl font-bold" style={{ color }}>{val}</div>
-              <div className="text-xs mt-1" style={{ color: '#b8a898' }}>{label}</div>
+            <div key={label} style={{ padding: '14px 10px', textAlign: 'center',
+              background: 'rgba(0,0,0,0.2)' }}>
+              <div style={{ fontSize: 24, fontWeight: 800, color }}>{val}</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>{label}</div>
             </div>
           ))}
         </div>
-        {/* Barre progression */}
-        <div className="w-full h-2 rounded-full mb-1" style={{ background: '#52367c' }}>
-          <div className="h-full rounded-full transition-all"
-            style={{ width: `${Math.min(100, (confirmed.length / session.slots_needed) * 100)}%`,
-              background: 'linear-gradient(to right,#10b981,#34d399)' }} />
+
+        {/* Barre remplissage postes */}
+        <div style={{ padding: '10px 16px 14px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Postes pourvus</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#10b981' }}>
+              {confirmed.length}/{session.slots_needed}
+            </span>
+          </div>
+          <div style={{ height: 6, borderRadius: 999, background: 'rgba(255,255,255,0.08)' }}>
+            <div style={{
+              height: '100%', borderRadius: 999, transition: 'width 0.5s',
+              background: 'linear-gradient(to right,#10b981,#34d399)',
+              width: `${Math.min(100, (confirmed.length / session.slots_needed) * 100)}%`,
+            }} />
+          </div>
         </div>
-        <p className="text-xs" style={{ color: '#b8a898' }}>{confirmed.length}/{session.slots_needed} postes confirmés</p>
       </div>
 
-      {/* Réponses en attente */}
-      {pending.length > 0 && (
-        <div className="card-glass p-5">
-          <h3 className="font-semibold mb-4 text-sm" style={{ color: '#f0e6d3' }}>
-            ⏳ En attente de confirmation ({pending.length})
+      {/* ── Propositions en attente ── */}
+      <div className="card-glass p-5">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: '#f0e6d3', margin: 0 }}>
+            📥 Propositions reçues
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {pending.length > 0 && (
+            <span style={{ fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
+              background: 'rgba(245,158,11,0.15)', color: '#f59e0b',
+              border: '1px solid rgba(245,158,11,0.3)' }}>
+              {pending.length} en attente
+            </span>
+          )}
+        </div>
+
+        {pending.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '28px 0' }}>
+            <div style={{ fontSize: 32, marginBottom: 8 }}>⏳</div>
+            <p style={{ fontSize: 13, color: '#5a4a6a' }}>
+              {expired ? 'Session expirée — aucune réponse reçue.' : 'En attente de réponses des freelances...'}
+            </p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {pending.map(r => (
-              <FreelanceResponseRow key={r.id} resp={r}
+              <PropositionCard key={r.id} resp={r}
                 onConfirm={() => confirmResponse(r)}
                 onReject={() => rejectResponse(r)}
+                onViewProfile={() => navigate(`/public-profile?id=${r.freelance_id}`)}
                 busy={confirming === r.id}
+                canConfirm={confirmed.length < session.slots_needed}
               />
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Confirmés */}
+      {/* ── Freelances confirmés ── */}
       {confirmed.length > 0 && (
         <div className="card-glass p-5">
-          <h3 className="font-semibold mb-4 text-sm" style={{ color: '#10b981' }}>
-            ✅ Confirmés ({confirmed.length})
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: '#10b981', margin: '0 0 12px' }}>
+            ✅ Équipe confirmée ({confirmed.length}/{session.slots_needed})
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {confirmed.map(r => (
+            {confirmed.map((r, i) => (
               <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 10,
-                padding: '10px 12px', borderRadius: 10, background: 'rgba(16,185,129,0.08)',
-                border: '1px solid rgba(16,185,129,0.2)' }}>
+                padding: '10px 14px', borderRadius: 10,
+                background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.2)' }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#10b981', minWidth: 20 }}>#{i+1}</span>
                 <AvatarMini name={r.freelance?.full_name} src={r.freelance?.avatar_url} />
-                <span style={{ fontSize: 13, color: '#f0e6d3' }}>{r.freelance?.full_name || '—'}</span>
-                <span style={{ marginLeft: 'auto', fontSize: 11, color: '#10b981', fontWeight: 700 }}>✅ Confirmé</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: '#f0e6d3', margin: 0 }}>
+                    {r.freelance?.full_name || '—'}
+                  </p>
+                  {r.freelance?.phone && (
+                    <p style={{ fontSize: 11, color: '#c9a84c', margin: '2px 0 0' }}>
+                      📞 {r.freelance.phone}
+                    </p>
+                  )}
+                </div>
+                <button onClick={() => navigate(`/public-profile?id=${r.freelance_id}`)}
+                  style={{ padding: '5px 10px', borderRadius: 7, fontSize: 11, fontWeight: 600,
+                    background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.3)',
+                    color: '#c9a84c', cursor: 'pointer' }}>
+                  Profil
+                </button>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {responses.length === 0 && (
-        <div className="card-glass p-6 text-center">
-          <p style={{ color: '#b8a898', fontSize: 14 }}>En attente de réponses des freelances...</p>
-        </div>
-      )}
-
-      <button onClick={onReset} className="btn-outline-gold px-6 py-2 rounded-xl text-sm">
-        Nouvelle alerte S.O.S
+      <button onClick={onReset}
+        style={{ padding: '11px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+          background: 'transparent', border: '1px solid rgba(201,168,76,0.25)',
+          color: '#c9a84c', cursor: 'pointer' }}>
+        + Nouvelle alerte S.O.S
       </button>
     </div>
   );
 }
 
-function FreelanceResponseRow({ resp, onConfirm, onReject, busy }: {
-  resp: SosResponse; onConfirm: () => void; onReject: () => void; busy: boolean;
+/* ── Carte de proposition freelance ── */
+function PropositionCard({ resp, onConfirm, onReject, onViewProfile, busy, canConfirm }: {
+  resp: SosResponse; onConfirm: () => void; onReject: () => void;
+  onViewProfile: () => void; busy: boolean; canConfirm: boolean;
 }) {
   const fl = resp.freelance;
+  const [showDetails, setShowDetails] = useState(false);
+
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
-      borderRadius: 10, background: 'rgba(82,54,124,0.3)', border: '1px solid rgba(201,168,76,0.1)' }}>
-      <AvatarMini name={fl?.full_name} src={fl?.avatar_url} />
-      <div style={{ flex: 1 }}>
-        <p style={{ fontSize: 13, fontWeight: 600, color: '#f0e6d3', margin: 0 }}>{fl?.full_name || '—'}</p>
-        {fl?.avg_rating && fl.avg_rating > 0 && (
-          <p style={{ fontSize: 11, color: '#c9a84c', margin: 0 }}>⭐ {fl.avg_rating.toFixed(1)}</p>
-        )}
+    <div style={{ borderRadius: 12, overflow: 'hidden',
+      background: 'rgba(82,54,124,0.25)', border: '1px solid rgba(201,168,76,0.12)' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px' }}>
+        <AvatarMini name={fl?.full_name} src={fl?.avatar_url} size={40} />
+        <div style={{ flex: 1 }}>
+          <p style={{ fontSize: 14, fontWeight: 700, color: '#f0e6d3', margin: 0 }}>
+            {fl?.full_name || '—'}
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
+            {fl?.avg_rating && fl.avg_rating > 0 && (
+              <span style={{ fontSize: 12, color: '#c9a84c' }}>⭐ {fl.avg_rating.toFixed(1)}</span>
+            )}
+            {fl?.ville && (
+              <span style={{ fontSize: 11, color: '#6a5a7a' }}>📍 {fl.ville}</span>
+            )}
+          </div>
+        </div>
+        <button onClick={() => setShowDetails(v => !v)}
+          style={{ fontSize: 11, color: '#c9a84c', background: 'transparent',
+            border: 'none', cursor: 'pointer', padding: '4px 8px' }}>
+          {showDetails ? '▲ Moins' : '▼ Détails'}
+        </button>
       </div>
-      <button onClick={onReject} disabled={busy}
-        style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
-          background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-          color: '#ef4444', cursor: 'pointer', opacity: busy ? 0.5 : 1 }}>
-        Refuser
-      </button>
-      <button onClick={onConfirm} disabled={busy}
-        style={{ padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 700,
-          background: 'linear-gradient(135deg,#10b981,#059669)', border: 'none',
-          color: '#fff', cursor: 'pointer', opacity: busy ? 0.5 : 1 }}>
-        {busy ? '…' : '✓ Confirmer'}
-      </button>
+
+      {/* Détails dépliables */}
+      {showDetails && (
+        <div style={{ padding: '0 14px 12px', borderTop: '1px solid rgba(201,168,76,0.08)' }}>
+          {fl?.skills && fl.skills.length > 0 && (
+            <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {fl.skills.map(s => (
+                <span key={s} style={{ fontSize: 11, padding: '3px 9px', borderRadius: 999,
+                  background: 'rgba(201,168,76,0.1)', color: '#c9a84c',
+                  border: '1px solid rgba(201,168,76,0.2)' }}>
+                  {s}
+                </span>
+              ))}
+            </div>
+          )}
+          <button onClick={onViewProfile}
+            style={{ marginTop: 10, fontSize: 12, color: '#60a5fa', background: 'transparent',
+              border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>
+            👤 Voir le profil complet →
+          </button>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0,
+        borderTop: '1px solid rgba(201,168,76,0.08)' }}>
+        <button onClick={onReject} disabled={busy}
+          style={{ padding: '11px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+            background: 'rgba(239,68,68,0.08)', border: 'none', borderRight: '1px solid rgba(201,168,76,0.08)',
+            color: '#ef4444', opacity: busy ? 0.5 : 1, transition: 'background 0.15s' }}>
+          ✕ Refuser
+        </button>
+        <button onClick={onConfirm} disabled={busy || !canConfirm}
+          style={{ padding: '11px', fontSize: 13, fontWeight: 700, cursor: canConfirm ? 'pointer' : 'not-allowed',
+            background: canConfirm ? 'rgba(16,185,129,0.12)' : 'rgba(82,54,124,0.2)',
+            border: 'none', color: canConfirm ? '#10b981' : '#5a4a6a',
+            opacity: (busy || !canConfirm) ? 0.5 : 1, transition: 'background 0.15s' }}>
+          {busy ? '…' : !canConfirm ? 'Complet' : '✓ Confirmer'}
+        </button>
+      </div>
     </div>
   );
 }
@@ -495,12 +629,12 @@ function FreelanceView() {
   );
 }
 
-function AvatarMini({ name, src }: { name?: string | null; src?: string | null }) {
+function AvatarMini({ name, src, size = 34 }: { name?: string | null; src?: string | null; size?: number }) {
   const initials = (name || 'U').split(' ').map(n => n[0] || '').join('').toUpperCase().slice(0, 2) || 'U';
   return src
-    ? <img src={src} alt="" style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-    : <div style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0, display: 'flex',
-        alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800,
+    ? <img src={src} alt="" style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+    : <div style={{ width: size, height: size, borderRadius: '50%', flexShrink: 0, display: 'flex',
+        alignItems: 'center', justifyContent: 'center', fontSize: size * 0.33, fontWeight: 800,
         color: '#261642', background: 'linear-gradient(135deg,#c9a84c,#e8c97a)' }}>
         {initials}
       </div>;
