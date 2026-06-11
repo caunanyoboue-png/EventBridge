@@ -37,14 +37,30 @@ function OrgView() {
   const [loading, setLoading] = useState(false);
   const [checkingActive, setCheckingActive] = useState(true);
 
-  // Au chargement : récupérer la session active depuis la DB
+  // Timeout de sécurité : si rien ne répond en 6s, on arrête le spinner
   useEffect(() => {
-    if (!profile) {
-      setCheckingActive(false);
-      return;
-    }
+    const t = setTimeout(() => setCheckingActive(false), 6000);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Au chargement du profil : récupérer la session active
+  useEffect(() => {
+    if (!profile?.id) return; // Attendre que le profil soit chargé
     async function checkSession() {
       try {
+        // 1. Essayer d'abord avec l'ID sauvegardé en localStorage
+        const savedId = localStorage.getItem('sos_session_id');
+        if (savedId) {
+          const { data } = await supabase
+            .from('sos_sessions').select('*').eq('id', savedId).maybeSingle();
+          if (data && data.status === 'active' && new Date(data.expires_at) > new Date()) {
+            setSession(data as SosSession);
+            setCheckingActive(false);
+            return;
+          }
+          localStorage.removeItem('sos_session_id');
+        }
+        // 2. Fallback : chercher par organisateur_id
         const { data } = await supabase
           .from('sos_sessions')
           .select('*')
@@ -57,17 +73,15 @@ function OrgView() {
         if (data) {
           setSession(data as SosSession);
           localStorage.setItem('sos_session_id', data.id);
-        } else {
-          localStorage.removeItem('sos_session_id');
         }
-      } catch {
-        // ignore
+      } catch (e) {
+        console.error('SOS check:', e);
       } finally {
         setCheckingActive(false);
       }
     }
     checkSession();
-  }, [profile?.id]);
+  }, [profile?.id]); // Ne s'exécute qu'une fois quand le profil est prêt
 
   const inputClass = "w-full px-4 py-3 rounded-xl text-sm outline-none";
   const inputStyle = { background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
