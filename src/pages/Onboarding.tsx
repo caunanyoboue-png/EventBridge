@@ -261,8 +261,31 @@ export default function Onboarding() {
           {!emailSent && needsCompletion && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-              <input style={inp} placeholder="Téléphone (+225 XX XX XX XX)"
-                value={phone} onChange={e => setPhone(e.target.value)} />
+              {/* Téléphone — format ivoirien +225 XX XX XX XX XX */}
+              <div style={{ position: 'relative' }}>
+                <span style={{
+                  position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
+                  fontSize: 13, color: '#c9a84c', fontWeight: 600, pointerEvents: 'none', userSelect: 'none',
+                }}>🇨🇮 +225</span>
+                <input
+                  style={{ ...inp, paddingLeft: 80 }}
+                  placeholder="07 00 00 00 00"
+                  value={phone.replace(/^\+?225\s?/, '')}
+                  maxLength={14}
+                  onChange={e => {
+                    // Garde uniquement les chiffres et espaces
+                    const digits = e.target.value.replace(/[^\d]/g, '').slice(0, 10);
+                    // Formate en XX XX XX XX XX
+                    const formatted = digits.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
+                    setPhone(digits.length ? `+225 ${formatted}` : '');
+                  }}
+                />
+              </div>
+              {phone && !/^\+225 \d{2} \d{2} \d{2} \d{2} \d{2}$/.test(phone) && (
+                <p style={{ fontSize: 11, color: '#f59e0b', margin: '-8px 0 0', paddingLeft: 4 }}>
+                  Format : +225 07 00 00 00 00 (10 chiffres)
+                </p>
+              )}
 
               <input style={inp} placeholder="Quartier"
                 value={quartier} onChange={e => setQuartier(e.target.value)} />
@@ -320,8 +343,36 @@ export default function Onboarding() {
                 <>
                   <input style={inp} placeholder="Nom de la structure *"
                     value={companyName} onChange={e => setCompanyName(e.target.value)} />
-                  <input style={inp} placeholder="Secteur d'activité"
-                    value={companySector} onChange={e => setCompanySector(e.target.value)} />
+                  <select
+                    style={{ ...inp, cursor: 'pointer', background: '#1e0f3c', color: companySector ? '#f0e6d3' : 'rgba(240,230,211,0.4)' }}
+                    value={companySector}
+                    onChange={e => setCompanySector(e.target.value)}>
+                    <option value="" style={{ background: '#1e0f3c', color: 'rgba(240,230,211,0.4)' }}>Secteur d'activité</option>
+                    {[
+                      'Événementiel & Communication',
+                      'Hôtellerie & Restauration',
+                      'Musique & Entertainment',
+                      'Mariage & Célébrations',
+                      'Mode & Beauté',
+                      'Sport & Fitness',
+                      'Art & Culture',
+                      'Entreprise & Corporate',
+                      'ONG & Associations',
+                      'Éducation & Formation',
+                      'Technologie & Numérique',
+                      'Santé & Bien-être',
+                      'Finance & Assurance',
+                      'Immobilier',
+                      'Commerce & Distribution',
+                      'Transport & Logistique',
+                      'Médias & Audiovisuel',
+                      'Religion & Spiritualité',
+                      'Politique & Institutionnel',
+                      'Autre',
+                    ].map(s => (
+                      <option key={s} value={s} style={{ background: '#1e0f3c', color: '#f0e6d3' }}>{s}</option>
+                    ))}
+                  </select>
                 </>
               )}
 
