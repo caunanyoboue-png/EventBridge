@@ -28,60 +28,71 @@ export default function SosBrigade() {
 }
 
 /* ══════════════════════════════════════════════════════════════════════
+   HELPERS localStorage — session complète sérialisée
+══════════════════════════════════════════════════════════════════════ */
+const SOS_KEY = 'eb_sos_active';
+
+function lsSave(s: SosSession) {
+  localStorage.setItem(SOS_KEY, JSON.stringify(s));
+}
+function lsClear() {
+  localStorage.removeItem(SOS_KEY);
+}
+function lsLoad(): SosSession | null {
+  try {
+    const raw = localStorage.getItem(SOS_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw) as SosSession;
+    if (s.status === 'active' && new Date(s.expires_at) > new Date()) return s;
+    lsClear();
+    return null;
+  } catch { lsClear(); return null; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
    VUE ORGANISATEUR
 ══════════════════════════════════════════════════════════════════════ */
 function OrgView() {
   const { profile } = useAuth();
   const [form, setForm] = useState({ service_type: '', location: '', slots_needed: 3, message: '' });
-  const [session, setSession] = useState<SosSession | null>(null);
   const [loading, setLoading] = useState(false);
-  const [checkingActive, setCheckingActive] = useState(true);
 
-  // Timeout de sécurité : si rien ne répond en 6s, on arrête le spinner
-  useEffect(() => {
-    const t = setTimeout(() => setCheckingActive(false), 6000);
-    return () => clearTimeout(t);
-  }, []);
+  // ── Lecture SYNCHRONE depuis localStorage avant le premier render ──
+  const [session, setSession] = useState<SosSession | null>(() => lsLoad());
+  // Si une session locale existe → pas besoin de spinner
+  const [checkingActive, setCheckingActive] = useState<boolean>(() => !lsLoad());
 
-  // Au chargement du profil : récupérer la session active
+  // Si pas de session locale → vérifier en DB (une seule fois)
   useEffect(() => {
-    if (!profile?.id) return; // Attendre que le profil soit chargé
-    async function checkSession() {
-      try {
-        // 1. Essayer d'abord avec l'ID sauvegardé en localStorage
-        const savedId = localStorage.getItem('sos_session_id');
-        if (savedId) {
-          const { data } = await supabase
-            .from('sos_sessions').select('*').eq('id', savedId).maybeSingle();
-          if (data && data.status === 'active' && new Date(data.expires_at) > new Date()) {
-            setSession(data as SosSession);
-            setCheckingActive(false);
-            return;
-          }
-          localStorage.removeItem('sos_session_id');
-        }
-        // 2. Fallback : chercher par organisateur_id
-        const { data } = await supabase
-          .from('sos_sessions')
-          .select('*')
-          .eq('organisateur_id', profile!.id)
-          .eq('status', 'active')
-          .gt('expires_at', new Date().toISOString())
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        if (data) {
-          setSession(data as SosSession);
-          localStorage.setItem('sos_session_id', data.id);
-        }
-      } catch (e) {
-        console.error('SOS check:', e);
-      } finally {
+    if (!checkingActive || !profile?.id) return;
+    supabase
+      .from('sos_sessions')
+      .select('*')
+      .eq('organisateur_id', profile.id)
+      .eq('status', 'active')
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) { lsSave(data as SosSession); setSession(data as SosSession); }
         setCheckingActive(false);
-      }
-    }
-    checkSession();
-  }, [profile?.id]); // Ne s'exécute qu'une fois quand le profil est prêt
+      });
+  }, [profile?.id, checkingActive]);
+
+  // Rafraîchir les compteurs depuis la DB si session locale présente
+  useEffect(() => {
+    if (!session?.id) return;
+    supabase.from('sos_sessions').select('*').eq('id', session.id).maybeSingle()
+      .then(({ data }) => {
+        if (!data || data.status !== 'active' || new Date(data.expires_at) <= new Date()) {
+          lsClear(); setSession(null);
+        } else {
+          lsSave(data as SosSession);
+          setSession(data as SosSession);
+        }
+      });
+  }, []); // Une seule fois au montage pour refresh des compteurs
 
   const inputClass = "w-full px-4 py-3 rounded-xl text-sm outline-none";
   const inputStyle = { background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
@@ -130,8 +141,8 @@ function OrgView() {
         data.notified_count = targets.length;
       }
 
+      lsSave(data as SosSession);
       setSession(data);
-      localStorage.setItem('sos_session_id', data.id);
       toast.success(`🚨 Alerte déclenchée ! ${targets.length} freelance(s) notifié(s).`);
     } catch (e: unknown) {
       toast.error((e as Error).message || 'Erreur lors du déclenchement');
@@ -231,7 +242,7 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
         clearInterval(timerRef.current!);
         // Marquer la session comme expirée en base
         supabase.from('sos_sessions').update({ status: 'expired' }).eq('id', session.id).then(() => {});
-        localStorage.removeItem('sos_session_id');
+        lsClear();
       }
     }
     tick();
@@ -444,7 +455,7 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
         </div>
       )}
 
-      <button onClick={() => { localStorage.removeItem('sos_session_id'); onReset(); }}
+      <button onClick={() => { lsClear(); onReset(); }}
         style={{ padding: '11px', borderRadius: 12, fontSize: 13, fontWeight: 600,
           background: 'transparent', border: '1px solid rgba(201,168,76,0.25)',
           color: '#c9a84c', cursor: 'pointer' }}>
