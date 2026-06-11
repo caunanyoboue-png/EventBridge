@@ -39,21 +39,35 @@ function OrgView() {
 
   // Au chargement : récupérer la session active depuis la DB
   useEffect(() => {
-    if (!profile) return;
-    supabase
-      .from('sos_sessions')
-      .select('*')
-      .eq('organisateur_id', profile.id)
-      .eq('status', 'active')
-      .gt('expires_at', new Date().toISOString())
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data) setSession(data as SosSession);
+    if (!profile) {
+      setCheckingActive(false);
+      return;
+    }
+    async function checkSession() {
+      try {
+        const { data } = await supabase
+          .from('sos_sessions')
+          .select('*')
+          .eq('organisateur_id', profile!.id)
+          .eq('status', 'active')
+          .gt('expires_at', new Date().toISOString())
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (data) {
+          setSession(data as SosSession);
+          localStorage.setItem('sos_session_id', data.id);
+        } else {
+          localStorage.removeItem('sos_session_id');
+        }
+      } catch {
+        // ignore
+      } finally {
         setCheckingActive(false);
-      });
-  }, [profile]);
+      }
+    }
+    checkSession();
+  }, [profile?.id]);
 
   const inputClass = "w-full px-4 py-3 rounded-xl text-sm outline-none";
   const inputStyle = { background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
@@ -103,6 +117,7 @@ function OrgView() {
       }
 
       setSession(data);
+      localStorage.setItem('sos_session_id', data.id);
       toast.success(`🚨 Alerte déclenchée ! ${targets.length} freelance(s) notifié(s).`);
     } catch (e: unknown) {
       toast.error((e as Error).message || 'Erreur lors du déclenchement');
@@ -202,6 +217,7 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
         clearInterval(timerRef.current!);
         // Marquer la session comme expirée en base
         supabase.from('sos_sessions').update({ status: 'expired' }).eq('id', session.id).then(() => {});
+        localStorage.removeItem('sos_session_id');
       }
     }
     tick();
@@ -414,7 +430,7 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
         </div>
       )}
 
-      <button onClick={onReset}
+      <button onClick={() => { localStorage.removeItem('sos_session_id'); onReset(); }}
         style={{ padding: '11px', borderRadius: 12, fontSize: 13, fontWeight: 600,
           background: 'transparent', border: '1px solid rgba(201,168,76,0.25)',
           color: '#c9a84c', cursor: 'pointer' }}>
