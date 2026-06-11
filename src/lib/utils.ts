@@ -142,6 +142,7 @@ export const COMPETENCES = [
   'Service en salle',
   'Bar / Barman',
   'Cuisine gastronomique',
+  'Plongeur',
   'Hôtesse accueil',
   'Animation',
   'MC / Présentateur',
