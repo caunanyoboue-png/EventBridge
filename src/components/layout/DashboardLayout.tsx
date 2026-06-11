@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { type ReactNode } from 'react';
 import Sidebar from './Sidebar';
 import NotificationBell from '../NotificationBell';
+import SosAlertBanner from '../SosAlertBanner';
 
 const LOGO = '/logo.png.jpeg';
 
@@ -30,6 +31,7 @@ export default function DashboardLayout({ children, bgImage }: Props) {
         style={{ zIndex: 39 }}
       />
 
+      <SosAlertBanner />
       <Sidebar glassy={!!bgImage} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <main

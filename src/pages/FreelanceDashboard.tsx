@@ -6,6 +6,7 @@ import {
   Send, CheckCircle, Star, Award, FileText,
   Menu, X,
 } from 'lucide-react';
+import SosAlertBanner from '../components/SosAlertBanner';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 
@@ -209,6 +210,8 @@ export default function FreelanceDashboard() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', background: C.bg, fontFamily: 'Inter, system-ui, sans-serif', position: 'relative', overflowX: 'hidden' }}>
+
+      <SosAlertBanner />
 
       {/* Overlay mobile */}
       <div className={`eb-overlay${sidebarOpen ? ' open' : ''}`} onClick={() => setSidebarOpen(false)} />
