@@ -126,6 +126,10 @@ export const VILLES = [
   'Korhogo - Soba',
   'Korhogo - Zone Industrielle',
   // ── Autres villes ────────────────────────────
+  'Grand-Bassam',
+  'Grand-Bassam - Quartier France',
+  'Grand-Bassam - Nouveau Quartier',
+  'Grand-Bassam - Moossou',
   'Daloa',
   'Abengourou',
   'Man',
