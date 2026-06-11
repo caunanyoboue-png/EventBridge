@@ -35,6 +35,25 @@ function OrgView() {
   const [form, setForm] = useState({ service_type: '', location: '', slots_needed: 3, message: '' });
   const [session, setSession] = useState<SosSession | null>(null);
   const [loading, setLoading] = useState(false);
+  const [checkingActive, setCheckingActive] = useState(true);
+
+  // Au chargement : récupérer la session active depuis la DB
+  useEffect(() => {
+    if (!profile) return;
+    supabase
+      .from('sos_sessions')
+      .select('*')
+      .eq('organisateur_id', profile.id)
+      .eq('status', 'active')
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) setSession(data as SosSession);
+        setCheckingActive(false);
+      });
+  }, [profile]);
 
   const inputClass = "w-full px-4 py-3 rounded-xl text-sm outline-none";
   const inputStyle = { background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
@@ -88,6 +107,19 @@ function OrgView() {
     } catch (e: unknown) {
       toast.error((e as Error).message || 'Erreur lors du déclenchement');
     } finally { setLoading(false); }
+  }
+
+  if (checkingActive) {
+    return (
+      <DashboardLayout>
+        <div style={{ textAlign: 'center', padding: '80px 0', color: '#b8a898' }}>
+          <div style={{ width: 36, height: 36, borderRadius: '50%', border: '2px solid #c9a84c',
+            borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
+          <p>Vérification d'une alerte active...</p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      </DashboardLayout>
+    );
   }
 
   return (
@@ -165,7 +197,12 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
     function tick() {
       const secs = Math.max(0, Math.floor((new Date(session.expires_at).getTime() - Date.now()) / 1000));
       setTimeLeft(secs);
-      if (secs === 0) { setExpired(true); clearInterval(timerRef.current!); }
+      if (secs === 0) {
+        setExpired(true);
+        clearInterval(timerRef.current!);
+        // Marquer la session comme expirée en base
+        supabase.from('sos_sessions').update({ status: 'expired' }).eq('id', session.id).then(() => {});
+      }
     }
     tick();
     timerRef.current = setInterval(tick, 1000);
