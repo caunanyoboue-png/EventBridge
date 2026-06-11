@@ -78,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
       options: {
+        emailRedirectTo: `${window.location.origin}/onboarding`,
         data: {
           full_name: data.full_name || '',
           role: data.role || 'freelance',
