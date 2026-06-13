@@ -4,7 +4,8 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { type Mission, type MissionStatus } from '../types';
-import { formatDateShort, formatCFA, SERVICE_ICONS } from '../lib/utils';
+import { formatDateShort, formatCFA } from '../lib/utils';
+import { ServiceIcon } from '../lib/serviceIcons';
 import toast from 'react-hot-toast';
 
 const TABS: { key: MissionStatus | 'all'; label: string }[] = [
@@ -98,8 +99,8 @@ export default function MyMissions() {
               className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all border"
               style={{
                 background: tab === t.key ? 'rgba(201,168,76,0.15)' : 'transparent',
-                borderColor: tab === t.key ? '#c9a84c' : 'rgba(201,168,76,0.2)',
-                color: tab === t.key ? '#c9a84c' : '#b8a898',
+                borderColor: tab === t.key ? '#d4af37' : 'rgba(201,168,76,0.2)',
+                color: tab === t.key ? '#d4af37' : '#b8a898',
               }}>
               {t.label} {count > 0 && <span className="ml-1 text-xs opacity-70">({count})</span>}
             </button>
@@ -137,7 +138,7 @@ export default function MyMissions() {
               <div className="p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{SERVICE_ICONS[m.service_type] || '🎯'}</span>
+                  <ServiceIcon type={m.service_type} size={26} />
                   <div>
                     <h3 className="font-semibold" style={{ color: '#f0e6d3' }}>{m.title}</h3>
                     <p className="text-sm" style={{ color: '#b8a898' }}>
@@ -173,7 +174,7 @@ export default function MyMissions() {
                 {(m.status === 'open' || m.status === 'draft') && (
                   <button onClick={() => navigate(`/edit-mission?id=${m.id}`)}
                     className="px-4 py-2 rounded-lg text-sm border transition-all hover:opacity-80"
-                    style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#c9a84c' }}>
+                    style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#d4af37' }}>
                     Modifier
                   </button>
                 )}

@@ -4,7 +4,8 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { type Mission } from '../types';
-import { formatDateShort, formatCFA, SERVICE_ICONS } from '../lib/utils';
+import { formatDateShort, formatCFA } from '../lib/utils';
+import { ServiceIcon } from '../lib/serviceIcons';
 import { distanceKm, formatDistance } from '../lib/geo';
 import toast from 'react-hot-toast';
 
@@ -133,7 +134,7 @@ function MissionCard({ mission: m, onApply, onView, isFreelance, userLat, userLn
       <div className="p-5 flex flex-col flex-1">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-2xl">{SERVICE_ICONS[m.service_type] || '🎯'}</span>
+          <ServiceIcon type={m.service_type} size={26} />
           <div>
             <h3 className="font-semibold text-sm line-clamp-1" style={{ color: '#f0e6d3' }}>{m.title}</h3>
             <p className="text-xs" style={{ color: '#b8a898' }}>{m.service_type}</p>
@@ -152,7 +153,7 @@ function MissionCard({ mission: m, onApply, onView, isFreelance, userLat, userLn
           <span>📍</span>
           <span>{m.location}{m.ville ? `, ${m.ville}` : ''}</span>
           {dist !== null && (
-            <span style={{ marginLeft: 4, color: '#c9a84c', fontWeight: 600 }}>
+            <span style={{ marginLeft: 4, color: '#d4af37', fontWeight: 600 }}>
               · {formatDistance(dist)}
             </span>
           )}
@@ -161,13 +162,13 @@ function MissionCard({ mission: m, onApply, onView, isFreelance, userLat, userLn
           <div className="flex items-center gap-2 text-xs" style={{ color: '#b8a898' }}>
             <span>👥</span><span>{slots_filled}/{m.slots_total} poste(s)</span>
           </div>
-          <div className="text-sm font-bold" style={{ color: '#c9a84c' }}>{formatCFA(m.hourly_rate)}/h</div>
+          <div className="text-sm font-bold" style={{ color: '#d4af37' }}>{formatCFA(m.hourly_rate)}/h</div>
         </div>
       </div>
 
       <div className="mb-4">
         <div className="w-full h-1 rounded-full" style={{ background: '#52367c' }}>
-          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: 'linear-gradient(to right,#c9a84c,#e8c97a)' }} />
+          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: 'linear-gradient(to right,#d4af37,#e8c97a)' }} />
         </div>
       </div>
 

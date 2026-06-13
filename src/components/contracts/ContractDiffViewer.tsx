@@ -42,7 +42,7 @@ export default function ContractDiffViewer({
         return (
           <div key={key} className="rounded-lg p-3"
             style={{ background: 'rgba(82,54,124,0.3)', border: '1px solid rgba(201,168,76,0.15)' }}>
-            <p className="text-xs font-semibold mb-1" style={{ color: '#c9a84c' }}>{label}</p>
+            <p className="text-xs font-semibold mb-1" style={{ color: '#d4af37' }}>{label}</p>
             <div className="flex gap-3 text-xs">
               <div className="flex-1 rounded px-2 py-1" style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171' }}>
                 <span style={{ opacity: 0.7 }}>Avant : </span>{oldVal}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Siren, Zap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -149,11 +150,12 @@ export default function SosAlertBanner() {
           width: 72, height: 72, borderRadius: '50%', margin: '0 auto 18px',
           background: 'linear-gradient(135deg, #dc2626, #b91c1c)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 32, animation: 'sosPulse 1.5s infinite',
-        }}>🚨</div>
+          animation: 'sosPulse 1.5s infinite',
+        }}><Siren size={34} color="#fff" strokeWidth={2} /></div>
 
-        <h2 style={{ fontSize: 20, fontWeight: 800, color: '#fff', margin: '0 0 6px' }}>
-          🚨 S.O.S Brigade
+        <h2 style={{ fontSize: 20, fontWeight: 800, color: '#fff', margin: '0 0 6px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <Siren size={20} /> S.O.S Brigade
         </h2>
         <p style={{ fontSize: 13, color: 'rgba(255,200,200,0.85)', margin: '0 0 18px', fontWeight: 600 }}>
           Urgence dans votre zone !
@@ -189,8 +191,9 @@ export default function SosAlertBanner() {
           border: 'none', borderRadius: 12, color: '#fff',
           fontSize: 15, fontWeight: 800, cursor: 'pointer', marginBottom: 10,
           boxShadow: '0 4px 16px rgba(220,38,38,0.4)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
         }}>
-          🚀 Répondre à l'alerte →
+          <Zap size={18} fill="#fff" /> Répondre à l'alerte
         </button>
 
         <button onClick={handleDismiss} style={{

@@ -1,8 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getInitials } from '../../lib/utils';
-
-const LOGO = '/logo.png.jpeg';
+import Logo from '../Logo';
 
 // ── SVG icons — aucun emoji ───────────────────────────────────────────────────
 const IcoDashboard = () => (
@@ -160,7 +159,7 @@ export default function Sidebar({ glassy, isOpen, onClose }: SidebarProps) {
       {onClose && (
         <button className="eb-sidebar-close" onClick={onClose}>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M2 2l12 12M14 2L2 14" stroke="#c9a84c" strokeWidth="1.6" strokeLinecap="round"/>
+            <path d="M2 2l12 12M14 2L2 14" stroke="#d4af37" strokeWidth="1.6" strokeLinecap="round"/>
           </svg>
         </button>
       )}
@@ -168,8 +167,7 @@ export default function Sidebar({ glassy, isOpen, onClose }: SidebarProps) {
       {/* Logo */}
       <NavLink to="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 10,
         marginBottom: 22, padding: '0 6px', textDecoration: 'none' }}>
-        <img src={LOGO} style={{ height: 32, width: 'auto' }} alt="EventBridge" />
-        <span className="text-gold-gradient" style={{ fontWeight: 800, fontSize: 15 }}>EventBridge</span>
+        <Logo height={42} />
       </NavLink>
 
       {/* Avatar utilisateur */}
@@ -184,7 +182,7 @@ export default function Sidebar({ glassy, isOpen, onClose }: SidebarProps) {
             <div style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 13, fontWeight: 800, color: '#261642',
-              background: 'linear-gradient(135deg,#c9a84c,#e8c97a)' }}>
+              background: 'linear-gradient(135deg,#d4af37,#e8c97a)' }}>
               {getInitials(profile.full_name || 'U')}
             </div>
           )}
@@ -193,7 +191,7 @@ export default function Sidebar({ glassy, isOpen, onClose }: SidebarProps) {
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {profile.full_name}
             </p>
-            <p style={{ fontSize: 11, color: '#c9a84c', marginTop: 2, fontWeight: 500 }}>
+            <p style={{ fontSize: 11, color: '#d4af37', marginTop: 2, fontWeight: 500 }}>
               {profile.role === 'freelance' ? 'Freelance' : profile.role === 'organisateur' ? 'Organisateur' : 'Admin'}
             </p>
           </div>
@@ -203,16 +201,18 @@ export default function Sidebar({ glassy, isOpen, onClose }: SidebarProps) {
       {/* Navigation */}
       <nav style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
         {navItems.map(item => (
-          <NavLink key={item.path} to={item.path}
+          <NavLink key={item.path} to={item.path} className="eb-nav-link"
             style={({ isActive }) => ({
               display: 'flex', alignItems: 'center', gap: 11,
-              padding: '10px 12px', borderRadius: 10, fontSize: 13, fontWeight: 500,
-              textDecoration: 'none', transition: 'all 0.15s',
+              padding: '11px 13px', borderRadius: 10, fontSize: 13.5,
+              fontWeight: isActive ? 700 : 500,
+              textDecoration: 'none', transition: 'all 0.18s',
               background: isActive
-                ? (glassy ? 'rgba(201,168,76,0.14)' : 'rgba(201,168,76,0.1)')
+                ? (glassy ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.16)')
                 : 'transparent',
-              borderLeft: isActive ? '2.5px solid #c9a84c' : '2.5px solid transparent',
-              color: isActive ? '#c9a84c' : (glassy ? 'rgba(240,230,211,0.7)' : '#b8a898'),
+              borderLeft: isActive ? '3px solid #d4af37' : '3px solid transparent',
+              boxShadow: isActive ? 'inset 0 0 18px rgba(212,175,55,0.12)' : 'none',
+              color: isActive ? '#e8c97a' : (glassy ? 'rgba(240,230,211,0.7)' : '#b8a898'),
             })}>
             <item.Icon />
             {item.label}
@@ -222,7 +222,7 @@ export default function Sidebar({ glassy, isOpen, onClose }: SidebarProps) {
 
       {/* SOS Brigade (organisateur) */}
       {profile?.role === 'organisateur' && (
-        <button onClick={() => navigate('/sos-brigade')}
+        <button onClick={() => navigate('/sos-brigade')} className="animate-sos"
           style={{ marginTop: 12, width: '100%', padding: '11px', borderRadius: 10,
             fontWeight: 700, fontSize: 13, color: '#fff', border: 'none', cursor: 'pointer',
             background: 'linear-gradient(135deg,#dc2626,#b91c1c)',

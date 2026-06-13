@@ -1,10 +1,18 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import {
+  Heart, MessageCircle, Repeat2, Send, ImagePlus, X, Plus,
+  Inbox, Calendar, MapPin, Users, Wallet, Newspaper, Loader2,
+  PenLine, Briefcase,
+  type LucideIcon,
+} from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { type Mission } from '../types';
-import { formatCFA, SERVICE_ICONS, getInitials } from '../lib/utils';
+import { formatCFA, getInitials } from '../lib/utils';
+import { ServiceIconBadge } from '../lib/serviceIcons';
 import toast from 'react-hot-toast';
 
 /* ── Types ─────────────────────────────────────────────────────────── */
@@ -41,27 +49,28 @@ function timeAgo(d: string) {
 /* ── Avatar mini ────────────────────────────────────────────────────── */
 function Avatar({ src, name, size = 40 }: { src?: string | null; name?: string | null; size?: number }) {
   return src
-    ? <img src={src} alt="" style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+    ? <img src={src} alt="" style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid rgba(201,168,76,0.25)' }} />
     : <div style={{ width: size, height: size, borderRadius: '50%', flexShrink: 0, display: 'flex',
-        alignItems: 'center', justifyContent: 'center', fontSize: size * 0.32, fontWeight: 800,
-        color: '#261642', background: 'linear-gradient(135deg,#c9a84c,#e8c97a)' }}>
+        alignItems: 'center', justifyContent: 'center', fontSize: size * 0.34, fontWeight: 700,
+        color: '#261642', background: 'linear-gradient(135deg,#d4af37,#e8c97a)' }}>
         {getInitials(name || 'U')}
       </div>;
 }
 
 /* ── Action button ──────────────────────────────────────────────────── */
-function ActionBtn({ onClick, active, icon, label, activeColor }: {
-  onClick: () => void; active: boolean; icon: string; label: string; activeColor: string;
+function ActionBtn({ onClick, active, Icon, label, activeColor, fill }: {
+  onClick: () => void; active: boolean; Icon: LucideIcon; label: string; activeColor: string; fill?: boolean;
 }) {
   return (
-    <button onClick={onClick} style={{
-      flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
-      padding: '9px 4px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 13,
-      background: active ? `${activeColor}15` : 'transparent',
-      color: active ? activeColor : '#6a5a7a',
-      fontWeight: active ? 700 : 500, transition: 'all 0.15s',
+    <button onClick={onClick} className="feed-action" style={{
+      flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+      padding: '11px 4px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13,
+      background: active ? `${activeColor}14` : 'transparent',
+      color: active ? activeColor : '#9a8a9a',
+      fontWeight: active ? 700 : 500, transition: 'all 0.18s',
     }}>
-      <span>{icon}</span><span className="hidden sm:inline">{label}</span>
+      <Icon size={17} strokeWidth={2} fill={active && fill ? activeColor : 'none'} />
+      <span className="hidden sm:inline">{label}</span>
     </button>
   );
 }
@@ -78,66 +87,85 @@ function PostCard({ post, liked, reposted, onLike, onRepost, onToggleComment,
 }) {
   const a = post.author;
   const isOrg = a.role === 'organisateur';
-  const roleColor = isOrg ? '#60a5fa' : '#c9a84c';
+  const roleColor = isOrg ? '#60a5fa' : '#d4af37';
 
   return (
-    <div className="card-glass overflow-hidden">
+    <div className="card-glass overflow-hidden" style={{ position: 'relative' }}>
+      {/* Badge type — coin haut droit */}
+      <span style={{ position: 'absolute', top: 12, right: 12, zIndex: 2,
+        display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9.5, fontWeight: 700,
+        letterSpacing: '0.06em', padding: '4px 9px', borderRadius: 999,
+        background: 'rgba(212,175,55,0.14)', color: '#e8c97a', border: '1px solid rgba(212,175,55,0.4)' }}>
+        <PenLine size={11} /> PUBLICATION
+      </span>
       {/* Header */}
-      <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <Avatar src={a.avatar_url} name={a.full_name} size={42} />
-        <div style={{ flex: 1 }}>
+      <div style={{ padding: '15px 17px', display: 'flex', alignItems: 'center', gap: 11 }}>
+        <Avatar src={a.avatar_url} name={a.full_name} size={44} />
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#f0e6d3' }}>{a.full_name || 'Utilisateur'}</span>
-            <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999,
+            <span style={{ fontSize: 14.5, fontWeight: 700, color: '#f0e6d3' }}>{a.full_name || 'Utilisateur'}</span>
+            <span style={{ fontSize: 9.5, fontWeight: 700, padding: '2px 8px', borderRadius: 999, letterSpacing: '0.04em',
               background: isOrg ? 'rgba(96,165,250,0.12)' : 'rgba(201,168,76,0.12)',
               color: roleColor, border: `1px solid ${roleColor}30` }}>
               {isOrg ? 'ORGANISATEUR' : 'FREELANCE'}
             </span>
           </div>
-          <p style={{ fontSize: 11, color: '#5a4a6a', marginTop: 2 }}>{timeAgo(post.created_at)}</p>
+          <p style={{ fontSize: 11.5, color: '#7a6a8a', marginTop: 2 }}>{timeAgo(post.created_at)}</p>
         </div>
       </div>
 
       {/* Content */}
-      <div style={{ padding: '0 16px 12px' }}>
-        <p style={{ fontSize: 14, color: '#d0c0b0', lineHeight: 1.78, whiteSpace: 'pre-wrap', margin: 0 }}>
+      <div style={{ padding: '0 17px 13px' }}>
+        <p style={{ fontSize: 14.5, color: '#d8cabb', lineHeight: 1.75, whiteSpace: 'pre-wrap', margin: 0 }}>
           {post.content}
         </p>
       </div>
 
       {/* Image */}
       {post.image_url && (
-        <img src={post.image_url} alt="" style={{ width: '100%', maxHeight: 420, objectFit: 'cover', display: 'block' }} />
+        <img src={post.image_url} alt="" style={{ width: '100%', maxHeight: 440, objectFit: 'cover', display: 'block' }} />
       )}
 
       {/* Counts bar */}
       {(post.likes_count > 0 || post.comments_count > 0 || post.reposts_count > 0) && (
-        <div style={{ padding: '6px 16px', display: 'flex', gap: 14,
+        <div style={{ padding: '9px 17px', display: 'flex', gap: 16, alignItems: 'center',
           borderTop: '1px solid rgba(201,168,76,0.06)' }}>
-          {post.likes_count  > 0 && <span style={{ fontSize: 12, color: '#5a4a6a' }}>❤ {post.likes_count}</span>}
-          {post.comments_count > 0 && <span style={{ fontSize: 12, color: '#5a4a6a' }}>💬 {post.comments_count}</span>}
-          {post.reposts_count > 0 && <span style={{ fontSize: 12, color: '#5a4a6a' }}>🔁 {post.reposts_count}</span>}
+          {post.likes_count > 0 && (
+            <span style={{ fontSize: 12, color: '#7a6a8a', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+              <Heart size={13} fill="#ef4444" color="#ef4444" /> {post.likes_count}
+            </span>
+          )}
+          {post.comments_count > 0 && (
+            <span style={{ fontSize: 12, color: '#7a6a8a', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+              <MessageCircle size={13} /> {post.comments_count}
+            </span>
+          )}
+          {post.reposts_count > 0 && (
+            <span style={{ fontSize: 12, color: '#7a6a8a', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+              <Repeat2 size={14} /> {post.reposts_count}
+            </span>
+          )}
         </div>
       )}
 
       {/* Actions */}
-      <div style={{ display: 'flex', borderTop: '1px solid rgba(201,168,76,0.08)' }}>
-        <ActionBtn onClick={onLike}          active={liked}    icon="❤"  label="J'aime"    activeColor="#ef4444" />
-        <ActionBtn onClick={onToggleComment} active={commentsOpen} icon="💬" label="Commenter" activeColor="#c9a84c" />
-        <ActionBtn onClick={onRepost}        active={reposted} icon="🔁" label="Reposter"  activeColor="#10b981" />
+      <div style={{ display: 'flex', padding: '4px 8px', borderTop: '1px solid rgba(201,168,76,0.08)' }}>
+        <ActionBtn onClick={onLike}          active={liked}        Icon={Heart}         label="J'aime"    activeColor="#ef4444" fill />
+        <ActionBtn onClick={onToggleComment} active={commentsOpen} Icon={MessageCircle} label="Commenter" activeColor="#d4af37" />
+        <ActionBtn onClick={onRepost}        active={reposted}     Icon={Repeat2}       label="Reposter"  activeColor="#10b981" />
       </div>
 
       {/* Comments */}
       {commentsOpen && (
-        <div style={{ borderTop: '1px solid rgba(201,168,76,0.08)', padding: '12px 14px' }}>
+        <div style={{ borderTop: '1px solid rgba(201,168,76,0.08)', padding: '13px 15px' }}>
           {comments.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 12 }}>
               {comments.map(c => (
-                <div key={c.id} style={{ display: 'flex', gap: 8 }}>
-                  <Avatar src={c.author.avatar_url} name={c.author.full_name} size={28} />
-                  <div style={{ background: 'rgba(82,54,124,0.4)', borderRadius: 10, padding: '6px 11px', flex: 1 }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#c9a84c' }}>{c.author.full_name}</span>
-                    <p style={{ fontSize: 13, color: '#d0c0b0', margin: '3px 0 0', lineHeight: 1.5 }}>{c.content}</p>
+                <div key={c.id} style={{ display: 'flex', gap: 9 }}>
+                  <Avatar src={c.author.avatar_url} name={c.author.full_name} size={30} />
+                  <div style={{ background: 'rgba(82,54,124,0.4)', borderRadius: 12, padding: '7px 12px', flex: 1 }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: '#d4af37' }}>{c.author.full_name}</span>
+                    <p style={{ fontSize: 13, color: '#d8cabb', margin: '3px 0 0', lineHeight: 1.5 }}>{c.content}</p>
                   </div>
                 </div>
               ))}
@@ -148,13 +176,14 @@ function PostCard({ post, liked, reposted, onLike, onRepost, onToggleComment,
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onCommentSubmit(); } }}
               placeholder="Écrire un commentaire..."
               style={{ flex: 1, background: 'rgba(82,54,124,0.4)', border: '1px solid rgba(201,168,76,0.2)',
-                borderRadius: 20, padding: '8px 14px', color: '#f0e6d3', fontSize: 13, outline: 'none' }}
+                borderRadius: 22, padding: '9px 15px', color: '#f0e6d3', fontSize: 13, outline: 'none' }}
             />
             <button onClick={onCommentSubmit} disabled={!commentText.trim() || commentLoading}
-              style={{ padding: '8px 16px', background: '#c9a84c', border: 'none', borderRadius: 20,
-                color: '#261642', fontWeight: 800, fontSize: 14, cursor: 'pointer',
+              style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'linear-gradient(135deg,#d4af37,#e8c97a)', border: 'none', borderRadius: '50%',
+                color: '#261642', cursor: 'pointer', flexShrink: 0,
                 opacity: (!commentText.trim() || commentLoading) ? 0.45 : 1 }}>
-              →
+              {commentLoading ? <Loader2 size={17} className="animate-spin" /> : <Send size={16} />}
             </button>
           </div>
         </div>
@@ -169,21 +198,28 @@ function MissionFeedCard({ mission: m, isFreelance, onApply, onView }: {
 }) {
   const org = m.organisateur;
   return (
-    <div className="card-glass overflow-hidden">
+    <div className="card-glass card-lift overflow-hidden" style={{ position: 'relative' }}>
+      {/* Badge type — coin haut droit */}
+      <span style={{ position: 'absolute', top: 12, right: 12, zIndex: 2,
+        display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9.5, fontWeight: 700,
+        letterSpacing: '0.06em', padding: '4px 9px', borderRadius: 999,
+        background: 'rgba(0,200,150,0.16)', color: '#00C896', border: '1px solid rgba(0,200,150,0.45)' }}>
+        <Briefcase size={11} /> MISSION
+      </span>
       {m.venue_photo_url && (
         <div style={{ aspectRatio: '16/7', overflow: 'hidden', cursor: 'pointer' }} onClick={onView}>
           <img src={m.venue_photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
         </div>
       )}
-      <div style={{ padding: 16 }}>
+      <div style={{ padding: 17 }}>
         {/* Posted by */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <Avatar src={org.avatar_url} name={org.full_name} size={26} />
-          <span style={{ fontSize: 12, color: '#b8a898', flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 14 }}>
+          <Avatar src={org.avatar_url} name={org.full_name} size={28} />
+          <span style={{ fontSize: 12, color: '#b8a898', flex: 1, minWidth: 0 }}>
             <span style={{ fontWeight: 700, color: '#f0e6d3' }}>{org.full_name || org.company_name}</span>
             {' '}a publié une mission
           </span>
-          <span style={{ fontSize: 10, padding: '3px 8px', borderRadius: 999, flexShrink: 0,
+          <span style={{ fontSize: 9.5, padding: '3px 9px', borderRadius: 999, flexShrink: 0, letterSpacing: '0.04em',
             background: 'rgba(16,185,129,0.1)', color: '#10b981',
             border: '1px solid rgba(16,185,129,0.25)', fontWeight: 700 }}>
             OUVERT
@@ -191,21 +227,33 @@ function MissionFeedCard({ mission: m, isFreelance, onApply, onView }: {
         </div>
 
         {/* Mission info */}
-        <div style={{ display: 'flex', gap: 10, marginBottom: 14, cursor: 'pointer' }} onClick={onView}>
-          <span style={{ fontSize: 26, lineHeight: 1 }}>{SERVICE_ICONS[m.service_type] || '🎯'}</span>
-          <div>
-            <h3 style={{ fontSize: 15, fontWeight: 700, color: '#f0e6d3', margin: '0 0 5px' }}>{m.title}</h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, fontSize: 12, color: '#b8a898' }}>
-              {m.event_date && <span>📅 {new Date(m.event_date).toLocaleDateString('fr-CI', { day: '2-digit', month: 'short', year: 'numeric' })}</span>}
-              {m.ville && <span>📍 {m.ville}</span>}
-              <span>👥 {m.slots_filled || 0}/{m.slots_total} poste(s)</span>
-              <span style={{ color: '#c9a84c', fontWeight: 700 }}>💰 {formatCFA(m.hourly_rate)}/h</span>
+        <div style={{ display: 'flex', gap: 13, marginBottom: 15, cursor: 'pointer' }} onClick={onView}>
+          <ServiceIconBadge type={m.service_type} size={48} />
+          <div style={{ minWidth: 0 }}>
+            <h3 style={{ fontSize: 15.5, fontWeight: 700, color: '#f0e6d3', margin: '0 0 7px' }}>{m.title}</h3>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px 13px', fontSize: 12, color: '#b8a898' }}>
+              {m.event_date && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                  <Calendar size={13} color="#8a7a9a" /> {new Date(m.event_date).toLocaleDateString('fr-CI', { day: '2-digit', month: 'short', year: 'numeric' })}
+                </span>
+              )}
+              {m.ville && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                  <MapPin size={13} color="#8a7a9a" /> {m.ville}
+                </span>
+              )}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                <Users size={13} color="#8a7a9a" /> {m.slots_filled || 0}/{m.slots_total} poste(s)
+              </span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#d4af37', fontWeight: 700 }}>
+                <Wallet size={13} /> {formatCFA(m.hourly_rate)}/h
+              </span>
             </div>
           </div>
         </div>
 
         {/* Buttons */}
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 9 }}>
           <button onClick={onView}
             className="btn-outline-gold px-4 py-2 rounded-lg text-sm"
             style={{ flex: 1 }}>
@@ -215,7 +263,7 @@ function MissionFeedCard({ mission: m, isFreelance, onApply, onView }: {
             <button onClick={onApply}
               className="btn-gold px-4 py-2 rounded-lg text-sm font-bold text-[#261642]"
               style={{ flex: 1 }}>
-              Postuler →
+              Postuler
             </button>
           )}
         </div>
@@ -346,7 +394,7 @@ export default function Feed() {
     if (error) {
       if (error.code === '23505') toast.error('Vous avez déjà postulé');
       else toast.error('Erreur lors de la candidature');
-    } else toast.success('Candidature envoyée ! 🎉');
+    } else toast.success('Candidature envoyée !');
   }
 
   const isFreelance = profile?.role === 'freelance';
@@ -361,46 +409,58 @@ export default function Feed() {
       <div style={{ maxWidth: 680, margin: '0 auto', paddingBottom: 48 }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h1 className="font-display text-2xl font-bold" style={{ color: '#f0e6d3' }}>🏠 Fil d'actualité</h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 42, height: 42, borderRadius: 12, flexShrink: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'linear-gradient(135deg, rgba(201,168,76,0.16), rgba(201,168,76,0.05))',
+              border: '1px solid rgba(201,168,76,0.28)' }}>
+              <Newspaper size={21} color="#d4af37" strokeWidth={1.7} />
+            </div>
+            <div>
+              <h1 className="font-display text-xl font-bold" style={{ color: '#f0e6d3', margin: 0 }}>Fil d'actualité</h1>
+              <p style={{ fontSize: 12, color: '#7a6a8a', margin: 0 }}>La communauté EventBridge en direct</p>
+            </div>
+          </div>
           <button onClick={() => { setCreating(c => !c); setPostContent(''); setPostImage(null); }}
-            className="btn-gold px-4 py-2 rounded-xl text-sm font-bold text-[#261642]">
-            {creating ? '✕ Annuler' : '+ Publier'}
+            className="btn-gold px-4 py-2.5 rounded-xl text-sm font-bold text-[#261642] flex items-center gap-1.5">
+            {creating ? <><X size={15} /> Annuler</> : <><Plus size={16} /> Publier</>}
           </button>
         </div>
 
         {/* Create post */}
         {creating && (
-          <div className="card-glass p-4 mb-5">
+          <motion.div className="card-glass p-4 mb-5"
+            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
             <div style={{ display: 'flex', gap: 12 }}>
-              <Avatar src={profile?.avatar_url} name={profile?.full_name} size={38} />
-              <div style={{ flex: 1 }}>
+              <Avatar src={profile?.avatar_url} name={profile?.full_name} size={40} />
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <textarea rows={3} value={postContent} onChange={e => setPostContent(e.target.value)}
                   placeholder={isFreelance
                     ? 'Partagez votre expérience, une mission réussie...'
                     : 'Partagez votre after-event, retour d\'expérience...'}
                   style={{ width: '100%', background: 'rgba(82,54,124,0.4)',
-                    border: '1px solid rgba(201,168,76,0.2)', borderRadius: 10,
-                    padding: '10px 14px', color: '#f0e6d3', fontSize: 14,
-                    resize: 'none', outline: 'none', boxSizing: 'border-box' }}
+                    border: '1px solid rgba(201,168,76,0.2)', borderRadius: 12,
+                    padding: '11px 15px', color: '#f0e6d3', fontSize: 14.5,
+                    resize: 'none', outline: 'none', boxSizing: 'border-box', lineHeight: 1.6 }}
                 />
                 {postImage && (
-                  <div style={{ position: 'relative', marginTop: 8, borderRadius: 10, overflow: 'hidden' }}>
+                  <div style={{ position: 'relative', marginTop: 8, borderRadius: 12, overflow: 'hidden' }}>
                     <img src={postImage} alt="" style={{ width: '100%', maxHeight: 220, objectFit: 'cover', display: 'block' }} />
                     <button onClick={() => setPostImage(null)}
-                      style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(0,0,0,0.6)',
-                        border: 'none', borderRadius: 999, color: '#fff', width: 26, height: 26,
-                        cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      ✕
+                      style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.65)',
+                        border: 'none', borderRadius: 999, color: '#fff', width: 28, height: 28,
+                        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <X size={15} />
                     </button>
                   </div>
                 )}
-                <div style={{ display: 'flex', alignItems: 'center', marginTop: 10, gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginTop: 11, gap: 10 }}>
                   <input type="file" accept="image/*" ref={fileRef} style={{ display: 'none' }} onChange={uploadPostImage} />
                   <button onClick={() => fileRef.current?.click()}
                     style={{ fontSize: 13, color: '#b8a898', background: 'transparent', border: 'none',
-                      cursor: uploadingImg ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
-                    {uploadingImg ? '⏳' : '🖼'} Photo
+                      cursor: uploadingImg ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {uploadingImg ? <Loader2 size={16} className="animate-spin" /> : <ImagePlus size={16} color="#d4af37" />} Photo
                   </button>
                   <button onClick={createPost} disabled={!postContent.trim() || submitting}
                     className="btn-gold px-5 py-2 rounded-lg text-sm font-bold text-[#261642]"
@@ -410,18 +470,18 @@ export default function Feed() {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        <div style={{ display: 'inline-flex', gap: 4, marginBottom: 22, padding: 4, borderRadius: 12,
+          background: 'rgba(28,17,50,0.5)', border: '1px solid rgba(201,168,76,0.12)' }}>
           {([['all', 'Tout'], ['posts', 'Posts'], ['missions', 'Missions']] as const).map(([key, label]) => (
             <button key={key} onClick={() => setTab(key)}
-              style={{ padding: '8px 18px', borderRadius: 10, fontSize: 13, fontWeight: 600,
-                cursor: 'pointer', transition: 'all 0.15s',
-                background: tab === key ? 'rgba(201,168,76,0.15)' : 'transparent',
-                border: `1px solid ${tab === key ? '#c9a84c' : 'rgba(201,168,76,0.2)'}`,
-                color: tab === key ? '#c9a84c' : '#b8a898' }}>
+              style={{ padding: '7px 18px', borderRadius: 9, fontSize: 13, fontWeight: 600,
+                cursor: 'pointer', transition: 'all 0.18s', border: 'none',
+                background: tab === key ? 'linear-gradient(135deg,#d4af37,#e8c97a)' : 'transparent',
+                color: tab === key ? '#261642' : '#b8a898' }}>
               {label}
             </button>
           ))}
@@ -429,36 +489,49 @@ export default function Feed() {
 
         {/* Feed */}
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '64px 0', color: '#b8a898' }}>Chargement du fil...</div>
+          <div style={{ textAlign: 'center', padding: '64px 0', color: '#b8a898',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+            <Loader2 size={28} className="animate-spin" color="#d4af37" />
+            Chargement du fil...
+          </div>
         ) : feedItems.length === 0 ? (
           <div className="card-glass" style={{ textAlign: 'center', padding: '56px 24px' }}>
-            <p style={{ fontSize: 36, marginBottom: 12 }}>📭</p>
-            <p style={{ color: '#b8a898' }}>Aucun contenu pour l'instant</p>
-            <p style={{ fontSize: 12, color: '#5a4a6a', marginTop: 6 }}>Soyez le premier à publier !</p>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+              <Inbox size={40} color="#7a6a8a" strokeWidth={1.5} />
+            </div>
+            <p style={{ color: '#f0e6d3', fontSize: 15, fontWeight: 600 }}>Aucun contenu pour l'instant</p>
+            <p style={{ fontSize: 12.5, color: '#7a6a8a', marginTop: 6 }}>Soyez le premier à publier !</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {feedItems.map(item =>
-              item.kind === 'post'
-                ? <PostCard key={item.post.id} post={item.post}
-                    liked={myLikes.has(item.post.id)}
-                    reposted={myReposts.has(item.post.id)}
-                    onLike={() => toggleLike(item.post)}
-                    onRepost={() => repost(item.post)}
-                    onToggleComment={() => toggleComments(item.post.id)}
-                    commentsOpen={openComments === item.post.id}
-                    comments={comments[item.post.id] || []}
-                    commentText={openComments === item.post.id ? commentText : ''}
-                    onCommentChange={setCommentText}
-                    onCommentSubmit={() => submitComment(item.post)}
-                    commentLoading={commentLoading}
-                  />
-                : <MissionFeedCard key={item.mission.id} mission={item.mission}
-                    isFreelance={isFreelance}
-                    onApply={() => applyMission(item.mission.id)}
-                    onView={() => navigate(`/MissionDetail?id=${item.mission.id}`)}
-                  />
-            )}
+            {feedItems.map((item, i) => (
+              <motion.div
+                key={item.kind === 'post' ? item.post.id : item.mission.id}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: Math.min(i * 0.05, 0.4), ease: [0.22, 1, 0.36, 1] }}
+              >
+                {item.kind === 'post'
+                  ? <PostCard post={item.post}
+                      liked={myLikes.has(item.post.id)}
+                      reposted={myReposts.has(item.post.id)}
+                      onLike={() => toggleLike(item.post)}
+                      onRepost={() => repost(item.post)}
+                      onToggleComment={() => toggleComments(item.post.id)}
+                      commentsOpen={openComments === item.post.id}
+                      comments={comments[item.post.id] || []}
+                      commentText={openComments === item.post.id ? commentText : ''}
+                      onCommentChange={setCommentText}
+                      onCommentSubmit={() => submitComment(item.post)}
+                      commentLoading={commentLoading}
+                    />
+                  : <MissionFeedCard mission={item.mission}
+                      isFreelance={isFreelance}
+                      onApply={() => applyMission(item.mission.id)}
+                      onView={() => navigate(`/MissionDetail?id=${item.mission.id}`)}
+                    />}
+              </motion.div>
+            ))}
           </div>
         )}
       </div>

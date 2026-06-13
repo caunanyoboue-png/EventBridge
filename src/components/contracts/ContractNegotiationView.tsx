@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { FileText, Check, Pencil, X, Hourglass, FileSignature, CreditCard, BellRing } from 'lucide-react';
 import { type Contract, type ContractNegotiationEntry } from '../../types';
 import { formatCFA } from '../../lib/utils';
 import {
@@ -44,7 +45,7 @@ export default function ContractNegotiationView({ contract: initialContract, myR
   const handleRealtime = useCallback((updated: Contract) => {
     setContract(updated);
     onUpdate(updated);
-    toast('Contrat mis à jour en temps réel', { icon: '🔔' });
+    toast('Contrat mis à jour en temps réel', { icon: <BellRing size={18} color="#d4af37" /> });
   }, [onUpdate]);
 
   useContractRealtime(contract.id, handleRealtime);
@@ -153,8 +154,8 @@ export default function ContractNegotiationView({ contract: initialContract, myR
           <ContractStatusBadge status={contract.status} />
           {contract.pdf_url && (
             <a href={contract.pdf_url} target="_blank" rel="noreferrer"
-              className="btn-outline-gold px-3 py-1.5 rounded-lg text-xs">
-              📄 PDF
+              className="btn-outline-gold px-3 py-1.5 rounded-lg text-xs inline-flex items-center gap-1.5">
+              <FileText size={13} /> PDF
             </a>
           )}
         </div>
@@ -162,7 +163,7 @@ export default function ContractNegotiationView({ contract: initialContract, myR
 
       {/* Résumé du contrat */}
       <div className="card-glass p-5">
-        <h3 className="text-sm font-semibold mb-4" style={{ color: '#c9a84c' }}>Détails du contrat</h3>
+        <h3 className="text-sm font-semibold mb-4" style={{ color: '#d4af37' }}>Détails du contrat</h3>
         <div className="grid grid-cols-2 gap-2 text-xs" style={{ color: '#b8a898' }}>
           {[
             ['Organisateur', contract.organizer_name],
@@ -192,8 +193,8 @@ export default function ContractNegotiationView({ contract: initialContract, myR
           ].map(({ label, signed }) => (
             <div key={label} className="text-xs px-3 py-2 rounded-lg text-center"
               style={{ background: signed ? 'rgba(16,185,129,0.1)' : 'rgba(82,54,124,0.3)', border: `1px solid ${signed ? 'rgba(16,185,129,0.3)' : 'rgba(201,168,76,0.1)'}` }}>
-              <p style={{ color: signed ? '#10b981' : '#b8a898' }}>
-                {signed ? `✓ Signé le ${new Date(signed).toLocaleDateString('fr-CI')}` : '⏳ En attente de signature'}
+              <p style={{ color: signed ? '#10b981' : '#b8a898', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                {signed ? <><Check size={13} /> Signé le {new Date(signed).toLocaleDateString('fr-CI')}</> : <><Hourglass size={12} /> En attente de signature</>}
               </p>
               <p style={{ color: '#7a6a7a' }}>{label}</p>
             </div>
@@ -204,24 +205,24 @@ export default function ContractNegotiationView({ contract: initialContract, myR
       {/* Zone d'actions */}
       {STATUS_ACTIONS['Action'] && (
         <div className="card-glass p-5 space-y-3">
-          <h3 className="text-sm font-semibold" style={{ color: '#c9a84c' }}>Actions</h3>
+          <h3 className="text-sm font-semibold" style={{ color: '#d4af37' }}>Actions</h3>
 
           {/* L'autre partie a proposé */}
           {otherProposed && !showReject && !showCounter && (
             <div className="flex gap-3 flex-wrap">
               <button onClick={handleAccept} disabled={busy}
-                className="btn-gold px-5 py-2.5 rounded-xl text-sm font-bold text-[#261642]">
-                ✓ Accepter
+                className="btn-gold px-5 py-2.5 rounded-xl text-sm font-bold text-[#261642] inline-flex items-center gap-2">
+                <Check size={16} /> Accepter
               </button>
               <button onClick={() => setShowCounter(true)}
-                className="px-5 py-2.5 rounded-xl text-sm font-medium border"
-                style={{ borderColor: '#c9a84c', color: '#c9a84c', background: 'transparent' }}>
-                ✎ Contre-proposer
+                className="px-5 py-2.5 rounded-xl text-sm font-medium border inline-flex items-center gap-2"
+                style={{ borderColor: '#d4af37', color: '#d4af37', background: 'transparent' }}>
+                <Pencil size={15} /> Contre-proposer
               </button>
               <button onClick={() => setShowReject(true)}
-                className="px-5 py-2.5 rounded-xl text-sm font-medium border"
+                className="px-5 py-2.5 rounded-xl text-sm font-medium border inline-flex items-center gap-2"
                 style={{ borderColor: '#ef4444', color: '#ef4444', background: 'transparent' }}>
-                ✗ Refuser
+                <X size={16} /> Refuser
               </button>
             </div>
           )}
@@ -230,7 +231,7 @@ export default function ContractNegotiationView({ contract: initialContract, myR
           {iWaited && (
             <div className="flex items-center gap-3 px-4 py-3 rounded-xl"
               style={{ background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.2)' }}>
-              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#c9a84c' }} />
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#d4af37' }} />
               <p className="text-sm" style={{ color: '#b8a898' }}>En attente de réponse de l'autre partie...</p>
             </div>
           )}
@@ -256,7 +257,7 @@ export default function ContractNegotiationView({ contract: initialContract, myR
           {/* Contre-proposition */}
           {showCounter && (
             <div className="space-y-3">
-              <p className="text-xs font-semibold" style={{ color: '#c9a84c' }}>Votre contre-proposition</p>
+              <p className="text-xs font-semibold" style={{ color: '#d4af37' }}>Votre contre-proposition</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs block mb-1" style={{ color: '#b8a898' }}>Taux horaire (FCFA/h)</label>
@@ -286,8 +287,8 @@ export default function ContractNegotiationView({ contract: initialContract, myR
           {/* Signature */}
           {canSign && (
             <button onClick={handleSign} disabled={busy || genPdf}
-              className="btn-gold w-full py-3 rounded-xl text-sm font-bold text-[#261642]">
-              {genPdf ? '📄 Génération PDF...' : busy ? 'Signature...' : '✍ Signer électroniquement'}
+              className="btn-gold w-full py-3 rounded-xl text-sm font-bold text-[#261642] flex items-center justify-center gap-2">
+              {genPdf ? <><FileText size={16} /> Génération PDF...</> : busy ? 'Signature...' : <><FileSignature size={16} /> Signer électroniquement</>}
             </button>
           )}
         </div>
@@ -296,7 +297,7 @@ export default function ContractNegotiationView({ contract: initialContract, myR
       {/* Section paiement (contrat signé) */}
       {contract.status === 'signed' && (
         <div className="card-glass p-5">
-          <h3 className="text-sm font-semibold mb-3" style={{ color: '#c9a84c' }}>💳 Paiement</h3>
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: '#d4af37' }}><CreditCard size={16} /> Paiement</h3>
           <PaymentButton
             contractId={contract.id}
             amount={contract.total_gross + contract.end_of_contract_indemnity}
@@ -308,13 +309,13 @@ export default function ContractNegotiationView({ contract: initialContract, myR
       {/* Historique des versions */}
       {history.length > 0 && (
         <div className="card-glass p-5">
-          <h3 className="text-sm font-semibold mb-4" style={{ color: '#c9a84c' }}>Historique des négociations</h3>
+          <h3 className="text-sm font-semibold mb-4" style={{ color: '#d4af37' }}>Historique des négociations</h3>
           <div className="space-y-3">
             {history.map((entry, i) => (
               <div key={entry.id} className="flex gap-3">
                 <div className="flex flex-col items-center">
                   <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                    style={{ background: 'rgba(201,168,76,0.2)', color: '#c9a84c' }}>v{entry.version}</div>
+                    style={{ background: 'rgba(201,168,76,0.2)', color: '#d4af37' }}>v{entry.version}</div>
                   {i < history.length - 1 && <div className="w-px flex-1 mt-1" style={{ background: 'rgba(201,168,76,0.15)' }} />}
                 </div>
                 <div className="flex-1 pb-3">
@@ -339,7 +340,7 @@ export default function ContractNegotiationView({ contract: initialContract, myR
       {/* Diff avec version précédente */}
       {contract.version > 1 && history.length > 0 && (
         <div className="card-glass p-5">
-          <h3 className="text-sm font-semibold mb-4" style={{ color: '#c9a84c' }}>
+          <h3 className="text-sm font-semibold mb-4" style={{ color: '#d4af37' }}>
             Modifications (v{contract.version - 1} → v{contract.version})
           </h3>
           <ContractDiffViewer

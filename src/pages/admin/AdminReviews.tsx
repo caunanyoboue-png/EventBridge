@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { supabase } from '../../lib/supabase';
+import { Star } from 'lucide-react';
 import { formatRelative, getInitials } from '../../lib/utils';
 import toast from 'react-hot-toast';
 
@@ -58,7 +59,7 @@ export default function AdminReviews() {
     return (
       <span>
         {[1, 2, 3, 4, 5].map(i => (
-          <span key={i} style={{ color: i <= rating ? '#c9a84c' : '#52367c' }}>★</span>
+          <span key={i} style={{ color: i <= rating ? '#d4af37' : '#52367c' }}>★</span>
         ))}
       </span>
     );
@@ -66,11 +67,11 @@ export default function AdminReviews() {
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6" style={{ color: '#f0e6d3' }}>⭐ Gestion des avis</h1>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><Star size={25} fill="#d4af37" color="#d4af37" /> Gestion des avis</h1>
 
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="card-glass p-4 text-center">
-          <div className="text-2xl font-bold" style={{ color: '#c9a84c' }}>{reviews.length}</div>
+          <div className="text-2xl font-bold" style={{ color: '#d4af37' }}>{reviews.length}</div>
           <div className="text-xs mt-1" style={{ color: '#b8a898' }}>Total avis</div>
         </div>
         <div className="card-glass p-4 text-center">
@@ -88,7 +89,7 @@ export default function AdminReviews() {
       <div className="card-glass p-4 mb-6 flex flex-wrap gap-3">
         <input className="px-3 py-2 rounded-lg text-sm outline-none flex-1 min-w-40"
           style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
-          placeholder="🔍 Rechercher..." value={search} onChange={e => setSearch(e.target.value)} />
+          placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} />
         <select className="px-3 py-2 rounded-lg text-sm outline-none"
           style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
           value={filterRating} onChange={e => setFilterRating(Number(e.target.value))}>
@@ -109,7 +110,7 @@ export default function AdminReviews() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3 flex-1">
                   <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                    style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642' }}>
+                    style={{ background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }}>
                     {getInitials(r.reviewer?.full_name || '?')}
                   </div>
                   <div className="flex-1">

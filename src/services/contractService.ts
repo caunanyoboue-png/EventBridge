@@ -159,11 +159,11 @@ export async function fetchNegotiationHistory(contractId: string) {
 // ── Notification helper ───────────────────────────────────────────────────────
 
 const CONTRACT_NOTIF: Record<string, { title: string; body: string }> = {
-  proposed:         { title: '📄 Nouveau contrat proposé',    body: 'Un contrat CDD vous a été soumis pour validation.' },
-  counter_proposed: { title: '🔄 Contre-proposition reçue',   body: 'L\'autre partie a soumis une contre-proposition.' },
-  accepted:         { title: '✅ Contrat accepté !',           body: 'L\'autre partie a accepté les termes du contrat.' },
-  rejected:         { title: '❌ Contrat refusé',              body: 'L\'autre partie a refusé le contrat.' },
-  signed:           { title: '✍ Contrat signé',               body: 'L\'autre partie a apposé sa signature.' },
+  proposed:         { title: 'Nouveau contrat proposé',    body: 'Un contrat CDD vous a été soumis pour validation.' },
+  counter_proposed: { title: 'Contre-proposition reçue',   body: 'L\'autre partie a soumis une contre-proposition.' },
+  accepted:         { title: 'Contrat accepté !',           body: 'L\'autre partie a accepté les termes du contrat.' },
+  rejected:         { title: 'Contrat refusé',              body: 'L\'autre partie a refusé le contrat.' },
+  signed:           { title: 'Contrat signé',               body: 'L\'autre partie a apposé sa signature.' },
 };
 
 async function notifyOtherParty(

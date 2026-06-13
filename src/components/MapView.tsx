@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { MapPin } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -54,9 +55,10 @@ export default function MapView({ lat, lng, label, zoom = 15 }: Props) {
       <div ref={containerRef} style={{ height: 220, width: '100%' }} />
       <div style={{
         padding: '7px 12px', background: 'rgba(26,18,50,0.95)',
-        fontSize: 11, color: 'rgba(240,230,211,0.35)',
+        fontSize: 11, color: 'rgba(240,230,211,0.45)',
+        display: 'flex', alignItems: 'center', gap: 5,
       }}>
-        📍 {label || `${lat.toFixed(5)}, ${lng.toFixed(5)}`} · OpenStreetMap
+        <MapPin size={12} /> {label || `${lat.toFixed(5)}, ${lng.toFixed(5)}`} · OpenStreetMap
       </div>
     </div>
   );

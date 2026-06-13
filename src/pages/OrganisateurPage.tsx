@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-
-const LOGO = '/logo.png.jpeg';
+import Logo from '../components/Logo';
 
 function IconArrow() {
   return (
@@ -12,13 +11,13 @@ function IconArrow() {
 function IconCheck() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-      <path d="M2.5 7l3.5 3.5 5.5-6" stroke="#c9a84c" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M2.5 7l3.5 3.5 5.5-6" stroke="#d4af37" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }
 function IconStar() {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="#c9a84c">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="#d4af37">
       <path d="M7 1l1.8 3.6L13 5.3l-3 2.9.7 4.1L7 10.4l-3.7 1.9.7-4.1-3-2.9 4.2-.7L7 1Z" strokeLinejoin="round"/>
     </svg>
   );
@@ -82,7 +81,7 @@ export default function OrganisateurPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-4 flex items-center justify-between"
         style={{ background: 'rgba(8,3,18,0.92)', backdropFilter: 'blur(24px)', borderBottom: '1px solid rgba(201,168,76,0.1)' }}>
         <button onClick={() => navigate('/')} className="flex items-center gap-3">
-          <img src={LOGO} className="h-10 w-auto" alt="EventBridge" />
+          <Logo height={46} />
         </button>
         <div className="hidden md:flex items-center gap-8">
           <button onClick={() => navigate('/pour-les-freelances')}
@@ -108,8 +107,8 @@ export default function OrganisateurPage() {
         <div className="relative z-10 max-w-4xl mx-auto px-6 text-center pt-24">
           <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full mb-10"
             style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.3)' }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#c9a84c', display: 'inline-block' }} />
-            <span className="text-xs font-semibold tracking-widest" style={{ color: '#c9a84c', letterSpacing: '0.1em' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#d4af37', display: 'inline-block' }} />
+            <span className="text-xs font-semibold tracking-widest" style={{ color: '#d4af37', letterSpacing: '0.1em' }}>
               POUR LES ORGANISATEURS D'ÉVÉNEMENTS
             </span>
           </div>
@@ -118,9 +117,9 @@ export default function OrganisateurPage() {
             Les meilleurs talents<br />
             pour vos <span className="text-gold-gradient">événements</span>
           </h1>
-          <p className="text-lg mb-12 max-w-xl mx-auto leading-relaxed" style={{ color: '#a09080', lineHeight: 1.8 }}>
+          <p className="text-lg mb-12 max-w-xl mx-auto leading-relaxed" style={{ color: '#b8a898', lineHeight: 1.8 }}>
             Recrutez des freelances vérifiés et certifiés en quelques minutes.
-            Service en salle, sécurité, animation, hôtesses — tout est disponible.
+            Service en salle, sécurité, animation, hôtesses — l'excellence est à portée de main.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button onClick={() => navigate('/onboarding')}
@@ -145,7 +144,7 @@ export default function OrganisateurPage() {
               <div key={s.l} className="text-center py-4 rounded-xl"
                 style={{ background: 'rgba(201,168,76,0.05)', border: '1px solid rgba(201,168,76,0.12)' }}>
                 <div className="text-xl font-bold text-gold-gradient">{s.v}</div>
-                <div className="text-xs mt-1" style={{ color: '#5a4a6a' }}>{s.l}</div>
+                <div className="text-xs mt-1" style={{ color: '#8a7a9a' }}>{s.l}</div>
               </div>
             ))}
           </div>
@@ -156,19 +155,19 @@ export default function OrganisateurPage() {
       <section className="py-24 px-6" style={{ background: '#0f0520' }}>
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: '#c9a84c', letterSpacing: '0.15em' }}>Pourquoi EventBridge</p>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: '#d4af37', letterSpacing: '0.15em' }}>Pourquoi EventBridge</p>
             <h2 className="font-display text-3xl font-bold" style={{ color: '#f0e6d3' }}>Une plateforme pensée pour vous</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {AVANTAGES.map((a, i) => (
-              <div key={i} className="p-6 rounded-2xl"
+              <div key={i} className="p-6 rounded-2xl card-lift"
                 style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(201,168,76,0.08)' }}>
                 <div className="w-8 h-8 rounded-full flex items-center justify-center mb-4"
                   style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)' }}>
                   <IconCheck />
                 </div>
                 <h3 className="font-bold text-sm mb-2" style={{ color: '#f0e6d3' }}>{a.title}</h3>
-                <p className="text-xs leading-relaxed" style={{ color: '#6a5a7a', lineHeight: 1.8 }}>{a.desc}</p>
+                <p className="text-xs leading-relaxed" style={{ color: '#9a8a9a', lineHeight: 1.8 }}>{a.desc}</p>
               </div>
             ))}
           </div>
@@ -179,7 +178,7 @@ export default function OrganisateurPage() {
       <section className="py-24 px-6" style={{ background: '#1c1132' }}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: '#c9a84c', letterSpacing: '0.15em' }}>Simple & Rapide</p>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: '#d4af37', letterSpacing: '0.15em' }}>Simple & Rapide</p>
             <h2 className="font-display text-3xl font-bold" style={{ color: '#f0e6d3' }}>Recruter en 3 étapes</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 relative">
@@ -193,10 +192,10 @@ export default function OrganisateurPage() {
                     <span className="font-display text-2xl font-bold text-gold-gradient">{String(idx + 1).padStart(2, '0')}</span>
                   </div>
                   <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full"
-                    style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', boxShadow: '0 0 12px rgba(201,168,76,0.4)' }} />
+                    style={{ background: 'linear-gradient(135deg,#d4af37,#e8c97a)', boxShadow: '0 0 12px rgba(201,168,76,0.4)' }} />
                 </div>
                 <h3 className="font-bold text-base mb-3" style={{ color: '#f0e6d3' }}>{s.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: '#6a5a7a', lineHeight: 1.9 }}>{s.desc}</p>
+                <p className="text-sm leading-relaxed" style={{ color: '#9a8a9a', lineHeight: 1.9 }}>{s.desc}</p>
               </div>
             ))}
           </div>
@@ -206,12 +205,12 @@ export default function OrganisateurPage() {
       {/* TYPES D'ÉVÉNEMENTS */}
       <section className="py-24 px-6" style={{ background: '#0a0416' }}>
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: '#c9a84c', letterSpacing: '0.15em' }}>Nos domaines</p>
+          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: '#d4af37', letterSpacing: '0.15em' }}>Nos domaines</p>
           <h2 className="font-display text-3xl font-bold mb-12" style={{ color: '#f0e6d3' }}>Pour tous types d'événements</h2>
           <div className="flex flex-wrap justify-center gap-3">
             {TYPES_EVENTS.map(t => (
               <span key={t} className="px-5 py-2.5 rounded-full text-sm font-medium"
-                style={{ background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.18)', color: '#c9a84c' }}>
+                style={{ background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.18)', color: '#d4af37' }}>
                 {t}
               </span>
             ))}
@@ -227,7 +226,7 @@ export default function OrganisateurPage() {
         </div>
         <div className="relative z-10 max-w-2xl mx-auto text-center">
           <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 rounded-full flex items-center justify-center"
+            <div className="w-16 h-16 rounded-full flex items-center justify-center animate-sos"
               style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.25)' }}>
               <IconWarning />
             </div>
@@ -254,23 +253,23 @@ export default function OrganisateurPage() {
       <section className="py-24 px-6" style={{ background: '#0f0520' }}>
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: '#c9a84c', letterSpacing: '0.15em' }}>Témoignages</p>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: '#d4af37', letterSpacing: '0.15em' }}>Témoignages</p>
             <h2 className="font-display text-3xl font-bold" style={{ color: '#f0e6d3' }}>Ils nous font confiance</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {TEMOIGNAGES.map(t => (
-              <div key={t.name} className="p-6 rounded-2xl"
+              <div key={t.name} className="p-6 rounded-2xl card-lift"
                 style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(201,168,76,0.1)' }}>
                 <div className="flex gap-1 mb-4">
                   {Array.from({ length: t.rating }).map((_, i) => <IconStar key={i} />)}
                 </div>
-                <p className="text-sm leading-relaxed mb-5" style={{ color: '#9a8a7a', lineHeight: 1.8 }}>"{t.text}"</p>
+                <p className="text-sm leading-relaxed mb-5" style={{ color: '#b8a898', lineHeight: 1.8 }}>"{t.text}"</p>
                 <div className="flex items-center gap-3 pt-4" style={{ borderTop: '1px solid rgba(201,168,76,0.08)' }}>
                   <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full object-cover"
                     style={{ border: '2px solid rgba(201,168,76,0.2)' }} />
                   <div>
                     <p className="font-semibold text-sm" style={{ color: '#f0e6d3' }}>{t.name}</p>
-                    <p className="text-xs mt-0.5" style={{ color: '#4a3a5a' }}>{t.company} · {t.role}</p>
+                    <p className="text-xs mt-0.5" style={{ color: '#8a7a9a' }}>{t.company} · {t.role}</p>
                   </div>
                 </div>
               </div>
@@ -282,12 +281,12 @@ export default function OrganisateurPage() {
       {/* CTA FINAL */}
       <section className="py-28 px-6 text-center" style={{ background: '#1c1132' }}>
         <div className="max-w-xl mx-auto">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: '#c9a84c', letterSpacing: '0.15em' }}>Commencez aujourd'hui</p>
+          <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: '#d4af37', letterSpacing: '0.15em' }}>Commencez aujourd'hui</p>
           <h2 className="font-display text-4xl font-bold mb-4" style={{ color: '#f0e6d3' }}>
             Prêt à recruter les<br />
             <span className="text-gold-gradient">meilleurs talents ?</span>
           </h2>
-          <p className="text-sm mb-10" style={{ color: '#5a4a6a', lineHeight: 1.9 }}>
+          <p className="text-sm mb-10" style={{ color: '#9a8a9a', lineHeight: 1.9 }}>
             Publiez votre première mission en moins de 5 minutes.<br />
             Sans abonnement. Payez uniquement ce que vous utilisez.
           </p>
@@ -301,7 +300,7 @@ export default function OrganisateurPage() {
 
       {/* FOOTER */}
       <footer className="py-8 px-8 text-center" style={{ background: '#040110', borderTop: '1px solid rgba(201,168,76,0.07)' }}>
-        <p className="text-xs" style={{ color: '#2a1a3a' }}>© 2025 EventBridge · Côte d'Ivoire</p>
+        <p className="text-xs" style={{ color: '#5a4a6a' }}>© 2026 EventBridge · Côte d'Ivoire</p>
       </footer>
 
     </div>

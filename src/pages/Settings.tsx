@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 
 const C = {
   card:    '#1a1232',
-  gold:    '#c9a84c',
+  gold:    '#d4af37',
   goldLt:  '#e8c97a',
   text:    '#f0e6d3',
   textDim: 'rgba(240,230,211,0.45)',

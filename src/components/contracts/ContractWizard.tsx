@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Check, X, FileText } from 'lucide-react';
 import { type Mission, type Profile, type Contract, type CddReason, type PaymentMethod } from '../../types';
 import { formatCFA } from '../../lib/utils';
 import {
@@ -93,8 +94,8 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
             <h2 className="font-display font-bold text-lg" style={{ color: '#f0e6d3' }}>Contrat de mission</h2>
             <p className="text-xs mt-0.5" style={{ color: '#b8a898' }}>CDD — Code du Travail ivoirien</p>
           </div>
-          <button onClick={onCancel} className="w-8 h-8 rounded-full flex items-center justify-center text-sm"
-            style={{ background: 'rgba(82,54,124,0.5)', color: '#b8a898' }}>✕</button>
+          <button onClick={onCancel} className="w-8 h-8 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(82,54,124,0.5)', color: '#b8a898' }}><X size={15} /></button>
         </div>
 
         {/* Stepper */}
@@ -104,13 +105,13 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
               <div className="flex items-center gap-1.5">
                 <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
                   style={i <= step
-                    ? { background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642' }
+                    ? { background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }
                     : { border: '1px solid rgba(201,168,76,0.25)', color: '#7a6a7a' }}>
-                  {i < step ? '✓' : i + 1}
+                  {i < step ? <Check size={13} /> : i + 1}
                 </div>
-                <span className="text-xs hidden sm:block" style={{ color: i === step ? '#c9a84c' : '#7a6a7a' }}>{s}</span>
+                <span className="text-xs hidden sm:block" style={{ color: i === step ? '#d4af37' : '#7a6a7a' }}>{s}</span>
               </div>
-              {i < STEPS.length - 1 && <div className="w-5 h-px mx-1" style={{ background: i < step ? '#c9a84c' : 'rgba(201,168,76,0.2)' }} />}
+              {i < STEPS.length - 1 && <div className="w-5 h-px mx-1" style={{ background: i < step ? '#d4af37' : 'rgba(201,168,76,0.2)' }} />}
             </div>
           ))}
         </div>
@@ -121,7 +122,7 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
           {/* Étape 1 — Parties */}
           {step === 0 && (
             <>
-              <p className="text-xs font-semibold" style={{ color: '#c9a84c' }}>ORGANISATEUR</p>
+              <p className="text-xs font-semibold" style={{ color: '#d4af37' }}>ORGANISATEUR</p>
               <div><label style={label}>Nom / Raison sociale</label>
                 <input style={inp} value={form.organizer_name} onChange={e => upd('organizer_name', e.target.value)} /></div>
               <div><label style={label}>Adresse</label>
@@ -129,7 +130,7 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
               <div><label style={label}>RCCM (numéro registre de commerce)</label>
                 <input style={inp} value={form.organizer_rccm} onChange={e => upd('organizer_rccm', e.target.value)} /></div>
 
-              <p className="text-xs font-semibold pt-2" style={{ color: '#c9a84c' }}>FREELANCE</p>
+              <p className="text-xs font-semibold pt-2" style={{ color: '#d4af37' }}>FREELANCE</p>
               <div><label style={label}>Nom complet</label>
                 <input style={inp} value={form.freelance_name} onChange={e => upd('freelance_name', e.target.value)} /></div>
               <div><label style={label}>Adresse</label>
@@ -209,19 +210,19 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
 
               {/* Récapitulatif calcul automatique */}
               <div className="rounded-xl p-4 space-y-2" style={{ background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.2)' }}>
-                <p className="text-xs font-semibold" style={{ color: '#c9a84c' }}>Calcul automatique</p>
+                <p className="text-xs font-semibold" style={{ color: '#d4af37' }}>Calcul automatique</p>
                 <div className="flex justify-between text-xs" style={{ color: '#b8a898' }}>
                   <span>Montant brut total</span>
                   <span style={{ color: '#f0e6d3', fontWeight: 600 }}>{formatCFA(totalGross)} FCFA</span>
                 </div>
                 <div className="flex justify-between text-xs" style={{ color: '#b8a898' }}>
                   <span>Indemnité fin de contrat (3% — Art. 15.8)</span>
-                  <span style={{ color: '#c9a84c', fontWeight: 600 }}>{formatCFA(indemnity)} FCFA</span>
+                  <span style={{ color: '#d4af37', fontWeight: 600 }}>{formatCFA(indemnity)} FCFA</span>
                 </div>
                 <div className="h-px" style={{ background: 'rgba(201,168,76,0.15)' }} />
                 <div className="flex justify-between text-xs font-bold">
                   <span style={{ color: '#f0e6d3' }}>Total à verser</span>
-                  <span style={{ color: '#c9a84c' }}>{formatCFA(totalGross + indemnity)} FCFA</span>
+                  <span style={{ color: '#d4af37' }}>{formatCFA(totalGross + indemnity)} FCFA</span>
                 </div>
               </div>
             </>
@@ -251,11 +252,13 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
               ))}
 
               <div className="rounded-xl p-4 text-xs space-y-1.5" style={{ background: 'rgba(82,54,124,0.3)', border: '1px solid rgba(201,168,76,0.1)' }}>
-                <p className="font-semibold" style={{ color: '#c9a84c' }}>Clauses obligatoires incluses automatiquement :</p>
+                <p className="font-semibold" style={{ color: '#d4af37' }}>Clauses obligatoires incluses automatiquement :</p>
                 {['Interdiction du travail forcé (Art. 3)', 'Non-discrimination (Art. 4)', 'Anti-harcèlement (Art. 5)',
                   'Rupture anticipée et indemnités (Art. 15.9)', 'Indemnité de fin de contrat 3% (Art. 15.8)',
                   'Heures supplémentaires +15%/+50% (Art. 21.5)', 'Repos hebdomadaire 24h (Art. 24.1)'].map(c => (
-                  <p key={c} style={{ color: '#b8a898' }}>✓ {c}</p>
+                  <p key={c} style={{ color: '#b8a898', display: 'flex', alignItems: 'flex-start', gap: 7 }}>
+                    <Check size={14} color="#10b981" style={{ flexShrink: 0, marginTop: 2 }} /> {c}
+                  </p>
                 ))}
               </div>
             </>
@@ -287,11 +290,11 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
                 <div className="h-px" style={{ background: 'rgba(201,168,76,0.15)' }} />
                 <div className="flex justify-between font-bold">
                   <span>Montant brut</span>
-                  <span style={{ color: '#c9a84c' }}>{formatCFA(totalGross)}</span>
+                  <span style={{ color: '#d4af37' }}>{formatCFA(totalGross)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Indemnité fin contrat (3%)</span>
-                  <span style={{ color: '#c9a84c' }}>{formatCFA(indemnity)}</span>
+                  <span style={{ color: '#d4af37' }}>{formatCFA(indemnity)}</span>
                 </div>
                 {!smig.ok && (
                   <p className="px-3 py-2 rounded-lg text-xs" style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171' }}>
@@ -323,7 +326,7 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
             <button onClick={handleSubmit} disabled={saving}
               className="btn-gold flex-1 py-2.5 rounded-xl text-sm font-bold text-[#261642]"
               style={{ opacity: saving ? 0.7 : 1 }}>
-              {saving ? 'Envoi...' : '📄 Proposer ce contrat'}
+              {saving ? 'Envoi...' : <span className="inline-flex items-center gap-2"><FileText size={16} /> Proposer ce contrat</span>}
             </button>
           )}
         </div>

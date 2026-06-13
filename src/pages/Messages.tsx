@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react';
+import { Smile, Paperclip, X, Download } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -170,7 +171,7 @@ export default function Messages() {
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
 
-    const preview = content || (attachment ? `📎 ${attachment.name}` : '');
+    const preview = content || (attachment ? `Pièce jointe : ${attachment.name}` : '');
     await supabase.from('conversations')
       .update({ last_message: preview, last_message_at: new Date().toISOString() })
       .eq('id', selected.id);
@@ -211,7 +212,7 @@ export default function Messages() {
                       borderColor: 'rgba(201,168,76,0.05)',
                     }}>
                     <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-                      style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642' }}>
+                      style={{ background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }}>
                       {other ? getInitials(other.full_name) : '?'}
                     </div>
                     <div className="overflow-hidden flex-1">
@@ -239,7 +240,7 @@ export default function Messages() {
                   justifyContent: 'center', margin: '0 auto 14px' }}>
                   <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
                     <path d="M19 2H3a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h5l3 4 3-4h5a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1Z"
-                      stroke="#c9a84c" strokeWidth="1.4" strokeLinejoin="round"/>
+                      stroke="#d4af37" strokeWidth="1.4" strokeLinejoin="round"/>
                   </svg>
                 </div>
                 <p style={{ color: '#b8a898', fontSize: 14 }}>Sélectionnez une conversation</p>
@@ -253,14 +254,14 @@ export default function Messages() {
                   style={{ display: 'none', alignItems: 'center', gap: 6,
                     background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.2)',
                     borderRadius: 8, padding: '5px 10px', cursor: 'pointer',
-                    color: '#c9a84c', fontSize: 13, fontWeight: 500, flexShrink: 0 }}>
+                    color: '#d4af37', fontSize: 13, fontWeight: 500, flexShrink: 0 }}>
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path d="M9 2L4 7l5 5" stroke="#c9a84c" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M9 2L4 7l5 5" stroke="#d4af37" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                   Retour
                 </button>
                 <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-                  style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642' }}>
+                  style={{ background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }}>
                   {selected.other_user ? getInitials((selected.other_user as Profile).full_name) : '?'}
                 </div>
                 <div style={{ flex: 1 }}>
@@ -273,7 +274,7 @@ export default function Messages() {
                     onClick={() => navigate(`/public-profile?id=${(selected.other_user as Profile).id}`)}
                     style={{ flexShrink: 0, fontSize: 12, fontWeight: 500,
                       padding: '5px 12px', borderRadius: 8, cursor: 'pointer',
-                      border: '1px solid rgba(201,168,76,0.25)', color: '#c9a84c',
+                      border: '1px solid rgba(201,168,76,0.25)', color: '#d4af37',
                       background: 'transparent' }}>
                     Voir profil
                   </button>
@@ -289,7 +290,7 @@ export default function Messages() {
                       <div className="max-w-xs lg:max-w-md">
                         <div className="rounded-2xl text-sm overflow-hidden"
                           style={isMe
-                            ? { background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642', borderBottomRightRadius: 4 }
+                            ? { background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642', borderBottomRightRadius: 4 }
                             : { background: 'rgba(82,54,124,0.7)', color: '#f0e6d3', border: '1px solid rgba(201,168,76,0.1)', borderBottomLeftRadius: 4 }
                           }>
                           {/* Pièce jointe image */}
@@ -304,10 +305,10 @@ export default function Messages() {
                           {m.attachment_type === 'file' && m.attachment_url && (
                             <a href={m.attachment_url} target="_blank" rel="noreferrer" download={m.attachment_name}
                               className="flex items-center gap-2 px-4 py-3"
-                              style={{ color: isMe ? '#261642' : '#c9a84c', textDecoration: 'none' }}>
-                              <span className="text-lg">📎</span>
+                              style={{ color: isMe ? '#261642' : '#d4af37', textDecoration: 'none' }}>
+                              <Paperclip size={16} className="shrink-0" />
                               <span className="text-xs font-medium truncate max-w-[160px]">{m.attachment_name}</span>
-                              <span className="text-xs shrink-0 opacity-70">↓</span>
+                              <Download size={14} className="shrink-0 opacity-70" />
                             </a>
                           )}
                           {/* Texte */}
@@ -333,17 +334,17 @@ export default function Messages() {
                   {attachPreview ? (
                     <img src={attachPreview} alt="" className="h-14 w-14 object-cover rounded-lg" />
                   ) : (
-                    <div className="h-14 w-14 rounded-lg flex items-center justify-center text-2xl"
-                      style={{ background: 'rgba(82,54,124,0.5)' }}>📎</div>
+                    <div className="h-14 w-14 rounded-lg flex items-center justify-center"
+                      style={{ background: 'rgba(82,54,124,0.5)' }}><Paperclip size={22} color="#d4af37" /></div>
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium truncate" style={{ color: '#f0e6d3' }}>{attachFile.name}</p>
                     <p className="text-xs" style={{ color: '#b8a898' }}>{(attachFile.size / 1024).toFixed(0)} Ko</p>
                   </div>
                   <button onClick={clearAttach}
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs"
+                    className="w-7 h-7 rounded-full flex items-center justify-center"
                     style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)' }}>
-                    ✕
+                    <X size={14} />
                   </button>
                 </div>
               )}
@@ -376,10 +377,10 @@ export default function Messages() {
                   style={{
                     background: showEmoji ? 'rgba(201,168,76,0.15)' : 'rgba(82,54,124,0.5)',
                     border: '1px solid rgba(201,168,76,0.2)',
-                    fontSize: 18,
+                    color: '#d4af37',
                   }}
                   title="Emojis">
-                  😊
+                  <Smile size={20} />
                 </button>
 
                 {/* Bouton fichier */}
@@ -388,10 +389,10 @@ export default function Messages() {
                   style={{
                     background: attachFile ? 'rgba(201,168,76,0.15)' : 'rgba(82,54,124,0.5)',
                     border: `1px solid ${attachFile ? 'rgba(201,168,76,0.5)' : 'rgba(201,168,76,0.2)'}`,
-                    fontSize: 18,
+                    color: '#d4af37',
                   }}
                   title="Joindre un fichier">
-                  📎
+                  <Paperclip size={19} />
                 </button>
 
                 <input

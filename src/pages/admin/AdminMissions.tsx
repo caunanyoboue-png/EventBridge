@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { supabase } from '../../lib/supabase';
 import { type Mission } from '../../types';
-import { formatDateShort, formatCFA, SERVICE_ICONS } from '../../lib/utils';
+import { Target } from 'lucide-react';
+import { formatDateShort, formatCFA } from '../../lib/utils';
+import { ServiceIcon } from '../../lib/serviceIcons';
 import toast from 'react-hot-toast';
 
 export default function AdminMissions() {
@@ -35,12 +37,12 @@ export default function AdminMissions() {
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6" style={{ color: '#f0e6d3' }}>🎯 Gestion des missions</h1>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><Target size={26} color="#d4af37" /> Gestion des missions</h1>
 
       <div className="card-glass p-4 mb-6 flex gap-3">
         <input className="px-3 py-2 rounded-lg text-sm outline-none flex-1"
           style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
-          placeholder="🔍 Rechercher..." value={search} onChange={e => setSearch(e.target.value)} />
+          placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} />
         <span className="text-sm my-auto" style={{ color: '#b8a898' }}>{filtered.length} mission(s)</span>
       </div>
 
@@ -51,7 +53,7 @@ export default function AdminMissions() {
           {filtered.map(m => (
             <div key={m.id} className="card-glass p-5 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="text-xl">{SERVICE_ICONS[m.service_type] || '🎯'}</span>
+                <ServiceIcon type={m.service_type} size={22} />
                 <div>
                   <p className="font-medium" style={{ color: '#f0e6d3' }}>{m.title}</p>
                   <p className="text-xs" style={{ color: '#b8a898' }}>

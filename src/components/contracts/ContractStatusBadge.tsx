@@ -7,7 +7,7 @@ const CONFIG: Record<ContractStatus, { label: string; bg: string; color: string;
   counter_proposed:       { label: 'Contre-proposé',  bg: 'rgba(245,158,11,0.15)',  color: '#fbbf24', border: 'rgba(245,158,11,0.35)' },
   accepted_by_both:       { label: 'Accepté',         bg: 'rgba(16,185,129,0.15)',  color: '#34d399', border: 'rgba(16,185,129,0.35)' },
   rejected:               { label: 'Refusé',          bg: 'rgba(239,68,68,0.15)',   color: '#f87171', border: 'rgba(239,68,68,0.35)'  },
-  signed:                 { label: '✓ Signé',         bg: 'rgba(16,185,129,0.25)',  color: '#10b981', border: 'rgba(16,185,129,0.5)'  },
+  signed:                 { label: 'Signé',            bg: 'rgba(16,185,129,0.25)',  color: '#10b981', border: 'rgba(16,185,129,0.5)'  },
   expired:                { label: 'Expiré',          bg: 'rgba(107,114,128,0.15)', color: '#6b7280', border: 'rgba(107,114,128,0.3)' },
 };
 

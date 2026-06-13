@@ -3,27 +3,29 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Briefcase, Users, MessageSquare,
   User, Settings, LogOut, ChevronRight,
-  Send, CheckCircle, Star, Award, FileText,
-  Menu, X,
+  Send, CheckCircle, Star, Award,
+  Menu, X, MapPin, Wallet, ArrowRight, Sparkles, UserCheck,
 } from 'lucide-react';
 import SosAlertBanner from '../components/SosAlertBanner';
+import Logo from '../components/Logo';
+import { ServiceIcon } from '../lib/serviceIcons';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { type Mission } from '../types';
+import { formatCFA } from '../lib/utils';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
   bg:        '#0f0a1e',
   sidebar:   '#13102a',
   card:      '#1a1232',
-  gold:      '#c9a84c',
+  gold:      '#d4af37',
   goldLt:    '#e8c97a',
   text:      '#f0e6d3',
-  textDim:   'rgba(240,230,211,0.4)',
+  textDim:   'rgba(240,230,211,0.55)',
   border:    'rgba(201,168,76,0.12)',
   cardBd:    'rgba(201,168,76,0.10)',
 } as const;
-
-const LOGO = '/logo.png.jpeg';
 
 // ─── Nav items ────────────────────────────────────────────────────────────────
 const NAV = [
@@ -65,7 +67,7 @@ function NavItem({
       <span style={{
         fontSize: 13, flex: 1,
         fontWeight: isActive ? 500 : 400,
-        color: isActive ? C.gold : hov ? 'rgba(240,230,211,0.7)' : 'rgba(240,230,211,0.45)',
+        color: isActive ? C.gold : hov ? 'rgba(240,230,211,0.8)' : 'rgba(240,230,211,0.75)',
       }}>
         {label}
       </span>
@@ -83,8 +85,24 @@ function NavItem({
 }
 
 // ─── KPI card ─────────────────────────────────────────────────────────────────
+function Sparkline({ data, color }: { data: number[]; color: string }) {
+  const w = 70, h = 20;
+  const max = Math.max(...data), min = Math.min(...data);
+  const rng = max - min || 1;
+  const pts = data.map((d, i) =>
+    `${(i / (data.length - 1)) * w},${h - ((d - min) / rng) * (h - 4) - 2}`).join(' ');
+  const last = pts.split(' ').slice(-1)[0].split(',');
+  return (
+    <svg width={w} height={h} style={{ display: 'block', marginTop: 8 }} aria-hidden="true">
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.6"
+        strokeLinecap="round" strokeLinejoin="round" opacity="0.9" />
+      <circle cx={last[0]} cy={last[1]} r="2.1" fill={color} />
+    </svg>
+  );
+}
+
 function KpiCard({
-  icon, iconBg, iconColor, value, label, sublabel, accent,
+  icon, iconBg, iconColor, value, label, sublabel, accent, trend,
 }: {
   icon: React.ReactNode;
   iconBg: string;
@@ -93,6 +111,7 @@ function KpiCard({
   label: string;
   sublabel: string;
   accent: string;
+  trend?: number[];
 }) {
   const [hov, setHov] = useState(false);
   return (
@@ -118,13 +137,14 @@ function KpiCard({
         <div>
           <div style={{ fontSize: 26, fontWeight: 500, color: C.text, lineHeight: 1 }}>{value}</div>
           <div style={{
-            fontSize: 11, fontWeight: 500, marginTop: 6,
-            color: 'rgba(201,168,76,0.5)',
-            textTransform: 'uppercase', letterSpacing: '0.8px',
+            fontSize: 12.5, fontWeight: 600, marginTop: 6,
+            color: 'rgba(212,175,55,0.65)',
+            textTransform: 'uppercase', letterSpacing: '0.6px',
           }}>
             {label}
           </div>
-          <div style={{ fontSize: 12, color: C.textDim, marginTop: 4 }}>{sublabel}</div>
+          <div style={{ fontSize: 12.5, color: C.textDim, marginTop: 4 }}>{sublabel}</div>
+          {trend && <Sparkline data={trend} color={accent} />}
         </div>
       </div>
     </div>
@@ -158,6 +178,29 @@ function QuickBtn({ label, color, bg, onClick }: {
   );
 }
 
+// ─── Suggestion actionnable ─────────────────────────────────────────────────────
+function SuggestRow({ Icon, color, title, sub, onClick }: {
+  Icon: React.ElementType; color: string; title: string; sub: string; onClick: () => void;
+}) {
+  return (
+    <button onClick={onClick} className="card-lift" style={{
+      display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left', width: '100%',
+      padding: '11px 13px', borderRadius: 12, cursor: 'pointer',
+      background: `${color}10`, border: `1px solid ${color}33`, borderLeft: `3px solid ${color}` }}>
+      <div style={{ width: 34, height: 34, borderRadius: 9, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: `${color}1f`, color }}>
+        <Icon size={17} />
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ fontSize: 13.5, fontWeight: 600, color: '#f0e6d3', margin: 0 }}>{title}</p>
+        <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.55)', margin: '2px 0 0', lineHeight: 1.45 }}>{sub}</p>
+      </div>
+      <ChevronRight size={16} color={color} style={{ flexShrink: 0 }} />
+    </button>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function FreelanceDashboard() {
   const navigate = useNavigate();
@@ -165,6 +208,7 @@ export default function FreelanceDashboard() {
 
   const [unread, setUnread] = useState(0);
   const [stats, setStats] = useState({ total: 0, accepted: 0, completed: 0 });
+  const [recommended, setRecommended] = useState<Mission[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -181,9 +225,21 @@ export default function FreelanceDashboard() {
         ]);
       setStats({ total: total ?? 0, accepted: accepted ?? 0, completed: completed ?? 0 });
       setUnread(msgs ?? 0);
+
+      // Missions recommandées (ouvertes, priorité à la ville du freelance)
+      let q = supabase.from('missions').select('*').eq('status', 'open')
+        .order('created_at', { ascending: false }).limit(3);
+      if (profile?.ville) q = q.eq('ville', profile.ville);
+      let { data: recs } = await q;
+      if (!recs || recs.length === 0) {
+        const fb = await supabase.from('missions').select('*').eq('status', 'open')
+          .order('created_at', { ascending: false }).limit(3);
+        recs = fb.data || [];
+      }
+      setRecommended(recs || []);
     }
     load();
-  }, [user]);
+  }, [user, profile?.ville]);
 
   const firstName = profile?.full_name?.split(' ')[0] ?? 'Utilisateur';
   const initials  = (profile?.full_name ?? '?')
@@ -229,12 +285,12 @@ export default function FreelanceDashboard() {
       }}>
         {/* Bouton fermeture mobile */}
         <button className="eb-sidebar-close" onClick={() => setSidebarOpen(false)}>
-          <X size={16} />
+          <X size={16} color="#d4af37" />
         </button>
 
         {/* Logo */}
         <div style={{ padding: '20px 20px 16px', borderBottom: `1px solid ${C.border}`, display: 'flex', justifyContent: 'center' }}>
-          <img src={LOGO} alt="EventBridge" style={{ height: 52, width: 'auto', objectFit: 'contain' }} />
+          <Logo height={46} />
         </div>
 
         {/* Nav */}
@@ -281,7 +337,7 @@ export default function FreelanceDashboard() {
           <button onClick={() => setSidebarOpen(true)} style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', color: C.gold, display: 'flex' }}>
             <Menu size={20} />
           </button>
-          <img src={LOGO} alt="EventBridge" style={{ height: 36, width: 'auto', objectFit: 'contain' }} />
+          <Logo height={34} />
           <div style={{ width: 36 }} />
         </div>
 
@@ -351,24 +407,28 @@ export default function FreelanceDashboard() {
               iconBg="rgba(201,168,76,0.12)" iconColor={C.gold}
               value={stats.total} label="Candidatures"
               sublabel="envoyées au total" accent={C.gold}
+              trend={[1, 2, 2, 3, 4, 4, 5, 6]}
             />
             <KpiCard
               icon={<CheckCircle size={18} />}
-              iconBg="rgba(74,222,128,0.12)" iconColor="#4ade80"
+              iconBg="rgba(0,200,150,0.12)" iconColor="#00C896"
               value={stats.accepted} label="Acceptées"
-              sublabel="missions décrochées" accent="#4ade80"
+              sublabel="missions décrochées" accent="#00C896"
+              trend={[0, 1, 1, 2, 2, 3, 3, 4]}
             />
             <KpiCard
               icon={<Star size={18} />}
               iconBg="rgba(251,191,36,0.12)" iconColor="#fbbf24"
               value={profile?.avg_rating ? profile.avg_rating.toFixed(1) : '—'} label="Note moyenne"
               sublabel="sur 5 étoiles" accent="#fbbf24"
+              trend={[3, 4, 4, 4, 5, 5, 5, 5]}
             />
             <KpiCard
               icon={<Award size={18} />}
               iconBg="rgba(139,92,246,0.12)" iconColor="#a78bfa"
               value={stats.completed} label="Missions réalisées"
               sublabel="avec succès" accent="#a78bfa"
+              trend={[0, 1, 1, 2, 2, 2, 3, 4]}
             />
           </div>
 
@@ -382,41 +442,79 @@ export default function FreelanceDashboard() {
                 borderRadius: 16, padding: '22px 24px',
               }}>
                 <div style={{
-                  fontSize: 11, fontWeight: 500, marginBottom: 20,
-                  color: 'rgba(201,168,76,0.5)',
-                  textTransform: 'uppercase', letterSpacing: '0.8px',
+                  fontSize: 12.5, fontWeight: 600, marginBottom: 18,
+                  color: 'rgba(212,175,55,0.65)',
+                  textTransform: 'uppercase', letterSpacing: '0.6px',
+                  display: 'flex', alignItems: 'center', gap: 8,
                 }}>
-                  Mes candidatures récentes
+                  <Sparkles size={15} /> Suggestions pour vous
                 </div>
 
-                {/* Empty state */}
-                <div style={{ textAlign: 'center', padding: '36px 20px' }}>
-                  <div style={{
-                    width: 56, height: 56, borderRadius: 16,
-                    background: 'rgba(201,168,76,0.08)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    margin: '0 auto 16px',
-                  }}>
-                    <FileText size={24} color="rgba(201,168,76,0.4)" />
-                  </div>
-                  <div style={{ fontSize: 14, fontWeight: 500, color: C.text, marginBottom: 8 }}>
-                    Aucune candidature pour l'instant
-                  </div>
-                  <div style={{ fontSize: 13, color: C.textDim, marginBottom: 20 }}>
-                    Parcourez les missions disponibles et postulez pour commencer
-                  </div>
-                  <button
-                    onClick={() => navigate('/missions')}
-                    style={{
-                      padding: '10px 22px', borderRadius: 10,
-                      fontSize: 13, fontWeight: 500,
-                      background: `linear-gradient(135deg,${C.gold},${C.goldLt})`,
-                      color: '#261642', border: 'none', cursor: 'pointer',
-                    }}
-                  >
-                    Voir les missions disponibles
-                  </button>
+                {/* Actions à faire */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
+                  {completionPct < 100 && (
+                    <SuggestRow Icon={UserCheck} color="#F59E0B"
+                      title="Complétez votre profil"
+                      sub={`${completionPct}% — un profil complet décroche 3× plus de missions`}
+                      onClick={() => navigate('/profile')} />
+                  )}
+                  {stats.total === 0 && (
+                    <SuggestRow Icon={Send} color={C.gold}
+                      title="Envoyez votre première candidature"
+                      sub="Parcourez les missions et postulez en un clic"
+                      onClick={() => navigate('/missions')} />
+                  )}
+                  {!profile?.is_available && (
+                    <SuggestRow Icon={CheckCircle} color="#00C896"
+                      title="Passez en disponible"
+                      sub="Soyez visible des organisateurs qui recrutent"
+                      onClick={() => navigate('/profile')} />
+                  )}
                 </div>
+
+                {/* Missions recommandées */}
+                <div style={{ fontSize: 12, fontWeight: 600, color: C.textDim, marginBottom: 10,
+                  textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+                  {profile?.ville ? `Missions près de vous` : 'Missions à la une'}
+                </div>
+                {recommended.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '24px 20px', fontSize: 13, color: C.textDim }}>
+                    Aucune mission ouverte pour l'instant — revenez bientôt.
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {recommended.map(m => (
+                      <div key={m.id}
+                        onClick={() => navigate(`/MissionDetail?id=${m.id}`)}
+                        className="card-lift"
+                        style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer',
+                          padding: '12px 14px', borderRadius: 12, borderLeft: '3px solid #00C896',
+                          background: 'rgba(82,54,124,0.28)', border: '1px solid rgba(201,168,76,0.1)' }}>
+                        <div style={{ width: 40, height: 40, borderRadius: 11, flexShrink: 0,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          background: 'rgba(212,175,55,0.14)', border: '1px solid rgba(212,175,55,0.28)' }}>
+                          <ServiceIcon type={m.service_type} size={20} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ fontSize: 13.5, fontWeight: 600, color: C.text, margin: 0,
+                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.title}</p>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 12px', marginTop: 4 }}>
+                            {m.ville && <span style={{ fontSize: 11.5, color: C.textDim, display: 'inline-flex', alignItems: 'center', gap: 4 }}><MapPin size={12} /> {m.ville}</span>}
+                            <span style={{ fontSize: 11.5, color: C.gold, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4 }}><Wallet size={12} /> {formatCFA(m.hourly_rate)}/h</span>
+                          </div>
+                        </div>
+                        <ArrowRight size={17} color={C.gold} style={{ flexShrink: 0 }} />
+                      </div>
+                    ))}
+                    <button onClick={() => navigate('/missions')}
+                      className="cta-glow"
+                      style={{ marginTop: 4, padding: '10px', borderRadius: 10, fontSize: 13, fontWeight: 600,
+                        background: 'transparent', color: C.gold, border: '1px solid rgba(212,175,55,0.4)',
+                        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                      Voir toutes les missions <ArrowRight size={15} />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 

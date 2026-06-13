@@ -1,16 +1,26 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Target, MessageCircle, Mail, CheckCircle2, XCircle, Siren, Wallet, FileText, Bell,
+  type LucideIcon,
+} from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { type Notification } from '../types';
 import { formatRelative } from '../lib/utils';
 
-const ICONS: Record<string, string> = {
-  mission_match: '🎯',
-  message: '💬',
-  application: '📩',
-  accepted: '✅',
-  default: '🔔',
+const ICONS: Record<string, LucideIcon> = {
+  mission_match:     Target,
+  message:           MessageCircle,
+  application:       Mail,
+  accepted:          CheckCircle2,
+  sos_alert:         Siren,
+  sos_confirmed:     CheckCircle2,
+  sos_rejected:      XCircle,
+  payment_received:  Wallet,
+  payment_confirmed: Wallet,
+  contract:          FileText,
+  default:           Bell,
 };
 
 export default function NotificationBell() {
@@ -86,17 +96,17 @@ export default function NotificationBell() {
       >
         <svg width="17" height="17" viewBox="0 0 18 20" fill="none">
           <path d="M9 2a6 6 0 0 0-6 6v3.5L1.5 14h15L15 11.5V8A6 6 0 0 0 9 2Z"
-            stroke="#c9a84c" strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
-          <path d="M7.5 17a1.5 1.5 0 0 0 3 0" stroke="#c9a84c" strokeWidth="1.5" strokeLinecap="round"/>
+            stroke="#d4af37" strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
+          <path d="M7.5 17a1.5 1.5 0 0 0 3 0" stroke="#d4af37" strokeWidth="1.5" strokeLinecap="round"/>
         </svg>
         {unread > 0 && (
-          <span style={{
+          <span className="notif-pulse" style={{
             position: 'absolute', top: -5, right: -5,
-            minWidth: 17, height: 17, borderRadius: 999,
+            minWidth: 18, height: 18, borderRadius: 999,
             background: '#ef4444', color: '#fff',
-            fontSize: 9, fontWeight: 700,
+            fontSize: 10, fontWeight: 700,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '0 3px', border: '2px solid #261642',
+            padding: '0 4px', border: '2px solid #261642',
           }}>
             {unread > 9 ? '9+' : unread}
           </span>
@@ -123,14 +133,14 @@ export default function NotificationBell() {
               <span style={{ fontSize: 13, fontWeight: 600, color: '#f0e6d3' }}>Notifications</span>
               {unread > 0 && (
                 <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 7px',
-                  borderRadius: 999, background: 'rgba(201,168,76,0.15)', color: '#c9a84c' }}>
+                  borderRadius: 999, background: 'rgba(201,168,76,0.15)', color: '#d4af37' }}>
                   {unread} non lu{unread > 1 ? 's' : ''}
                 </span>
               )}
             </div>
             {unread > 0 && (
               <button onClick={markAllRead} style={{
-                fontSize: 11, color: '#c9a84c', background: 'none',
+                fontSize: 11, color: '#d4af37', background: 'none',
                 border: 'none', cursor: 'pointer', fontWeight: 500,
               }}>
                 Tout marquer lu
@@ -142,8 +152,10 @@ export default function NotificationBell() {
           <div style={{ maxHeight: 400, overflowY: 'auto' }}>
             {notifs.length === 0 ? (
               <div style={{ padding: '36px 20px', textAlign: 'center' }}>
-                <div style={{ fontSize: 28, marginBottom: 8 }}>🔔</div>
-                <p style={{ fontSize: 13, color: 'rgba(240,230,211,0.35)', margin: 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+                  <Bell size={28} color="rgba(240,230,211,0.4)" strokeWidth={1.5} />
+                </div>
+                <p style={{ fontSize: 13, color: 'rgba(240,230,211,0.5)', margin: 0 }}>
                   Aucune notification pour l'instant
                 </p>
               </div>
@@ -162,10 +174,10 @@ export default function NotificationBell() {
                 {/* Icône type */}
                 <div style={{
                   width: 34, height: 34, borderRadius: 9, flexShrink: 0,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
                   background: 'rgba(201,168,76,0.1)',
                 }}>
-                  {ICONS[n.type] || ICONS.default}
+                  {(() => { const Icon = ICONS[n.type] || ICONS.default; return <Icon size={16} color="#d4af37" />; })()}
                 </div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -190,7 +202,7 @@ export default function NotificationBell() {
                 {!n.is_read && (
                   <div style={{
                     width: 7, height: 7, borderRadius: '50%',
-                    background: '#c9a84c', flexShrink: 0, marginTop: 5,
+                    background: '#d4af37', flexShrink: 0, marginTop: 5,
                   }} />
                 )}
               </button>

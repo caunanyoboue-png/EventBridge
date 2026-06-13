@@ -4,8 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { COMPETENCES, VILLES } from '../lib/utils';
 import { type UserRole } from '../types';
 import toast from 'react-hot-toast';
-
-const LOGO = '/logo.png.jpeg';
+import Logo from '../components/Logo';
 
 // ─── Styles réutilisables ─────────────────────────────────────────────────────
 const inp: React.CSSProperties = {
@@ -27,7 +26,7 @@ const btnGold: React.CSSProperties = {
   fontWeight: 600,
   cursor: 'pointer',
   border: 'none',
-  background: 'linear-gradient(135deg,#c9a84c,#e8c97a)',
+  background: 'linear-gradient(135deg,#d4af37,#e8c97a)',
   color: '#261642',
   transition: 'opacity 0.15s',
 };
@@ -40,7 +39,7 @@ const btnOutline: React.CSSProperties = {
   cursor: 'pointer',
   background: 'transparent',
   border: '1px solid rgba(201,168,76,0.3)',
-  color: '#c9a84c',
+  color: '#d4af37',
   transition: 'background 0.15s',
 };
 
@@ -188,7 +187,7 @@ export default function Onboarding() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f0a1e' }}>
-        <div style={{ width: 36, height: 36, borderRadius: '50%', border: '2px solid #c9a84c',
+        <div style={{ width: 36, height: 36, borderRadius: '50%', border: '2px solid #d4af37',
           borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -216,7 +215,9 @@ export default function Onboarding() {
 
         {/* Logo + titre */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <img src={LOGO} style={{ height: 56, width: 'auto', marginBottom: 16, display: 'block', margin: '0 auto 16px' }} alt="EventBridge" />
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+            <Logo height={112} animated />
+          </div>
           <h1 style={{ fontSize: 22, fontWeight: 600, color: '#f0e6d3', margin: '0 0 6px' }}>{title}</h1>
           <p style={{ fontSize: 14, color: 'rgba(240,230,211,0.5)', margin: 0 }}>{subtitle}</p>
         </div>
@@ -241,7 +242,7 @@ export default function Onboarding() {
               </h2>
               <p style={{ fontSize: 14, color: 'rgba(240,230,211,0.65)', lineHeight: 1.7, margin: '0 0 20px' }}>
                 Nous avons envoyé un lien de confirmation à<br/>
-                <strong style={{ color: '#c9a84c' }}>{email}</strong>.<br/>
+                <strong style={{ color: '#d4af37' }}>{email}</strong>.<br/>
                 Cliquez sur ce lien pour activer votre compte et accéder à la plateforme.
               </p>
               <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.35)', margin: '0 0 20px', lineHeight: 1.6 }}>
@@ -265,7 +266,7 @@ export default function Onboarding() {
               <div style={{ position: 'relative' }}>
                 <span style={{
                   position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
-                  fontSize: 13, color: '#c9a84c', fontWeight: 600, pointerEvents: 'none', userSelect: 'none',
+                  fontSize: 13, color: '#d4af37', fontWeight: 600, pointerEvents: 'none', userSelect: 'none',
                 }}>🇨🇮 +225</span>
                 <input
                   style={{ ...inp, paddingLeft: 80 }}
@@ -308,8 +309,8 @@ export default function Onboarding() {
                             padding: '6px 12px', borderRadius: 20, fontSize: 12, cursor: 'pointer',
                             transition: 'all 0.15s',
                             background: skills.includes(c) ? 'rgba(201,168,76,0.2)' : 'transparent',
-                            border: `1px solid ${skills.includes(c) ? '#c9a84c' : 'rgba(201,168,76,0.2)'}`,
-                            color: skills.includes(c) ? '#c9a84c' : 'rgba(240,230,211,0.5)',
+                            border: `1px solid ${skills.includes(c) ? '#d4af37' : 'rgba(201,168,76,0.2)'}`,
+                            color: skills.includes(c) ? '#d4af37' : 'rgba(240,230,211,0.5)',
                           }}>
                           {c}
                         </button>
@@ -403,7 +404,7 @@ export default function Onboarding() {
                 Pas encore de compte ?{' '}
                 <button type="button"
                   onClick={() => { setMode('register'); setStep(0); }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#c9a84c', fontWeight: 600, fontSize: 13 }}>
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#d4af37', fontWeight: 600, fontSize: 13 }}>
                   S'inscrire gratuitement
                 </button>
               </p>
@@ -422,8 +423,8 @@ export default function Onboarding() {
                       padding: '20px 12px', borderRadius: 14, textAlign: 'center',
                       cursor: 'pointer', transition: 'all 0.15s',
                       background: role === r ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
-                      border: `1.5px solid ${role === r ? '#c9a84c' : 'rgba(201,168,76,0.15)'}`,
-                      color: role === r ? '#c9a84c' : 'rgba(240,230,211,0.5)',
+                      border: `1.5px solid ${role === r ? '#d4af37' : 'rgba(201,168,76,0.15)'}`,
+                      color: role === r ? '#d4af37' : 'rgba(240,230,211,0.5)',
                     }}>
                     <p style={{ fontSize: 15, fontWeight: 600, margin: '0 0 4px', textTransform: 'capitalize' }}>{r}</p>
                     <p style={{ fontSize: 12, margin: 0, color: role === r ? 'rgba(201,168,76,0.7)' : 'rgba(240,230,211,0.35)' }}>
@@ -440,7 +441,7 @@ export default function Onboarding() {
               <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(240,230,211,0.45)', margin: 0 }}>
                 Déjà un compte ?{' '}
                 <button type="button" onClick={() => setMode('login')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#c9a84c', fontWeight: 600, fontSize: 13 }}>
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#d4af37', fontWeight: 600, fontSize: 13 }}>
                   Se connecter
                 </button>
               </p>

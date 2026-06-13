@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { supabase } from '../../lib/supabase';
+import { Users, Star, Check } from 'lucide-react';
 import { type Profile, type UserStatus } from '../../types';
 import { getInitials } from '../../lib/utils';
 import toast from 'react-hot-toast';
@@ -42,12 +43,12 @@ export default function AdminProfiles() {
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6" style={{ color: '#f0e6d3' }}>👥 Gestion des profils</h1>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><Users size={26} color="#d4af37" /> Gestion des profils</h1>
 
       <div className="card-glass p-4 mb-6 flex flex-wrap gap-3">
         <input className="px-3 py-2 rounded-lg text-sm outline-none flex-1 min-w-40"
           style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
-          placeholder="🔍 Rechercher..." value={search} onChange={e => setSearch(e.target.value)} />
+          placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} />
         <select className="px-3 py-2 rounded-lg text-sm outline-none"
           style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
           value={filterRole} onChange={e => setFilterRole(e.target.value)}>
@@ -79,14 +80,14 @@ export default function AdminProfiles() {
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                        style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642' }}>
+                        style={{ background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }}>
                         {getInitials(p.full_name)}
                       </div>
                       <div>
                         <p className="font-medium" style={{ color: '#f0e6d3' }}>{p.full_name}</p>
                         <p className="text-xs" style={{ color: '#7a6a7a' }}>{p.email}</p>
                       </div>
-                      {p.is_certified && <span className="text-xs" style={{ color: '#c9a84c' }}>✓</span>}
+                      {p.is_certified && <Check size={13} color="#d4af37" />}
                     </div>
                   </td>
                   <td className="py-3 px-4">
@@ -101,8 +102,10 @@ export default function AdminProfiles() {
                       {statusLabel[p.status] || p.status}
                     </span>
                   </td>
-                  <td className="py-3 px-4" style={{ color: '#c9a84c' }}>
-                    {p.avg_rating ? `⭐ ${p.avg_rating.toFixed(1)}` : '–'}
+                  <td className="py-3 px-4" style={{ color: '#d4af37' }}>
+                    {p.avg_rating
+                      ? <span className="inline-flex items-center gap-1.5"><Star size={13} fill="#d4af37" color="#d4af37" /> {p.avg_rating.toFixed(1)}</span>
+                      : '–'}
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex gap-2">
@@ -119,7 +122,7 @@ export default function AdminProfiles() {
                         </button>
                       )}
                       <button onClick={() => certifier(p.id, !p.is_certified)}
-                        className="px-2 py-1 rounded text-xs" style={{ background: 'rgba(201,168,76,0.15)', color: '#c9a84c' }}>
+                        className="px-2 py-1 rounded text-xs" style={{ background: 'rgba(201,168,76,0.15)', color: '#d4af37' }}>
                         {p.is_certified ? 'Décertifier' : 'Certifier'}
                       </button>
                     </div>

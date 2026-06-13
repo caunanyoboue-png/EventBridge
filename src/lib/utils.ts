@@ -36,22 +36,6 @@ export function getInitials(name: string): string {
     .slice(0, 2);
 }
 
-export const SERVICE_ICONS: Record<string, string> = {
-  'Service en salle': '🍽️',
-  'Bar / Barman': '🍸',
-  'Cuisine gastronomique': '👨‍🍳',
-  'Hôtesse accueil': '💁',
-  'Animation': '🎤',
-  'MC / Présentateur': '🎙️',
-  'Son & Lumière': '💡',
-  'Photographie': '📸',
-  'Vidéographie': '🎥',
-  'Sécurité': '🛡️',
-  'Chauffeur': '🚗',
-  'Manutention': '📦',
-  'Décoration': '🎨',
-};
-
 export const VILLES = [
   // ── Abidjan ──────────────────────────────────
   'Abidjan - Plateau',

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { MapPin } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -122,12 +123,12 @@ export default function MapPicker({ lat, lng, onSelect }: Props) {
             marginLeft: 10, flexShrink: 0,
             padding: '5px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
             cursor: locating ? 'wait' : 'pointer',
-            background: 'linear-gradient(135deg,#c9a84c,#e8c97a)',
+            background: 'linear-gradient(135deg,#d4af37,#e8c97a)',
             color: '#261642', border: 'none', opacity: locating ? 0.7 : 1,
             transition: 'opacity 0.15s',
           }}
         >
-          {locating ? '…' : '📍 Me localiser'}
+          {locating ? '…' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}><MapPin size={14} /> Me localiser</span>}
         </button>
       </div>
 

@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { type ReactNode } from 'react';
 
@@ -43,7 +44,7 @@ function ProtectedRoute({ children, role }: { children: ReactNode; role?: string
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#261642' }}>
         <div className="text-center">
           <div className="w-16 h-16 rounded-full border-2 border-t-transparent animate-spin mx-auto mb-4"
-            style={{ borderColor: '#c9a84c', borderTopColor: 'transparent' }} />
+            style={{ borderColor: '#d4af37', borderTopColor: 'transparent' }} />
           <p style={{ color: '#b8a898' }}>Chargement...</p>
         </div>
       </div>
@@ -56,7 +57,7 @@ function ProtectedRoute({ children, role }: { children: ReactNode; role?: string
   if (!profile) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f0a1e' }}>
-        <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #c9a84c',
+        <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #d4af37',
           borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -77,8 +78,31 @@ function ProtectedRoute({ children, role }: { children: ReactNode; role?: string
 }
 
 function AppRoutes() {
+  const location = useLocation();
+  const reduceMotion = useReducedMotion();
+
   return (
-    <Routes>
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: reduceMotion ? 0 : 0.28, ease: 'easeOut' }}
+      >
+        {/* Voile doré qui balaie l'écran à chaque navigation */}
+        {!reduceMotion && (
+          <motion.div
+            initial={{ x: '-110%' }}
+            animate={{ x: '110%' }}
+            transition={{ duration: 0.85, ease: [0.65, 0, 0.35, 1] }}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 9999, pointerEvents: 'none',
+              background: 'linear-gradient(105deg, transparent 32%, rgba(232,201,122,0.13) 46%, rgba(245,230,196,0.22) 50%, rgba(232,201,122,0.13) 54%, transparent 68%)',
+            }}
+          />
+        )}
+        <Routes location={location}>
       <Route path="/" element={<Landing />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/pour-les-freelances" element={<FreelancePage />} />
@@ -109,8 +133,10 @@ function AppRoutes() {
       <Route path="/admin/AdminReviews" element={<ProtectedRoute role="admin"><AdminReviews /></ProtectedRoute>} />
       <Route path="/admin/AdminSettings" element={<ProtectedRoute role="admin"><AdminSettings /></ProtectedRoute>} />
 
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Check, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { type PortfolioItem } from '../types';
 import toast from 'react-hot-toast';
@@ -12,7 +13,7 @@ const CATEGORIES = [
 ];
 
 const C = {
-  card: '#1a1232', gold: '#c9a84c', goldLt: '#e8c97a',
+  card: '#1a1232', gold: '#d4af37', goldLt: '#e8c97a',
   text: '#f0e6d3', sec: 'rgba(240,230,211,0.45)', bdr: 'rgba(201,168,76,0.12)',
 } as const;
 
@@ -107,7 +108,7 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
       // Publier automatiquement dans le fil d'actualité
       const feedContent = [
         mTitle.trim(),
-        mCategory ? `📌 ${mCategory}` : '',
+        mCategory ? `Catégorie : ${mCategory}` : '',
         mDesc.trim(),
       ].filter(Boolean).join('\n');
       await supabase.from('posts').insert({
@@ -161,7 +162,7 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
             justifyContent: 'center', background: 'rgba(201,168,76,0.1)',
             border: '1px solid rgba(201,168,76,0.2)', flexShrink: 0 }}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M7 1v12M1 7h12" stroke="#c9a84c" strokeWidth="1.6" strokeLinecap="round" strokeOpacity="0.8"/>
+              <path d="M7 1v12M1 7h12" stroke="#d4af37" strokeWidth="1.6" strokeLinecap="round" strokeOpacity="0.8"/>
             </svg>
           </div>
           <div>
@@ -410,8 +411,11 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
                 style={{ flex: 2, padding: '11px', borderRadius: 10, fontSize: 13,
                   fontWeight: 700, cursor: uploading ? 'wait' : 'pointer', color: '#261642',
                   background: `linear-gradient(135deg, ${C.gold}, ${C.goldLt})`,
-                  border: 'none', opacity: uploading ? 0.75 : 1, transition: 'opacity 0.15s' }}>
-                {uploading ? '⏳ Publication…' : '✓ Publier'}
+                  border: 'none', opacity: uploading ? 0.75 : 1, transition: 'opacity 0.15s',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+                {uploading
+                  ? <><Loader2 size={15} className="animate-spin" /> Publication…</>
+                  : <><Check size={15} /> Publier</>}
               </button>
             </div>
           </div>

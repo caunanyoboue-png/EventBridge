@@ -5,7 +5,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { getOrCreateConversation } from '../lib/messaging';
 import { type Mission, type Profile, type Contract } from '../types';
-import { formatDate, formatCFA, SERVICE_ICONS } from '../lib/utils';
+import { Zap, Calendar, Clock, MapPin, Wallet, Users, Shirt, Star, CheckCircle2, MessageCircle, FileText } from 'lucide-react';
+import { formatDate, formatCFA } from '../lib/utils';
+import { ServiceIcon } from '../lib/serviceIcons';
 import { distanceKm, formatDistance } from '../lib/geo';
 import MapView from '../components/MapView';
 import { fetchContractByMission } from '../services/contractService';
@@ -100,7 +102,7 @@ export default function MissionDetail() {
         await supabase.from('notifications').insert({
           user_id: mission.organisateur_id,
           type: 'new_application',
-          title: '📩 Nouvelle candidature',
+          title: 'Nouvelle candidature',
           body: `${profile.full_name} a postulé à votre mission "${mission.title}"`,
           data: { mission_id: mission.id, freelance_id: profile.id },
           is_read: false,
@@ -148,9 +150,9 @@ export default function MissionDetail() {
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
           <button onClick={() => navigate(-1)} style={{ color: '#b8a898' }}>← Retour</button>
-          <span className="text-2xl">{SERVICE_ICONS[mission.service_type] || '🎯'}</span>
+          <ServiceIcon type={mission.service_type} size={26} />
           <h1 className="font-display text-2xl font-bold flex-1" style={{ color: '#f0e6d3' }}>{mission.title}</h1>
-          {mission.is_urgent && <span className="badge-urgent px-3 py-1 rounded-full text-sm font-bold">⚡ URGENT</span>}
+          {mission.is_urgent && <span className="badge-urgent px-3 py-1 rounded-full text-sm font-bold inline-flex items-center gap-1.5"><Zap size={14} fill="currentColor" /> URGENT</span>}
         </div>
 
         {/* Photo du lieu */}
@@ -164,21 +166,21 @@ export default function MissionDetail() {
         <div className="card-glass p-8 mb-6">
           {/* Infos principales */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-sm">
-            <div className="flex items-center gap-2" style={{ color: '#b8a898' }}>
-              <span>📅</span><span>{formatDate(mission.event_date)}</span>
+            <div className="flex items-center gap-2.5" style={{ color: '#b8a898' }}>
+              <Calendar size={16} color="#d4af37" /><span>{formatDate(mission.event_date)}</span>
             </div>
-            <div className="flex items-center gap-2" style={{ color: '#b8a898' }}>
-              <span>⏰</span><span>{mission.start_time?.substring(0,5)} – {mission.end_time?.substring(0,5)}</span>
+            <div className="flex items-center gap-2.5" style={{ color: '#b8a898' }}>
+              <Clock size={16} color="#d4af37" /><span>{mission.start_time?.substring(0,5)} – {mission.end_time?.substring(0,5)}</span>
             </div>
-            <div className="flex items-center gap-2" style={{ color: '#b8a898' }}>
-              <span>📍</span><span>{mission.location}{mission.ville ? `, ${mission.ville}` : ''}</span>
+            <div className="flex items-center gap-2.5" style={{ color: '#b8a898' }}>
+              <MapPin size={16} color="#d4af37" /><span>{mission.location}{mission.ville ? `, ${mission.ville}` : ''}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <span>💰</span>
-              <span className="font-bold" style={{ color: '#c9a84c' }}>{formatCFA(mission.hourly_rate)}/h · Total: {formatCFA(totalAmount)}</span>
+            <div className="flex items-center gap-2.5">
+              <Wallet size={16} color="#d4af37" />
+              <span className="font-bold" style={{ color: '#d4af37' }}>{formatCFA(mission.hourly_rate)}/h · Total: {formatCFA(totalAmount)}</span>
             </div>
-            <div className="flex items-center gap-2" style={{ color: '#b8a898' }}>
-              <span>👥</span>
+            <div className="flex items-center gap-2.5" style={{ color: '#b8a898' }}>
+              <Users size={16} color="#d4af37" />
               <span>{slots_filled}/{mission.slots_total} poste(s) confirmé(s)</span>
             </div>
           </div>
@@ -186,7 +188,7 @@ export default function MissionDetail() {
           {/* Progress bar */}
           <div className="mb-6">
             <div className="w-full h-2 rounded-full" style={{ background: '#52367c' }}>
-              <div className="h-full rounded-full" style={{ width: `${(slots_filled / mission.slots_total) * 100}%`, background: 'linear-gradient(to right,#c9a84c,#e8c97a)' }} />
+              <div className="h-full rounded-full" style={{ width: `${(slots_filled / mission.slots_total) * 100}%`, background: 'linear-gradient(to right,#d4af37,#e8c97a)' }} />
             </div>
           </div>
 
@@ -215,17 +217,17 @@ export default function MissionDetail() {
           {mission.dress_code && (
             <div className="mb-6">
               <h3 className="font-semibold mb-2" style={{ color: '#f0e6d3' }}>Dress code</h3>
-              <p className="text-sm" style={{ color: '#b8a898' }}>👔 {mission.dress_code}</p>
+              <p className="text-sm flex items-center gap-2" style={{ color: '#b8a898' }}><Shirt size={15} color="#d4af37" /> {mission.dress_code}</p>
             </div>
           )}
 
           {/* Carte de localisation */}
           {mission.latitude && mission.longitude && (
             <div className="mb-6">
-              <h3 className="font-semibold mb-3" style={{ color: '#f0e6d3' }}>
-                📍 Localisation
+              <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: '#f0e6d3' }}>
+                <MapPin size={16} color="#d4af37" /> Localisation
                 {profile?.latitude && profile?.longitude && (
-                  <span style={{ marginLeft: 10, fontSize: 12, fontWeight: 400, color: '#c9a84c' }}>
+                  <span style={{ marginLeft: 10, fontSize: 12, fontWeight: 400, color: '#d4af37' }}>
                     · à {formatDistance(distanceKm(profile.latitude, profile.longitude, mission.latitude!, mission.longitude!))} de vous
                   </span>
                 )}
@@ -249,14 +251,14 @@ export default function MissionDetail() {
                       border: '1.5px solid rgba(201,168,76,0.3)', flexShrink: 0 }} />
                 ) : (
                   <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0"
-                    style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642' }}>
+                    style={{ background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }}>
                     {org.full_name?.[0]}
                   </div>
                 )}
                 <div style={{ flex: 1 }}>
                   <p className="font-medium text-sm" style={{ color: '#f0e6d3' }}>{org.company_name || org.full_name}</p>
-                  <p className="text-xs" style={{ color: '#b8a898' }}>
-                    ⭐ {org.avg_rating || '–'} · {org.total_missions || 0} mission(s)
+                  <p className="text-xs flex items-center gap-1.5" style={{ color: '#b8a898' }}>
+                    <Star size={12} fill="#d4af37" color="#d4af37" /> {org.avg_rating || '–'} · {org.total_missions || 0} mission(s)
                   </p>
                 </div>
                 <button onClick={() => navigate(`/public-profile?id=${org.id}`)}
@@ -274,7 +276,7 @@ export default function MissionDetail() {
                 {alreadyApplied ? (
                   <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl"
                     style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.25)' }}>
-                    <span className="text-sm font-medium flex-1" style={{ color: '#10b981' }}>✅ Candidature envoyée</span>
+                    <span className="text-sm font-medium flex-1 flex items-center gap-2" style={{ color: '#10b981' }}><CheckCircle2 size={15} /> Candidature envoyée</span>
                     {confirmWithdraw ? (
                       <>
                         <span className="text-xs" style={{ color: '#b8a898' }}>Retirer ?</span>
@@ -306,7 +308,7 @@ export default function MissionDetail() {
                 <button onClick={contacter} disabled={contacting}
                   className="btn-outline-gold px-5 py-3 rounded-xl font-medium"
                   style={{ opacity: contacting ? 0.7 : 1 }}>
-                  {contacting ? '…' : '💬 Contacter'}
+                  {contacting ? '…' : <span className="inline-flex items-center gap-2"><MessageCircle size={15} /> Contacter</span>}
                 </button>
               </div>
             </div>
@@ -317,7 +319,7 @@ export default function MissionDetail() {
         {profile?.role === 'organisateur' && (
           <div className="card-glass p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold" style={{ color: '#f0e6d3' }}>📄 Contrat CDD</h2>
+              <h2 className="font-semibold flex items-center gap-2" style={{ color: '#f0e6d3' }}><FileText size={17} color="#d4af37" /> Contrat CDD</h2>
               {!contract && acceptedFreelances.length > 0 && !showWizard && (
                 <button onClick={() => setShowWizard(true)}
                   className="btn-gold px-4 py-2 rounded-xl text-sm font-bold text-[#261642]">

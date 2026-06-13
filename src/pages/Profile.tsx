@@ -1,4 +1,8 @@
 import { useState, useEffect } from 'react';
+import {
+  Check, Pencil, ImagePlus, MapPin, Building2, Target, FileText,
+  Phone, CheckCircle2, Star, GraduationCap, Banknote, Trophy, type LucideIcon,
+} from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -19,7 +23,7 @@ function Stars({ rating }: { rating: number }) {
     <span style={{ display: 'inline-flex', gap: 3 }}>
       {Array.from({ length: 5 }).map((_, i) => (
         <svg key={i} width="13" height="13" viewBox="0 0 13 13"
-          fill={i < Math.round(rating) ? '#c9a84c' : 'none'} stroke="#c9a84c" strokeWidth="0.9">
+          fill={i < Math.round(rating) ? '#d4af37' : 'none'} stroke="#d4af37" strokeWidth="0.9">
           <path d="M6.5 1l1.6 3.3 3.7.5-2.7 2.6.6 3.7-3.2-1.7-3.2 1.7.6-3.7L1.8 4.8l3.7-.5L6.5 1z"
             strokeLinejoin="round"/>
         </svg>
@@ -175,7 +179,7 @@ export default function Profile() {
     draft: { label: 'Brouillon', color: '#6a5a7a' },
     open: { label: 'Ouverte', color: '#10b981' },
     in_progress: { label: 'En cours', color: '#3b82f6' },
-    completed: { label: 'Terminée', color: '#c9a84c' },
+    completed: { label: 'Terminée', color: '#d4af37' },
     cancelled: { label: 'Annulée', color: '#ef4444' },
     disputed: { label: 'Litige', color: '#f59e0b' },
   };
@@ -229,10 +233,10 @@ export default function Profile() {
                 </button>
               )}
               <button onClick={() => editing ? save() : setEditing(true)} disabled={saving}
-                className="btn-gold"
+                className="btn-gold inline-flex items-center justify-center gap-2"
                 style={{ padding: '8px 18px', borderRadius: 9, fontSize: 12, fontWeight: 700,
                   color: '#261642', opacity: saving ? 0.7 : 1 }}>
-                {editing ? (saving ? '⏳…' : '✓ Sauvegarder') : '✏ Modifier le profil'}
+                {editing ? (saving ? 'Enregistrement…' : <><Check size={14} /> Sauvegarder</>) : <><Pencil size={13} /> Modifier le profil</>}
               </button>
             </div>
 
@@ -244,7 +248,7 @@ export default function Profile() {
                 background: 'rgba(0,0,0,0.45)', color: '#f0e6d3', backdropFilter: 'blur(8px)',
                 border: '1px solid rgba(255,255,255,0.15)' }}>
                 <input type="file" accept="image/*" style={{ display: 'none' }} onChange={uploadBanner} />
-                {bannerUploading ? '⏳ Upload…' : '🖼 Changer la bannière'}
+                {bannerUploading ? 'Upload…' : <><ImagePlus size={13} /> Changer la bannière</>}
               </label>
             )}
           </div>
@@ -259,14 +263,14 @@ export default function Profile() {
                       outline: '2px solid rgba(201,168,76,0.4)' }} />
                 : <div style={{ width: 100, height: 100, borderRadius: '50%', display: 'flex',
                     alignItems: 'center', justifyContent: 'center', fontSize: 30, fontWeight: 800,
-                    color: '#261642', background: 'linear-gradient(135deg,#c9a84c,#e8c97a)',
+                    color: '#261642', background: 'linear-gradient(135deg,#d4af37,#e8c97a)',
                     border: '3px solid #261642', outline: '2px solid rgba(201,168,76,0.3)' }}>
                     {initials}
                   </div>
               }
               <label title="Changer la photo"
                 style={{ position: 'absolute', bottom: 2, right: 2, width: 28, height: 28,
-                  borderRadius: '50%', background: '#c9a84c', cursor: 'pointer',
+                  borderRadius: '50%', background: '#d4af37', cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   border: '2px solid #261642' }}>
                 <input type="file" accept="image/*" style={{ display: 'none' }} onChange={uploadAvatar} />
@@ -292,15 +296,16 @@ export default function Profile() {
             <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 999,
               letterSpacing: '0.08em',
               background: isFreelance ? 'rgba(201,168,76,0.12)' : 'rgba(96,165,250,0.12)',
-              color: isFreelance ? '#c9a84c' : '#60a5fa',
+              color: isFreelance ? '#d4af37' : '#60a5fa',
               border: `1px solid ${isFreelance ? 'rgba(201,168,76,0.3)' : 'rgba(96,165,250,0.3)'}` }}>
               {isFreelance ? 'FREELANCE' : 'ORGANISATEUR'}
             </span>
             {profile.is_certified && (
               <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 999,
                 background: 'rgba(16,185,129,0.1)', color: '#10b981',
-                border: '1px solid rgba(16,185,129,0.25)', letterSpacing: '0.08em' }}>
-                ✓ CERTIFIÉ
+                border: '1px solid rgba(16,185,129,0.25)', letterSpacing: '0.08em',
+                display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <Check size={11} /> CERTIFIÉ
               </span>
             )}
             {isFreelance && (
@@ -318,16 +323,16 @@ export default function Profile() {
           {(profile.avg_rating ?? 0) > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
               <Stars rating={profile.avg_rating || 0} />
-              <span style={{ fontSize: 14, fontWeight: 700, color: '#c9a84c' }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: '#d4af37' }}>
                 {(profile.avg_rating || 0).toFixed(1)}
               </span>
               <span style={{ fontSize: 12, color: '#5a4a6a' }}>· {profile.total_reviews || 0} avis</span>
             </div>
           )}
-          <p style={{ fontSize: 13, color: '#6a5a7a', margin: 0 }}>
-            📍 {[profile.ville, profile.quartier].filter(Boolean).join(', ') || 'Localisation non renseignée'}
+          <p style={{ fontSize: 13, color: '#8a7a9a', margin: 0, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            <MapPin size={13} /> {[profile.ville, profile.quartier].filter(Boolean).join(', ') || 'Localisation non renseignée'}
             {!isFreelance && profile.company_name && (
-              <span style={{ color: '#c9a84c', fontWeight: 600 }}> · 🏢 {profile.company_name}</span>
+              <span style={{ color: '#d4af37', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5 }}> · <Building2 size={13} /> {profile.company_name}</span>
             )}
           </p>
         </div>
@@ -368,8 +373,8 @@ export default function Profile() {
                           style={{ padding: '7px 13px', borderRadius: 999, fontSize: 12, fontWeight: 600,
                             cursor: 'pointer', transition: 'all 0.15s',
                             background: form.skills.includes(c) ? 'rgba(201,168,76,0.15)' : 'transparent',
-                            border: `1px solid ${form.skills.includes(c) ? '#c9a84c' : 'rgba(201,168,76,0.18)'}`,
-                            color: form.skills.includes(c) ? '#c9a84c' : '#6a5a7a' }}>
+                            border: `1px solid ${form.skills.includes(c) ? '#d4af37' : 'rgba(201,168,76,0.18)'}`,
+                            color: form.skills.includes(c) ? '#d4af37' : '#6a5a7a' }}>
                           {c}
                         </button>
                       ))}
@@ -412,13 +417,13 @@ export default function Profile() {
                   <button type="button" onClick={detectLocation} disabled={locating}
                     style={{ padding: '10px 18px', borderRadius: 10, fontSize: 13, fontWeight: 600,
                       cursor: locating ? 'wait' : 'pointer',
-                      background: 'linear-gradient(135deg,#c9a84c,#e8c97a)',
+                      background: 'linear-gradient(135deg,#d4af37,#e8c97a)',
                       color: '#261642', border: 'none', opacity: locating ? 0.7 : 1 }}>
-                    {locating ? '…' : '📍 Détecter ma position'}
+                    {locating ? 'Localisation…' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><MapPin size={15} /> Détecter ma position</span>}
                   </button>
                   {geoLat && geoLng && (
-                    <span style={{ fontSize: 12, color: '#10b981' }}>
-                      ✓ Position enregistrée {geoAddr ? `— ${geoAddr}` : ''}
+                    <span style={{ fontSize: 12, color: '#10b981', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                      <Check size={13} /> Position enregistrée {geoAddr ? `— ${geoAddr}` : ''}
                     </span>
                   )}
                 </div>
@@ -444,7 +449,7 @@ export default function Profile() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
                       <h3 style={{ ...sT, margin: 0 }}>Compétences</h3>
                       {profile.hourly_rate && (
-                        <span style={{ fontSize: 14, fontWeight: 700, color: '#c9a84c' }}>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: '#d4af37' }}>
                           {formatCFA(profile.hourly_rate)}/h
                         </span>
                       )}
@@ -452,7 +457,7 @@ export default function Profile() {
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                       {(profile.skills || []).map(s => (
                         <span key={s} style={{ padding: '7px 14px', borderRadius: 999, fontSize: 13,
-                          fontWeight: 600, background: 'rgba(201,168,76,0.1)', color: '#c9a84c',
+                          fontWeight: 600, background: 'rgba(201,168,76,0.1)', color: '#d4af37',
                           border: '1px solid rgba(201,168,76,0.22)' }}>
                           {s}
                         </span>
@@ -496,21 +501,21 @@ export default function Profile() {
                         <div>
                           <p style={{ fontSize: 11, color: '#5a4a6a', margin: '0 0 4px', fontWeight: 600,
                             textTransform: 'uppercase', letterSpacing: '0.06em' }}>Structure</p>
-                          <p style={{ fontSize: 14, color: '#b8a898', margin: 0 }}>🏢 {profile.company_name}</p>
+                          <p style={{ fontSize: 14, color: '#b8a898', margin: 0, display: 'flex', alignItems: 'center', gap: 7 }}><Building2 size={14} color="#d4af37" /> {profile.company_name}</p>
                         </div>
                       )}
                       {profile.company_sector && (
                         <div>
                           <p style={{ fontSize: 11, color: '#5a4a6a', margin: '0 0 4px', fontWeight: 600,
                             textTransform: 'uppercase', letterSpacing: '0.06em' }}>Secteur</p>
-                          <p style={{ fontSize: 14, color: '#b8a898', margin: 0 }}>🎯 {profile.company_sector}</p>
+                          <p style={{ fontSize: 14, color: '#b8a898', margin: 0, display: 'flex', alignItems: 'center', gap: 7 }}><Target size={14} color="#d4af37" /> {profile.company_sector}</p>
                         </div>
                       )}
                       {profile.rccm && (
                         <div>
                           <p style={{ fontSize: 11, color: '#5a4a6a', margin: '0 0 4px', fontWeight: 600,
                             textTransform: 'uppercase', letterSpacing: '0.06em' }}>RCCM</p>
-                          <p style={{ fontSize: 14, color: '#b8a898', margin: 0 }}>📋 {profile.rccm}</p>
+                          <p style={{ fontSize: 14, color: '#b8a898', margin: 0, display: 'flex', alignItems: 'center', gap: 7 }}><FileText size={14} color="#d4af37" /> {profile.rccm}</p>
                         </div>
                       )}
                     </div>
@@ -559,7 +564,7 @@ export default function Profile() {
                     {(profile.avg_rating ?? 0) > 0 && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <Stars rating={profile.avg_rating || 0} />
-                        <span style={{ fontSize: 15, fontWeight: 800, color: '#c9a84c' }}>
+                        <span style={{ fontSize: 15, fontWeight: 800, color: '#d4af37' }}>
                           {(profile.avg_rating || 0).toFixed(1)}
                         </span>
                         <span style={{ fontSize: 12, color: '#4a3a5a' }}>({profile.total_reviews || 0})</span>
@@ -571,7 +576,7 @@ export default function Profile() {
                       <svg width="40" height="40" viewBox="0 0 40 40" fill="none"
                         style={{ margin: '0 auto 14px', display: 'block' }}>
                         <path d="M20 4l4.9 10 11 1.6-8 7.7 1.9 10.8L20 29.5l-9.8 5.2 1.9-10.8-8-7.7L16.1 14 20 4Z"
-                          stroke="#c9a84c" strokeWidth="1.5" strokeLinejoin="round" strokeOpacity="0.4"/>
+                          stroke="#d4af37" strokeWidth="1.5" strokeLinejoin="round" strokeOpacity="0.4"/>
                       </svg>
                       <p style={{ fontSize: 13, color: '#4a3a5a' }}>
                         {isFreelance
@@ -592,7 +597,7 @@ export default function Profile() {
                             : <div style={{ width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 fontSize: 13, fontWeight: 700,
-                                background: 'rgba(201,168,76,0.1)', color: '#c9a84c' }}>
+                                background: 'rgba(201,168,76,0.1)', color: '#d4af37' }}>
                                 {(rev?.full_name || '?').charAt(0)}
                               </div>
                           }
@@ -626,18 +631,20 @@ export default function Profile() {
               <h3 style={sT}>Statistiques</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {([
-                  { icon: '✅', label: 'Missions réalisées', value: String(profile.total_missions ?? 0) },
-                  { icon: '⭐', label: 'Note moyenne', value: (profile.avg_rating ?? 0) > 0 ? `${(profile.avg_rating || 0).toFixed(1)}/5` : '—' },
+                  { Icon: CheckCircle2, label: 'Missions réalisées', value: String(profile.total_missions ?? 0) },
+                  { Icon: Star, label: 'Note moyenne', value: (profile.avg_rating ?? 0) > 0 ? `${(profile.avg_rating || 0).toFixed(1)}/5` : '—' },
                   ...(isFreelance ? [
-                    { icon: '🎓', label: "Années d'expérience", value: `${profile.experience_years ?? 0} ans` },
-                    { icon: '💵', label: 'Tarif horaire', value: profile.hourly_rate ? formatCFA(profile.hourly_rate) : '—' },
+                    { Icon: GraduationCap, label: "Années d'expérience", value: `${profile.experience_years ?? 0} ans` },
+                    { Icon: Banknote, label: 'Tarif horaire', value: profile.hourly_rate ? formatCFA(profile.hourly_rate) : '—' },
                   ] : []),
-                ] as { icon: string; label: string; value: string }[]).map(stat => (
+                ] as { Icon: LucideIcon; label: string; value: string }[]).map(stat => (
                   <div key={stat.label} style={{ display: 'flex', justifyContent: 'space-between',
                     alignItems: 'center', padding: '10px 12px', background: 'rgba(82,54,124,0.3)',
                     borderRadius: 10, border: '1px solid rgba(201,168,76,0.06)' }}>
-                    <span style={{ fontSize: 12, color: '#6a5a7a' }}>{stat.icon} {stat.label}</span>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: '#c9a84c' }}>{stat.value}</span>
+                    <span style={{ fontSize: 12, color: '#8a7a9a', display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                      <stat.Icon size={14} color="#d4af37" /> {stat.label}
+                    </span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: '#d4af37' }}>{stat.value}</span>
                   </div>
                 ))}
               </div>
@@ -652,13 +659,13 @@ export default function Profile() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {profile.phone && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span>📞</span>
+                      <Phone size={15} color="#d4af37" />
                       <span style={{ fontSize: 13, color: '#b8a898' }}>{profile.phone}</span>
                     </div>
                   )}
                   {(profile.ville || profile.quartier) && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span>📍</span>
+                      <MapPin size={15} color="#d4af37" />
                       <span style={{ fontSize: 13, color: '#b8a898' }}>
                         {[profile.ville, profile.quartier].filter(Boolean).join(', ')}
                       </span>
@@ -666,19 +673,19 @@ export default function Profile() {
                   )}
                   {!isFreelance && profile.company_name && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span>🏢</span>
+                      <Building2 size={15} color="#d4af37" />
                       <span style={{ fontSize: 13, color: '#b8a898' }}>{profile.company_name}</span>
                     </div>
                   )}
                   {!isFreelance && profile.company_sector && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span>🎯</span>
+                      <Target size={15} color="#d4af37" />
                       <span style={{ fontSize: 13, color: '#b8a898' }}>{profile.company_sector}</span>
                     </div>
                   )}
                   {isFreelance && profile.hourly_rate && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span>💵</span>
+                      <Banknote size={15} color="#d4af37" />
                       <span style={{ fontSize: 13, color: '#b8a898' }}>{formatCFA(profile.hourly_rate)}/h</span>
                     </div>
                   )}
@@ -690,14 +697,15 @@ export default function Profile() {
             <div className="card-glass" style={{ padding: 20 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                 <h3 style={{ ...sT, margin: 0 }}>Complétude</h3>
-                <span style={{ fontSize: 18, fontWeight: 800, color: '#c9a84c' }}>{completionPct}%</span>
+                <span style={{ fontSize: 18, fontWeight: 800, color: '#d4af37' }}>{completionPct}%</span>
               </div>
               <div style={{ height: 6, background: 'rgba(82,54,124,0.8)', borderRadius: 999, marginBottom: 10 }}>
                 <div style={{ height: '100%', borderRadius: 999, width: `${completionPct}%`,
-                  background: 'linear-gradient(to right,#c9a84c,#e8c97a)', transition: 'width 0.3s' }} />
+                  background: 'linear-gradient(to right,#d4af37,#e8c97a)', transition: 'width 0.3s' }} />
               </div>
-              <p style={{ fontSize: 11, color: '#4a3a5a', lineHeight: 1.5, margin: 0 }}>
-                {completionPct === 100 ? '🏆 Profil complet !' :
+              <p style={{ fontSize: 11, color: '#7a6a8a', lineHeight: 1.5, margin: 0,
+                display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                {completionPct === 100 ? <><Trophy size={13} color="#d4af37" /> Profil complet !</> :
                  completionPct >= 80 ? 'Presque complet — encore un effort !' :
                  completionPct >= 50 ? "Bon début — ajoutez plus d'infos." :
                  'Complétez votre profil pour plus de visibilité.'}
@@ -717,7 +725,7 @@ export default function Profile() {
             {profile.is_certified && (
               <div className="card-glass" style={{ padding: 20, textAlign: 'center',
                 border: '1px solid rgba(16,185,129,0.2)' }}>
-                <div style={{ fontSize: 28, marginBottom: 8 }}>🏆</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}><Trophy size={28} color="#10b981" /></div>
                 <p style={{ fontSize: 12, fontWeight: 700, color: '#10b981', margin: '0 0 6px',
                   textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   Profil certifié

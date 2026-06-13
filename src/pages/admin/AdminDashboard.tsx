@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Users, Target, Scale, CheckCircle2, LayoutDashboard, type LucideIcon } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { supabase } from '../../lib/supabase';
 
@@ -21,21 +22,23 @@ export default function AdminDashboard() {
     fetchStats();
   }, []);
 
-  const kpis = [
-    { label: 'Utilisateurs', value: stats.users, icon: '👥', color: '#c9a84c' },
-    { label: 'Missions', value: stats.missions, icon: '🎯', color: '#10b981' },
-    { label: 'Litiges ouverts', value: stats.disputes, icon: '⚖️', color: '#ef4444' },
-    { label: 'Satisfaction', value: '98%', icon: '✅', color: '#3b82f6' },
+  const kpis: { label: string; value: string | number; Icon: LucideIcon; color: string }[] = [
+    { label: 'Utilisateurs', value: stats.users, Icon: Users, color: '#d4af37' },
+    { label: 'Missions', value: stats.missions, Icon: Target, color: '#10b981' },
+    { label: 'Litiges ouverts', value: stats.disputes, Icon: Scale, color: '#ef4444' },
+    { label: 'Satisfaction', value: '98%', Icon: CheckCircle2, color: '#3b82f6' },
   ];
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-8" style={{ color: '#f0e6d3' }}>📊 Dashboard Admin</h1>
+      <h1 className="font-display text-3xl font-bold mb-8 flex items-center gap-3" style={{ color: '#f0e6d3' }}>
+        <LayoutDashboard size={26} color="#d4af37" /> Dashboard Admin
+      </h1>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {kpis.map(k => (
           <div key={k.label} className="card-glass p-6">
-            <div className="text-3xl mb-3">{k.icon}</div>
+            <div className="mb-3"><k.Icon size={28} color={k.color} /></div>
             <div className="text-3xl font-bold mb-1" style={{ color: k.color }}>{k.value}</div>
             <div className="text-sm" style={{ color: '#b8a898' }}>{k.label}</div>
           </div>

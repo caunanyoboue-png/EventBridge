@@ -3,8 +3,7 @@ import { type ReactNode } from 'react';
 import Sidebar from './Sidebar';
 import NotificationBell from '../NotificationBell';
 import SosAlertBanner from '../SosAlertBanner';
-
-const LOGO = '/logo.png.jpeg';
+import Logo from '../Logo';
 
 interface Props {
   children: ReactNode;
@@ -60,10 +59,10 @@ export default function DashboardLayout({ children, bgImage }: Props) {
               }}
             >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M2 5h16M2 10h16M2 15h16" stroke="#c9a84c" strokeWidth="1.6" strokeLinecap="round"/>
+                <path d="M2 5h16M2 10h16M2 15h16" stroke="#d4af37" strokeWidth="1.6" strokeLinecap="round"/>
               </svg>
             </button>
-            <img src={LOGO} alt="EventBridge" style={{ height: 32, width: 'auto', objectFit: 'contain' }} />
+            <Logo height={36} />
           </div>
 
           {/* Espace vide sur desktop pour pousser la cloche à droite */}

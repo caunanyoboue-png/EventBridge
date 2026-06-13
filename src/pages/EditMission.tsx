@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Check, X, Camera } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -131,7 +132,7 @@ export default function EditMission() {
           p_ville:           form.ville,
           p_skills_required: form.skills_required.length > 0 ? form.skills_required : null,
         });
-        toast.success(`Mission publiée ! ${count ?? 0} freelance(s) notifié(s) 🎯`);
+        toast.success(`Mission publiée ! ${count ?? 0} freelance(s) notifié(s)`);
       } else {
         toast.success('Mission mise à jour !');
       }
@@ -146,7 +147,7 @@ export default function EditMission() {
     return (
       <DashboardLayout>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
-          <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #c9a84c',
+          <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #d4af37',
             borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
@@ -169,13 +170,13 @@ export default function EditMission() {
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all"
                   style={i <= step
-                    ? { background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642' }
+                    ? { background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }
                     : { border: '1px solid rgba(201,168,76,0.3)', color: '#7a6a7a' }}>
-                  {i < step ? '✓' : i + 1}
+                  {i < step ? <Check size={15} /> : i + 1}
                 </div>
-                <span className="text-xs hidden sm:block" style={{ color: i === step ? '#c9a84c' : '#7a6a7a' }}>{s}</span>
+                <span className="text-xs hidden sm:block" style={{ color: i === step ? '#d4af37' : '#7a6a7a' }}>{s}</span>
               </div>
-              {i < steps.length - 1 && <div className="w-8 h-px mx-2" style={{ background: i < step ? '#c9a84c' : 'rgba(201,168,76,0.2)' }} />}
+              {i < steps.length - 1 && <div className="w-8 h-px mx-2" style={{ background: i < step ? '#d4af37' : 'rgba(201,168,76,0.2)' }} />}
             </div>
           ))}
         </div>
@@ -275,14 +276,14 @@ export default function EditMission() {
                   <div className="relative">
                     <img src={venuePreview} alt="Lieu" className="w-full h-48 object-cover rounded-xl" />
                     <button onClick={() => { setVenueFile(null); setVenuePreview(null); upd('venue_photo_url', ''); }}
-                      className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-                      style={{ background: 'rgba(0,0,0,0.6)', color: '#fff' }}>✕</button>
+                      className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center"
+                      style={{ background: 'rgba(0,0,0,0.6)', color: '#fff' }}><X size={15} /></button>
                   </div>
                 ) : (
                   <button onClick={() => venueInputRef.current?.click()}
                     className="w-full h-32 rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-all"
                     style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#b8a898' }}>
-                    <span className="text-2xl">📸</span>
+                    <Camera size={26} color="#d4af37" />
                     <span className="text-xs">Ajouter une photo du lieu</span>
                   </button>
                 )}
@@ -294,11 +295,11 @@ export default function EditMission() {
                   <div className="flex items-center gap-3">
                     <button onClick={() => upd('slots_total', Math.max(1, form.slots_total - 1))}
                       className="w-10 h-10 rounded-lg font-bold text-lg"
-                      style={{ background: 'rgba(82,54,124,0.5)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}>-</button>
+                      style={{ background: 'rgba(82,54,124,0.5)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}>-</button>
                     <span className="text-xl font-bold" style={{ color: '#f0e6d3' }}>{form.slots_total}</span>
                     <button onClick={() => upd('slots_total', form.slots_total + 1)}
                       className="w-10 h-10 rounded-lg font-bold text-lg"
-                      style={{ background: 'rgba(82,54,124,0.5)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}>+</button>
+                      style={{ background: 'rgba(82,54,124,0.5)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}>+</button>
                   </div>
                 </div>
                 <div>
@@ -315,8 +316,8 @@ export default function EditMission() {
                       className="px-3 py-1 rounded-full text-xs transition-all border"
                       style={{
                         background: form.skills_required.includes(c) ? 'rgba(201,168,76,0.2)' : 'transparent',
-                        borderColor: form.skills_required.includes(c) ? '#c9a84c' : 'rgba(201,168,76,0.2)',
-                        color: form.skills_required.includes(c) ? '#c9a84c' : '#b8a898',
+                        borderColor: form.skills_required.includes(c) ? '#d4af37' : 'rgba(201,168,76,0.2)',
+                        color: form.skills_required.includes(c) ? '#d4af37' : '#b8a898',
                       }}>
                       {c}
                     </button>

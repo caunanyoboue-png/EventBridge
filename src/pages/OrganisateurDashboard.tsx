@@ -1,12 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Briefcase, Users, MessageSquare, User,
   LogOut, ChevronRight, FileText, Check, AlertCircle,
-  Target, Calendar, PlusCircle, Zap, Menu, X, Settings,
+  Target, Calendar, PlusCircle, Zap, Menu, X, Settings, Trash2,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import Logo from '../components/Logo';
 import { type Mission, type Application, type Review } from '../types';
 import { formatCFA, formatDateShort } from '../lib/utils';
 import toast from 'react-hot-toast';
@@ -16,7 +17,7 @@ const C = {
   bg:     '#0f0a1e',
   side:   '#13102a',
   card:   '#1a1232',
-  gold:   '#c9a84c',
+  gold:   '#d4af37',
   goldLt: '#e8c97a',
   text:   '#f0e6d3',
   sec:    'rgba(240,230,211,0.4)',
@@ -25,12 +26,68 @@ const C = {
 } as const;
 
 const sLabel: React.CSSProperties = {
-  fontSize: 11,
-  fontWeight: 500,
+  fontSize: 12.5,
+  fontWeight: 600,
   textTransform: 'uppercase',
-  letterSpacing: '0.8px',
-  color: 'rgba(201,168,76,0.5)',
+  letterSpacing: '0.6px',
+  color: 'rgba(212,175,55,0.65)',
 };
+
+// ── Sparkline (micro-graphique sous les chiffres clés) ──────────────────────────
+function Sparkline({ data, color }: { data: number[]; color: string }) {
+  const w = 76, h = 22;
+  const max = Math.max(...data), min = Math.min(...data);
+  const rng = max - min || 1;
+  const pts = data.map((d, i) =>
+    `${(i / (data.length - 1)) * w},${h - ((d - min) / rng) * (h - 4) - 2}`).join(' ');
+  const last = pts.split(' ').slice(-1)[0].split(',');
+  return (
+    <svg width={w} height={h} style={{ display: 'block' }} aria-hidden="true">
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.6"
+        strokeLinecap="round" strokeLinejoin="round" opacity="0.9" />
+      <circle cx={last[0]} cy={last[1]} r="2.2" fill={color} />
+    </svg>
+  );
+}
+
+// ── Ligne candidature swipable (mobile : droite = accepter, gauche = refuser) ───
+function SwipeAppRow({ onAccept, onReject, disabled, children }: {
+  onAccept: () => void; onReject: () => void; disabled?: boolean; children: React.ReactNode;
+}) {
+  const [dx, setDx] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const startX = useRef(0);
+  const TH = 80;
+  return (
+    <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 10 }}>
+      {/* Indices de swipe */}
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
+        justifyContent: 'space-between', padding: '0 18px', pointerEvents: 'none' }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: '#00C896', opacity: dx > 24 ? 1 : 0,
+          transition: 'opacity 0.12s', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+          <Check size={15} /> Accepter
+        </span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: '#EF4444', opacity: dx < -24 ? 1 : 0,
+          transition: 'opacity 0.12s', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+          Refuser <X size={15} />
+        </span>
+      </div>
+      <div
+        onTouchStart={e => { if (disabled) return; startX.current = e.touches[0].clientX; setDragging(true); }}
+        onTouchMove={e => { if (!dragging) return; setDx(e.touches[0].clientX - startX.current); }}
+        onTouchEnd={() => {
+          setDragging(false);
+          if (dx > TH) onAccept();
+          else if (dx < -TH) onReject();
+          setDx(0);
+        }}
+        style={{ transform: `translateX(${dx}px)`,
+          transition: dragging ? 'none' : 'transform 0.2s cubic-bezier(0.22,1,0.36,1)' }}>
+        {children}
+      </div>
+    </div>
+  );
+}
 
 
 // ── KPI Card ──────────────────────────────────────────────────────────────────
@@ -40,11 +97,12 @@ interface KpiProps {
   label: string;
   value: React.ReactNode;
   sub: string;
+  trend?: number[];
   hovered: boolean;
   onEnter: () => void;
   onLeave: () => void;
 }
-function KpiCard({ icon: Icon, accent, label, value, sub, hovered, onEnter, onLeave }: KpiProps) {
+function KpiCard({ icon: Icon, accent, label, value, sub, trend, hovered, onEnter, onLeave }: KpiProps) {
   return (
     <div
       onMouseEnter={onEnter}
@@ -71,8 +129,11 @@ function KpiCard({ icon: Icon, accent, label, value, sub, hovered, onEnter, onLe
         </div>
         <span style={sLabel}>{label}</span>
       </div>
-      <div style={{ fontSize: 26, fontWeight: 500, color: C.text, lineHeight: 1 }}>{value}</div>
-      <p style={{ fontSize: 12, color: C.sec, lineHeight: 1.6, margin: 0 }}>{sub}</p>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 8 }}>
+        <div style={{ fontSize: 26, fontWeight: 500, color: C.text, lineHeight: 1 }}>{value}</div>
+        {trend && <Sparkline data={trend} color={accent} />}
+      </div>
+      <p style={{ fontSize: 12.5, color: C.sec, lineHeight: 1.6, margin: 0 }}>{sub}</p>
     </div>
   );
 }
@@ -247,16 +308,16 @@ export default function OrganisateurDashboard() {
 
   const kpis = [
     { icon: FileText,  accent: '#3b82f6', label: 'Missions publiées',
-      value: totalMissions,
+      value: totalMissions, trend: [3, 4, 4, 5, 6, 6, 7, 8],
       sub: `${missionsOuvertes} actuellement ouverte${missionsOuvertes !== 1 ? 's' : ''}` },
-    { icon: Target,    accent: '#10b981', label: 'En recrutement',
-      value: missionsOuvertes,
+    { icon: Target,    accent: '#00C896', label: 'En recrutement',
+      value: missionsOuvertes, trend: [2, 2, 3, 3, 4, 4, 5, 6],
       sub: totalMissions > 0 ? `${Math.round(missionsOuvertes / totalMissions * 100)}% du total` : 'Aucune mission' },
     { icon: Users,     accent: C.gold,   label: 'Candidatures',
-      value: candidaturesRecues,
+      value: candidaturesRecues, trend: [1, 2, 2, 3, 4, 5, 6, 7],
       sub: `${pendingApps.length} en attente de réponse` },
     { icon: Briefcase, accent: '#8b5cf6', label: 'Budget engagé',
-      value: budgetEngage > 0 ? formatCFA(budgetEngage) : '—',
+      value: budgetEngage > 0 ? formatCFA(budgetEngage) : '—', trend: [2, 3, 3, 4, 4, 5, 6, 7],
       sub: `${allApps.filter(a => a.status === 'accepted').length} freelance${allApps.filter(a => a.status === 'accepted').length !== 1 ? 's' : ''} confirmé${allApps.filter(a => a.status === 'accepted').length !== 1 ? 's' : ''}` },
   ];
 
@@ -307,7 +368,7 @@ export default function OrganisateurDashboard() {
 
         {/* Logo */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
-          <img src="/logo.png.jpeg" alt="EventBridge" style={{ height: 52, width: 'auto', objectFit: 'contain' }} />
+          <Logo height={46} />
         </div>
 
         {/* Nav — seul élément scrollable si contenu trop long */}
@@ -397,7 +458,7 @@ export default function OrganisateurDashboard() {
           <button onClick={() => setSidebarOpen(true)} style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', color: C.gold, display: 'flex' }}>
             <Menu size={20} />
           </button>
-          <img src="/logo.png.jpeg" alt="EventBridge" style={{ height: 36, width: 'auto', objectFit: 'contain' }} />
+          <Logo height={34} />
           <div style={{ width: 36 }} />
         </div>
 
@@ -460,7 +521,7 @@ export default function OrganisateurDashboard() {
             {kpis.map((k, i) => (
               <KpiCard key={i}
                 icon={k.icon} accent={k.accent}
-                label={k.label} value={k.value} sub={k.sub}
+                label={k.label} value={k.value} sub={k.sub} trend={k.trend}
                 hovered={hovKpi === i}
                 onEnter={() => setHovKpi(i)}
                 onLeave={() => setHovKpi(null)} />
@@ -489,9 +550,14 @@ export default function OrganisateurDashboard() {
                       const fl = a.freelance as { id?: string; full_name?: string; avatar_url?: string; avg_rating?: number; skills?: string[] } | undefined;
                       const m = a.mission as Mission | undefined;
                       return (
-                        <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 12,
+                       <SwipeAppRow key={a.id}
+                         disabled={actionLoading === a.id}
+                         onAccept={() => handleApplication(a.id, 'accepted')}
+                         onReject={() => handleApplication(a.id, 'rejected')}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12,
                           padding: '12px 14px', borderRadius: 10,
-                          background: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.1)' }}>
+                          background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.1)',
+                          borderLeft: '3px solid #F59E0B' }}>
                           {fl?.avatar_url ? (
                             <img src={fl.avatar_url} style={{ width: 38, height: 38, borderRadius: '50%',
                               objectFit: 'cover', flexShrink: 0, border: `1.5px solid ${C.gold}40` }} alt="" />
@@ -545,9 +611,13 @@ export default function OrganisateurDashboard() {
                             </button>
                           </div>
                         </div>
+                       </SwipeAppRow>
                       );
                     })}
                   </div>
+                  <p style={{ fontSize: 11.5, color: C.sec, margin: '10px 2px 0', textAlign: 'center', opacity: 0.7 }}>
+                    Astuce : sur mobile, glissez une candidature à droite pour accepter, à gauche pour refuser.
+                  </p>
                 </div>
               )}
 
@@ -674,7 +744,7 @@ export default function OrganisateurDashboard() {
                                     color: 'rgba(239,68,68,0.65)', background: 'transparent', transition: 'all 0.15s' }}
                                   onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)'; (e.currentTarget as HTMLButtonElement).style.color = '#ef4444'; }}
                                   onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = 'rgba(239,68,68,0.65)'; }}>
-                                  {m.status === 'draft' ? '🗑' : '✗'}
+                                  {m.status === 'draft' ? <Trash2 size={13} /> : <X size={13} />}
                                 </button>
                               )
                             )}

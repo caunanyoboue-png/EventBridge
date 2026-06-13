@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { supabase } from '../../lib/supabase';
+import { Scale } from 'lucide-react';
 import { formatRelative } from '../../lib/utils';
 import toast from 'react-hot-toast';
 
@@ -54,14 +55,14 @@ export default function AdminDisputes() {
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6" style={{ color: '#f0e6d3' }}>⚖️ Gestion des litiges</h1>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><Scale size={26} color="#d4af37" /> Gestion des litiges</h1>
 
       <div className="card-glass p-4 mb-6 flex flex-wrap gap-3">
         {(['open', 'investigating', 'resolved', 'closed', ''] as const).map(s => (
           <button key={s} onClick={() => setFilterStatus(s as string)}
             className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
             style={filterStatus === s
-              ? { background: 'rgba(201,168,76,0.2)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.4)' }
+              ? { background: 'rgba(201,168,76,0.2)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.4)' }
               : { background: 'rgba(82,54,124,0.4)', color: '#7a6a7a', border: '1px solid rgba(201,168,76,0.1)' }}>
             {s === '' ? 'Tous' : statusLabel[s]}
           </button>
@@ -103,7 +104,7 @@ export default function AdminDisputes() {
                 {d.status === 'open' && (
                   <button onClick={() => { setSelected(d); setResolution(''); }}
                     className="px-3 py-1.5 rounded-lg text-xs shrink-0"
-                    style={{ background: 'rgba(201,168,76,0.15)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}>
+                    style={{ background: 'rgba(201,168,76,0.15)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}>
                     Traiter
                   </button>
                 )}
@@ -131,7 +132,7 @@ export default function AdminDisputes() {
             <div className="flex gap-3">
               <button onClick={() => resolve(selected.id, 'resolved')}
                 className="flex-1 py-2 rounded-xl text-sm font-bold"
-                style={{ background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642' }}>
+                style={{ background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }}>
                 Résoudre
               </button>
               <button onClick={() => resolve(selected.id, 'closed')}

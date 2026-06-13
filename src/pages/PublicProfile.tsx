@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import {
+  Mail, Pencil, Check, MapPin, Building2, Target, FileText,
+  Phone, CheckCircle2, Star, GraduationCap, Banknote, Trophy, type LucideIcon,
+} from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -19,7 +23,7 @@ function Stars({ rating }: { rating: number }) {
     <span style={{ display: 'inline-flex', gap: 3 }}>
       {Array.from({ length: 5 }).map((_, i) => (
         <svg key={i} width="13" height="13" viewBox="0 0 13 13"
-          fill={i < Math.round(rating) ? '#c9a84c' : 'none'} stroke="#c9a84c" strokeWidth="0.9">
+          fill={i < Math.round(rating) ? '#d4af37' : 'none'} stroke="#d4af37" strokeWidth="0.9">
           <path d="M6.5 1l1.6 3.3 3.7.5-2.7 2.6.6 3.7-3.2-1.7-3.2 1.7.6-3.7L1.8 4.8l3.7-.5L6.5 1z"
             strokeLinejoin="round"/>
         </svg>
@@ -77,7 +81,7 @@ export default function PublicProfile() {
   if (loading) return (
     <DashboardLayout>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
-        <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #c9a84c',
+        <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #d4af37',
           borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -103,7 +107,7 @@ export default function PublicProfile() {
     draft: { label: 'Brouillon', color: '#6a5a7a' },
     open: { label: 'Ouverte', color: '#10b981' },
     in_progress: { label: 'En cours', color: '#3b82f6' },
-    completed: { label: 'Terminée', color: '#c9a84c' },
+    completed: { label: 'Terminée', color: '#d4af37' },
     cancelled: { label: 'Annulée', color: '#ef4444' },
     disputed: { label: 'Litige', color: '#f59e0b' },
   };
@@ -144,16 +148,16 @@ export default function PublicProfile() {
                   className="btn-gold"
                   style={{ padding: '8px 18px', borderRadius: 9, fontSize: 12, fontWeight: 700,
                     color: '#261642', opacity: messaging ? 0.75 : 1 }}>
-                  {messaging ? 'Ouverture…' : '✉ Envoyer un message'}
+                  {messaging ? 'Ouverture…' : <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}><Mail size={14} /> Envoyer un message</span>}
                 </button>
               )}
               {isSelf && (
                 <button onClick={() => navigate('/profile')}
                   style={{ padding: '8px 16px', borderRadius: 9, fontSize: 12, fontWeight: 600,
-                    cursor: 'pointer', color: '#c9a84c',
+                    cursor: 'pointer', color: '#d4af37',
                     background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)',
                     border: '1px solid rgba(201,168,76,0.3)' }}>
-                  ✏ Modifier mon profil
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Pencil size={13} /> Modifier mon profil</span>
                 </button>
               )}
             </div>
@@ -168,7 +172,7 @@ export default function PublicProfile() {
                     outline: '2px solid rgba(201,168,76,0.4)' }} />
               : <div style={{ width: 100, height: 100, borderRadius: '50%', display: 'flex',
                   alignItems: 'center', justifyContent: 'center', fontSize: 30, fontWeight: 800,
-                  color: '#261642', background: 'linear-gradient(135deg,#c9a84c,#e8c97a)',
+                  color: '#261642', background: 'linear-gradient(135deg,#d4af37,#e8c97a)',
                   border: '3px solid #261642', outline: '2px solid rgba(201,168,76,0.3)' }}>
                   {initials}
                 </div>
@@ -183,15 +187,16 @@ export default function PublicProfile() {
             <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 999,
               letterSpacing: '0.08em',
               background: isFreelance ? 'rgba(201,168,76,0.12)' : 'rgba(96,165,250,0.12)',
-              color: isFreelance ? '#c9a84c' : '#60a5fa',
+              color: isFreelance ? '#d4af37' : '#60a5fa',
               border: `1px solid ${isFreelance ? 'rgba(201,168,76,0.3)' : 'rgba(96,165,250,0.3)'}` }}>
               {isFreelance ? 'FREELANCE' : 'ORGANISATEUR'}
             </span>
             {viewed.is_certified && (
               <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 999,
                 background: 'rgba(16,185,129,0.1)', color: '#10b981',
-                border: '1px solid rgba(16,185,129,0.25)', letterSpacing: '0.08em' }}>
-                ✓ CERTIFIÉ
+                border: '1px solid rgba(16,185,129,0.25)', letterSpacing: '0.08em',
+                display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <Check size={11} /> CERTIFIÉ
               </span>
             )}
             {isFreelance && (
@@ -209,16 +214,16 @@ export default function PublicProfile() {
           {(viewed.avg_rating ?? 0) > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
               <Stars rating={viewed.avg_rating || 0} />
-              <span style={{ fontSize: 14, fontWeight: 700, color: '#c9a84c' }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: '#d4af37' }}>
                 {(viewed.avg_rating || 0).toFixed(1)}
               </span>
               <span style={{ fontSize: 12, color: '#5a4a6a' }}>· {viewed.total_reviews || 0} avis</span>
             </div>
           )}
-          <p style={{ fontSize: 13, color: '#6a5a7a', margin: 0 }}>
-            📍 {[viewed.ville, viewed.quartier].filter(Boolean).join(', ') || 'Localisation non renseignée'}
+          <p style={{ fontSize: 13, color: '#8a7a9a', margin: 0, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+            <MapPin size={13} /> {[viewed.ville, viewed.quartier].filter(Boolean).join(', ') || 'Localisation non renseignée'}
             {!isFreelance && viewed.company_name && (
-              <span style={{ color: '#c9a84c', fontWeight: 600 }}> · 🏢 {viewed.company_name}</span>
+              <span style={{ color: '#d4af37', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5 }}> · <Building2 size={13} /> {viewed.company_name}</span>
             )}
           </p>
         </div>
@@ -241,7 +246,7 @@ export default function PublicProfile() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
                   <h3 style={{ ...sT, margin: 0 }}>Compétences</h3>
                   {viewed.hourly_rate && (
-                    <span style={{ fontSize: 14, fontWeight: 700, color: '#c9a84c' }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: '#d4af37' }}>
                       {formatCFA(viewed.hourly_rate)}/h
                     </span>
                   )}
@@ -249,7 +254,7 @@ export default function PublicProfile() {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   {(viewed.skills || []).map(s => (
                     <span key={s} style={{ padding: '7px 14px', borderRadius: 999, fontSize: 13,
-                      fontWeight: 600, background: 'rgba(201,168,76,0.1)', color: '#c9a84c',
+                      fontWeight: 600, background: 'rgba(201,168,76,0.1)', color: '#d4af37',
                       border: '1px solid rgba(201,168,76,0.22)' }}>
                       {s}
                     </span>
@@ -289,21 +294,21 @@ export default function PublicProfile() {
                     <div>
                       <p style={{ fontSize: 11, color: '#5a4a6a', margin: '0 0 4px', fontWeight: 600,
                         textTransform: 'uppercase', letterSpacing: '0.06em' }}>Structure</p>
-                      <p style={{ fontSize: 14, color: '#b8a898', margin: 0 }}>🏢 {viewed.company_name}</p>
+                      <p style={{ fontSize: 14, color: '#b8a898', margin: 0, display: 'flex', alignItems: 'center', gap: 7 }}><Building2 size={14} color="#d4af37" /> {viewed.company_name}</p>
                     </div>
                   )}
                   {viewed.company_sector && (
                     <div>
                       <p style={{ fontSize: 11, color: '#5a4a6a', margin: '0 0 4px', fontWeight: 600,
                         textTransform: 'uppercase', letterSpacing: '0.06em' }}>Secteur</p>
-                      <p style={{ fontSize: 14, color: '#b8a898', margin: 0 }}>🎯 {viewed.company_sector}</p>
+                      <p style={{ fontSize: 14, color: '#b8a898', margin: 0, display: 'flex', alignItems: 'center', gap: 7 }}><Target size={14} color="#d4af37" /> {viewed.company_sector}</p>
                     </div>
                   )}
                   {viewed.rccm && (
                     <div>
                       <p style={{ fontSize: 11, color: '#5a4a6a', margin: '0 0 4px', fontWeight: 600,
                         textTransform: 'uppercase', letterSpacing: '0.06em' }}>RCCM</p>
-                      <p style={{ fontSize: 14, color: '#b8a898', margin: 0 }}>📋 {viewed.rccm}</p>
+                      <p style={{ fontSize: 14, color: '#b8a898', margin: 0, display: 'flex', alignItems: 'center', gap: 7 }}><FileText size={14} color="#d4af37" /> {viewed.rccm}</p>
                     </div>
                   )}
                 </div>
@@ -352,7 +357,7 @@ export default function PublicProfile() {
                 {(viewed.avg_rating ?? 0) > 0 && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <Stars rating={viewed.avg_rating || 0} />
-                    <span style={{ fontSize: 15, fontWeight: 700, color: '#c9a84c' }}>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: '#d4af37' }}>
                       {(viewed.avg_rating || 0).toFixed(1)}
                     </span>
                     <span style={{ fontSize: 12, color: '#5a4a6a' }}>({viewed.total_reviews || 0})</span>
@@ -364,7 +369,7 @@ export default function PublicProfile() {
                   <svg width="36" height="36" viewBox="0 0 36 36" fill="none"
                     style={{ margin: '0 auto 12px', display: 'block' }}>
                     <path d="M18 3.5l4.4 9 9.8 1.4-7.1 6.9 1.7 9.7L18 26.4 9.2 30.5l1.7-9.7-7.1-6.9 9.8-1.4L18 3.5Z"
-                      stroke="#c9a84c" strokeWidth="1.4" strokeLinejoin="round" strokeOpacity="0.35"/>
+                      stroke="#d4af37" strokeWidth="1.4" strokeLinejoin="round" strokeOpacity="0.35"/>
                   </svg>
                   <p style={{ fontSize: 13, color: 'rgba(240,230,211,0.45)' }}>Aucun avis pour l'instant.</p>
                 </div>
@@ -381,7 +386,7 @@ export default function PublicProfile() {
                         : <div style={{ width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             fontSize: 13, fontWeight: 600,
-                            background: 'rgba(201,168,76,0.1)', color: '#c9a84c' }}>
+                            background: 'rgba(201,168,76,0.1)', color: '#d4af37' }}>
                             {(rev?.full_name || '?').charAt(0)}
                           </div>
                       }
@@ -413,18 +418,20 @@ export default function PublicProfile() {
               <h3 style={sT}>Statistiques</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {([
-                  { icon: '✅', label: 'Missions réalisées', value: String(viewed.total_missions ?? 0) },
-                  { icon: '⭐', label: 'Note moyenne', value: (viewed.avg_rating ?? 0) > 0 ? `${(viewed.avg_rating || 0).toFixed(1)}/5` : '—' },
+                  { Icon: CheckCircle2, label: 'Missions réalisées', value: String(viewed.total_missions ?? 0) },
+                  { Icon: Star, label: 'Note moyenne', value: (viewed.avg_rating ?? 0) > 0 ? `${(viewed.avg_rating || 0).toFixed(1)}/5` : '—' },
                   ...(isFreelance ? [
-                    { icon: '🎓', label: "Années d'expérience", value: `${viewed.experience_years ?? 0} ans` },
-                    { icon: '💵', label: 'Tarif horaire', value: viewed.hourly_rate ? formatCFA(viewed.hourly_rate) : '—' },
+                    { Icon: GraduationCap, label: "Années d'expérience", value: `${viewed.experience_years ?? 0} ans` },
+                    { Icon: Banknote, label: 'Tarif horaire', value: viewed.hourly_rate ? formatCFA(viewed.hourly_rate) : '—' },
                   ] : []),
-                ] as { icon: string; label: string; value: string }[]).map(stat => (
+                ] as { Icon: LucideIcon; label: string; value: string }[]).map(stat => (
                   <div key={stat.label} style={{ display: 'flex', justifyContent: 'space-between',
                     alignItems: 'center', padding: '10px 12px', background: 'rgba(82,54,124,0.3)',
                     borderRadius: 10, border: '1px solid rgba(201,168,76,0.06)' }}>
-                    <span style={{ fontSize: 12, color: '#6a5a7a' }}>{stat.icon} {stat.label}</span>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: '#c9a84c' }}>{stat.value}</span>
+                    <span style={{ fontSize: 12, color: '#8a7a9a', display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                      <stat.Icon size={14} color="#d4af37" /> {stat.label}
+                    </span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: '#d4af37' }}>{stat.value}</span>
                   </div>
                 ))}
               </div>
@@ -439,13 +446,13 @@ export default function PublicProfile() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {viewed.phone && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span>📞</span>
+                      <Phone size={15} color="#d4af37" />
                       <span style={{ fontSize: 13, color: '#b8a898' }}>{viewed.phone}</span>
                     </div>
                   )}
                   {(viewed.ville || viewed.quartier) && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span>📍</span>
+                      <MapPin size={15} color="#d4af37" />
                       <span style={{ fontSize: 13, color: '#b8a898' }}>
                         {[viewed.ville, viewed.quartier].filter(Boolean).join(', ')}
                       </span>
@@ -453,19 +460,19 @@ export default function PublicProfile() {
                   )}
                   {!isFreelance && viewed.company_name && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span>🏢</span>
+                      <Building2 size={15} color="#d4af37" />
                       <span style={{ fontSize: 13, color: '#b8a898' }}>{viewed.company_name}</span>
                     </div>
                   )}
                   {!isFreelance && viewed.company_sector && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span>🎯</span>
+                      <Target size={15} color="#d4af37" />
                       <span style={{ fontSize: 13, color: '#b8a898' }}>{viewed.company_sector}</span>
                     </div>
                   )}
                   {isFreelance && viewed.hourly_rate && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span>💵</span>
+                      <Banknote size={15} color="#d4af37" />
                       <span style={{ fontSize: 13, color: '#b8a898' }}>{formatCFA(viewed.hourly_rate)}/h</span>
                     </div>
                   )}
@@ -477,7 +484,7 @@ export default function PublicProfile() {
             {viewed.is_certified && (
               <div className="card-glass" style={{ padding: 20, textAlign: 'center',
                 border: '1px solid rgba(16,185,129,0.2)' }}>
-                <div style={{ fontSize: 28, marginBottom: 8 }}>🏆</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}><Trophy size={28} color="#10b981" /></div>
                 <p style={{ fontSize: 12, fontWeight: 700, color: '#10b981', margin: '0 0 6px',
                   textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   Profil certifié

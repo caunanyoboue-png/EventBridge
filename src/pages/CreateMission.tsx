@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Check, Zap } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -104,7 +105,7 @@ export default function CreateMission() {
           p_ville:           form.ville,
           p_skills_required: form.skills_required.length > 0 ? form.skills_required : null,
         });
-        toast.success(`Mission publiée ! ${count ?? 0} freelance(s) notifié(s) 🎯`);
+        toast.success(`Mission publiée ! ${count ?? 0} freelance(s) notifié(s)`);
       } else {
         toast.success('Brouillon enregistré');
       }
@@ -132,13 +133,13 @@ export default function CreateMission() {
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all"
                   style={i <= step
-                    ? { background: 'linear-gradient(135deg,#c9a84c,#e8c97a)', color: '#261642' }
+                    ? { background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }
                     : { border: '1px solid rgba(201,168,76,0.3)', color: '#7a6a7a' }}>
-                  {i < step ? '✓' : i + 1}
+                  {i < step ? <Check size={15} /> : i + 1}
                 </div>
-                <span className="text-xs hidden sm:block" style={{ color: i === step ? '#c9a84c' : '#7a6a7a' }}>{s}</span>
+                <span className="text-xs hidden sm:block" style={{ color: i === step ? '#d4af37' : '#7a6a7a' }}>{s}</span>
               </div>
-              {i < steps.length - 1 && <div className="w-8 h-px mx-2" style={{ background: i < step ? '#c9a84c' : 'rgba(201,168,76,0.2)' }} />}
+              {i < steps.length - 1 && <div className="w-8 h-px mx-2" style={{ background: i < step ? '#d4af37' : 'rgba(201,168,76,0.2)' }} />}
             </div>
           ))}
         </div>
@@ -165,16 +166,16 @@ export default function CreateMission() {
                       className="px-3 py-1.5 rounded-full text-xs font-medium transition-all border"
                       style={{
                         background: form.skills_required.includes(t) ? 'rgba(201,168,76,0.2)' : 'transparent',
-                        borderColor: form.skills_required.includes(t) ? '#c9a84c' : 'rgba(201,168,76,0.2)',
-                        color: form.skills_required.includes(t) ? '#c9a84c' : '#b8a898',
+                        borderColor: form.skills_required.includes(t) ? '#d4af37' : 'rgba(201,168,76,0.2)',
+                        color: form.skills_required.includes(t) ? '#d4af37' : '#b8a898',
                       }}>
                       {t}
                     </button>
                   ))}
                 </div>
                 {form.skills_required.length > 0 && (
-                  <p className="text-xs mt-2" style={{ color: 'rgba(201,168,76,0.7)' }}>
-                    ✓ {form.skills_required.length} sélectionné(s) — icône : {form.service_type}
+                  <p className="text-xs mt-2 flex items-center gap-1.5" style={{ color: 'rgba(201,168,76,0.7)' }}>
+                    <Check size={13} /> {form.skills_required.length} sélectionné(s) — type principal : {form.service_type}
                   </p>
                 )}
               </div>
@@ -199,7 +200,7 @@ export default function CreateMission() {
                   <div className="absolute w-4 h-4 bg-white rounded-full top-1 transition-all"
                     style={{ left: form.is_urgent ? '24px' : '4px' }} />
                 </div>
-                <span className="text-sm" style={{ color: '#b8a898' }}>Mission urgente ⚡</span>
+                <span className="text-sm flex items-center gap-1.5" style={{ color: '#b8a898' }}>Mission urgente <Zap size={14} color="#ef4444" fill="#ef4444" /></span>
               </label>
 
               <button onClick={() => setStep(1)}
@@ -264,9 +265,9 @@ export default function CreateMission() {
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'rgba(201,168,76,0.03)'}>
                     <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleVenueFile} />
                     <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                      <rect x="2" y="6" width="24" height="18" rx="3" stroke="#c9a84c" strokeWidth="1.5" strokeOpacity="0.5"/>
-                      <circle cx="9" cy="13" r="2.5" stroke="#c9a84c" strokeWidth="1.5" strokeOpacity="0.5"/>
-                      <path d="M2 20l7-5 5 4 4-3 8 5" stroke="#c9a84c" strokeWidth="1.5" strokeOpacity="0.5" strokeLinejoin="round"/>
+                      <rect x="2" y="6" width="24" height="18" rx="3" stroke="#d4af37" strokeWidth="1.5" strokeOpacity="0.5"/>
+                      <circle cx="9" cy="13" r="2.5" stroke="#d4af37" strokeWidth="1.5" strokeOpacity="0.5"/>
+                      <path d="M2 20l7-5 5 4 4-3 8 5" stroke="#d4af37" strokeWidth="1.5" strokeOpacity="0.5" strokeLinejoin="round"/>
                     </svg>
                     <span style={{ fontSize: 12, color: 'rgba(201,168,76,0.5)' }}>Ajouter une photo du lieu</span>
                   </label>
@@ -277,7 +278,7 @@ export default function CreateMission() {
               <div>
                 <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>
                   Localisation sur la carte
-                  {form.latitude && <span style={{ color: '#c9a84c', marginLeft: 8 }}>✓ Position enregistrée</span>}
+                  {form.latitude && <span style={{ color: '#d4af37', marginLeft: 8 }} className="inline-flex items-center gap-1"><Check size={12} /> Position enregistrée</span>}
                 </label>
                 <MapPicker
                   lat={form.latitude}
@@ -296,11 +297,11 @@ export default function CreateMission() {
                   <div className="flex items-center gap-3">
                     <button onClick={() => upd('slots_total', Math.max(1, form.slots_total - 1))}
                       className="w-10 h-10 rounded-lg font-bold text-lg"
-                      style={{ background: 'rgba(82,54,124,0.5)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}>-</button>
+                      style={{ background: 'rgba(82,54,124,0.5)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}>-</button>
                     <span className="text-xl font-bold" style={{ color: '#f0e6d3' }}>{form.slots_total}</span>
                     <button onClick={() => upd('slots_total', form.slots_total + 1)}
                       className="w-10 h-10 rounded-lg font-bold text-lg"
-                      style={{ background: 'rgba(82,54,124,0.5)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}>+</button>
+                      style={{ background: 'rgba(82,54,124,0.5)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}>+</button>
                   </div>
                 </div>
                 <div>
@@ -369,8 +370,8 @@ export default function CreateMission() {
                 </div>
               </div>
               {form.is_urgent && (
-                <div className="badge-urgent px-3 py-2 rounded-lg text-sm text-center">
-                  ⚡ Mission marquée comme URGENTE
+                <div className="badge-urgent px-3 py-2 rounded-lg text-sm text-center flex items-center justify-center gap-2">
+                  <Zap size={15} fill="currentColor" /> Mission marquée comme URGENTE
                 </div>
               )}
               <div className="flex gap-3 pt-2">
@@ -382,7 +383,7 @@ export default function CreateMission() {
                 </button>
                 <button onClick={() => submit('open')} disabled={loading || uploadingVenue}
                   className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#261642]">
-                  {uploadingVenue ? 'Photo...' : loading ? 'Publication...' : 'Publier 🚀'}
+                  {uploadingVenue ? 'Photo...' : loading ? 'Publication...' : 'Publier la mission'}
                 </button>
               </div>
             </>

@@ -3,11 +3,12 @@
 @tailwind utilities;
 
 :root {
+  /* Palette d'origine */
   --color-bg-primary: #261642;
   --color-bg-secondary: #3d2764;
   --color-bg-card: #52367c;
   --color-bg-overlay: #1c1132;
-  --color-gold-primary: #c9a84c;
+  --color-gold-primary: #d4af37;
   --color-gold-light: #e8c97a;
   --color-gold-dark: #a07830;
   --color-text-primary: #f0e6d3;
@@ -17,17 +18,73 @@
   --color-border-hover: rgba(201, 168, 76, 0.5);
   --glass-bg: rgba(61, 39, 100, 0.6);
   --glass-border: rgba(201, 168, 76, 0.15);
+
+  /* Variations dérivées — profondeur et richesse sans trahir l'original */
+  --color-night: #0f0a1e;
+  --color-night-deep: #160e2c;
+  --color-plum: #6b4a9e;
+  --color-plum-light: #8a67c0;
+  --color-orchid: #a98ed6;
+  --color-gold-pale: #f5e6c4;
+  --color-gold-deep: #7d5a20;
+  --color-champagne: #f7edd8;
+
+  /* Dégradés signature */
+  --gradient-gold: linear-gradient(135deg, #a07830 0%, #d4af37 35%, #e8c97a 60%, #d4af37 100%);
+  --gradient-royal: linear-gradient(160deg, #0f0a1e 0%, #261642 45%, #3d2764 100%);
+  --gradient-veil: linear-gradient(105deg, transparent 20%, rgba(232, 201, 122, 0.35) 50%, transparent 80%);
+
+  /* Statuts (palette validée) */
+  --color-success: #00C896;
+  --color-warning: #F59E0B;
+  --color-danger:  #EF4444;
+  --color-text-soft: #A0A0B8;
+  --gold-glow: 0 0 12px rgba(212, 175, 55, 0.5);
+
+  /* Typographie */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Manrope', 'Helvetica Neue', sans-serif;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html { scroll-behavior: smooth; }
+
 body {
   background-color: #261642;
   color: #f0e6d3;
-  font-family: 'Inter', 'Helvetica Neue', sans-serif;
-  line-height: 1.6;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.65;
+  letter-spacing: 0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Playfair Display : serif éditorial en casse normale pour les grands titres. */
+h1, h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: 0;
+}
+/* Sous-titres en casse normale → Manrope, plus lisible. */
+h3 {
+  font-family: var(--font-body);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+::selection {
+  background: rgba(201, 168, 76, 0.35);
+  color: #f7edd8;
+}
+
+:focus-visible {
+  outline: 2px solid rgba(201, 168, 76, 0.7);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar { width: 6px; }
@@ -59,6 +116,35 @@ body {
   0% { transform: scale(1); opacity: 0.8; }
   100% { transform: scale(2.5); opacity: 0; }
 }
+@keyframes notif-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55); }
+  50% { box-shadow: 0 0 0 5px rgba(239, 68, 68, 0); }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes gold-sweep {
+  0% { transform: translateX(-100%) skewX(-12deg); }
+  100% { transform: translateX(220%) skewX(-12deg); }
+}
+@keyframes draw-line {
+  from { stroke-dashoffset: var(--draw-length, 600); }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes aurora {
+  0% { transform: translate(-8%, -4%) scale(1); }
+  50% { transform: translate(6%, 5%) scale(1.12); }
+  100% { transform: translate(-4%, 8%) scale(1.05); }
+}
 
 @layer utilities {
   .animate-twinkle { animation: twinkle 3s ease-in-out infinite; }
@@ -66,9 +152,12 @@ body {
   .animate-glow { animation: glow-pulse 2s ease-in-out infinite; }
   .animate-sos { animation: sos-pulse 1.5s ease-in-out infinite; }
   .animate-ping-slow { animation: ping-slow 2s ease-out infinite; }
+  .animate-fade-up { animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .animate-fade-in { animation: fade-in 0.5s ease-out both; }
+  .animate-scale-in { animation: scale-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
   .text-gold-gradient {
-    background: linear-gradient(135deg, #c9a84c 0%, #e8c97a 50%, #c9a84c 100%);
+    background: linear-gradient(135deg, #d4af37 0%, #e8c97a 50%, #d4af37 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -84,31 +173,57 @@ body {
     border-radius: 16px;
   }
 
+  .card-lift {
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+  .card-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(15, 10, 30, 0.5), 0 0 0 1px rgba(201, 168, 76, 0.25);
+  }
+
   .btn-gold {
-    background: linear-gradient(135deg, #c9a84c, #e8c97a);
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #d4af37, #e8c97a);
     color: #261642;
     font-weight: 700;
     border-radius: 8px;
-    transition: all 0.3s ease;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
     box-shadow: 0 4px 20px rgba(201, 168, 76, 0.3);
     cursor: pointer;
   }
   .btn-gold:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(201, 168, 76, 0.5);
+    box-shadow: 0 8px 30px rgba(212, 175, 55, 0.45), 0 0 12px rgba(212, 175, 55, 0.5);
   }
+  /* Glow doré générique pour les CTA non .btn-gold */
+  .cta-glow { transition: box-shadow 0.25s ease, transform 0.2s ease; }
+  .cta-glow:hover { box-shadow: 0 0 12px rgba(212, 175, 55, 0.5); }
+  .btn-gold::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 40%;
+    background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    transform: translateX(-150%) skewX(-12deg);
+    transition: none;
+    pointer-events: none;
+  }
+  .btn-gold:hover::after { animation: gold-sweep 0.9s cubic-bezier(0.65, 0, 0.35, 1); }
 
   .btn-outline-gold {
     background: transparent;
     border: 1px solid rgba(201, 168, 76, 0.5);
-    color: #c9a84c;
+    color: #d4af37;
     border-radius: 8px;
-    transition: all 0.3s ease;
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
     cursor: pointer;
   }
   .btn-outline-gold:hover {
     background: rgba(201, 168, 76, 0.1);
-    border-color: #c9a84c;
+    border-color: #d4af37;
+    color: #e8c97a;
   }
 
   .badge-urgent {
@@ -119,6 +234,51 @@ body {
   }
 
   .font-display { font-family: 'Playfair Display', Georgia, serif; }
+  .font-body { font-family: 'Manrope', 'Helvetica Neue', sans-serif; }
+
+  /* Hover doré des liens de navigation (sidebar) */
+  .eb-nav-link:hover {
+    background: rgba(201, 168, 76, 0.07) !important;
+    color: #e8c97a !important;
+  }
+
+  /* Hover des actions du fil d'actualité */
+  .feed-action:hover {
+    background: rgba(201, 168, 76, 0.06);
+  }
+
+  /* Badge notification animé (pulse rouge) */
+  .notif-pulse { animation: notif-pulse 1.8s ease-in-out infinite; }
+
+  /* Labels d'interface : tailles relevées pour lisibilité */
+  .ui-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-soft);
+  }
+  .stat-label {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--color-text-soft);
+  }
+
+  /* Filet doré décoratif sous les titres de section */
+  .gold-rule {
+    position: relative;
+    display: inline-block;
+  }
+  .gold-rule::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -10px;
+    transform: translateX(-50%);
+    width: 56px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #d4af37 30%, #e8c97a 50%, #d4af37 70%, transparent);
+  }
 
   .line-clamp-2 {
     display: -webkit-box;
@@ -131,5 +291,15 @@ body {
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+}
+
+/* Accessibilité : désactiver les animations si l'utilisateur le demande */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

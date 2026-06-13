@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Settings, Wallet, Siren, ShieldCheck, Globe, Save } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import toast from 'react-hot-toast';
 
@@ -37,12 +38,12 @@ export default function AdminSettings() {
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6" style={{ color: '#f0e6d3' }}>⚙️ Paramètres plateforme</h1>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><Settings size={26} color="#d4af37" /> Paramètres plateforme</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Financier */}
         <div className="card-glass p-6 space-y-4">
-          <h2 className="font-semibold mb-4" style={{ color: '#c9a84c' }}>💰 Paramètres financiers</h2>
+          <h2 className="font-semibold mb-4 flex items-center gap-2" style={{ color: '#d4af37' }}><Wallet size={18} /> Paramètres financiers</h2>
           <Field label="Taux de commission (%)">
             <input type="number" className={inputClass} style={inputStyle}
               value={settings.commission_rate} min={0} max={50}
@@ -62,7 +63,7 @@ export default function AdminSettings() {
 
         {/* S.O.S Brigade */}
         <div className="card-glass p-6 space-y-4">
-          <h2 className="font-semibold mb-4" style={{ color: '#ef4444' }}>🚨 S.O.S Brigade</h2>
+          <h2 className="font-semibold mb-4 flex items-center gap-2" style={{ color: '#ef4444' }}><Siren size={18} /> S.O.S Brigade</h2>
           <Field label="Rayon de recherche par défaut (km)">
             <input type="number" className={inputClass} style={inputStyle}
               value={settings.sos_radius_km} min={1} max={100}
@@ -77,7 +78,7 @@ export default function AdminSettings() {
 
         {/* Vérification */}
         <div className="card-glass p-6 space-y-4">
-          <h2 className="font-semibold mb-4" style={{ color: '#10b981' }}>✅ Vérification & Certification</h2>
+          <h2 className="font-semibold mb-4 flex items-center gap-2" style={{ color: '#10b981' }}><ShieldCheck size={18} /> Vérification & Certification</h2>
           <div className="flex items-center justify-between py-2">
             <div>
               <p className="text-sm font-medium" style={{ color: '#f0e6d3' }}>Certification automatique</p>
@@ -85,7 +86,7 @@ export default function AdminSettings() {
             </div>
             <button onClick={() => setSettings(p => ({ ...p, auto_certify: !p.auto_certify }))}
               className="relative w-12 h-6 rounded-full transition-all"
-              style={{ background: settings.auto_certify ? '#c9a84c' : 'rgba(82,54,124,0.8)' }}>
+              style={{ background: settings.auto_certify ? '#d4af37' : 'rgba(82,54,124,0.8)' }}>
               <span className="absolute top-1 w-4 h-4 rounded-full bg-white transition-all"
                 style={{ left: settings.auto_certify ? '26px' : '4px' }} />
             </button>
@@ -97,7 +98,7 @@ export default function AdminSettings() {
             </div>
             <button onClick={() => setSettings(p => ({ ...p, require_id_verification: !p.require_id_verification }))}
               className="relative w-12 h-6 rounded-full transition-all"
-              style={{ background: settings.require_id_verification ? '#c9a84c' : 'rgba(82,54,124,0.8)' }}>
+              style={{ background: settings.require_id_verification ? '#d4af37' : 'rgba(82,54,124,0.8)' }}>
               <span className="absolute top-1 w-4 h-4 rounded-full bg-white transition-all"
                 style={{ left: settings.require_id_verification ? '26px' : '4px' }} />
             </button>
@@ -106,7 +107,7 @@ export default function AdminSettings() {
 
         {/* Général */}
         <div className="card-glass p-6 space-y-4">
-          <h2 className="font-semibold mb-4" style={{ color: '#3b82f6' }}>🌐 Général</h2>
+          <h2 className="font-semibold mb-4 flex items-center gap-2" style={{ color: '#3b82f6' }}><Globe size={18} /> Général</h2>
           <Field label="Nom de la plateforme">
             <input type="text" className={inputClass} style={inputStyle}
               value={settings.platform_name}
@@ -122,8 +123,8 @@ export default function AdminSettings() {
 
       <div className="flex justify-end mt-6">
         <button onClick={saveSettings} disabled={saving}
-          className="btn-gold px-8 py-3 rounded-xl font-bold text-[#261642]">
-          {saving ? 'Sauvegarde...' : '💾 Sauvegarder les paramètres'}
+          className="btn-gold px-8 py-3 rounded-xl font-bold text-[#261642] inline-flex items-center gap-2">
+          {saving ? 'Sauvegarde...' : <><Save size={17} /> Sauvegarder les paramètres</>}
         </button>
       </div>
     </DashboardLayout>

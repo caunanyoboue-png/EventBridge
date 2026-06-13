@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { User, Building2, Calendar, MapPin, Wallet } from 'lucide-react';
 import { type Contract } from '../../types';
 import { formatCFA } from '../../lib/utils';
 import ContractStatusBadge from './ContractStatusBadge';
@@ -22,8 +23,8 @@ export default function ContractCard({ contract, myRole }: {
       <div className="flex items-start justify-between mb-3">
         <div>
           <h3 className="font-semibold text-sm" style={{ color: '#f0e6d3' }}>{contract.job_title}</h3>
-          <p className="text-xs mt-0.5" style={{ color: '#b8a898' }}>
-            {myRole === 'organizer' ? '👤 Freelance' : '🏢 Org.'} : {other?.full_name || other?.company_name || '—'}
+          <p className="text-xs mt-0.5 flex items-center gap-1.5" style={{ color: '#b8a898' }}>
+            {myRole === 'organizer' ? <><User size={12} /> Freelance</> : <><Building2 size={12} /> Org.</>} : {other?.full_name || other?.company_name || '—'}
           </p>
         </div>
         <ContractStatusBadge status={contract.status} />
@@ -31,14 +32,14 @@ export default function ContractCard({ contract, myRole }: {
 
       <div className="space-y-1 text-xs mb-4" style={{ color: '#b8a898' }}>
         <div className="flex items-center gap-2">
-          <span>📅</span><span>{startDate}</span>
+          <Calendar size={13} color="#8a7a9a" /><span>{startDate}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span>📍</span><span className="truncate">{contract.location}</span>
+          <MapPin size={13} color="#8a7a9a" /><span className="truncate">{contract.location}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span>💰</span>
-          <span style={{ color: '#c9a84c', fontWeight: 600 }}>
+          <Wallet size={13} color="#d4af37" />
+          <span style={{ color: '#d4af37', fontWeight: 600 }}>
             {formatCFA(contract.total_gross)} brut
           </span>
         </div>
