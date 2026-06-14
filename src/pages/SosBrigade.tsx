@@ -37,6 +37,11 @@ export default function SosBrigade() {
 ══════════════════════════════════════════════════════════════════════ */
 const SOS_KEY = 'eb_sos_active';
 
+// Ville (ex. "Abidjan - Cocody" → "abidjan") pour le matching géographique.
+function cityOf(v?: string | null): string {
+  return (v || '').split(' - ')[0].trim().toLowerCase();
+}
+
 function lsSave(s: SosSession) {
   localStorage.setItem(SOS_KEY, JSON.stringify(s));
 }
@@ -121,14 +126,17 @@ function OrgView() {
       }).select().single();
       if (error) throw error;
 
-      // Notifier les freelances disponibles avec la compétence
-      const { data: freelances } = await supabase
+      // Notifier les freelances disponibles, avec la compétence, DANS LA MÊME VILLE
+      const cityRaw = (profile.ville || '').split(' - ')[0].trim();
+      let fq = supabase
         .from('profiles')
         .select('id')
         .eq('role', 'freelance')
         .eq('is_available', true)
         .contains('skills', [form.service_type])
         .neq('id', profile.id);
+      if (cityRaw) fq = fq.ilike('ville', `${cityRaw}%`);
+      const { data: freelances } = await fq;
 
       const targets = freelances || [];
       if (targets.length > 0) {
@@ -281,7 +289,12 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
     try {
       await supabase.from('sos_responses').update({ status: 'confirmed' }).eq('id', resp.id);
       const confirmedCount = responses.filter(r => r.status === 'confirmed').length + 1;
-      await supabase.from('sos_sessions').update({ slots_confirmed: confirmedCount }).eq('id', session.id);
+      const isFull = confirmedCount >= session.slots_needed;
+      // Quand l'équipe est complète, on clôt la session (statut 'completed' :
+      // l'alerte disparaît pour les autres freelances).
+      await supabase.from('sos_sessions')
+        .update(isFull ? { slots_confirmed: confirmedCount, status: 'completed' } : { slots_confirmed: confirmedCount })
+        .eq('id', session.id);
       await supabase.from('notifications').insert({
         user_id: resp.freelance_id,
         type: 'sos_confirmed',
@@ -467,7 +480,12 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
         </div>
       )}
 
-      <button onClick={() => { lsClear(); onReset(); }}
+      <button onClick={async () => {
+          // Clôt la session encore active en base pour ne pas laisser d'alerte fantôme.
+          await supabase.from('sos_sessions').update({ status: 'cancelled' })
+            .eq('id', session.id).eq('status', 'active');
+          lsClear(); onReset();
+        }}
         style={{ padding: '11px', borderRadius: 12, fontSize: 13, fontWeight: 600,
           background: 'transparent', border: '1px solid rgba(201,168,76,0.25)',
           color: '#d4af37', cursor: 'pointer' }}>
@@ -592,14 +610,20 @@ function FreelanceView() {
     if (!profile) return;
     const skills = profile.skills || [];
 
-    const { data: sos } = await supabase.from('sos_sessions')
-      .select('*')
+    const myCity = cityOf(profile.ville);
+    const { data: list } = await supabase.from('sos_sessions')
+      .select('*, organisateur:profiles!organisateur_id(ville)')
       .eq('status', 'active')
       .in('service_type', skills.length ? skills : ['__none__'])
       .gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .limit(8);
+
+    // Ne garder que les alertes de la même ville (ou sans ville renseignée).
+    const sos = (list || []).find(s => {
+      const c = cityOf((s as { organisateur?: { ville?: string } }).organisateur?.ville);
+      return !c || !myCity || c === myCity;
+    }) as SosSession | undefined;
 
     if (sos) {
       setActiveSos(sos);
@@ -622,6 +646,17 @@ function FreelanceView() {
       }).select().single();
       if (error) throw error;
       setMyResponse(data as SosResponse);
+
+      // Notifier l'organisateur qu'un freelance a répondu
+      await supabase.from('notifications').insert({
+        user_id: activeSos.organisateur_id,
+        type: 'sos_alert',
+        title: 'S.O.S Brigade — Nouvelle réponse',
+        body: `${profile.full_name || 'Un freelance'} se propose pour "${activeSos.service_type}" à ${activeSos.location}.`,
+        data: { sos_session_id: activeSos.id },
+        is_read: false,
+      });
+
       toast.success('Réponse envoyée ! En attente de confirmation...');
     } catch (e: unknown) {
       toast.error((e as Error).message || 'Erreur');

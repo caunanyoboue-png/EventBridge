@@ -11,7 +11,13 @@ type SosData = {
   slots_needed: number;
   message?: string | null;
   expires_at: string;
+  organisateur_id?: string;
 };
+
+// Ville (ex. "Abidjan - Cocody" → "abidjan") pour le matching géographique.
+function cityOf(v?: string | null): string {
+  return (v || '').split(' - ')[0].trim().toLowerCase();
+}
 
 /* ── localStorage helpers ─────────────────────────────────────────── */
 const LS_KEY = 'eb_sos_dismissed'; // Set<sosSessionId>
@@ -57,12 +63,20 @@ export default function SosAlertBanner() {
         event: 'INSERT',
         schema: 'public',
         table: 'sos_sessions',
-      }, (payload) => {
+      }, async (payload) => {
         const data = payload.new as SosData & { status: string };
         if (data.status !== 'active') return;
         if (!skills.includes(data.service_type)) return;
         if (new Date(data.expires_at) < new Date()) return;
         if (isDismissed(data.id)) return; // Déjà ignoré
+        // Même ville uniquement
+        const myCity = cityOf(profile?.ville);
+        if (myCity && data.organisateur_id) {
+          const { data: org } = await supabase.from('profiles')
+            .select('ville').eq('id', data.organisateur_id).maybeSingle();
+          const orgCity = cityOf(org?.ville);
+          if (orgCity && orgCity !== myCity) return;
+        }
         setSos(data);
         setVisible(true);
       })
@@ -74,15 +88,21 @@ export default function SosAlertBanner() {
   async function checkExistingSos(skills: string[]) {
     if (!profile) return;
 
-    const { data } = await supabase
+    const myCity = cityOf(profile.ville);
+    const { data: list } = await supabase
       .from('sos_sessions')
-      .select('id, service_type, location, slots_needed, message, expires_at')
+      .select('id, service_type, location, slots_needed, message, expires_at, organisateur_id, organisateur:profiles!organisateur_id(ville)')
       .eq('status', 'active')
       .in('service_type', skills)
       .gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .limit(8);
+
+    // Première alerte de la même ville (ou sans ville renseignée).
+    const data = (list || []).find(s => {
+      const c = cityOf((s as { organisateur?: { ville?: string } }).organisateur?.ville);
+      return !c || !myCity || c === myCity;
+    }) as SosData | undefined;
 
     if (!data) return;
 

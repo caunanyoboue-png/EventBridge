@@ -25,5 +25,7 @@ dist-ssr
 
 .vercel
 
-# Claude Code (réglages locaux)
+# Claude Code (réglages locaux + outillage)
 .claude/
+.agents/
+skills-lock.json

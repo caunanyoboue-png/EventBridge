@@ -24,7 +24,7 @@ export interface Payment {
 }
 export type PaymentMethod = 'orange_money' | 'mtn_momo' | 'wave' | 'cash';
 export type DisputeStatus = 'open' | 'investigating' | 'resolved' | 'closed';
-export type SosStatus = 'active' | 'fulfilled' | 'expired' | 'cancelled';
+export type SosStatus = 'active' | 'completed' | 'expired' | 'cancelled';
 
 export interface Profile {
   id: string;
