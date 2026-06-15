@@ -72,7 +72,9 @@ function OrgView() {
   const [form, setForm] = useState<{
     service_type: string; location: string; slots_needed: number; message: string;
     latitude: number | null; longitude: number | null;
-  }>({ service_type: '', location: '', slots_needed: 3, message: '', latitude: null, longitude: null });
+    hourly_rate: number; estimated_hours: number;
+  }>({ service_type: '', location: '', slots_needed: 3, message: '', latitude: null, longitude: null,
+    hourly_rate: 3000, estimated_hours: 4 });
   const [loading, setLoading] = useState(false);
 
   // ── Lecture SYNCHRONE depuis localStorage avant le premier render ──
@@ -119,7 +121,7 @@ function OrgView() {
     if (!profile || !form.service_type || !form.location || form.latitude == null || form.longitude == null) return;
     setLoading(true);
     try {
-      const expires_at = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+      const expires_at = new Date(Date.now() + 10 * 60 * 1000).toISOString();
       const { data, error } = await supabase.from('sos_sessions').insert({
         organisateur_id: profile.id,
         service_type: form.service_type,
@@ -129,6 +131,8 @@ function OrgView() {
         slots_needed: form.slots_needed,
         slots_confirmed: 0,
         radius_km: SOS_RADIUS_KM,
+        hourly_rate: form.hourly_rate,
+        estimated_hours: form.estimated_hours,
         notified_count: 0,
         status: 'active',
         expires_at,
@@ -242,6 +246,26 @@ function OrgView() {
                   style={{ background: 'rgba(82,54,124,0.5)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}>+</button>
               </div>
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Tarif horaire (FCFA)</label>
+                <input type="number" min={0} step={500} className={inputClass} style={inputStyle}
+                  value={form.hourly_rate}
+                  onChange={e => setForm(p => ({ ...p, hourly_rate: Number(e.target.value) }))} />
+              </div>
+              <div>
+                <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Durée estimée (h)</label>
+                <input type="number" min={1} step={1} className={inputClass} style={inputStyle}
+                  value={form.estimated_hours}
+                  onChange={e => setForm(p => ({ ...p, estimated_hours: Number(e.target.value) }))} />
+              </div>
+            </div>
+            <p className="text-xs" style={{ color: '#7a6a8a', marginTop: -8 }}>
+              En cas d'annulation, chaque freelance déjà confirmé reçoit 10 % ={' '}
+              <span style={{ color: '#d4af37', fontWeight: 600 }}>
+                {Math.round(0.1 * form.hourly_rate * form.estimated_hours).toLocaleString('fr-CI')} FCFA
+              </span>.
+            </p>
             <div>
               <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Message (optionnel)</label>
               <textarea className={inputClass} style={{ ...inputStyle, resize: 'none' }} rows={3}
@@ -276,6 +300,8 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
   const navigate = useNavigate();
   const [responses, setResponses] = useState<SosResponse[]>([]);
   const [confirming, setConfirming] = useState<string | null>(null);
+  const [cancelStep, setCancelStep] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [expired, setExpired] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -358,7 +384,47 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
   const confirmed = responses.filter(r => r.status === 'confirmed');
   const mins = String(Math.floor(timeLeft / 60)).padStart(2, '0');
   const secs = String(timeLeft % 60).padStart(2, '0');
-  const urgentColor = timeLeft < 300 ? '#ef4444' : timeLeft < 600 ? '#f59e0b' : '#10b981';
+  const urgentColor = timeLeft < 120 ? '#ef4444' : timeLeft < 300 ? '#f59e0b' : '#10b981';
+
+  // Dédommagement = 10 % de (tarif horaire × durée estimée), par freelance confirmé
+  const compPerFreelance = Math.round(0.1 * (session.hourly_rate || 0) * (session.estimated_hours || 0));
+  const totalComp = compPerFreelance * confirmed.length;
+
+  async function cancelSos() {
+    setCancelling(true);
+    try {
+      if (confirmed.length > 0 && compPerFreelance > 0) {
+        // Enregistrer la compensation due à chaque freelance confirmé
+        await supabase.from('sos_compensations').insert(
+          confirmed.map(r => ({
+            sos_session_id: session.id,
+            organizer_id: session.organisateur_id,
+            freelance_id: r.freelance_id,
+            amount: compPerFreelance,
+            status: 'due',
+          }))
+        );
+        await supabase.from('notifications').insert(
+          confirmed.map(r => ({
+            user_id: r.freelance_id,
+            type: 'sos_alert',
+            title: 'S.O.S annulé — compensation due',
+            body: `L'organisateur a annulé le S.O.S. Une compensation de ${compPerFreelance.toLocaleString('fr-CI')} FCFA vous est due.`,
+            data: { sos_session_id: session.id },
+            is_read: false,
+          }))
+        );
+      }
+      await supabase.from('sos_sessions').update({ status: 'cancelled' }).eq('id', session.id);
+      lsClear();
+      toast.success(confirmed.length > 0
+        ? `S.O.S annulé. ${totalComp.toLocaleString('fr-CI')} FCFA de compensation enregistré(s).`
+        : 'S.O.S annulé.');
+      onReset();
+    } catch (e: unknown) {
+      toast.error((e as Error).message || "Erreur lors de l'annulation");
+    } finally { setCancelling(false); }
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -398,7 +464,7 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
         <div style={{ height: 4, background: 'rgba(255,255,255,0.08)' }}>
           <div style={{
             height: '100%', background: urgentColor,
-            width: `${(timeLeft / 1800) * 100}%`,
+            width: `${(timeLeft / 600) * 100}%`,
             transition: 'width 1s linear, background 0.5s',
           }} />
         </div>
@@ -512,7 +578,7 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
         </div>
       )}
 
-      {/* Relancer une alerte est verrouillé tant que le compte à rebours tourne */}
+      {/* Compte à rebours terminé → relancer ; sinon → annuler (avec compensation) */}
       {expired ? (
         <button onClick={async () => {
             await supabase.from('sos_sessions').update({ status: 'cancelled' })
@@ -524,12 +590,43 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
             color: '#d4af37', cursor: 'pointer' }}>
           + Nouvelle alerte S.O.S
         </button>
+      ) : cancelStep ? (
+        <div style={{ borderRadius: 12, padding: '14px 16px',
+          background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.25)' }}>
+          {confirmed.length > 0 ? (
+            <p style={{ fontSize: 13, color: '#f0e6d3', margin: '0 0 12px', lineHeight: 1.6 }}>
+              {confirmed.length} freelance(s) déjà confirmé(s). Annuler vous engage à verser{' '}
+              <strong style={{ color: '#d4af37' }}>{compPerFreelance.toLocaleString('fr-CI')} FCFA</strong> à chacun
+              (10 %), soit <strong style={{ color: '#d4af37' }}>{totalComp.toLocaleString('fr-CI')} FCFA</strong> au total. Confirmer ?
+            </p>
+          ) : (
+            <p style={{ fontSize: 13, color: '#f0e6d3', margin: '0 0 12px', lineHeight: 1.6 }}>
+              Aucun freelance confirmé — l'annulation est sans frais. Confirmer ?
+            </p>
+          )}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={cancelSos} disabled={cancelling}
+              style={{ flex: 1, padding: '10px', borderRadius: 10, fontSize: 13, fontWeight: 700,
+                background: '#ef4444', border: 'none', color: '#fff', cursor: 'pointer',
+                opacity: cancelling ? 0.6 : 1 }}>
+              {cancelling ? '...' : confirmed.length > 0 ? 'Annuler et compenser' : "Confirmer l'annulation"}
+            </button>
+            <button onClick={() => setCancelStep(false)} disabled={cancelling}
+              style={{ flex: 1, padding: '10px', borderRadius: 10, fontSize: 13, fontWeight: 600,
+                background: 'transparent', border: '1px solid rgba(201,168,76,0.25)',
+                color: '#b8a898', cursor: 'pointer' }}>
+              Retour
+            </button>
+          </div>
+        </div>
       ) : (
-        <p style={{ padding: '11px', borderRadius: 12, fontSize: 12, textAlign: 'center',
-          background: 'rgba(82,54,124,0.25)', border: '1px solid rgba(201,168,76,0.12)',
-          color: '#A0A0B8', margin: 0 }}>
-          Vous pourrez lancer une nouvelle alerte à la fin du compte à rebours.
-        </p>
+        <button onClick={() => setCancelStep(true)}
+          className="cta-glow"
+          style={{ padding: '11px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+            background: 'transparent', border: '1px solid rgba(239,68,68,0.4)',
+            color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <X size={16} /> Annuler le S.O.S
+        </button>
       )}
     </div>
   );

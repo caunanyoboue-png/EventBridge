@@ -145,12 +145,26 @@ export interface SosSession {
   mission_id?: string;
   service_type: string;
   location: string;
+  latitude?: number | null;
+  longitude?: number | null;
   slots_needed: number;
   slots_confirmed: number;
   radius_km: number;
+  hourly_rate?: number | null;
+  estimated_hours?: number | null;
   status: SosStatus;
   notified_count: number;
   expires_at: string;
+  created_at?: string;
+}
+
+export interface SosCompensation {
+  id: string;
+  sos_session_id: string;
+  organizer_id: string;
+  freelance_id: string;
+  amount: number;
+  status: 'due' | 'paid' | 'cancelled';
   created_at?: string;
 }
 
