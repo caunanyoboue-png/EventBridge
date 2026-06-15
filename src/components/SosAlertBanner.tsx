@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Siren, Zap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { distanceKm } from '../lib/geo';
+
+const SOS_RADIUS_KM = 30;
 
 type SosData = {
   id: string;
@@ -11,13 +14,9 @@ type SosData = {
   slots_needed: number;
   message?: string | null;
   expires_at: string;
-  organisateur_id?: string;
+  latitude?: number | null;
+  longitude?: number | null;
 };
-
-// Ville (ex. "Abidjan - Cocody" → "abidjan") pour le matching géographique.
-function cityOf(v?: string | null): string {
-  return (v || '').split(' - ')[0].trim().toLowerCase();
-}
 
 /* ── localStorage helpers ─────────────────────────────────────────── */
 const LS_KEY = 'eb_sos_dismissed'; // Set<sosSessionId>
@@ -50,6 +49,9 @@ export default function SosAlertBanner() {
 
   useEffect(() => {
     if (!profile || profile.role !== 'freelance' || !profile.is_available) return;
+    // Sans position GPS activée → pas d'alerte (le freelance n'est pas localisable).
+    if (profile.latitude == null || profile.longitude == null) return;
+    const myLat = profile.latitude, myLng = profile.longitude;
 
     const skills = profile.skills || [];
     if (!skills.length) return;
@@ -63,20 +65,15 @@ export default function SosAlertBanner() {
         event: 'INSERT',
         schema: 'public',
         table: 'sos_sessions',
-      }, async (payload) => {
+      }, (payload) => {
         const data = payload.new as SosData & { status: string };
         if (data.status !== 'active') return;
         if (!skills.includes(data.service_type)) return;
         if (new Date(data.expires_at) < new Date()) return;
         if (isDismissed(data.id)) return; // Déjà ignoré
-        // Même ville uniquement
-        const myCity = cityOf(profile?.ville);
-        if (myCity && data.organisateur_id) {
-          const { data: org } = await supabase.from('profiles')
-            .select('ville').eq('id', data.organisateur_id).maybeSingle();
-          const orgCity = cityOf(org?.ville);
-          if (orgCity && orgCity !== myCity) return;
-        }
+        // À moins de 30 km uniquement
+        if (data.latitude == null || data.longitude == null) return;
+        if (distanceKm(myLat, myLng, data.latitude, data.longitude) > SOS_RADIUS_KM) return;
         setSos(data);
         setVisible(true);
       })
@@ -86,22 +83,23 @@ export default function SosAlertBanner() {
   }, [profile?.id]);
 
   async function checkExistingSos(skills: string[]) {
-    if (!profile) return;
+    if (!profile || profile.latitude == null || profile.longitude == null) return;
+    const myLat = profile.latitude, myLng = profile.longitude;
 
-    const myCity = cityOf(profile.ville);
     const { data: list } = await supabase
       .from('sos_sessions')
-      .select('id, service_type, location, slots_needed, message, expires_at, organisateur_id, organisateur:profiles!organisateur_id(ville)')
+      .select('id, service_type, location, slots_needed, message, expires_at, latitude, longitude')
       .eq('status', 'active')
       .in('service_type', skills)
       .gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false })
       .limit(8);
 
-    // Première alerte de la même ville (ou sans ville renseignée).
+    // Première alerte à ≤ 30 km de ma position.
     const data = (list || []).find(s => {
-      const c = cityOf((s as { organisateur?: { ville?: string } }).organisateur?.ville);
-      return !c || !myCity || c === myCity;
+      const g = s as SosData;
+      if (g.latitude == null || g.longitude == null) return false;
+      return distanceKm(myLat, myLng, g.latitude, g.longitude) <= SOS_RADIUS_KM;
     }) as SosData | undefined;
 
     if (!data) return;

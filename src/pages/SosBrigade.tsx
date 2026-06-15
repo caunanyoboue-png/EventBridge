@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
+import MapPicker from '../components/MapPicker';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { distanceKm } from '../lib/geo';
 import { type SosSession } from '../types';
 import {
   Siren, MapPin, Inbox, Hourglass, CheckCircle2, Phone, Star, User,
@@ -36,11 +38,9 @@ export default function SosBrigade() {
    HELPERS localStorage — session complète sérialisée
 ══════════════════════════════════════════════════════════════════════ */
 const SOS_KEY = 'eb_sos_active';
+const SOS_RADIUS_KM = 30; // rayon de matching géographique
 
-// Ville (ex. "Abidjan - Cocody" → "abidjan") pour le matching géographique.
-function cityOf(v?: string | null): string {
-  return (v || '').split(' - ')[0].trim().toLowerCase();
-}
+type SosSessionGeo = SosSession & { latitude?: number | null; longitude?: number | null };
 
 function lsSave(s: SosSession) {
   localStorage.setItem(SOS_KEY, JSON.stringify(s));
@@ -64,7 +64,10 @@ function lsLoad(): SosSession | null {
 ══════════════════════════════════════════════════════════════════════ */
 function OrgView() {
   const { profile } = useAuth();
-  const [form, setForm] = useState({ service_type: '', location: '', slots_needed: 3, message: '' });
+  const [form, setForm] = useState<{
+    service_type: string; location: string; slots_needed: number; message: string;
+    latitude: number | null; longitude: number | null;
+  }>({ service_type: '', location: '', slots_needed: 3, message: '', latitude: null, longitude: null });
   const [loading, setLoading] = useState(false);
 
   // ── Lecture SYNCHRONE depuis localStorage avant le premier render ──
@@ -108,7 +111,7 @@ function OrgView() {
   const inputStyle = { background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
 
   async function declencher() {
-    if (!profile || !form.service_type || !form.location) return;
+    if (!profile || !form.service_type || !form.location || form.latitude == null || form.longitude == null) return;
     setLoading(true);
     try {
       const expires_at = new Date(Date.now() + 30 * 60 * 1000).toISOString();
@@ -116,9 +119,11 @@ function OrgView() {
         organisateur_id: profile.id,
         service_type: form.service_type,
         location: form.location,
+        latitude: form.latitude,
+        longitude: form.longitude,
         slots_needed: form.slots_needed,
         slots_confirmed: 0,
-        radius_km: 10,
+        radius_km: SOS_RADIUS_KM,
         notified_count: 0,
         status: 'active',
         expires_at,
@@ -126,19 +131,20 @@ function OrgView() {
       }).select().single();
       if (error) throw error;
 
-      // Notifier les freelances disponibles, avec la compétence, DANS LA MÊME VILLE
-      const cityRaw = (profile.ville || '').split(' - ')[0].trim();
-      let fq = supabase
+      // Notifier les freelances dispo + compétence + GÉOLOCALISÉS à ≤ 30 km du lieu
+      const { data: freelances } = await supabase
         .from('profiles')
-        .select('id')
+        .select('id, latitude, longitude')
         .eq('role', 'freelance')
         .eq('is_available', true)
         .contains('skills', [form.service_type])
-        .neq('id', profile.id);
-      if (cityRaw) fq = fq.ilike('ville', `${cityRaw}%`);
-      const { data: freelances } = await fq;
+        .neq('id', profile.id)
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null);
 
-      const targets = freelances || [];
+      const targets = (freelances || []).filter(f =>
+        distanceKm(form.latitude!, form.longitude!, f.latitude as number, f.longitude as number) <= SOS_RADIUS_KM
+      );
       if (targets.length > 0) {
         await supabase.from('notifications').insert(
           targets.map(f => ({
@@ -206,6 +212,20 @@ function OrgView() {
                 value={form.location} onChange={e => setForm(p => ({ ...p, location: e.target.value }))} />
             </div>
             <div>
+              <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>
+                Placez le lieu sur la carte * <span style={{ color: '#7a6a8a' }}>(centre du rayon de 30 km)</span>
+              </label>
+              <MapPicker lat={form.latitude} lng={form.longitude}
+                onSelect={(lat, lng, addr) => setForm(p => ({
+                  ...p, latitude: lat, longitude: lng, location: p.location.trim() ? p.location : addr,
+                }))} />
+              {form.latitude != null && form.longitude != null && (
+                <p className="text-xs mt-2" style={{ color: '#00C896', display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <Check size={13} /> Lieu défini — seuls les freelances à moins de 30 km seront alertés.
+                </p>
+              )}
+            </div>
+            <div>
               <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>Nombre d'extras requis</label>
               <div className="flex items-center gap-4">
                 <button onClick={() => setForm(p => ({ ...p, slots_needed: Math.max(1, p.slots_needed - 1) }))}
@@ -223,9 +243,16 @@ function OrgView() {
                 placeholder="Précisions supplémentaires..."
                 value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))} />
             </div>
-            <button onClick={declencher} disabled={loading || !form.service_type || !form.location}
+            {(!form.latitude || !form.longitude) && (
+              <p className="text-xs text-center" style={{ color: '#F59E0B' }}>
+                Placez le lieu sur la carte pour pouvoir lancer l'alerte.
+              </p>
+            )}
+            <button onClick={declencher}
+              disabled={loading || !form.service_type || !form.location || !form.latitude || !form.longitude}
               className="w-full py-4 rounded-xl font-bold text-white text-lg flex items-center justify-center gap-2 transition-all hover:opacity-90"
-              style={{ background: 'linear-gradient(135deg,#dc2626,#b91c1c)', opacity: (loading || !form.service_type || !form.location) ? 0.6 : 1 }}>
+              style={{ background: 'linear-gradient(135deg,#dc2626,#b91c1c)',
+                opacity: (loading || !form.service_type || !form.location || !form.latitude || !form.longitude) ? 0.6 : 1 }}>
               {loading ? 'Déclenchement...' : <><Siren size={19} /> Déclencher l'alerte S.O.S</>}
             </button>
           </div>
@@ -480,17 +507,25 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
         </div>
       )}
 
-      <button onClick={async () => {
-          // Clôt la session encore active en base pour ne pas laisser d'alerte fantôme.
-          await supabase.from('sos_sessions').update({ status: 'cancelled' })
-            .eq('id', session.id).eq('status', 'active');
-          lsClear(); onReset();
-        }}
-        style={{ padding: '11px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-          background: 'transparent', border: '1px solid rgba(201,168,76,0.25)',
-          color: '#d4af37', cursor: 'pointer' }}>
-        + Nouvelle alerte S.O.S
-      </button>
+      {/* Relancer une alerte est verrouillé tant que le compte à rebours tourne */}
+      {expired ? (
+        <button onClick={async () => {
+            await supabase.from('sos_sessions').update({ status: 'cancelled' })
+              .eq('id', session.id).eq('status', 'active');
+            lsClear(); onReset();
+          }}
+          style={{ padding: '11px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+            background: 'transparent', border: '1px solid rgba(201,168,76,0.25)',
+            color: '#d4af37', cursor: 'pointer' }}>
+          + Nouvelle alerte S.O.S
+        </button>
+      ) : (
+        <p style={{ padding: '11px', borderRadius: 12, fontSize: 12, textAlign: 'center',
+          background: 'rgba(82,54,124,0.25)', border: '1px solid rgba(201,168,76,0.12)',
+          color: '#A0A0B8', margin: 0 }}>
+          Vous pourrez lancer une nouvelle alerte à la fin du compte à rebours.
+        </p>
+      )}
     </div>
   );
 }
@@ -608,21 +643,23 @@ function FreelanceView() {
 
   async function fetchActiveSos() {
     if (!profile) return;
+    // Pas de position GPS activée → le freelance n'est pas disponible géographiquement.
+    if (profile.latitude == null || profile.longitude == null) { setLoading(false); return; }
     const skills = profile.skills || [];
 
-    const myCity = cityOf(profile.ville);
     const { data: list } = await supabase.from('sos_sessions')
-      .select('*, organisateur:profiles!organisateur_id(ville)')
+      .select('*')
       .eq('status', 'active')
       .in('service_type', skills.length ? skills : ['__none__'])
       .gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false })
       .limit(8);
 
-    // Ne garder que les alertes de la même ville (ou sans ville renseignée).
+    // Ne garder que les alertes à ≤ 30 km de ma position.
     const sos = (list || []).find(s => {
-      const c = cityOf((s as { organisateur?: { ville?: string } }).organisateur?.ville);
-      return !c || !myCity || c === myCity;
+      const g = s as SosSessionGeo;
+      if (g.latitude == null || g.longitude == null) return false;
+      return distanceKm(profile.latitude!, profile.longitude!, g.latitude, g.longitude) <= SOS_RADIUS_KM;
     }) as SosSession | undefined;
 
     if (sos) {
