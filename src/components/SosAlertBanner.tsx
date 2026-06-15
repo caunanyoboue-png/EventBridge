@@ -3,9 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Siren, Zap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { distanceKm } from '../lib/geo';
-
-const SOS_RADIUS_KM = 30;
 
 type SosData = {
   id: string;
@@ -14,8 +11,6 @@ type SosData = {
   slots_needed: number;
   message?: string | null;
   expires_at: string;
-  latitude?: number | null;
-  longitude?: number | null;
 };
 
 /* ── localStorage helpers ─────────────────────────────────────────── */
@@ -48,77 +43,62 @@ export default function SosAlertBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (!profile || profile.role !== 'freelance' || !profile.is_available) return;
-    // Sans position GPS activée → pas d'alerte (le freelance n'est pas localisable).
-    if (profile.latitude == null || profile.longitude == null) return;
-    const myLat = profile.latitude, myLng = profile.longitude;
+    if (!profile || profile.role !== 'freelance') return;
 
-    const skills = profile.skills || [];
-    if (!skills.length) return;
+    // Au montage : ai-je une alerte S.O.S en attente ?
+    checkPendingAlert();
 
-    checkExistingSos(skills);
-
-    // Écouter les nouveaux SOS en temps réel
+    // Temps réel : on écoute MES notifications. Une 'sos_alert' = je suis ciblé
+    // (le filtre des 30 km a déjà été appliqué au déclenchement).
     const channel = supabase
-      .channel('sos-banner-realtime')
+      .channel('sos-banner-notif')
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
-        table: 'sos_sessions',
+        table: 'notifications',
+        filter: `user_id=eq.${profile.id}`,
       }, (payload) => {
-        const data = payload.new as SosData & { status: string };
-        if (data.status !== 'active') return;
-        if (!skills.includes(data.service_type)) return;
-        if (new Date(data.expires_at) < new Date()) return;
-        if (isDismissed(data.id)) return; // Déjà ignoré
-        // À moins de 30 km uniquement
-        if (data.latitude == null || data.longitude == null) return;
-        if (distanceKm(myLat, myLng, data.latitude, data.longitude) > SOS_RADIUS_KM) return;
-        setSos(data);
-        setVisible(true);
+        const n = payload.new as { type?: string; data?: { sos_session_id?: string } };
+        if (n.type !== 'sos_alert' || !n.data?.sos_session_id) return;
+        showSession(n.data.sos_session_id);
       })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
   }, [profile?.id]);
 
-  async function checkExistingSos(skills: string[]) {
-    if (!profile || profile.latitude == null || profile.longitude == null) return;
-    const myLat = profile.latitude, myLng = profile.longitude;
-
-    const { data: list } = await supabase
-      .from('sos_sessions')
-      .select('id, service_type, location, slots_needed, message, expires_at, latitude, longitude')
-      .eq('status', 'active')
-      .in('service_type', skills)
-      .gt('expires_at', new Date().toISOString())
+  async function checkPendingAlert() {
+    if (!profile) return;
+    const { data: notifs } = await supabase.from('notifications')
+      .select('data')
+      .eq('user_id', profile.id)
+      .eq('type', 'sos_alert')
       .order('created_at', { ascending: false })
-      .limit(8);
+      .limit(10);
+    const ids = [...new Set((notifs || [])
+      .map(n => (n.data as { sos_session_id?: string } | null)?.sos_session_id)
+      .filter(Boolean) as string[])];
+    for (const id of ids) {
+      if (await showSession(id)) break; // afficher la première alerte valide
+    }
+  }
 
-    // Première alerte à ≤ 30 km de ma position.
-    const data = (list || []).find(s => {
-      const g = s as SosData;
-      if (g.latitude == null || g.longitude == null) return false;
-      return distanceKm(myLat, myLng, g.latitude, g.longitude) <= SOS_RADIUS_KM;
-    }) as SosData | undefined;
+  async function showSession(sessionId: string): Promise<boolean> {
+    if (!profile || isDismissed(sessionId)) return false;
+    const { data } = await supabase.from('sos_sessions')
+      .select('id, service_type, location, slots_needed, message, expires_at, status')
+      .eq('id', sessionId).maybeSingle();
+    if (!data || data.status !== 'active') return false;
+    if (new Date(data.expires_at) < new Date()) return false;
 
-    if (!data) return;
+    // Déjà répondu → ne pas réafficher
+    const { data: existing } = await supabase.from('sos_responses')
+      .select('id').eq('sos_session_id', sessionId).eq('freelance_id', profile.id).maybeSingle();
+    if (existing) return false;
 
-    // Ne pas montrer si déjà ignoré
-    if (isDismissed(data.id)) return;
-
-    // Ne pas montrer si le freelance a déjà répondu (pending ou confirmed)
-    const { data: existing } = await supabase
-      .from('sos_responses')
-      .select('id, status')
-      .eq('sos_session_id', data.id)
-      .eq('freelance_id', profile.id)
-      .maybeSingle();
-
-    if (existing) return; // Déjà répondu → ne pas réafficher
-
-    setSos(data);
+    setSos(data as SosData);
     setVisible(true);
+    return true;
   }
 
   function handleDismiss() {

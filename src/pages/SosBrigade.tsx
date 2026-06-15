@@ -40,7 +40,12 @@ export default function SosBrigade() {
 const SOS_KEY = 'eb_sos_active';
 const SOS_RADIUS_KM = 30; // rayon de matching géographique
 
-type SosSessionGeo = SosSession & { latitude?: number | null; longitude?: number | null };
+// Extrait les id de session des notifications S.O.S reçues par le freelance.
+function sosIdsFromNotifs(notifs: { data: unknown }[] | null): string[] {
+  return [...new Set((notifs || [])
+    .map(n => (n.data as { sos_session_id?: string } | null)?.sos_session_id)
+    .filter(Boolean) as string[])];
+}
 
 function lsSave(s: SosSession) {
   localStorage.setItem(SOS_KEY, JSON.stringify(s));
@@ -643,25 +648,26 @@ function FreelanceView() {
 
   async function fetchActiveSos() {
     if (!profile) return;
-    // Pas de position GPS activée → le freelance n'est pas disponible géographiquement.
-    if (profile.latitude == null || profile.longitude == null) { setLoading(false); return; }
-    const skills = profile.skills || [];
+    // Source de vérité : les notifications S.O.S reçues (déjà filtrées à 30 km
+    // au déclenchement). On affiche la session active correspondante.
+    const { data: notifs } = await supabase.from('notifications')
+      .select('data')
+      .eq('user_id', profile.id)
+      .eq('type', 'sos_alert')
+      .order('created_at', { ascending: false })
+      .limit(10);
+    const ids = sosIdsFromNotifs(notifs);
+    if (ids.length === 0) { setLoading(false); return; }
 
-    const { data: list } = await supabase.from('sos_sessions')
+    const { data: sessions } = await supabase.from('sos_sessions')
       .select('*')
+      .in('id', ids)
       .eq('status', 'active')
-      .in('service_type', skills.length ? skills : ['__none__'])
       .gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false })
-      .limit(8);
+      .limit(1);
 
-    // Ne garder que les alertes à ≤ 30 km de ma position.
-    const sos = (list || []).find(s => {
-      const g = s as SosSessionGeo;
-      if (g.latitude == null || g.longitude == null) return false;
-      return distanceKm(profile.latitude!, profile.longitude!, g.latitude, g.longitude) <= SOS_RADIUS_KM;
-    }) as SosSession | undefined;
-
+    const sos = sessions?.[0] as SosSession | undefined;
     if (sos) {
       setActiveSos(sos);
       // Vérifier si j'ai déjà répondu
