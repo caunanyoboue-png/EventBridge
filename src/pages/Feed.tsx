@@ -4,16 +4,141 @@ import { motion } from 'framer-motion';
 import {
   Heart, MessageCircle, Repeat2, Send, ImagePlus, X, Plus,
   Inbox, Calendar, MapPin, Users, Wallet, Newspaper, Loader2,
-  PenLine, Briefcase,
+  PenLine, Briefcase, Siren, Zap, Navigation,
   type LucideIcon,
 } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { type Mission } from '../types';
+import { type Mission, type SosSession } from '../types';
 import { formatCFA, getInitials } from '../lib/utils';
 import { ServiceIconBadge } from '../lib/serviceIcons';
+import { distanceKm, formatDistance, getBrowserPosition } from '../lib/geo';
 import toast from 'react-hot-toast';
+
+/* ── Alerte S.O.S épinglée en haut du fil (freelance uniquement) ──────── */
+function SosFeedAlert() {
+  const { profile } = useAuth();
+  const navigate = useNavigate();
+  const [sos, setSos] = useState<SosSession | null>(null);
+  const [myPos, setMyPos] = useState<{ lat: number; lng: number } | null>(null);
+  const [locDenied, setLocDenied] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
+
+  useEffect(() => {
+    if (!profile || profile.role !== 'freelance') return;
+    let cancelled = false;
+    (async () => {
+      // 1) Position GPS actuelle → maj du profil (le matching 30 km s'en sert)
+      try {
+        const c = await getBrowserPosition();
+        if (cancelled) return;
+        setMyPos({ lat: c.latitude, lng: c.longitude });
+        await supabase.from('profiles')
+          .update({ latitude: c.latitude, longitude: c.longitude }).eq('id', profile.id);
+      } catch {
+        if (!cancelled) setLocDenied(true);
+      }
+      // 2) S.O.S actif pour lequel j'ai été notifié
+      const { data: notifs } = await supabase.from('notifications')
+        .select('data').eq('user_id', profile.id).eq('type', 'sos_alert')
+        .order('created_at', { ascending: false }).limit(10);
+      const ids = [...new Set((notifs || [])
+        .map(n => (n.data as { sos_session_id?: string } | null)?.sos_session_id)
+        .filter(Boolean) as string[])];
+      if (ids.length === 0) return;
+      const { data: sessions } = await supabase.from('sos_sessions')
+        .select('*').in('id', ids).eq('status', 'active')
+        .gt('expires_at', new Date().toISOString())
+        .order('created_at', { ascending: false }).limit(1);
+      if (!cancelled && sessions?.[0]) setSos(sessions[0] as SosSession);
+    })();
+    return () => { cancelled = true; };
+  }, [profile?.id]);
+
+  useEffect(() => {
+    if (!sos) return;
+    const iv = setInterval(() => {
+      const s = Math.max(0, Math.floor((new Date(sos.expires_at).getTime() - Date.now()) / 1000));
+      setTimeLeft(s);
+      if (s === 0) { setSos(null); clearInterval(iv); }
+    }, 1000);
+    return () => clearInterval(iv);
+  }, [sos]);
+
+  if (!profile || profile.role !== 'freelance') return null;
+
+  // Localisation refusée et pas d'alerte → inciter à l'activer
+  if (locDenied && !sos) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', marginBottom: 16,
+        borderRadius: 12, background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)' }}>
+        <Navigation size={18} color="#F59E0B" />
+        <span style={{ fontSize: 13, color: '#f0e6d3' }}>
+          Activez votre localisation pour voir les S.O.S Brigade près de vous.
+        </span>
+      </div>
+    );
+  }
+  if (!sos) return null;
+
+  const dist = myPos && sos.latitude != null && sos.longitude != null
+    ? distanceKm(myPos.lat, myPos.lng, sos.latitude, sos.longitude) : null;
+  const types = sos.service_types?.length ? sos.service_types.join(', ') : sos.service_type;
+  const total = (sos.hourly_rate || 0) * (sos.estimated_hours || 0);
+  const mins = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+  const secs = String(timeLeft % 60).padStart(2, '0');
+
+  return (
+    <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+      onClick={() => navigate('/sos-brigade')}
+      style={{ marginBottom: 18, borderRadius: 16, overflow: 'hidden', cursor: 'pointer',
+        border: '2px solid rgba(220,38,38,0.6)', background: 'linear-gradient(135deg,#1a0505,#2d0808)' }}>
+      <div style={{ padding: '16px 18px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+          <div className="animate-sos" style={{ width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
+            background: 'linear-gradient(135deg,#dc2626,#b91c1c)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Siren size={22} color="#fff" />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: '0.08em', padding: '2px 8px',
+                borderRadius: 999, background: '#ef4444', color: '#fff' }}>URGENT</span>
+              <span style={{ fontSize: 15, fontWeight: 800, color: '#fff' }}>S.O.S Brigade</span>
+            </div>
+            <p style={{ fontSize: 12.5, color: 'rgba(255,200,200,0.8)', margin: '3px 0 0' }}>{types}</p>
+          </div>
+          <div style={{ textAlign: 'center', flexShrink: 0 }}>
+            <div style={{ fontSize: 22, fontWeight: 800, color: timeLeft < 300 ? '#ef4444' : '#fff',
+              fontVariantNumeric: 'tabular-nums', lineHeight: 1 }}>{mins}:{secs}</div>
+            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>restant</div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px', marginBottom: 14 }}>
+          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <MapPin size={13} /> {sos.location}
+          </span>
+          {dist != null && (
+            <span style={{ fontSize: 12, color: '#fca5a5', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+              <Navigation size={13} /> À {formatDistance(dist)} de vous
+            </span>
+          )}
+          {total > 0 && (
+            <span style={{ fontSize: 12, color: '#e8c97a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+              <Wallet size={13} /> {formatCFA(total)}
+            </span>
+          )}
+        </div>
+        <button onClick={(e) => { e.stopPropagation(); navigate('/sos-brigade'); }}
+          style={{ width: '100%', padding: '12px', borderRadius: 12, fontSize: 14, fontWeight: 800,
+            background: '#fff', color: '#b91c1c', border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <Zap size={17} fill="#b91c1c" /> Je suis disponible
+        </button>
+      </div>
+    </motion.div>
+  );
+}
 
 /* ── Types ─────────────────────────────────────────────────────────── */
 type Author = {
@@ -407,6 +532,9 @@ export default function Feed() {
   return (
     <DashboardLayout>
       <div style={{ maxWidth: 680, margin: '0 auto', paddingBottom: 48 }}>
+
+        {/* Alerte S.O.S Brigade épinglée (freelance) */}
+        <SosFeedAlert />
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>

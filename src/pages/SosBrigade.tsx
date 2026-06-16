@@ -2,12 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import MapPicker from '../components/MapPicker';
+import MapView from '../components/MapView';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { distanceKm, geocodeAddress } from '../lib/geo';
+import { distanceKm, formatDistance, geocodeAddress } from '../lib/geo';
+import { formatCFA } from '../lib/utils';
 import { type SosSession } from '../types';
 import {
-  Siren, MapPin, Inbox, Hourglass, CheckCircle2, Phone, Star, User,
+  Siren, MapPin, Inbox, Hourglass, CheckCircle2, Phone, Star, User, Wallet,
   X, Check, Target, Users, Clock, Zap, BellOff, XCircle, ChevronUp, ChevronDown, Search,
   type LucideIcon,
 } from 'lucide-react';
@@ -805,6 +807,14 @@ function FreelanceView() {
   const [myResponse, setMyResponse] = useState<SosResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [responding, setResponding] = useState(false);
+  const [, forceTick] = useState(0);
+
+  // Minuteur live (re-render chaque seconde tant qu'une alerte est active)
+  useEffect(() => {
+    if (!activeSos) return;
+    const iv = setInterval(() => forceTick(t => t + 1), 1000);
+    return () => clearInterval(iv);
+  }, [activeSos]);
 
   useEffect(() => {
     if (!profile) return;
@@ -909,23 +919,39 @@ function FreelanceView() {
               <h2 style={{ fontSize: 18, fontWeight: 800, color: '#fff', margin: 0 }}>URGENCE — Répondez maintenant</h2>
             </div>
             <div style={{ padding: 24 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
-                {([
-                  { Icon: Target, label: 'Prestation', val: activeSos.service_type },
-                  { Icon: MapPin, label: 'Lieu',       val: activeSos.location },
-                  { Icon: Users,  label: 'Postes',     val: `${activeSos.slots_needed} poste(s) disponible(s)` },
-                  { Icon: Clock,  label: 'Expire dans', val: `${Math.max(0, Math.round((new Date(activeSos.expires_at).getTime() - Date.now()) / 60000))} min` },
-                ] as { Icon: LucideIcon; label: string; val: string }[]).map(({ Icon, label, val }) => (
-                  <div key={label} style={{ display: 'flex', gap: 12, alignItems: 'flex-start',
-                    padding: '10px 14px', borderRadius: 10, background: 'rgba(82,54,124,0.3)' }}>
-                    <span style={{ flexShrink: 0, marginTop: 1 }}><Icon size={18} color="#d4af37" /></span>
-                    <div>
-                      <p style={{ fontSize: 11, color: '#7a6a7a', margin: 0 }}>{label}</p>
-                      <p style={{ fontSize: 14, fontWeight: 600, color: '#f0e6d3', margin: '2px 0 0' }}>{val}</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+                {(() => {
+                  const types = activeSos.service_types?.length ? activeSos.service_types.join(', ') : activeSos.service_type;
+                  const tl = Math.max(0, Math.floor((new Date(activeSos.expires_at).getTime() - Date.now()) / 1000));
+                  const mmss = `${String(Math.floor(tl / 60)).padStart(2, '0')}:${String(tl % 60).padStart(2, '0')}`;
+                  const total = (activeSos.hourly_rate || 0) * (activeSos.estimated_hours || 0);
+                  const remu = total > 0 ? `${formatCFA(activeSos.hourly_rate || 0)}/h · ${formatCFA(total)} estimé` : '—';
+                  const dist = (profile?.latitude != null && profile?.longitude != null && activeSos.latitude != null && activeSos.longitude != null)
+                    ? `À ${formatDistance(distanceKm(profile.latitude, profile.longitude, activeSos.latitude, activeSos.longitude))} de vous` : null;
+                  const rows: { Icon: LucideIcon; label: string; val: string }[] = [
+                    { Icon: Target, label: 'Prestation(s)', val: types },
+                    { Icon: MapPin, label: 'Lieu', val: dist ? `${activeSos.location} — ${dist}` : activeSos.location },
+                    { Icon: Wallet, label: 'Rémunération', val: remu },
+                    { Icon: Users, label: 'Postes', val: `${activeSos.slots_needed} poste(s) disponible(s)` },
+                    { Icon: Clock, label: 'Expire dans', val: mmss },
+                  ];
+                  return rows.map(({ Icon, label, val }) => (
+                    <div key={label} style={{ display: 'flex', gap: 12, alignItems: 'flex-start',
+                      padding: '10px 14px', borderRadius: 10, background: 'rgba(82,54,124,0.3)' }}>
+                      <span style={{ flexShrink: 0, marginTop: 1 }}><Icon size={18} color="#d4af37" /></span>
+                      <div>
+                        <p style={{ fontSize: 11, color: '#7a6a7a', margin: 0 }}>{label}</p>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: '#f0e6d3', margin: '2px 0 0' }}>{val}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ));
+                })()}
               </div>
+              {activeSos.latitude != null && activeSos.longitude != null && (
+                <div style={{ marginBottom: 20 }}>
+                  <MapView lat={activeSos.latitude} lng={activeSos.longitude} label={activeSos.location} zoom={14} />
+                </div>
+              )}
               <button onClick={respond} disabled={responding}
                 style={{ width: '100%', padding: '14px', borderRadius: 12, fontSize: 16, fontWeight: 800,
                   background: 'linear-gradient(135deg,#dc2626,#b91c1c)', border: 'none', color: '#fff',
