@@ -24,6 +24,7 @@ function SosFeedAlert() {
   const [myPos, setMyPos] = useState<{ lat: number; lng: number } | null>(null);
   const [locDenied, setLocDenied] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [responding, setResponding] = useState(false);
 
   useEffect(() => {
     if (!profile || profile.role !== 'freelance') return;
@@ -51,10 +52,38 @@ function SosFeedAlert() {
         .select('*').in('id', ids).eq('status', 'active')
         .gt('expires_at', new Date().toISOString())
         .order('created_at', { ascending: false }).limit(1);
-      if (!cancelled && sessions?.[0]) setSos(sessions[0] as SosSession);
+      const session = sessions?.[0] as SosSession | undefined;
+      if (!session) return;
+      // Déjà répondu → ne plus afficher l'alerte en haut du fil
+      const { data: resp } = await supabase.from('sos_responses')
+        .select('id').eq('sos_session_id', session.id).eq('freelance_id', profile.id).maybeSingle();
+      if (!cancelled && !resp) setSos(session);
     })();
     return () => { cancelled = true; };
   }, [profile?.id]);
+
+  async function handleAvailable() {
+    if (!profile || !sos) return;
+    setResponding(true);
+    const { error } = await supabase.from('sos_responses')
+      .insert({ sos_session_id: sos.id, freelance_id: profile.id, status: 'pending' });
+    if (error && error.code !== '23505') { // 23505 = déjà répondu
+      toast.error('Erreur lors de la réponse');
+      setResponding(false);
+      return;
+    }
+    if (!error) {
+      const types = sos.service_types?.length ? sos.service_types.join(', ') : sos.service_type;
+      await supabase.from('notifications').insert({
+        user_id: sos.organisateur_id, type: 'sos_alert',
+        title: 'S.O.S Brigade — Nouvelle réponse',
+        body: `${profile.full_name || 'Un freelance'} se propose pour "${types}" à ${sos.location}.`,
+        data: { sos_session_id: sos.id }, is_read: false,
+      });
+    }
+    setSos(null); // l'alerte disparaît du haut du fil
+    navigate('/sos-brigade');
+  }
 
   useEffect(() => {
     if (!sos) return;
@@ -129,12 +158,21 @@ function SosFeedAlert() {
             </span>
           )}
         </div>
-        <button onClick={(e) => { e.stopPropagation(); navigate('/sos-brigade'); }}
-          style={{ width: '100%', padding: '12px', borderRadius: 12, fontSize: 14, fontWeight: 800,
-            background: '#fff', color: '#b91c1c', border: 'none', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          <Zap size={17} fill="#b91c1c" /> Je suis disponible
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={(e) => { e.stopPropagation(); handleAvailable(); }} disabled={responding}
+            style={{ flex: 1, padding: '12px', borderRadius: 12, fontSize: 14, fontWeight: 800,
+              background: '#fff', color: '#b91c1c', border: 'none', cursor: 'pointer',
+              opacity: responding ? 0.7 : 1,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <Zap size={17} fill="#b91c1c" /> {responding ? 'Envoi...' : 'Je suis disponible'}
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); setSos(null); }}
+            style={{ padding: '12px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+              background: 'transparent', border: '1px solid rgba(255,255,255,0.25)',
+              color: 'rgba(255,255,255,0.8)', cursor: 'pointer', flexShrink: 0 }}>
+            Ignorer
+          </button>
+        </div>
       </div>
     </motion.div>
   );
