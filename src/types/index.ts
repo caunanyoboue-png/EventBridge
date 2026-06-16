@@ -144,6 +144,7 @@ export interface SosSession {
   organisateur_id: string;
   mission_id?: string;
   service_type: string;
+  service_types?: string[] | null;
   location: string;
   latitude?: number | null;
   longitude?: number | null;

@@ -4,11 +4,11 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import MapPicker from '../components/MapPicker';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { distanceKm } from '../lib/geo';
+import { distanceKm, geocodeAddress } from '../lib/geo';
 import { type SosSession } from '../types';
 import {
   Siren, MapPin, Inbox, Hourglass, CheckCircle2, Phone, Star, User,
-  X, Check, Target, Users, Clock, Zap, BellOff, XCircle, ChevronUp, ChevronDown,
+  X, Check, Target, Users, Clock, Zap, BellOff, XCircle, ChevronUp, ChevronDown, Search,
   type LucideIcon,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -70,12 +70,35 @@ function lsLoad(): SosSession | null {
 function OrgView() {
   const { profile } = useAuth();
   const [form, setForm] = useState<{
-    service_type: string; location: string; slots_needed: number; message: string;
+    service_types: string[]; location: string; slots_needed: number; message: string;
     latitude: number | null; longitude: number | null;
     hourly_rate: number; estimated_hours: number;
-  }>({ service_type: '', location: '', slots_needed: 3, message: '', latitude: null, longitude: null,
+  }>({ service_types: [], location: '', slots_needed: 3, message: '', latitude: null, longitude: null,
     hourly_rate: 3000, estimated_hours: 4 });
   const [loading, setLoading] = useState(false);
+  const [geocoding, setGeocoding] = useState(false);
+
+  // Sélection 1 à 3 prestations
+  function toggleType(t: string) {
+    setForm(p => {
+      if (p.service_types.includes(t)) return { ...p, service_types: p.service_types.filter(x => x !== t) };
+      if (p.service_types.length >= 3) {
+        toast.error('Vous ne pouvez pas sélectionner plus de 3 types de prestation.');
+        return p;
+      }
+      return { ...p, service_types: [...p.service_types, t] };
+    });
+  }
+
+  // Adresse saisie → géocodage → déplace l'épingle (synchro adresse → carte)
+  async function searchAddress() {
+    if (!form.location.trim()) return;
+    setGeocoding(true);
+    const r = await geocodeAddress(form.location.trim());
+    if (r) setForm(p => ({ ...p, latitude: r.lat, longitude: r.lng }));
+    else toast.error('Adresse introuvable — placez le point directement sur la carte.');
+    setGeocoding(false);
+  }
 
   // ── Lecture SYNCHRONE depuis localStorage avant le premier render ──
   const [session, setSession] = useState<SosSession | null>(() => lsLoad());
@@ -118,13 +141,16 @@ function OrgView() {
   const inputStyle = { background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
 
   async function declencher() {
-    if (!profile || !form.service_type || !form.location || form.latitude == null || form.longitude == null) return;
+    if (!profile || form.service_types.length === 0 || !form.location || form.latitude == null || form.longitude == null) return;
     setLoading(true);
     try {
-      const expires_at = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+      // Compte à rebours principal : 30 minutes
+      const expires_at = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+      const typesLabel = form.service_types.join(', ');
       const { data, error } = await supabase.from('sos_sessions').insert({
         organisateur_id: profile.id,
-        service_type: form.service_type,
+        service_type: form.service_types[0], // type principal (compatibilité)
+        service_types: form.service_types,
         location: form.location,
         latitude: form.latitude,
         longitude: form.longitude,
@@ -140,13 +166,13 @@ function OrgView() {
       }).select().single();
       if (error) throw error;
 
-      // Notifier les freelances dispo + compétence + GÉOLOCALISÉS à ≤ 30 km du lieu
+      // Freelances dispo dont une compétence correspond + GÉOLOCALISÉS à ≤ 30 km
       const { data: freelances } = await supabase
         .from('profiles')
         .select('id, latitude, longitude')
         .eq('role', 'freelance')
         .eq('is_available', true)
-        .contains('skills', [form.service_type])
+        .overlaps('skills', form.service_types)
         .neq('id', profile.id)
         .not('latitude', 'is', null)
         .not('longitude', 'is', null);
@@ -160,7 +186,7 @@ function OrgView() {
             user_id: f.id,
             type: 'sos_alert',
             title: 'S.O.S Brigade — Urgence !',
-            body: `Besoin urgent de ${form.service_type} à ${form.location}. ${form.slots_needed} poste(s) disponible(s).`,
+            body: `Besoin urgent de ${typesLabel} à ${form.location}. ${form.slots_needed} poste(s) disponible(s).`,
             data: { sos_session_id: data.id },
             is_read: false,
           }))
@@ -207,27 +233,54 @@ function OrgView() {
         {!session ? (
           <div className="card-glass p-8 space-y-5">
             <div>
-              <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Type de prestation *</label>
-              <select className={inputClass} style={{ ...inputStyle, background: '#1e0f3c', cursor: 'pointer' }}
-                value={form.service_type} onChange={e => setForm(p => ({ ...p, service_type: e.target.value }))}>
-                <option value="">Sélectionner...</option>
-                {SERVICE_TYPES.map(t => <option key={t} value={t} style={{ background: '#1e0f3c' }}>{t}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Adresse exacte *</label>
-              <input className={inputClass} style={inputStyle}
-                placeholder="Ex: Avenue Delafosse, Plateau, Abidjan"
-                value={form.location} onChange={e => setForm(p => ({ ...p, location: e.target.value }))} />
+              <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>
+                Type(s) de prestation * <span style={{ color: '#7a6a8a' }}>(1 à 3)</span>
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {SERVICE_TYPES.map(t => {
+                  const on = form.service_types.includes(t);
+                  return (
+                    <button key={t} type="button" onClick={() => toggleType(t)}
+                      className="px-3 py-1.5 rounded-full text-xs font-medium transition-all border inline-flex items-center gap-1.5"
+                      style={{
+                        background: on ? 'rgba(212,175,55,0.2)' : 'transparent',
+                        borderColor: on ? '#d4af37' : 'rgba(201,168,76,0.25)',
+                        color: on ? '#e8c97a' : '#b8a898',
+                      }}>
+                      {on && <Check size={12} />} {t} {on && <X size={12} />}
+                    </button>
+                  );
+                })}
+              </div>
+              {form.service_types.length > 0 && (
+                <p className="text-xs mt-2" style={{ color: '#7a6a8a' }}>{form.service_types.length}/3 sélectionné(s)</p>
+              )}
             </div>
             <div>
               <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>
-                Placez le lieu sur la carte * <span style={{ color: '#7a6a8a' }}>(centre du rayon de 30 km)</span>
+                Adresse exacte * <span style={{ color: '#7a6a8a' }}>(synchronisée avec la carte)</span>
               </label>
-              <MapPicker lat={form.latitude} lng={form.longitude}
-                onSelect={(lat, lng, addr) => setForm(p => ({
-                  ...p, latitude: lat, longitude: lng, location: p.location.trim() ? p.location : addr,
-                }))} />
+              <div className="flex gap-2">
+                <input className={inputClass} style={inputStyle}
+                  placeholder="Ex: Avenue Delafosse, Plateau, Abidjan"
+                  value={form.location}
+                  onChange={e => setForm(p => ({ ...p, location: e.target.value }))}
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); searchAddress(); } }} />
+                <button type="button" onClick={searchAddress} disabled={geocoding || !form.location.trim()}
+                  className="px-4 rounded-xl text-sm font-semibold inline-flex items-center gap-2"
+                  style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.4)',
+                    color: '#d4af37', flexShrink: 0, cursor: 'pointer',
+                    opacity: (geocoding || !form.location.trim()) ? 0.6 : 1 }}>
+                  <Search size={15} /> {geocoding ? '...' : 'Localiser'}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>
+                Lieu sur la carte * <span style={{ color: '#7a6a8a' }}>(centre du rayon de 30 km)</span>
+              </label>
+              <MapPicker lat={form.latitude} lng={form.longitude} markerColor="#ef4444"
+                onSelect={(lat, lng, addr) => setForm(p => ({ ...p, latitude: lat, longitude: lng, location: addr }))} />
               {form.latitude != null && form.longitude != null && (
                 <p className="text-xs mt-2" style={{ color: '#00C896', display: 'flex', alignItems: 'center', gap: 5 }}>
                   <Check size={13} /> Lieu défini — seuls les freelances à moins de 30 km seront alertés.
@@ -278,10 +331,10 @@ function OrgView() {
               </p>
             )}
             <button onClick={declencher}
-              disabled={loading || !form.service_type || !form.location || !form.latitude || !form.longitude}
+              disabled={loading || form.service_types.length === 0 || !form.location || !form.latitude || !form.longitude}
               className="w-full py-4 rounded-xl font-bold text-white text-lg flex items-center justify-center gap-2 transition-all hover:opacity-90"
               style={{ background: 'linear-gradient(135deg,#dc2626,#b91c1c)',
-                opacity: (loading || !form.service_type || !form.location || !form.latitude || !form.longitude) ? 0.6 : 1 }}>
+                opacity: (loading || form.service_types.length === 0 || !form.location || !form.latitude || !form.longitude) ? 0.6 : 1 }}>
               {loading ? 'Déclenchement...' : <><Siren size={19} /> Déclencher l'alerte S.O.S</>}
             </button>
           </div>
@@ -303,14 +356,19 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
   const [cancelStep, setCancelStep] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [freeLeft, setFreeLeft] = useState(0);
   const [expired, setExpired] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   /* Minuteur en temps réel */
   useEffect(() => {
+    const startMs = session.created_at
+      ? new Date(session.created_at).getTime()
+      : new Date(session.expires_at).getTime() - 30 * 60 * 1000;
     function tick() {
       const secs = Math.max(0, Math.floor((new Date(session.expires_at).getTime() - Date.now()) / 1000));
       setTimeLeft(secs);
+      setFreeLeft(Math.max(0, 600 - Math.floor((Date.now() - startMs) / 1000))); // fenêtre gratuite 10 min
       if (secs === 0) {
         setExpired(true);
         clearInterval(timerRef.current!);
@@ -384,23 +442,30 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
   const confirmed = responses.filter(r => r.status === 'confirmed');
   const mins = String(Math.floor(timeLeft / 60)).padStart(2, '0');
   const secs = String(timeLeft % 60).padStart(2, '0');
-  const urgentColor = timeLeft < 120 ? '#ef4444' : timeLeft < 300 ? '#f59e0b' : '#10b981';
+  const urgentColor = timeLeft < 300 ? '#ef4444' : timeLeft < 600 ? '#f59e0b' : '#10b981';
 
-  // Dédommagement = 10 % de (tarif horaire × durée estimée), par freelance confirmé
-  const compPerFreelance = Math.round(0.1 * (session.hourly_rate || 0) * (session.estimated_hours || 0));
-  const totalComp = compPerFreelance * confirmed.length;
+  // Fenêtre d'annulation gratuite : 10 premières minutes
+  const inFreeWindow = freeLeft > 0;
+  const freeMin = Math.ceil(freeLeft / 60);
+
+  // Pénalité = 10 % du montant total dû (freelances confirmés × tarif × durée)
+  const baseAmount   = Math.round((session.hourly_rate || 0) * (session.estimated_hours || 0));
+  const totalDue     = baseAmount * confirmed.length;
+  const penaltyTotal = Math.round(0.1 * totalDue);
+  const penaltyPerFreelance = Math.round(0.1 * baseAmount);
 
   async function cancelSos() {
     setCancelling(true);
     try {
-      if (confirmed.length > 0 && compPerFreelance > 0) {
-        // Enregistrer la compensation due à chaque freelance confirmé
+      const applyPenalty = !inFreeWindow && confirmed.length > 0 && penaltyPerFreelance > 0;
+      if (applyPenalty) {
+        // Enregistrer la pénalité due à chaque freelance confirmé + le notifier
         await supabase.from('sos_compensations').insert(
           confirmed.map(r => ({
             sos_session_id: session.id,
             organizer_id: session.organisateur_id,
             freelance_id: r.freelance_id,
-            amount: compPerFreelance,
+            amount: penaltyPerFreelance,
             status: 'due',
           }))
         );
@@ -409,7 +474,7 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
             user_id: r.freelance_id,
             type: 'sos_alert',
             title: 'S.O.S annulé — compensation due',
-            body: `L'organisateur a annulé le S.O.S. Une compensation de ${compPerFreelance.toLocaleString('fr-CI')} FCFA vous est due.`,
+            body: `L'organisateur a annulé le S.O.S après le délai gratuit. Une compensation de ${penaltyPerFreelance.toLocaleString('fr-CI')} FCFA vous est due.`,
             data: { sos_session_id: session.id },
             is_read: false,
           }))
@@ -417,9 +482,9 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
       }
       await supabase.from('sos_sessions').update({ status: 'cancelled' }).eq('id', session.id);
       lsClear();
-      toast.success(confirmed.length > 0
-        ? `S.O.S annulé. ${totalComp.toLocaleString('fr-CI')} FCFA de compensation enregistré(s).`
-        : 'S.O.S annulé.');
+      toast.success(applyPenalty
+        ? `S.O.S annulé. Pénalité de ${penaltyTotal.toLocaleString('fr-CI')} FCFA enregistrée.`
+        : 'S.O.S annulé sans frais.');
       onReset();
     } catch (e: unknown) {
       toast.error((e as Error).message || "Erreur lors de l'annulation");
@@ -444,7 +509,7 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
               </h2>
               <p style={{ fontSize: 13, color: 'rgba(255,200,200,0.75)', margin: 0,
                 display: 'flex', alignItems: 'center', gap: 5 }}>
-                {session.service_type} · <MapPin size={12} /> {session.location}
+                {(session.service_types?.length ? session.service_types.join(', ') : session.service_type)} · <MapPin size={12} /> {session.location}
               </p>
             </div>
             {/* Minuteur */}
@@ -460,14 +525,21 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
           </div>
         </div>
 
-        {/* Barre de progression temporelle */}
+        {/* Barre de progression temporelle (30 min) */}
         <div style={{ height: 4, background: 'rgba(255,255,255,0.08)' }}>
           <div style={{
             height: '100%', background: urgentColor,
-            width: `${(timeLeft / 600) * 100}%`,
+            width: `${(timeLeft / 1800) * 100}%`,
             transition: 'width 1s linear, background 0.5s',
           }} />
         </div>
+        {!expired && inFreeWindow && (
+          <div style={{ padding: '8px 16px', background: 'rgba(0,200,150,0.08)',
+            borderTop: '1px solid rgba(0,200,150,0.2)', fontSize: 12, color: '#00C896',
+            display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Check size={13} /> Annulation gratuite possible encore {freeMin} min.
+          </div>
+        )}
 
         {/* KPI */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 1,
@@ -593,11 +665,17 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
       ) : cancelStep ? (
         <div style={{ borderRadius: 12, padding: '14px 16px',
           background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.25)' }}>
-          {confirmed.length > 0 ? (
+          {inFreeWindow ? (
             <p style={{ fontSize: 13, color: '#f0e6d3', margin: '0 0 12px', lineHeight: 1.6 }}>
-              {confirmed.length} freelance(s) déjà confirmé(s). Annuler vous engage à verser{' '}
-              <strong style={{ color: '#d4af37' }}>{compPerFreelance.toLocaleString('fr-CI')} FCFA</strong> à chacun
-              (10 %), soit <strong style={{ color: '#d4af37' }}>{totalComp.toLocaleString('fr-CI')} FCFA</strong> au total. Confirmer ?
+              Vous êtes dans le délai gratuit ({freeMin} min restante(s)). L'annulation est{' '}
+              <strong style={{ color: '#00C896' }}>sans frais</strong>. Confirmer ?
+            </p>
+          ) : confirmed.length > 0 ? (
+            <p style={{ fontSize: 13, color: '#f0e6d3', margin: '0 0 12px', lineHeight: 1.6 }}>
+              Attention : l'annulation après le délai gratuit entraîne des frais de{' '}
+              <strong style={{ color: '#ef4444' }}>{penaltyTotal.toLocaleString('fr-CI')} FCFA</strong>{' '}
+              (10 % du total de <strong style={{ color: '#d4af37' }}>{totalDue.toLocaleString('fr-CI')} FCFA</strong>),
+              répartis entre {confirmed.length} freelance(s) confirmé(s). Confirmer l'annulation ?
             </p>
           ) : (
             <p style={{ fontSize: 13, color: '#f0e6d3', margin: '0 0 12px', lineHeight: 1.6 }}>
@@ -609,7 +687,7 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
               style={{ flex: 1, padding: '10px', borderRadius: 10, fontSize: 13, fontWeight: 700,
                 background: '#ef4444', border: 'none', color: '#fff', cursor: 'pointer',
                 opacity: cancelling ? 0.6 : 1 }}>
-              {cancelling ? '...' : confirmed.length > 0 ? 'Annuler et compenser' : "Confirmer l'annulation"}
+              {cancelling ? '...' : (!inFreeWindow && confirmed.length > 0) ? 'Annuler et payer la pénalité' : "Confirmer l'annulation"}
             </button>
             <button onClick={() => setCancelStep(false)} disabled={cancelling}
               style={{ flex: 1, padding: '10px', borderRadius: 10, fontSize: 13, fontWeight: 600,

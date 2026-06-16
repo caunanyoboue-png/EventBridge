@@ -20,13 +20,24 @@ const DEFAULT_LAT = 5.3599517;
 const DEFAULT_LNG = -4.0082563;
 const DEFAULT_ZOOM = 13;
 
+// Épingle colorée (ex. rouge urgence pour le S.O.S)
+function pinIcon(color: string) {
+  return L.divIcon({
+    className: 'eb-pin',
+    html: `<svg width="32" height="42" viewBox="0 0 24 36" xmlns="http://www.w3.org/2000/svg"><path d="M12 0C5.37 0 0 5.37 0 12c0 9 12 24 12 24s12-15 12-24C24 5.37 18.63 0 12 0z" fill="${color}"/><circle cx="12" cy="12" r="4.5" fill="#fff"/></svg>`,
+    iconSize: [32, 42],
+    iconAnchor: [16, 42],
+  });
+}
+
 interface Props {
   lat?: number | null;
   lng?: number | null;
   onSelect: (lat: number, lng: number, address: string) => void;
+  markerColor?: string;
 }
 
-export default function MapPicker({ lat, lng, onSelect }: Props) {
+export default function MapPicker({ lat, lng, onSelect, markerColor }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef      = useRef<L.Map | null>(null);
   const markerRef   = useRef<L.Marker | null>(null);
@@ -55,22 +66,35 @@ export default function MapPicker({ lat, lng, onSelect }: Props) {
     }
   }
 
+  // Crée le marqueur (avec son handler de drag) ou le déplace s'il existe déjà.
+  function ensureMarker(la: number, ln: number): L.Marker {
+    if (!markerRef.current) {
+      const opts: L.MarkerOptions = { draggable: true };
+      if (markerColor) opts.icon = pinIcon(markerColor);
+      const m = L.marker([la, ln], opts).addTo(mapRef.current!);
+      m.on('dragend', async () => {
+        const pos = m.getLatLng();
+        const addr = await reverseGeocode(pos.lat, pos.lng);
+        setAddress(addr);
+        onSelect(pos.lat, pos.lng, addr); // déplacement manuel → met à jour l'adresse
+      });
+      markerRef.current = m;
+    } else {
+      markerRef.current.setLatLng([la, ln]);
+    }
+    return markerRef.current;
+  }
+
+  // Clic / GPS : place l'épingle ET remonte l'adresse au parent.
   async function placeMarker(la: number, ln: number) {
     if (!mapRef.current) return;
-    markerRef.current?.remove();
-    markerRef.current = L.marker([la, ln], { draggable: true }).addTo(mapRef.current);
-    markerRef.current.on('dragend', async () => {
-      const pos = markerRef.current!.getLatLng();
-      const addr = await reverseGeocode(pos.lat, pos.lng);
-      setAddress(addr);
-      onSelect(pos.lat, pos.lng, addr);
-    });
+    ensureMarker(la, ln);
     const addr = await reverseGeocode(la, ln);
     setAddress(addr);
     onSelect(la, ln, addr);
   }
 
-  // Init map once
+  // Init carte (une seule fois)
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
     const map = L.map(containerRef.current).setView([initLat, initLng], DEFAULT_ZOOM);
@@ -83,11 +107,24 @@ export default function MapPicker({ lat, lng, onSelect }: Props) {
     });
     mapRef.current = map;
 
-    if (lat && lng) placeMarker(lat, lng);
+    if (lat != null && lng != null) ensureMarker(lat, lng); // épingle initiale (silencieuse)
 
-    return () => { map.remove(); mapRef.current = null; };
+    return () => { map.remove(); mapRef.current = null; markerRef.current = null; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Coordonnées modifiées depuis l'extérieur (ex. adresse géocodée) → déplacer l'épingle.
+  useEffect(() => {
+    if (lat == null || lng == null || !mapRef.current) return;
+    const m = markerRef.current;
+    if (m) {
+      const c = m.getLatLng();
+      if (Math.abs(c.lat - lat) < 1e-6 && Math.abs(c.lng - lng) < 1e-6) return; // déjà à la bonne place
+    }
+    ensureMarker(lat, lng);
+    mapRef.current.setView([lat, lng], Math.max(mapRef.current.getZoom(), 15));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lat, lng]);
 
   async function geolocate() {
     if (!navigator.geolocation) return;
