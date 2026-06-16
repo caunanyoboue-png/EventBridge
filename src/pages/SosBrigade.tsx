@@ -5,7 +5,7 @@ import MapPicker from '../components/MapPicker';
 import MapView from '../components/MapView';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { distanceKm, formatDistance, geocodeAddress } from '../lib/geo';
+import { distanceKm, formatDistance, geocodeAddress, getBrowserPosition } from '../lib/geo';
 import { formatCFA } from '../lib/utils';
 import { type SosSession } from '../types';
 import {
@@ -159,8 +159,8 @@ function OrgView() {
         slots_needed: form.slots_needed,
         slots_confirmed: 0,
         radius_km: SOS_RADIUS_KM,
-        hourly_rate: form.hourly_rate,
-        estimated_hours: form.estimated_hours,
+        hourly_rate: Math.max(0, form.hourly_rate),
+        estimated_hours: Math.max(1, form.estimated_hours),
         notified_count: 0,
         status: 'active',
         expires_at,
@@ -405,8 +405,16 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
   async function confirmResponse(resp: SosResponse) {
     setConfirming(resp.id);
     try {
+      // Garde serveur : ne jamais dépasser le nombre de postes (compte réel en base)
+      const { count: already } = await supabase.from('sos_responses')
+        .select('*', { count: 'exact', head: true })
+        .eq('sos_session_id', session.id).eq('status', 'confirmed');
+      if ((already || 0) >= session.slots_needed) {
+        toast.error('Tous les postes sont déjà pourvus.');
+        setConfirming(null); fetchResponses(); return;
+      }
       await supabase.from('sos_responses').update({ status: 'confirmed' }).eq('id', resp.id);
-      const confirmedCount = responses.filter(r => r.status === 'confirmed').length + 1;
+      const confirmedCount = (already || 0) + 1;
       const isFull = confirmedCount >= session.slots_needed;
       // Quand l'équipe est complète, on clôt la session (statut 'completed' :
       // l'alerte disparaît pour les autres freelances).
@@ -807,6 +815,7 @@ function FreelanceView() {
   const [myResponse, setMyResponse] = useState<SosResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [responding, setResponding] = useState(false);
+  const [dueComp, setDueComp] = useState(0);
   const [, forceTick] = useState(0);
 
   // Minuteur live (re-render chaque seconde tant qu'une alerte est active)
@@ -819,6 +828,11 @@ function FreelanceView() {
   useEffect(() => {
     if (!profile) return;
     fetchActiveSos();
+
+    // Compensations dues (S.O.S annulés après le délai gratuit)
+    supabase.from('sos_compensations').select('amount')
+      .eq('freelance_id', profile.id).eq('status', 'due')
+      .then(({ data }) => setDueComp((data || []).reduce((s, c) => s + Number(c.amount || 0), 0)));
 
     // Écouter confirmation en temps réel
     const ch = supabase.channel('freelance-sos-status')
@@ -867,6 +881,19 @@ function FreelanceView() {
     if (!profile || !activeSos) return;
     setResponding(true);
     try {
+      // Re-vérifier la position actuelle (≤ 30 km) au moment de répondre
+      if (activeSos.latitude != null && activeSos.longitude != null) {
+        try {
+          const c = await getBrowserPosition();
+          await supabase.from('profiles')
+            .update({ latitude: c.latitude, longitude: c.longitude }).eq('id', profile.id);
+          const d = distanceKm(c.latitude, c.longitude, activeSos.latitude, activeSos.longitude);
+          if (d > SOS_RADIUS_KM) {
+            toast.error(`Vous êtes à ${formatDistance(d)} du lieu (max ${SOS_RADIUS_KM} km).`);
+            setResponding(false); return;
+          }
+        } catch { /* position indisponible → on laisse répondre */ }
+      }
       const { data, error } = await supabase.from('sos_responses').insert({
         sos_session_id: activeSos.id,
         freelance_id: profile.id,
@@ -902,6 +929,17 @@ function FreelanceView() {
           <h1 className="font-display text-2xl font-bold" style={{ color: '#f0e6d3' }}>S.O.S Brigade</h1>
           <p className="mt-2 text-sm" style={{ color: '#b8a898' }}>Alerte urgente en cours dans votre zone</p>
         </div>
+
+        {dueComp > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', marginBottom: 16,
+            borderRadius: 12, background: 'rgba(0,200,150,0.08)', border: '1px solid rgba(0,200,150,0.3)' }}>
+            <Wallet size={18} color="#00C896" />
+            <span style={{ fontSize: 13, color: '#f0e6d3' }}>
+              Compensation(s) due(s) : <strong style={{ color: '#00C896' }}>{formatCFA(dueComp)}</strong>
+              <span style={{ color: '#7a6a8a' }}> — S.O.S annulés après le délai gratuit.</span>
+            </span>
+          </div>
+        )}
 
         {loading ? (
           <div className="text-center py-12" style={{ color: '#b8a898' }}>Chargement...</div>
