@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
@@ -14,6 +14,82 @@ import { fetchContractByMission } from '../services/contractService';
 import ContractWizard from '../components/contracts/ContractWizard';
 import ContractCard from '../components/contracts/ContractCard';
 import toast from 'react-hot-toast';
+
+const OVERLAY: CSSProperties = {
+  position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+  padding: 16, background: 'rgba(15,10,30,0.85)', zIndex: 1000,
+};
+
+function ReviewModal({ name, onClose, onSubmit }: {
+  name: string; onClose: () => void; onSubmit: (rating: number, comment: string) => Promise<void>;
+}) {
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+  const [busy, setBusy] = useState(false);
+  return (
+    <div style={OVERLAY} onClick={onClose}>
+      <div className="card-glass p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+        <h3 className="font-semibold mb-1" style={{ color: '#f0e6d3' }}>Noter {name}</h3>
+        <p className="text-xs mb-4" style={{ color: '#b8a898' }}>Votre avis aide toute la communauté.</p>
+        <div className="flex gap-1 mb-4">
+          {[1, 2, 3, 4, 5].map(i => (
+            <button key={i} type="button" onClick={() => setRating(i)}
+              style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 2 }}>
+              <Star size={28} fill={i <= rating ? '#d4af37' : 'none'} color="#d4af37" />
+            </button>
+          ))}
+        </div>
+        <textarea value={comment} onChange={e => setComment(e.target.value)} rows={3}
+          placeholder="Commentaire (optionnel)"
+          className="w-full px-4 py-3 rounded-xl text-sm outline-none mb-4"
+          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3', resize: 'none' }} />
+        <div className="flex gap-2">
+          <button type="button" disabled={busy}
+            onClick={async () => { setBusy(true); await onSubmit(rating, comment); setBusy(false); }}
+            className="btn-gold flex-1 py-2.5 rounded-xl text-sm font-bold text-[#261642]">
+            {busy ? '…' : 'Envoyer l\'avis'}
+          </button>
+          <button type="button" onClick={onClose} className="px-4 rounded-xl text-sm border"
+            style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#b8a898' }}>Annuler</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DisputeModal({ name, onClose, onSubmit }: {
+  name: string; onClose: () => void; onSubmit: (reason: string, description: string) => Promise<void>;
+}) {
+  const [reason, setReason] = useState('');
+  const [description, setDescription] = useState('');
+  const [busy, setBusy] = useState(false);
+  return (
+    <div style={OVERLAY} onClick={onClose}>
+      <div className="card-glass p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+        <h3 className="font-semibold mb-1" style={{ color: '#f0e6d3' }}>Signaler un litige</h3>
+        <p className="text-xs mb-4" style={{ color: '#b8a898' }}>Concernant {name}. Notre équipe examinera votre signalement.</p>
+        <input value={reason} onChange={e => setReason(e.target.value)}
+          placeholder="Motif (ex : absence, paiement, comportement)"
+          className="w-full px-4 py-3 rounded-xl text-sm outline-none mb-3"
+          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }} />
+        <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3}
+          placeholder="Décrivez ce qui s'est passé"
+          className="w-full px-4 py-3 rounded-xl text-sm outline-none mb-4"
+          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3', resize: 'none' }} />
+        <div className="flex gap-2">
+          <button type="button" disabled={busy || !reason.trim()}
+            onClick={async () => { setBusy(true); await onSubmit(reason, description); setBusy(false); }}
+            className="flex-1 py-2.5 rounded-xl text-sm font-bold disabled:opacity-50"
+            style={{ background: '#ef4444', color: '#fff' }}>
+            {busy ? '…' : 'Envoyer le signalement'}
+          </button>
+          <button type="button" onClick={onClose} className="px-4 rounded-xl text-sm border"
+            style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#b8a898' }}>Annuler</button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function MissionDetail() {
   const [params] = useSearchParams();
@@ -31,6 +107,11 @@ export default function MissionDetail() {
   const [showWizard, setShowWizard] = useState(false);
   const [acceptedFreelances, setAcceptedFreelances] = useState<Profile[]>([]);
   const [selectedFreelance, setSelectedFreelance] = useState<Profile | null>(null);
+  const [myAppStatus, setMyAppStatus] = useState<string | null>(null);
+  const [completing, setCompleting] = useState(false);
+  const [reviewedIds, setReviewedIds] = useState<Set<string>>(new Set());
+  const [reviewTarget, setReviewTarget] = useState<{ id: string; name: string; type: 'org_to_free' | 'free_to_org' } | null>(null);
+  const [disputeTarget, setDisputeTarget] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     if (missionId) fetchMission();
@@ -39,6 +120,9 @@ export default function MissionDetail() {
   useEffect(() => {
     if (!missionId || !profile) return;
     fetchContractByMission(missionId).then(c => setContract(c));
+    supabase.from('reviews').select('reviewed_id')
+      .eq('mission_id', missionId).eq('reviewer_id', profile.id)
+      .then(({ data }) => setReviewedIds(new Set((data || []).map(r => r.reviewed_id as string))));
     if (profile.role === 'organisateur') {
       supabase
         .from('applications')
@@ -58,8 +142,9 @@ export default function MissionDetail() {
     setMission(data);
     if (profile && data) {
       const { data: app } = await supabase.from('applications')
-        .select('id').eq('mission_id', missionId!).eq('freelance_id', profile.id).single();
+        .select('status').eq('mission_id', missionId!).eq('freelance_id', profile.id).maybeSingle();
       setAlreadyApplied(!!app);
+      setMyAppStatus(app?.status ?? null);
     }
     setLoading(false);
   }
@@ -136,6 +221,57 @@ export default function MissionDetail() {
       } catch { /* notification failure must never block */ }
     }
     setWithdrawing(false);
+  }
+
+  // Organisateur : clôturer la mission (après l'événement)
+  async function markCompleted() {
+    if (!mission || completing) return;
+    setCompleting(true);
+    const { error } = await supabase.from('missions').update({ status: 'completed' }).eq('id', mission.id);
+    if (error) { toast.error('Erreur lors de la clôture'); setCompleting(false); return; }
+    setMission(m => (m ? { ...m, status: 'completed' } : m));
+    if (acceptedFreelances.length) {
+      try {
+        await supabase.from('notifications').insert(acceptedFreelances.map(f => ({
+          user_id: f.id, type: 'mission_completed', title: 'Mission terminée',
+          body: `La mission "${mission.title}" est marquée comme terminée. Vous pouvez laisser un avis à l'organisateur.`,
+          data: { mission_id: mission.id }, is_read: false,
+        })));
+      } catch { /* notif jamais bloquante */ }
+    }
+    toast.success('Mission marquée comme terminée');
+    setCompleting(false);
+  }
+
+  async function submitReview(rating: number, comment: string) {
+    if (!mission || !profile || !reviewTarget) return;
+    // NB : la table `reviews` n'a pas de colonne `type` (le rôle se déduit du reviewer).
+    const { error } = await supabase.from('reviews').insert({
+      mission_id: mission.id, reviewer_id: profile.id, reviewed_id: reviewTarget.id,
+      rating, comment: comment.trim() || null,
+    });
+    if (error) { toast.error(error.code === '23505' ? 'Vous avez déjà noté cette personne.' : 'Erreur'); return; }
+    setReviewedIds(prev => new Set([...prev, reviewTarget.id]));
+    try {
+      await supabase.from('notifications').insert({
+        user_id: reviewTarget.id, type: 'review', title: 'Nouvel avis reçu',
+        body: `${profile.full_name} vous a laissé un avis (${rating}/5) sur "${mission.title}".`,
+        data: { mission_id: mission.id }, is_read: false,
+      });
+    } catch { /* notif jamais bloquante */ }
+    toast.success('Avis envoyé, merci !');
+    setReviewTarget(null);
+  }
+
+  async function submitDispute(reason: string, description: string) {
+    if (!mission || !profile || !disputeTarget) return;
+    const { error } = await supabase.from('disputes').insert({
+      mission_id: mission.id, reporter_id: profile.id, reported_id: disputeTarget.id,
+      reason: reason.trim(), description: description.trim() || null, status: 'open',
+    });
+    if (error) { toast.error('Erreur lors du signalement'); return; }
+    toast.success('Litige signalé. Notre équipe va l\'examiner.');
+    setDisputeTarget(null);
   }
 
   if (loading) return <DashboardLayout><div className="text-center py-20" style={{ color: '#b8a898' }}>Chargement...</div></DashboardLayout>;
@@ -315,6 +451,77 @@ export default function MissionDetail() {
           )}
         </div>
 
+        {/* Clôture, avis & litige */}
+        {(profile?.role === 'organisateur' || myAppStatus === 'accepted') && (
+          <div className="card-glass p-6 mb-6">
+            <h2 className="font-semibold mb-4 flex items-center gap-2" style={{ color: '#f0e6d3' }}>
+              <CheckCircle2 size={17} color="#00C896" /> Clôture &amp; avis
+            </h2>
+
+            {/* Organisateur : marquer terminée */}
+            {profile?.role === 'organisateur' && mission.status !== 'completed' && (
+              acceptedFreelances.length === 0 ? (
+                <p className="text-sm" style={{ color: '#b8a898' }}>
+                  Confirmez au moins un freelance pour pouvoir clôturer la mission.
+                </p>
+              ) : (
+                <button onClick={markCompleted} disabled={completing}
+                  className="btn-gold px-5 py-2.5 rounded-xl text-sm font-bold text-[#261642]">
+                  {completing ? '…' : <span className="inline-flex items-center gap-2"><CheckCircle2 size={15} /> Marquer la mission comme terminée</span>}
+                </button>
+              )
+            )}
+
+            {/* Freelance : en attente de la clôture */}
+            {profile?.role !== 'organisateur' && mission.status !== 'completed' && (
+              <p className="text-sm" style={{ color: '#b8a898' }}>
+                Vous pourrez laisser un avis dès que l'organisateur aura clôturé la mission.
+              </p>
+            )}
+
+            {/* Après clôture : noter + signaler */}
+            {mission.status === 'completed' && (
+              <div className="space-y-3">
+                {profile?.role === 'organisateur' ? (
+                  acceptedFreelances.length === 0 ? (
+                    <p className="text-sm" style={{ color: '#b8a898' }}>Aucun freelance à évaluer.</p>
+                  ) : acceptedFreelances.map(f => (
+                    <div key={f.id} className="flex items-center justify-between gap-3 p-3 rounded-xl"
+                      style={{ background: 'rgba(82,54,124,0.3)' }}>
+                      <span className="text-sm" style={{ color: '#f0e6d3' }}>{f.full_name}</span>
+                      <div className="flex gap-2">
+                        <button onClick={() => setReviewTarget({ id: f.id, name: f.full_name, type: 'org_to_free' })}
+                          disabled={reviewedIds.has(f.id)}
+                          className="btn-outline-gold px-3 py-1.5 rounded-lg text-xs disabled:opacity-50">
+                          {reviewedIds.has(f.id) ? 'Noté ✓' : 'Noter'}
+                        </button>
+                        <button onClick={() => setDisputeTarget({ id: f.id, name: f.full_name })}
+                          className="px-3 py-1.5 rounded-lg text-xs border"
+                          style={{ borderColor: 'rgba(239,68,68,0.35)', color: '#ef4444' }}>
+                          Signaler
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : org && (
+                  <div className="flex flex-wrap gap-2">
+                    <button onClick={() => setReviewTarget({ id: org.id, name: org.full_name || 'Organisateur', type: 'free_to_org' })}
+                      disabled={reviewedIds.has(org.id)}
+                      className="btn-gold px-4 py-2 rounded-lg text-sm font-bold text-[#261642] disabled:opacity-50">
+                      {reviewedIds.has(org.id) ? 'Avis envoyé ✓' : 'Noter l\'organisateur'}
+                    </button>
+                    <button onClick={() => setDisputeTarget({ id: org.id, name: org.full_name || 'Organisateur' })}
+                      className="px-4 py-2 rounded-lg text-sm border"
+                      style={{ borderColor: 'rgba(239,68,68,0.35)', color: '#ef4444' }}>
+                      Signaler un litige
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Section contrat (organisateur) */}
         {profile?.role === 'organisateur' && (
           <div className="card-glass p-6 mb-6">
@@ -370,6 +577,9 @@ export default function MissionDetail() {
             onCancel={() => { setShowWizard(false); setSelectedFreelance(null); }}
           />
         )}
+
+        {reviewTarget && <ReviewModal name={reviewTarget.name} onClose={() => setReviewTarget(null)} onSubmit={submitReview} />}
+        {disputeTarget && <DisputeModal name={disputeTarget.name} onClose={() => setDisputeTarget(null)} onSubmit={submitDispute} />}
       </div>
     </DashboardLayout>
   );
