@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Target, MessageCircle, Mail, CheckCircle2, XCircle, Siren, Wallet, FileText, Bell,
+  Star, Flag,
   type LucideIcon,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -20,6 +21,9 @@ const ICONS: Record<string, LucideIcon> = {
   payment_received:  Wallet,
   payment_confirmed: Wallet,
   contract:          FileText,
+  mission_completed: CheckCircle2,
+  review:            Star,
+  dispute:           Flag,
   default:           Bell,
 };
 
