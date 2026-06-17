@@ -10,7 +10,7 @@ import { formatCFA } from '../lib/utils';
 import { type SosSession } from '../types';
 import {
   Siren, MapPin, Inbox, Hourglass, CheckCircle2, Phone, Star, User, Wallet,
-  X, Check, Target, Users, Clock, Zap, BellOff, XCircle, ChevronUp, ChevronDown, Search,
+  X, Check, Target, Users, Clock, Zap, BellOff, XCircle, ChevronUp, ChevronDown, Search, Navigation,
   type LucideIcon,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -24,7 +24,7 @@ type SosResponse = {
   id: string;
   status: 'pending' | 'confirmed' | 'rejected';
   freelance_id: string;
-  freelance?: { full_name: string | null; avatar_url: string | null; skills: string[] | null; avg_rating: number | null; phone?: string | null; ville?: string | null };
+  freelance?: { full_name: string | null; avatar_url: string | null; skills: string[] | null; avg_rating: number | null; phone?: string | null; ville?: string | null; latitude?: number | null; longitude?: number | null };
 };
 
 /* ──────────────────────────────────────────────────────────────────── */
@@ -396,7 +396,7 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
 
   async function fetchResponses() {
     const { data } = await supabase.from('sos_responses')
-      .select('id, status, freelance_id, freelance:profiles!freelance_id(full_name,avatar_url,skills,avg_rating,phone,ville)')
+      .select('id, status, freelance_id, freelance:profiles!freelance_id(full_name,avatar_url,skills,avg_rating,phone,ville,latitude,longitude)')
       .eq('sos_session_id', session.id)
       .order('responded_at', { ascending: true });
     setResponses((data || []) as unknown as SosResponse[]);
@@ -610,15 +610,20 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {pending.map(r => (
-              <PropositionCard key={r.id} resp={r}
-                onConfirm={() => confirmResponse(r)}
-                onReject={() => rejectResponse(r)}
-                onViewProfile={() => navigate(`/public-profile?id=${r.freelance_id}`)}
-                busy={confirming === r.id}
-                canConfirm={confirmed.length < session.slots_needed}
-              />
-            ))}
+            {pending.map(r => {
+              const fl = r.freelance;
+              const dist = (session.latitude != null && session.longitude != null && fl?.latitude != null && fl?.longitude != null)
+                ? distanceKm(session.latitude, session.longitude, fl.latitude, fl.longitude) : null;
+              return (
+                <PropositionCard key={r.id} resp={r} distance={dist}
+                  onConfirm={() => confirmResponse(r)}
+                  onReject={() => rejectResponse(r)}
+                  onViewProfile={() => navigate(`/public-profile?id=${r.freelance_id}`)}
+                  busy={confirming === r.id}
+                  canConfirm={confirmed.length < session.slots_needed}
+                />
+              );
+            })}
           </div>
         )}
       </div>
@@ -721,8 +726,8 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
 }
 
 /* ── Carte de proposition freelance ── */
-function PropositionCard({ resp, onConfirm, onReject, onViewProfile, busy, canConfirm }: {
-  resp: SosResponse; onConfirm: () => void; onReject: () => void;
+function PropositionCard({ resp, distance, onConfirm, onReject, onViewProfile, busy, canConfirm }: {
+  resp: SosResponse; distance?: number | null; onConfirm: () => void; onReject: () => void;
   onViewProfile: () => void; busy: boolean; canConfirm: boolean;
 }) {
   const fl = resp.freelance;
@@ -744,6 +749,11 @@ function PropositionCard({ resp, onConfirm, onReject, onViewProfile, busy, canCo
                 <Star size={12} fill="#d4af37" /> {fl.avg_rating.toFixed(1)}
               </span>
             )}
+            {distance != null && (
+              <span style={{ fontSize: 11, color: '#00C896', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <Navigation size={11} /> {formatDistance(distance)}
+              </span>
+            )}
             {fl?.ville && (
               <span style={{ fontSize: 11, color: '#8a7a9a', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                 <MapPin size={11} /> {fl.ville}
@@ -751,6 +761,14 @@ function PropositionCard({ resp, onConfirm, onReject, onViewProfile, busy, canCo
             )}
           </div>
         </div>
+        {fl?.phone && (
+          <a href={`tel:${fl.phone}`} onClick={e => e.stopPropagation()}
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32,
+              borderRadius: 8, background: 'rgba(0,200,150,0.12)', border: '1px solid rgba(0,200,150,0.3)',
+              color: '#00C896', textDecoration: 'none', flexShrink: 0 }}>
+            <Phone size={15} />
+          </a>
+        )}
         <button onClick={() => setShowDetails(v => !v)}
           style={{ fontSize: 11, color: '#d4af37', background: 'transparent',
             border: 'none', cursor: 'pointer', padding: '4px 8px' }}>
