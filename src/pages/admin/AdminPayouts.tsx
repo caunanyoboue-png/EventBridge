@@ -6,8 +6,8 @@ import { formatCFA, getInitials } from '../../lib/utils';
 import { type Payment } from '../../types';
 import toast from 'react-hot-toast';
 
-// Moyens de versement courants en Côte d'Ivoire
-const PAYOUT_METHODS = ['Wave', 'Orange Money', 'MTN MoMo', 'Moov Money', 'Espèces'];
+// Moyens de versement courants en Côte d'Ivoire (mobile money + Wave + espèces)
+const PAYOUT_METHODS = ['Orange Money', 'MTN Money', 'Moov Money', 'Wave', 'Espèces'];
 
 function netOf(p: Payment) {
   const commission = p.commission_amount ?? Math.round(p.amount * 0.10);
