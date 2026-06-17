@@ -28,6 +28,7 @@ export default function NotificationBell() {
   const navigate = useNavigate();
   const [notifs, setNotifs] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
 
   const unread = notifs.filter(n => !n.is_read).length;
@@ -65,14 +66,26 @@ export default function NotificationBell() {
     setNotifs(data || []);
   }
 
+  function targetRoute(n: Notification): string | null {
+    const d = (n.data || {}) as Record<string, string>;
+    if (d.mission_id) return `/MissionDetail?id=${d.mission_id}`;
+    if (d.contract_id) return `/contracts/${d.contract_id}`;
+    if (d.sos_session_id) return '/sos-brigade';
+    return null;
+  }
+
+  // Clic = marquer lu + déplier le message complet (toggle)
   async function handleNotifClick(n: Notification) {
-    setOpen(false);
     if (!n.is_read) {
       await supabase.from('notifications').update({ is_read: true }).eq('id', n.id);
       setNotifs(prev => prev.map(x => x.id === n.id ? { ...x, is_read: true } : x));
     }
-    const missionId = n.data?.mission_id as string | undefined;
-    if (missionId) navigate(`/MissionDetail?id=${missionId}`);
+    setExpandedId(prev => (prev === n.id ? null : n.id));
+  }
+
+  function goTo(n: Notification) {
+    const r = targetRoute(n);
+    if (r) { setOpen(false); setExpandedId(null); navigate(r); }
   }
 
   async function markAllRead() {
@@ -182,20 +195,30 @@ export default function NotificationBell() {
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{
-                    fontSize: 12, fontWeight: n.is_read ? 400 : 600, color: '#f0e6d3',
-                    margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    fontSize: 12, fontWeight: n.is_read ? 400 : 600, color: '#f0e6d3', margin: '0 0 2px',
+                    ...(expandedId === n.id ? {} : { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }),
                   }}>
                     {n.title}
                   </p>
                   <p style={{
-                    fontSize: 11, color: 'rgba(240,230,211,0.5)', margin: '0 0 3px',
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    fontSize: 11, color: 'rgba(240,230,211,0.6)', margin: '0 0 4px',
+                    ...(expandedId === n.id
+                      ? { whiteSpace: 'pre-wrap', lineHeight: 1.5 }
+                      : { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }),
                   }}>
                     {n.body}
                   </p>
                   <p style={{ fontSize: 10, color: 'rgba(240,230,211,0.28)', margin: 0 }}>
                     {n.created_at ? formatRelative(n.created_at) : ''}
                   </p>
+                  {expandedId === n.id && targetRoute(n) && (
+                    <span role="button" tabIndex={0}
+                      onClick={e => { e.stopPropagation(); goTo(n); }}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 8,
+                        fontSize: 11, fontWeight: 600, color: '#d4af37', cursor: 'pointer' }}>
+                      Voir →
+                    </span>
+                  )}
                 </div>
 
                 {/* Point non lu */}
