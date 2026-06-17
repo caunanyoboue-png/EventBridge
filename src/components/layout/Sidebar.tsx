@@ -77,6 +77,13 @@ const IcoGear = () => (
       stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
   </svg>
 );
+const IcoWallet = () => (
+  <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
+    <rect x="1.8" y="3.5" width="13.4" height="10" rx="2" stroke="currentColor" strokeWidth="1.4"/>
+    <path d="M11 8.5h3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+    <circle cx="11.5" cy="8.5" r="0.9" fill="currentColor"/>
+  </svg>
+);
 const IcoLogout = () => (
   <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
     <path d="M7 14H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
@@ -125,6 +132,7 @@ const ADMIN_ITEMS = [
   { Icon: IcoMissions,  label: 'Missions',     path: '/admin/AdminMissions' },
   { Icon: IcoShield,    label: 'Litiges',      path: '/admin/AdminDisputes' },
   { Icon: IcoStar,      label: 'Avis',         path: '/admin/AdminReviews' },
+  { Icon: IcoWallet,    label: 'Versements',   path: '/admin/AdminPayouts' },
   { Icon: IcoGear,      label: 'Paramètres',   path: '/admin/AdminSettings' },
 ];
 

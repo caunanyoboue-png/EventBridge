@@ -34,6 +34,7 @@ import AdminProfiles from './pages/admin/AdminProfiles';
 import AdminMissions from './pages/admin/AdminMissions';
 import AdminDisputes from './pages/admin/AdminDisputes';
 import AdminReviews from './pages/admin/AdminReviews';
+import AdminPayouts from './pages/admin/AdminPayouts';
 import AdminSettings from './pages/admin/AdminSettings';
 
 function ProtectedRoute({ children, role }: { children: ReactNode; role?: string }) {
@@ -131,6 +132,7 @@ function AppRoutes() {
       <Route path="/admin/AdminMissions" element={<ProtectedRoute role="admin"><AdminMissions /></ProtectedRoute>} />
       <Route path="/admin/AdminDisputes" element={<ProtectedRoute role="admin"><AdminDisputes /></ProtectedRoute>} />
       <Route path="/admin/AdminReviews" element={<ProtectedRoute role="admin"><AdminReviews /></ProtectedRoute>} />
+      <Route path="/admin/AdminPayouts" element={<ProtectedRoute role="admin"><AdminPayouts /></ProtectedRoute>} />
       <Route path="/admin/AdminSettings" element={<ProtectedRoute role="admin"><AdminSettings /></ProtectedRoute>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />

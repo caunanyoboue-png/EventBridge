@@ -35,7 +35,7 @@ serve(async (req) => {
     // Charger le contrat
     const { data: contract, error: cErr } = await supabase
       .from('contracts')
-      .select('*, organizer:profiles!organizer_id(*), freelance:profiles!freelance_id(*)')
+      .select('*, organizer:profiles!organizer_id(*), freelance:profiles!freelance_id(*), mission:missions!mission_id(commission_rate)')
       .eq('id', contract_id)
       .single();
     if (cErr || !contract) return json({ error: 'Contrat introuvable' }, 404);
@@ -55,6 +55,11 @@ serve(async (req) => {
     }
 
     const amount = Math.round(contract.total_gross + contract.end_of_contract_indemnity);
+    // Commission plateforme : taux de la mission (fraction, ex. 0.10), défaut 10 %.
+    const rawRate = Number((contract.mission as { commission_rate?: number })?.commission_rate);
+    const rate = rawRate > 0 && rawRate < 1 ? rawRate : 0.10;
+    const commissionAmount = Math.round(amount * rate);
+    const netAmount = amount - commissionAmount;
     const transactionId = `EB_${Date.now()}_${crypto.randomUUID().replace(/-/g,'').slice(0,8)}`;
     const origin = req.headers.get('origin') || 'https://eventbridge-app.vercel.app';
 
@@ -67,6 +72,8 @@ serve(async (req) => {
         payer_id:      contract.organizer_id,
         payee_id:      contract.freelance_id,
         amount,
+        commission_amount: commissionAmount,
+        net_amount:        netAmount,
         description:   `Paiement contrat — ${contract.job_title}`,
         transaction_id: transactionId,
         status:        'pending',

@@ -19,6 +19,13 @@ const STATUS_UI: Record<string, { label: string; color: string; Icon: LucideIcon
   cancelled:  { label: 'Annulé',     color: '#7a6a7a', Icon: Undo2 },
 };
 
+// Commission/net : valeurs stockées, sinon repli sur 10 % (avant redéploiement de l'Edge Function).
+function breakdown(p: Payment) {
+  const commission = p.commission_amount ?? Math.round(p.amount * 0.10);
+  const net = p.net_amount ?? (p.amount - commission);
+  return { commission, net };
+}
+
 export default function PaymentButton({ contractId, amount, myRole }: Props) {
   const [payment, setPayment] = useState<Payment | null>(null);
   const [loading, setLoading] = useState(true);
@@ -72,14 +79,34 @@ export default function PaymentButton({ contractId, amount, myRole }: Props) {
       </div>
     );
     const ui = STATUS_UI[payment.status] || STATUS_UI.pending;
+    const { net } = breakdown(payment);
+    const paidOut = payment.payout_status === 'paid';
     return (
-      <div className="px-4 py-3 rounded-xl text-sm text-center flex items-center justify-center gap-2"
-        style={{ background: `${ui.color}12`, border: `1px solid ${ui.color}40`, color: ui.color }}>
-        <ui.Icon size={15} /> Paiement {ui.label} — {formatCFA(payment.amount)}
-        {payment.paid_at && (
-          <span className="block text-xs mt-1" style={{ color: '#b8a898' }}>
-            le {new Date(payment.paid_at).toLocaleDateString('fr-CI')}
-          </span>
+      <div className="space-y-2">
+        <div className="px-4 py-3 rounded-xl text-sm text-center flex items-center justify-center gap-2"
+          style={{ background: `${ui.color}12`, border: `1px solid ${ui.color}40`, color: ui.color }}>
+          <ui.Icon size={15} /> Paiement {ui.label}
+        </div>
+        {payment.status === 'completed' && (
+          <div className="px-4 py-3 rounded-xl text-sm" style={{ background: 'rgba(82,54,124,0.3)' }}>
+            <div className="flex justify-between">
+              <span style={{ color: '#b8a898' }}>Net à recevoir</span>
+              <span style={{ color: '#f0e6d3', fontWeight: 700 }}>{formatCFA(net)}</span>
+            </div>
+            <div className="flex justify-between mt-1">
+              <span style={{ color: '#b8a898' }}>Versement</span>
+              <span style={{ color: paidOut ? '#00C896' : '#F59E0B', fontWeight: 600 }}>
+                {paidOut
+                  ? `Versé${payment.payout_at ? ' le ' + new Date(payment.payout_at).toLocaleDateString('fr-CI') : ''}`
+                  : 'En attente'}
+              </span>
+            </div>
+            {paidOut && payment.payout_method && (
+              <div className="text-xs mt-1" style={{ color: '#b8a898' }}>
+                via {payment.payout_method}{payment.payout_ref ? ` · réf ${payment.payout_ref}` : ''}
+              </div>
+            )}
+          </div>
         )}
       </div>
     );
@@ -87,15 +114,28 @@ export default function PaymentButton({ contractId, amount, myRole }: Props) {
 
   // Organisateur
   if (payment?.status === 'completed') {
+    const { commission, net } = breakdown(payment);
     return (
-      <div className="px-4 py-3 rounded-xl text-sm text-center flex items-center justify-center gap-2"
-        style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', color: '#10b981' }}>
-        <CheckCircle2 size={16} /> Paiement effectué — {formatCFA(payment.amount)}
-        {payment.paid_at && (
-          <span className="block text-xs mt-1" style={{ color: '#b8a898' }}>
-            le {new Date(payment.paid_at).toLocaleDateString('fr-CI')}
-          </span>
-        )}
+      <div className="space-y-2">
+        <div className="px-4 py-3 rounded-xl text-sm text-center flex items-center justify-center gap-2"
+          style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', color: '#10b981' }}>
+          <CheckCircle2 size={16} /> Paiement effectué — {formatCFA(payment.amount)}
+          {payment.paid_at && (
+            <span className="block text-xs mt-1" style={{ color: '#b8a898' }}>
+              le {new Date(payment.paid_at).toLocaleDateString('fr-CI')}
+            </span>
+          )}
+        </div>
+        <div className="px-4 py-2.5 rounded-xl text-xs" style={{ background: 'rgba(82,54,124,0.3)' }}>
+          <div className="flex justify-between">
+            <span style={{ color: '#b8a898' }}>Commission plateforme</span>
+            <span style={{ color: '#f0e6d3' }}>{formatCFA(commission)}</span>
+          </div>
+          <div className="flex justify-between mt-0.5">
+            <span style={{ color: '#b8a898' }}>Net reversé au freelance</span>
+            <span style={{ color: '#f0e6d3' }}>{formatCFA(net)}</span>
+          </div>
+        </div>
       </div>
     );
   }

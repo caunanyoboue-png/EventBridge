@@ -19,9 +19,20 @@ export interface Payment {
   payment_url?: string;
   status: CinetPayStatus;
   paid_at?: string;
+  // Commission plateforme + versement freelance
+  commission_amount?: number;
+  net_amount?: number;            // montant net dû au freelance (amount - commission)
+  payout_status?: PayoutStatus;
+  payout_at?: string;
+  payout_method?: string;         // ex : Wave, Orange Money, MTN MoMo
+  payout_ref?: string;            // référence de la transaction de versement
   created_at: string;
   updated_at: string;
+  // jointures éventuelles
+  payee?: Profile;
+  payer?: Profile;
 }
+export type PayoutStatus = 'pending' | 'paid';
 export type PaymentMethod = 'orange_money' | 'mtn_momo' | 'wave' | 'cash';
 export type DisputeStatus = 'open' | 'investigating' | 'resolved' | 'closed';
 export type SosStatus = 'active' | 'completed' | 'expired' | 'cancelled';
