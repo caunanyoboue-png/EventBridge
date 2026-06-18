@@ -81,6 +81,10 @@ function ProtectedRoute({ children, role }: { children: ReactNode; role?: string
 function AppRoutes() {
   const location = useLocation();
   const reduceMotion = useReducedMotion();
+  // Sur mobile (Android en particulier), les couches composites de l'animation
+  // plein écran provoquent des artefacts GPU au scroll → on simplifie.
+  const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 1023px)').matches;
+  const lite = reduceMotion || isMobile;
 
   return (
     <AnimatePresence mode="wait" initial={false}>
@@ -89,10 +93,10 @@ function AppRoutes() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: reduceMotion ? 0 : 0.28, ease: 'easeOut' }}
+        transition={{ duration: lite ? 0 : 0.28, ease: 'easeOut' }}
       >
         {/* Voile doré qui balaie l'écran à chaque navigation */}
-        {!reduceMotion && (
+        {!lite && (
           <motion.div
             initial={{ x: '-110%' }}
             animate={{ x: '110%' }}

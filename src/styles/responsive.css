@@ -190,6 +190,10 @@
   .layout-main {
     margin-left: 0 !important;
     padding: 20px 16px !important;
+    /* Pas de conteneur de scroll imbriqué sur mobile : c'est le body qui scrolle.
+       (overflow:auto + 100vh imbriqués = artefacts GPU au scroll sur Android.) */
+    overflow: visible !important;
+    min-height: 0 !important;
   }
   .layout-topbar {
     display: flex !important;
