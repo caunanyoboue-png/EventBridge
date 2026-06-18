@@ -63,8 +63,12 @@ export default function PaymentButton({ contractId, amount, myRole }: Props) {
       const url = await initiateContractPayment(contractId);
       window.location.href = url;
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Erreur paiement';
-      toast.error(msg);
+      const raw = err instanceof Error ? err.message : 'Erreur paiement';
+      // Échec réseau pur (souvent : Edge Function non déployée / injoignable)
+      const friendly = /failed to fetch|networkerror|load failed|fetch/i.test(raw)
+        ? 'Service de paiement indisponible pour le moment. Réessayez plus tard.'
+        : raw;
+      toast.error(friendly);
       setPaying(false);
     }
   }
