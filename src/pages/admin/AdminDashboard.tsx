@@ -35,7 +35,7 @@ export default function AdminDashboard() {
       supabase.from('profiles').select('*', { count: 'exact', head: true }),
       supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'freelance'),
       supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'organisateur'),
-      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'freelance').eq('status', 'pending'),
+      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'freelance').eq('kyc_status', 'pending'),
       supabase.from('missions').select('*', { count: 'exact', head: true }),
       supabase.from('missions').select('*', { count: 'exact', head: true }).eq('status', 'open'),
       supabase.from('missions').select('*', { count: 'exact', head: true }).eq('status', 'completed'),

@@ -1,5 +1,6 @@
 export type UserRole = 'freelance' | 'organisateur' | 'admin';
 export type UserStatus = 'pending' | 'active' | 'suspended' | 'banned';
+export type KycStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
 export type MissionStatus = 'draft' | 'open' | 'in_progress' | 'completed' | 'cancelled' | 'disputed';
 export type ApplicationStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn';
 export type PaymentStatus = 'pending' | 'escrow' | 'released' | 'refunded' | 'failed';
@@ -44,6 +45,12 @@ export interface Profile {
   phone?: string;
   role: UserRole;
   status: UserStatus;
+  // Vérification d'identité (KYC) — RG3/RG11
+  kyc_status?: KycStatus;
+  kyc_document_path?: string;
+  kyc_rejection_reason?: string;
+  kyc_submitted_at?: string;
+  kyc_reviewed_at?: string;
   avatar_url?: string;
   bio?: string;
   ville?: string;
