@@ -64,6 +64,7 @@ export interface Profile {
   total_missions?: number;
   total_reviews?: number;
   is_certified?: boolean;
+  is_super_admin?: boolean;
   is_available?: boolean;
   company_name?: string;
   company_sector?: string;
