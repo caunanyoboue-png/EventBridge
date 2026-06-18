@@ -117,19 +117,34 @@ export default function ContractNegotiationView({ contract: initialContract, myR
   }
 
   async function handleSign() {
+    if (busy) return;
     setBusy(true);
     try {
       await signContract(contract.id, myRole, myId);
-      toast.success('Signature apposée !');
-      if (contract.organizer_signed_at || contract.freelance_signed_at) {
-        // Les deux ont signé → générer PDF
+
+      // Mise à jour optimiste de l'état local (sinon l'UI reste figée).
+      const now = new Date().toISOString();
+      const signedField = myRole === 'organizer' ? 'organizer_signed_at' : 'freelance_signed_at';
+      const otherSigned = myRole === 'organizer' ? contract.freelance_signed_at : contract.organizer_signed_at;
+      const bothSigned = !!otherSigned;
+      const updated: Contract = {
+        ...contract,
+        [signedField]: now,
+        ...(bothSigned ? { status: 'signed' as const } : {}),
+      };
+      setContract(updated); onUpdate(updated);
+      toast.success(bothSigned ? 'Contrat signé par les deux parties !' : 'Signature apposée !');
+
+      // PDF : best-effort. Ne doit JAMAIS bloquer ni alarmer : le contrat est signé,
+      // le PDF reste régénérable à tout moment depuis les données du contrat.
+      if (bothSigned) {
         setGenPdf(true);
         try {
-          const url = await generateContractPDF(contract);
+          const url = await generateContractPDF(updated);
           await updateContractPdfUrl(contract.id, url);
-          toast.success('PDF du contrat généré !');
-        } catch { toast.error('Erreur génération PDF'); }
-        finally { setGenPdf(false); }
+        } catch (e) {
+          console.warn('[handleSign] PDF non généré/enregistré (non bloquant):', e);
+        } finally { setGenPdf(false); }
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : (err as { message?: string })?.message ?? 'Erreur inconnue';

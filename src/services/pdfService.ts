@@ -164,7 +164,7 @@ export async function generateContractPDF(contract: Contract): Promise<string> {
   doc.text('L\'ORGANISATEUR', col1, y);
   doc.text('LE FREELANCE', col2, y);
   y += 5;
-  doc.setFont('helvetance', 'normal');
+  doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
   doc.text('Lu et approuvé', col1, y);
   doc.text('Lu et approuvé', col2, y);
