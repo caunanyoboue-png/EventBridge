@@ -209,6 +209,17 @@
   }
 }
 
+/* ─── Fix rendu mobile : le backdrop-filter empilé provoque des
+   artefacts GPU sur Android (texte fantôme / bruit au scroll).
+   Sur écrans tactiles on retire le flou et on opacifie le fond. ─── */
+@media (max-width: 1023px) {
+  .card-glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(45, 27, 78, 0.94) !important;
+  }
+}
+
 /* ─── Onboarding ─────────────────────────────────────────── */
 @media (max-width: 480px) {
   .onboarding-card { padding: 24px 18px !important; }
