@@ -125,9 +125,15 @@ CREATE POLICY "contracts_insert" ON public.contracts
 
 DROP POLICY IF EXISTS "contracts_update" ON public.contracts;
 CREATE POLICY "contracts_update" ON public.contracts
-  FOR UPDATE USING (
+  FOR UPDATE
+  USING (
     (auth.uid() = organizer_id OR auth.uid() = freelance_id)
-    AND status != 'signed'
+    AND status <> 'signed'
+  )
+  -- WITH CHECK explicite : sinon Postgres réutilise le USING et interdit
+  -- de passer le statut à 'signed' (→ signature impossible).
+  WITH CHECK (
+    auth.uid() = organizer_id OR auth.uid() = freelance_id
   );
 
 DROP POLICY IF EXISTS "contracts_delete" ON public.contracts;
