@@ -8,6 +8,7 @@ import {
 } from '../../services/contractService';
 import { generateContractPDF } from '../../services/pdfService';
 import { updateContractPdfUrl } from '../../services/contractService';
+import { supabase } from '../../lib/supabase';
 import { useContractRealtime } from '../../hooks/useContractRealtime';
 import ContractStatusBadge from './ContractStatusBadge';
 import ContractDiffViewer from './ContractDiffViewer';
@@ -140,8 +141,10 @@ export default function ContractNegotiationView({ contract: initialContract, myR
       if (bothSigned) {
         setGenPdf(true);
         try {
-          const url = await generateContractPDF(updated);
-          await updateContractPdfUrl(contract.id, url);
+          const path = await generateContractPDF(updated);
+          await updateContractPdfUrl(contract.id, path);
+          const withPdf = { ...updated, pdf_url: path };
+          setContract(withPdf); onUpdate(withPdf);
         } catch (e) {
           console.warn('[handleSign] PDF non généré/enregistré (non bloquant):', e);
         } finally { setGenPdf(false); }
@@ -151,6 +154,15 @@ export default function ContractNegotiationView({ contract: initialContract, myR
       toast.error(msg); console.error('[handleSign]', err);
     }
     finally { setBusy(false); }
+  }
+
+  // Bucket privé : on génère une URL signée temporaire à la demande.
+  async function openPdf() {
+    if (!contract.pdf_url) return;
+    const { data, error } = await supabase.storage
+      .from('contracts').createSignedUrl(contract.pdf_url, 3600);
+    if (error || !data?.signedUrl) { toast.error('PDF indisponible'); return; }
+    window.open(data.signedUrl, '_blank', 'noopener');
   }
 
   const STATUS_ACTIONS = {
@@ -168,10 +180,10 @@ export default function ContractNegotiationView({ contract: initialContract, myR
         <div className="flex items-center gap-3">
           <ContractStatusBadge status={contract.status} />
           {contract.pdf_url && (
-            <a href={contract.pdf_url} target="_blank" rel="noreferrer"
+            <button onClick={openPdf}
               className="btn-outline-gold px-3 py-1.5 rounded-lg text-xs inline-flex items-center gap-1.5">
               <FileText size={13} /> PDF
-            </a>
+            </button>
           )}
         </div>
       </div>

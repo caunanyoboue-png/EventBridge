@@ -220,6 +220,6 @@ export async function generateContractPDF(contract: Contract): Promise<string> {
   });
   if (error) throw error;
 
-  const { data } = supabase.storage.from('contracts').getPublicUrl(path);
-  return data.publicUrl;
+  // Bucket privé : on retourne le CHEMIN. L'URL signée est générée à la demande.
+  return path;
 }

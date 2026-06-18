@@ -296,8 +296,12 @@ export async function signContract(
   await notifyOtherParty(contractId, actorId, 'signed');
 }
 
-export async function updateContractPdfUrl(contractId: string, pdfUrl: string): Promise<void> {
-  const { error } = await supabase.from('contracts').update({ pdf_url: pdfUrl }).eq('id', contractId);
+export async function updateContractPdfUrl(contractId: string, pdfPath: string): Promise<void> {
+  // RPC SECURITY DEFINER : enregistre le chemin du PDF même si le contrat est
+  // verrouillé (statut 'signed'), sans affaiblir la policy contracts_update.
+  const { error } = await supabase.rpc('set_contract_pdf_url', {
+    p_contract_id: contractId, p_pdf_path: pdfPath,
+  });
   if (error) throw error;
 }
 
