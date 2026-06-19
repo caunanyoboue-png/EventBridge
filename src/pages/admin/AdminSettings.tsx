@@ -91,8 +91,30 @@ export default function AdminSettings() {
     platform_name: 'EventBridge', support_email: 'support@eventbridge.ci',
   });
   const [saving, setSaving] = useState(false);
+
+  // Charger la configuration persistée
+  useEffect(() => {
+    supabase.from('app_settings').select('*').eq('id', 1).maybeSingle().then(({ data }) => {
+      if (data) setSettings(s => ({ ...s, ...data }));
+    });
+  }, []);
+
   async function saveSettings() {
-    setSaving(true); await new Promise(r => setTimeout(r, 600)); setSaving(false);
+    setSaving(true);
+    const { error } = await supabase.from('app_settings').update({
+      commission_rate: settings.commission_rate,
+      sos_radius_km: settings.sos_radius_km,
+      sos_duration_min: settings.sos_duration_min,
+      min_hourly_rate: settings.min_hourly_rate,
+      max_hourly_rate: settings.max_hourly_rate,
+      auto_certify: settings.auto_certify,
+      require_id_verification: settings.require_id_verification,
+      platform_name: settings.platform_name,
+      support_email: settings.support_email,
+      updated_at: new Date().toISOString(),
+    }).eq('id', 1);
+    setSaving(false);
+    if (error) { toast.error('Erreur lors de la sauvegarde'); return; }
     toast.success('Paramètres sauvegardés');
   }
 

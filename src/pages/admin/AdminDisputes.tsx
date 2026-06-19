@@ -44,6 +44,12 @@ export default function AdminDisputes() {
     else { toast.success('Litige traité'); setSelected(null); setResolution(''); fetchDisputes(); }
   }
 
+  async function markInvestigating(id: string) {
+    const { error } = await supabase.from('disputes').update({ status: 'investigating' }).eq('id', id);
+    if (error) toast.error('Erreur');
+    else { toast.success('Litige marqué « en cours »'); fetchDisputes(); }
+  }
+
   const filtered = disputes.filter(d => !filterStatus || d.status === filterStatus);
 
   const statusColor: Record<string, string> = {
@@ -101,12 +107,21 @@ export default function AdminDisputes() {
                     </div>
                   )}
                 </div>
-                {d.status === 'open' && (
-                  <button onClick={() => { setSelected(d); setResolution(''); }}
-                    className="px-3 py-1.5 rounded-lg text-xs shrink-0"
-                    style={{ background: 'rgba(201,168,76,0.15)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}>
-                    Traiter
-                  </button>
+                {(d.status === 'open' || d.status === 'investigating') && (
+                  <div className="flex flex-col gap-2 shrink-0">
+                    {d.status === 'open' && (
+                      <button onClick={() => markInvestigating(d.id)}
+                        className="px-3 py-1.5 rounded-lg text-xs"
+                        style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.25)' }}>
+                        En cours
+                      </button>
+                    )}
+                    <button onClick={() => { setSelected(d); setResolution(''); }}
+                      className="px-3 py-1.5 rounded-lg text-xs"
+                      style={{ background: 'rgba(201,168,76,0.15)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}>
+                      Traiter
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
