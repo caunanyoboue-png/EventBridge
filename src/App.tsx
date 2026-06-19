@@ -86,28 +86,8 @@ function AppRoutes() {
   const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 1023px)').matches;
   const lite = reduceMotion || isMobile;
 
-  return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={location.pathname}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: lite ? 0 : 0.28, ease: 'easeOut' }}
-      >
-        {/* Voile doré qui balaie l'écran à chaque navigation */}
-        {!lite && (
-          <motion.div
-            initial={{ x: '-110%' }}
-            animate={{ x: '110%' }}
-            transition={{ duration: 0.85, ease: [0.65, 0, 0.35, 1] }}
-            style={{
-              position: 'fixed', inset: 0, zIndex: 9999, pointerEvents: 'none',
-              background: 'linear-gradient(105deg, transparent 32%, rgba(232,201,122,0.13) 46%, rgba(245,230,196,0.22) 50%, rgba(232,201,122,0.13) 54%, transparent 68%)',
-            }}
-          />
-        )}
-        <Routes location={location}>
+  const content = (
+    <Routes location={location}>
       <Route path="/" element={<Landing />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/pour-les-freelances" element={<FreelancePage />} />
@@ -140,7 +120,33 @@ function AppRoutes() {
       <Route path="/admin/AdminSettings" element={<ProtectedRoute role="admin"><AdminSettings /></ProtectedRoute>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+    </Routes>
+  );
+
+  // Mobile / mouvement réduit : aucune enveloppe animée. Les couches composites
+  // plein écran de framer-motion provoquent des artefacts GPU au scroll sur Android.
+  if (lite) return content;
+
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.28, ease: 'easeOut' }}
+      >
+        {/* Voile doré qui balaie l'écran à chaque navigation */}
+        <motion.div
+          initial={{ x: '-110%' }}
+          animate={{ x: '110%' }}
+          transition={{ duration: 0.85, ease: [0.65, 0, 0.35, 1] }}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999, pointerEvents: 'none',
+            background: 'linear-gradient(105deg, transparent 32%, rgba(232,201,122,0.13) 46%, rgba(245,230,196,0.22) 50%, rgba(232,201,122,0.13) 54%, transparent 68%)',
+          }}
+        />
+        {content}
       </motion.div>
     </AnimatePresence>
   );
