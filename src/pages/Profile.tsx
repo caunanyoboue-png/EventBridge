@@ -4,6 +4,7 @@ import {
   Phone, CheckCircle2, Star, GraduationCap, Banknote, Trophy, type LucideIcon,
 } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
+import KycCard from '../components/KycCard';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { COMPETENCES, VILLES, formatCFA } from '../lib/utils';
@@ -336,6 +337,9 @@ export default function Profile() {
             )}
           </p>
         </div>
+
+        {/* Certification (KYC) — freelance */}
+        {isFreelance && <KycCard alwaysShow />}
 
         {/* ── TWO-COLUMN LAYOUT ────────────────────────────── */}
         <div className="profile-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 20, alignItems: 'flex-start' }}>

@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 
 // Carte de certification (KYC) — facultative : fournir sa pièce donne le badge
 // « Certifié » (plus de confiance / visibilité), sans bloquer l'accès aux missions.
-export default function KycCard() {
+export default function KycCard({ alwaysShow = false }: { alwaysShow?: boolean }) {
   const { profile, updateProfile } = useAuth();
   const rectoRef = useRef<HTMLInputElement>(null);
   const versoRef = useRef<HTMLInputElement>(null);
@@ -16,7 +16,25 @@ export default function KycCard() {
 
   if (!profile || profile.role !== 'freelance') return null;
   const status = profile.kyc_status || 'unverified';
-  if (status === 'verified') return null; // déjà certifié → rien à afficher
+
+  // Déjà certifié : caché par défaut (ex. dashboard), confirmation sur le profil.
+  if (status === 'verified') {
+    if (!alwaysShow) return null;
+    return (
+      <div style={{
+        background: 'rgba(0,200,150,0.1)', border: '1px solid rgba(0,200,150,0.3)', borderRadius: 14,
+        padding: '16px 18px', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 14,
+      }}>
+        <div style={{ width: 42, height: 42, borderRadius: 11, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,200,150,0.18)' }}>
+          <BadgeCheck size={22} color="#00C896" />
+        </div>
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#f0e6d3' }}>Profil certifié ✓</div>
+          <div style={{ fontSize: 12.5, color: '#b8a898', marginTop: 2 }}>Votre identité a été vérifiée. Le badge Certifié est visible par les organisateurs.</div>
+        </div>
+      </div>
+    );
+  }
 
   async function uploadOne(file: File, side: 'recto' | 'verso'): Promise<string> {
     const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
