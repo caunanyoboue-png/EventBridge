@@ -77,6 +77,7 @@ export default function AdminProfiles() {
 
   async function reviewKyc(p: Profile, decision: 'verified' | 'rejected', reason?: string) {
     const patch: Record<string, unknown> = { kyc_status: decision, kyc_reviewed_at: new Date().toISOString() };
+    if (decision === 'verified') patch.status = 'active';            // RG3 : vérifié = activé
     if (decision === 'rejected') patch.kyc_rejection_reason = reason?.trim() || null;
     const { error } = await supabase.from('profiles').update(patch).eq('id', p.id);
     if (error) { toast.error('Erreur lors de la décision'); return; }
@@ -210,23 +211,27 @@ export default function AdminProfiles() {
                           </button>
                         </>
                       )}
-                      {/* Compte */}
-                      {p.status !== 'active' && (
-                        <button onClick={() => updateStatus(p.id, 'active')}
-                          className="px-2 py-1 rounded text-xs" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
-                          Activer
-                        </button>
+                      {/* Compte (les administrateurs se gèrent dans Paramètres, pas ici) */}
+                      {p.role !== 'admin' && (
+                        <>
+                          {p.status !== 'active' && (
+                            <button onClick={() => updateStatus(p.id, 'active')}
+                              className="px-2 py-1 rounded text-xs" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
+                              Activer
+                            </button>
+                          )}
+                          {p.status === 'active' && (
+                            <button onClick={() => updateStatus(p.id, 'suspended')}
+                              className="px-2 py-1 rounded text-xs" style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b' }}>
+                              Suspendre
+                            </button>
+                          )}
+                          <button onClick={() => certifier(p.id, !p.is_certified)}
+                            className="px-2 py-1 rounded text-xs" style={{ background: 'rgba(201,168,76,0.15)', color: '#d4af37' }}>
+                            {p.is_certified ? 'Décertifier' : 'Certifier'}
+                          </button>
+                        </>
                       )}
-                      {p.status === 'active' && (
-                        <button onClick={() => updateStatus(p.id, 'suspended')}
-                          className="px-2 py-1 rounded text-xs" style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b' }}>
-                          Suspendre
-                        </button>
-                      )}
-                      <button onClick={() => certifier(p.id, !p.is_certified)}
-                        className="px-2 py-1 rounded text-xs" style={{ background: 'rgba(201,168,76,0.15)', color: '#d4af37' }}>
-                        {p.is_certified ? 'Décertifier' : 'Certifier'}
-                      </button>
                     </div>
                   </td>
                 </tr>
