@@ -174,7 +174,6 @@ function OrgView() {
         .select('id, latitude, longitude')
         .eq('role', 'freelance')
         .eq('is_available', true)
-        .eq('kyc_status', 'verified') // RG11 : seuls les vérifiés sont matchés
         .overlaps('skills', form.service_types)
         .neq('id', profile.id)
         .not('latitude', 'is', null)

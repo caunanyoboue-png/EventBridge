@@ -1,51 +1,79 @@
 import { useRef, useState } from 'react';
-import { ShieldAlert, Clock, Upload, XCircle, type LucideIcon } from 'lucide-react';
+import { BadgeCheck, Clock, Upload, XCircle, Check, type LucideIcon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 
-// Carte de vérification d'identité (KYC) — visible pour le freelance.
-// Sert à la fois de rappel (RG3/RG11) et de point d'upload de la pièce.
+// Carte de certification (KYC) — facultative : fournir sa pièce donne le badge
+// « Certifié » (plus de confiance / visibilité), sans bloquer l'accès aux missions.
 export default function KycCard() {
   const { profile, updateProfile } = useAuth();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const rectoRef = useRef<HTMLInputElement>(null);
+  const versoRef = useRef<HTMLInputElement>(null);
+  const [recto, setRecto] = useState<File | null>(null);
+  const [verso, setVerso] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
 
   if (!profile || profile.role !== 'freelance') return null;
   const status = profile.kyc_status || 'unverified';
-  if (status === 'verified') return null; // rien à afficher si déjà vérifié
+  if (status === 'verified') return null; // déjà certifié → rien à afficher
 
-  async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file || !profile) return;
-    if (file.size > 8 * 1024 * 1024) { toast.error('Fichier trop lourd (max 8 Mo).'); return; }
+  async function uploadOne(file: File, side: 'recto' | 'verso'): Promise<string> {
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+    const path = `${profile!.id}/cni_${side}_${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('kyc').upload(path, file, { upsert: true, contentType: file.type });
+    if (error) throw error;
+    return path;
+  }
+
+  async function submit() {
+    if (!recto || !verso || !profile) { toast.error('Ajoutez le recto ET le verso de votre pièce.'); return; }
+    if (recto.size > 8 * 1024 * 1024 || verso.size > 8 * 1024 * 1024) { toast.error('Chaque image doit faire moins de 8 Mo.'); return; }
     setBusy(true);
     try {
-      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-      const path = `${profile.id}/cni_${Date.now()}.${ext}`;
-      const { error } = await supabase.storage.from('kyc').upload(path, file, { upsert: true, contentType: file.type });
-      if (error) throw error;
-      await updateProfile({ kyc_document_path: path, kyc_status: 'pending', kyc_submitted_at: new Date().toISOString() });
+      const rectoPath = await uploadOne(recto, 'recto');
+      const versoPath = await uploadOne(verso, 'verso');
+      await updateProfile({
+        kyc_document_path: rectoPath, kyc_document_back_path: versoPath,
+        kyc_status: 'pending', kyc_submitted_at: new Date().toISOString(),
+      });
       toast.success('Pièce envoyée — en attente de vérification.');
-    } catch {
-      toast.error('Échec de l\'envoi. Réessayez.');
+      setRecto(null); setVerso(null);
+    } catch (e) {
+      const msg = (e as { message?: string })?.message || 'Échec de l\'envoi';
+      console.error('[KYC upload]', e);
+      toast.error(`Échec : ${msg}`);
     } finally {
       setBusy(false);
-      if (inputRef.current) inputRef.current.value = '';
+      if (rectoRef.current) rectoRef.current.value = '';
+      if (versoRef.current) versoRef.current.value = '';
     }
   }
 
   const theme: { bg: string; bd: string; col: string; Icon: LucideIcon; title: string; msg: string } =
     status === 'pending'
       ? { bg: 'rgba(59,130,246,0.1)', bd: 'rgba(59,130,246,0.3)', col: '#3b82f6', Icon: Clock,
-          title: 'Vérification en cours', msg: 'Votre pièce a bien été envoyée. Un administrateur la vérifie sous peu.' }
+          title: 'Certification en cours', msg: 'Vos pièces (recto + verso) ont bien été envoyées. Un administrateur les vérifie sous peu.' }
       : status === 'rejected'
       ? { bg: 'rgba(239,68,68,0.1)', bd: 'rgba(239,68,68,0.3)', col: '#ef4444', Icon: XCircle,
-          title: 'Pièce refusée', msg: profile.kyc_rejection_reason || 'Votre pièce a été refusée. Merci d\'en envoyer une nouvelle.' }
-      : { bg: 'rgba(245,158,11,0.1)', bd: 'rgba(245,158,11,0.3)', col: '#F59E0B', Icon: ShieldAlert,
-          title: 'Vérifiez votre identité', msg: 'Pour recevoir des missions et apparaître auprès des organisateurs, envoyez une pièce d\'identité (CNI ou passeport).' };
+          title: 'Pièce refusée', msg: profile.kyc_rejection_reason || 'Vos pièces ont été refusées. Merci d\'en renvoyer de nouvelles (recto + verso, bien lisibles).' }
+      : { bg: 'rgba(212,175,55,0.1)', bd: 'rgba(212,175,55,0.3)', col: '#d4af37', Icon: BadgeCheck,
+          title: 'Obtenez votre badge Certifié', msg: 'Facultatif, mais ça rassure les organisateurs et booste votre visibilité. Envoyez le recto ET le verso de votre pièce (CNI ou passeport).' };
 
   const canUpload = status === 'unverified' || status === 'rejected';
+
+  const pick = (file: File | null, label: string, ref: { current: HTMLInputElement | null }) => (
+    <button type="button" onClick={() => ref.current?.click()}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 13px', borderRadius: 10, fontSize: 12.5, fontWeight: 600,
+        cursor: 'pointer',
+        background: file ? 'rgba(0,200,150,0.14)' : 'rgba(82,54,124,0.5)',
+        border: `1px solid ${file ? 'rgba(0,200,150,0.4)' : 'rgba(201,168,76,0.25)'}`,
+        color: file ? '#00C896' : '#f0e6d3',
+      }}>
+      {file ? <Check size={14} /> : <Upload size={14} />} {label}{file ? ' ✓' : ''}
+    </button>
+  );
 
   return (
     <div style={{
@@ -60,17 +88,22 @@ export default function KycCard() {
         <div style={{ fontSize: 12.5, color: '#b8a898', marginTop: 2 }}>{theme.msg}</div>
       </div>
       {canUpload && (
-        <>
-          <input ref={inputRef} type="file" accept="image/*,application/pdf" onChange={onFile} style={{ display: 'none' }} />
-          <button onClick={() => inputRef.current?.click()} disabled={busy}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <input ref={rectoRef} type="file" accept="image/*,application/pdf" style={{ display: 'none' }}
+            onChange={e => setRecto(e.target.files?.[0] ?? null)} />
+          <input ref={versoRef} type="file" accept="image/*,application/pdf" style={{ display: 'none' }}
+            onChange={e => setVerso(e.target.files?.[0] ?? null)} />
+          {pick(recto, 'Recto', rectoRef)}
+          {pick(verso, 'Verso', versoRef)}
+          <button type="button" onClick={submit} disabled={busy || !recto || !verso}
             style={{
-              flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 10,
+              display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 16px', borderRadius: 10,
               background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642', fontSize: 13, fontWeight: 700,
-              border: 'none', cursor: busy ? 'wait' : 'pointer', opacity: busy ? 0.7 : 1,
+              border: 'none', cursor: busy || !recto || !verso ? 'not-allowed' : 'pointer', opacity: busy || !recto || !verso ? 0.55 : 1,
             }}>
-            <Upload size={15} /> {busy ? 'Envoi…' : status === 'rejected' ? 'Renvoyer ma pièce' : 'Envoyer ma pièce'}
+            {busy ? 'Envoi…' : 'Envoyer'}
           </button>
-        </>
+        </div>
       )}
     </div>
   );

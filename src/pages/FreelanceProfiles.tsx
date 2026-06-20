@@ -21,7 +21,6 @@ export default function FreelanceProfiles() {
   async function fetchProfiles() {
     const { data } = await supabase.from('profiles')
       .select('*').eq('role', 'freelance').eq('status', 'active')
-      .eq('kyc_status', 'verified') // RG11 : seuls les freelances vérifiés sont visibles
       .order('avg_rating', { ascending: false });
     setProfiles(data || []);
     setLoading(false);

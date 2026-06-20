@@ -7,7 +7,7 @@ import { getInitials } from '../../lib/utils';
 import toast from 'react-hot-toast';
 
 const kycColor: Record<string, string> = { verified: '#00C896', pending: '#F59E0B', rejected: '#EF4444', unverified: '#7a6a7a' };
-const kycLabel: Record<string, string> = { verified: 'Vérifié', pending: 'À valider', rejected: 'Rejeté', unverified: 'Non vérifié' };
+const kycLabel: Record<string, string> = { verified: 'Certifié', pending: 'À valider', rejected: 'Refusé', unverified: 'Non certifié' };
 
 function RejectModal({ name, onClose, onConfirm }: {
   name: string; onClose: () => void; onConfirm: (reason: string) => Promise<void>;
@@ -76,8 +76,11 @@ export default function AdminProfiles() {
   }
 
   async function reviewKyc(p: Profile, decision: 'verified' | 'rejected', reason?: string) {
-    const patch: Record<string, unknown> = { kyc_status: decision, kyc_reviewed_at: new Date().toISOString() };
-    if (decision === 'verified') patch.status = 'active';            // RG3 : vérifié = activé
+    const patch: Record<string, unknown> = {
+      kyc_status: decision,
+      kyc_reviewed_at: new Date().toISOString(),
+      is_certified: decision === 'verified',   // valider la pièce = donner le badge Certifié
+    };
     if (decision === 'rejected') patch.kyc_rejection_reason = reason?.trim() || null;
     const { error } = await supabase.from('profiles').update(patch).eq('id', p.id);
     if (error) { toast.error('Erreur lors de la décision'); return; }
@@ -192,11 +195,17 @@ export default function AdminProfiles() {
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex gap-2 flex-wrap">
-                      {/* KYC : revue de la pièce */}
-                      {p.role === 'freelance' && (p.kyc_status === 'pending' || p.kyc_document_path) && (
+                      {/* KYC : revue des pièces (recto / verso) */}
+                      {p.role === 'freelance' && p.kyc_document_path && (
                         <button onClick={() => viewKyc(p.kyc_document_path)}
                           className="px-2 py-1 rounded text-xs inline-flex items-center gap-1" style={{ background: 'rgba(59,130,246,0.15)', color: '#3b82f6' }}>
-                          <FileText size={12} /> Pièce
+                          <FileText size={12} /> Recto
+                        </button>
+                      )}
+                      {p.role === 'freelance' && p.kyc_document_back_path && (
+                        <button onClick={() => viewKyc(p.kyc_document_back_path)}
+                          className="px-2 py-1 rounded text-xs inline-flex items-center gap-1" style={{ background: 'rgba(59,130,246,0.15)', color: '#3b82f6' }}>
+                          <FileText size={12} /> Verso
                         </button>
                       )}
                       {p.role === 'freelance' && p.kyc_status === 'pending' && (

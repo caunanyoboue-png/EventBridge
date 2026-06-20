@@ -47,7 +47,8 @@ export interface Profile {
   status: UserStatus;
   // Vérification d'identité (KYC) — RG3/RG11
   kyc_status?: KycStatus;
-  kyc_document_path?: string;
+  kyc_document_path?: string;        // recto
+  kyc_document_back_path?: string;   // verso
   kyc_rejection_reason?: string;
   kyc_submitted_at?: string;
   kyc_reviewed_at?: string;
