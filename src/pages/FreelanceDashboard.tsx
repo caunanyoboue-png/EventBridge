@@ -7,6 +7,7 @@ import {
   Menu, X, MapPin, Wallet, ArrowRight, Sparkles, UserCheck,
 } from 'lucide-react';
 import SosAlertBanner from '../components/SosAlertBanner';
+import KycCard from '../components/KycCard';
 import Logo from '../components/Logo';
 import { ServiceIcon } from '../lib/serviceIcons';
 import { useAuth } from '../contexts/AuthContext';
@@ -385,6 +386,9 @@ export default function FreelanceDashboard() {
 
         {/* Content */}
         <div className="eb-content-pad" style={{ padding: '24px 32px', flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+
+          {/* Vérification d'identité (KYC) */}
+          <KycCard />
 
           {/* Incomplete profile banner */}
           {profileIncomplete && (
