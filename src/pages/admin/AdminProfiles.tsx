@@ -63,9 +63,14 @@ export default function AdminProfiles() {
   }
 
   async function setCertif(id: string, level: CertificationLevel) {
-    const { error } = await supabase.from('profiles')
-      .update({ certification_level: level, is_certified: level !== 'none' }).eq('id', id);
-    if (error) { toast.error('Erreur'); return; }
+    const { data, error } = await supabase.from('profiles')
+      .update({ certification_level: level, is_certified: level !== 'none' })
+      .eq('id', id).select('id');
+    if (error) { console.error('[setCertif]', error); toast.error(`Erreur : ${error.message}`); return; }
+    if (!data || data.length === 0) {
+      toast.error('Action bloquée (droit admin manquant). Exécute supabase_migration_admin_profiles_update.sql.');
+      return;
+    }
     toast.success(level === 'none' ? 'Certification retirée' : `Certifié (${level === 'blue' ? 'bleu / premium' : 'gris'})`);
     fetchProfiles();
   }
