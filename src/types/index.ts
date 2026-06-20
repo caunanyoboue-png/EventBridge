@@ -1,6 +1,7 @@
 export type UserRole = 'freelance' | 'organisateur' | 'admin';
 export type UserStatus = 'pending' | 'active' | 'suspended' | 'banned';
 export type KycStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
+export type CertificationLevel = 'none' | 'grey' | 'blue';
 export type MissionStatus = 'draft' | 'open' | 'in_progress' | 'completed' | 'cancelled' | 'disputed';
 export type ApplicationStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn';
 export type PaymentStatus = 'pending' | 'escrow' | 'released' | 'refunded' | 'failed';
@@ -65,6 +66,7 @@ export interface Profile {
   total_missions?: number;
   total_reviews?: number;
   is_certified?: boolean;
+  certification_level?: CertificationLevel;
   is_super_admin?: boolean;
   is_available?: boolean;
   company_name?: string;

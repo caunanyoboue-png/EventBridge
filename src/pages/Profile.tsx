@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import KycCard from '../components/KycCard';
+import CertifiedBadge from '../components/CertifiedBadge';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { COMPETENCES, VILLES, formatCFA } from '../lib/utils';
@@ -301,14 +302,7 @@ export default function Profile() {
               border: `1px solid ${isFreelance ? 'rgba(201,168,76,0.3)' : 'rgba(96,165,250,0.3)'}` }}>
               {isFreelance ? 'FREELANCE' : 'ORGANISATEUR'}
             </span>
-            {profile.is_certified && (
-              <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 999,
-                background: 'rgba(16,185,129,0.1)', color: '#10b981',
-                border: '1px solid rgba(16,185,129,0.25)', letterSpacing: '0.08em',
-                display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                <Check size={11} /> CERTIFIÉ
-              </span>
-            )}
+            <CertifiedBadge level={profile.certification_level} size="md" />
             {isFreelance && (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11,
                 fontWeight: 600, padding: '3px 9px', borderRadius: 999,

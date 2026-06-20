@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Users, Star, Check, MapPin } from 'lucide-react';
+import { Users, Star, MapPin } from 'lucide-react';
 import { type Profile } from '../types';
 import { formatCFA, getInitials, COMPETENCES } from '../lib/utils';
 import { distanceKm, formatDistance } from '../lib/geo';
+import CertifiedBadge from '../components/CertifiedBadge';
 
 export default function FreelanceProfiles() {
   const { profile: me } = useAuth();
@@ -115,11 +116,7 @@ function FreelanceCard({ profile: p, userLat, userLng }: {
             <span className="text-xs ml-1" style={{ color: '#b8a898' }}>{p.avg_rating?.toFixed(1) || '–'} ({p.total_reviews || 0})</span>
           </div>
         </div>
-        {p.is_certified && (
-          <span className="ml-auto text-xs px-2 py-0.5 rounded-full inline-flex items-center gap-1" style={{ background: 'rgba(201,168,76,0.15)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.3)' }}>
-            <Check size={11} /> Certifié
-          </span>
-        )}
+        <div className="ml-auto"><CertifiedBadge level={p.certification_level} /></div>
       </div>
 
       {/* Compétences */}

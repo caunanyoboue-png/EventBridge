@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { supabase } from '../../lib/supabase';
-import { Users, Star, Check, ShieldCheck, FileText } from 'lucide-react';
-import { type Profile, type UserStatus } from '../../types';
+import { Users, Star, ShieldCheck, FileText, Eye } from 'lucide-react';
+import { type Profile, type UserStatus, type CertificationLevel } from '../../types';
 import { getInitials } from '../../lib/utils';
+import CertifiedBadge from '../../components/CertifiedBadge';
 import toast from 'react-hot-toast';
 
-const kycColor: Record<string, string> = { verified: '#00C896', pending: '#F59E0B', rejected: '#EF4444', unverified: '#7a6a7a' };
-const kycLabel: Record<string, string> = { verified: 'Certifié', pending: 'À valider', rejected: 'Refusé', unverified: 'Non certifié' };
 
 function RejectModal({ name, onClose, onConfirm }: {
   name: string; onClose: () => void; onConfirm: (reason: string) => Promise<void>;
@@ -46,6 +46,7 @@ export default function AdminProfiles() {
   const [filterRole, setFilterRole] = useState('');
   const [kycOnly, setKycOnly] = useState(false);
   const [rejectTarget, setRejectTarget] = useState<Profile | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => { fetchProfiles(); }, []);
 
@@ -61,9 +62,11 @@ export default function AdminProfiles() {
     else { toast.success('Statut mis à jour'); fetchProfiles(); }
   }
 
-  async function certifier(id: string, val: boolean) {
-    await supabase.from('profiles').update({ is_certified: val }).eq('id', id);
-    toast.success(val ? 'Profil certifié !' : 'Certification retirée');
+  async function setCertif(id: string, level: CertificationLevel) {
+    const { error } = await supabase.from('profiles')
+      .update({ certification_level: level, is_certified: level !== 'none' }).eq('id', id);
+    if (error) { toast.error('Erreur'); return; }
+    toast.success(level === 'none' ? 'Certification retirée' : `Certifié (${level === 'blue' ? 'bleu / premium' : 'gris'})`);
     fetchProfiles();
   }
 
@@ -79,8 +82,9 @@ export default function AdminProfiles() {
     const patch: Record<string, unknown> = {
       kyc_status: decision,
       kyc_reviewed_at: new Date().toISOString(),
-      is_certified: decision === 'verified',   // valider la pièce = donner le badge Certifié
     };
+    // Pièce d'identité validée → certification "grise" (l'admin peut passer en bleu ensuite).
+    if (decision === 'verified') { patch.certification_level = 'grey'; patch.is_certified = true; }
     if (decision === 'rejected') patch.kyc_rejection_reason = reason?.trim() || null;
     const { error } = await supabase.from('profiles').update(patch).eq('id', p.id);
     if (error) { toast.error('Erreur lors de la décision'); return; }
@@ -108,8 +112,13 @@ export default function AdminProfiles() {
     return true;
   });
 
-  const statusColor: Record<string, string> = { active: '#10b981', pending: '#f59e0b', suspended: '#ef4444', banned: '#7f1d1d' };
-  const statusLabel: Record<string, string> = { active: 'Actif', pending: 'En attente', suspended: 'Suspendu', banned: 'Banni' };
+  // Statut affiché = disponibilité réglée par le freelance ; suspendu/banni prime.
+  function availability(p: Profile): { label: string; color: string } {
+    if (p.status === 'suspended') return { label: 'Suspendu', color: '#ef4444' };
+    if (p.status === 'banned') return { label: 'Banni', color: '#7f1d1d' };
+    if (p.role === 'freelance') return p.is_available ? { label: 'Disponible', color: '#10b981' } : { label: 'Indisponible', color: '#7a6a7a' };
+    return { label: 'Actif', color: '#10b981' };
+  }
 
   return (
     <DashboardLayout>
@@ -165,7 +174,7 @@ export default function AdminProfiles() {
                         <p className="font-medium" style={{ color: '#f0e6d3' }}>{p.full_name}</p>
                         <p className="text-xs" style={{ color: '#7a6a7a' }}>{p.email}</p>
                       </div>
-                      {p.is_certified && <Check size={13} color="#d4af37" />}
+                      <CertifiedBadge level={p.certification_level} />
                     </div>
                   </td>
                   <td className="py-3 px-4">
@@ -175,18 +184,20 @@ export default function AdminProfiles() {
                     </span>
                   </td>
                   <td className="py-3 px-4">
-                    <span className="px-2 py-0.5 rounded-full text-xs"
-                      style={{ background: `${statusColor[p.status] || '#7a6a7a'}20`, color: statusColor[p.status] || '#7a6a7a' }}>
-                      {statusLabel[p.status] || p.status}
-                    </span>
+                    {(() => { const a = availability(p); return (
+                      <span className="px-2 py-0.5 rounded-full text-xs" style={{ background: `${a.color}20`, color: a.color }}>{a.label}</span>
+                    ); })()}
                   </td>
                   <td className="py-3 px-4">
-                    {p.role === 'freelance' ? (
-                      <span className="px-2 py-0.5 rounded-full text-xs"
-                        style={{ background: `${kycColor[p.kyc_status || 'unverified']}20`, color: kycColor[p.kyc_status || 'unverified'] }}>
-                        {kycLabel[p.kyc_status || 'unverified']}
-                      </span>
-                    ) : <span style={{ color: '#4a3a5a' }}>—</span>}
+                    {p.role !== 'freelance' ? (
+                      <span style={{ color: '#4a3a5a' }}>—</span>
+                    ) : p.kyc_status === 'pending' ? (
+                      <span className="px-2 py-0.5 rounded-full text-xs" style={{ background: 'rgba(245,158,11,0.2)', color: '#F59E0B' }}>À valider</span>
+                    ) : (p.certification_level && p.certification_level !== 'none') ? (
+                      <CertifiedBadge level={p.certification_level} />
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-xs" style={{ background: 'rgba(122,106,122,0.15)', color: '#7a6a7a' }}>Non certifié</span>
+                    )}
                   </td>
                   <td className="py-3 px-4" style={{ color: '#d4af37' }}>
                     {p.avg_rating
@@ -195,6 +206,12 @@ export default function AdminProfiles() {
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex gap-2 flex-wrap">
+                      {p.role !== 'admin' && (
+                        <button onClick={() => navigate(`/public-profile?id=${p.id}`)}
+                          className="px-2 py-1 rounded text-xs inline-flex items-center gap-1" style={{ background: 'rgba(201,168,76,0.12)', color: '#d4af37' }}>
+                          <Eye size={12} /> Consulter
+                        </button>
+                      )}
                       {/* KYC : revue des pièces (recto / verso) */}
                       {p.role === 'freelance' && p.kyc_document_path && (
                         <button onClick={() => viewKyc(p.kyc_document_path)}
@@ -235,10 +252,24 @@ export default function AdminProfiles() {
                               Suspendre
                             </button>
                           )}
-                          <button onClick={() => certifier(p.id, !p.is_certified)}
-                            className="px-2 py-1 rounded text-xs" style={{ background: 'rgba(201,168,76,0.15)', color: '#d4af37' }}>
-                            {p.is_certified ? 'Décertifier' : 'Certifier'}
-                          </button>
+                          {p.role === 'freelance' && (
+                            <>
+                              <button onClick={() => setCertif(p.id, 'grey')}
+                                className="px-2 py-1 rounded text-xs" style={{ background: 'rgba(156,163,175,0.18)', color: '#9ca3af', border: '1px solid rgba(156,163,175,0.4)' }}>
+                                Certif. grise
+                              </button>
+                              <button onClick={() => setCertif(p.id, 'blue')}
+                                className="px-2 py-1 rounded text-xs" style={{ background: 'rgba(59,130,246,0.15)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.4)' }}>
+                                Certif. bleue
+                              </button>
+                              {p.certification_level && p.certification_level !== 'none' && (
+                                <button onClick={() => setCertif(p.id, 'none')}
+                                  className="px-2 py-1 rounded text-xs" style={{ background: 'rgba(239,68,68,0.12)', color: '#ef4444' }}>
+                                  Retirer
+                                </button>
+                              )}
+                            </>
+                          )}
                         </>
                       )}
                     </div>

@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Mail, Pencil, Check, MapPin, Building2, Target, FileText,
+  Mail, Pencil, MapPin, Building2, Target, FileText,
   Phone, CheckCircle2, Star, GraduationCap, Banknote, Trophy, type LucideIcon,
 } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
+import CertifiedBadge from '../components/CertifiedBadge';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { getOrCreateConversation } from '../lib/messaging';
@@ -191,14 +192,7 @@ export default function PublicProfile() {
               border: `1px solid ${isFreelance ? 'rgba(201,168,76,0.3)' : 'rgba(96,165,250,0.3)'}` }}>
               {isFreelance ? 'FREELANCE' : 'ORGANISATEUR'}
             </span>
-            {viewed.is_certified && (
-              <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 999,
-                background: 'rgba(16,185,129,0.1)', color: '#10b981',
-                border: '1px solid rgba(16,185,129,0.25)', letterSpacing: '0.08em',
-                display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                <Check size={11} /> CERTIFIÉ
-              </span>
-            )}
+            <CertifiedBadge level={viewed.certification_level} size="md" />
             {isFreelance && (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11,
                 fontWeight: 600, padding: '3px 9px', borderRadius: 999,
