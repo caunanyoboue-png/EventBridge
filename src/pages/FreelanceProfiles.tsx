@@ -107,7 +107,10 @@ function FreelanceCard({ profile: p, userLat, userLng }: {
           </div>
         )}
         <div>
-          <h3 className="font-semibold" style={{ color: '#f0e6d3' }}>{p.full_name}</h3>
+          <h3 className="font-semibold flex items-center gap-1.5" style={{ color: '#f0e6d3' }}>
+            {p.full_name}
+            <CertifiedBadge level={p.certification_level} certified={p.is_certified} />
+          </h3>
           <div className="flex items-center gap-1 mt-0.5">
             {Array.from({ length: 5 }).map((_, i) => {
               const on = i < Math.round(p.avg_rating || 0);
@@ -116,7 +119,6 @@ function FreelanceCard({ profile: p, userLat, userLng }: {
             <span className="text-xs ml-1" style={{ color: '#b8a898' }}>{p.avg_rating?.toFixed(1) || '–'} ({p.total_reviews || 0})</span>
           </div>
         </div>
-        <div className="ml-auto"><CertifiedBadge level={p.certification_level} /></div>
       </div>
 
       {/* Compétences */}

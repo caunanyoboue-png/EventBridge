@@ -1,26 +1,28 @@
 import { BadgeCheck } from 'lucide-react';
 import { type CertificationLevel } from '../types';
 
-// Badge de certification : gris (standard) ou bleu (premium).
-// Rien si non certifié.
-export default function CertifiedBadge({ level, size = 'sm' }: { level?: CertificationLevel | null; size?: 'sm' | 'md' }) {
-  if (!level || level === 'none') return null;
-  const blue = level === 'blue';
+// Badge de certification — ICÔNE SEULE, juste après le nom.
+//   gris  = certifié standard (pièce d'identité)
+//   bleu  = certifié premium (pièce + documents)
+// Robuste : s'affiche aussi si is_certified=true sans niveau précis (→ gris).
+export default function CertifiedBadge({
+  level, certified, size = 'sm',
+}: { level?: CertificationLevel | null; certified?: boolean; size?: 'sm' | 'md' }) {
+  const eff: CertificationLevel = level && level !== 'none' ? level : certified ? 'grey' : 'none';
+  if (eff === 'none') return null;
+
+  const blue = eff === 'blue';
   const color = blue ? '#3b82f6' : '#9ca3af';
-  const label = blue ? 'Certifié Pro' : 'Certifié';
-  const fs = size === 'md' ? 12 : 10.5;
-  const ic = size === 'md' ? 13 : 11;
+  const px = size === 'md' ? 20 : 16;
+
   return (
-    <span
-      title={blue ? 'Certifié Premium (identité + documents)' : 'Certifié (identité vérifiée)'}
-      style={{
-        display: 'inline-flex', alignItems: 'center', gap: 4, flexShrink: 0,
-        fontSize: fs, fontWeight: 700, letterSpacing: '0.04em', whiteSpace: 'nowrap',
-        padding: size === 'md' ? '4px 10px' : '3px 8px', borderRadius: 999,
-        background: `${color}1f`, color, border: `1px solid ${color}55`,
-      }}
+    <BadgeCheck
+      size={px}
+      color={color}
+      aria-label={blue ? 'Certifié Premium' : 'Certifié'}
+      style={{ flexShrink: 0, display: 'inline-block', verticalAlign: 'middle' }}
     >
-      <BadgeCheck size={ic} /> {label}
-    </span>
+      <title>{blue ? 'Certifié Premium' : 'Certifié'}</title>
+    </BadgeCheck>
   );
 }

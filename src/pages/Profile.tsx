@@ -295,6 +295,7 @@ export default function Profile() {
             <h1 style={{ fontSize: 24, fontWeight: 800, color: '#f0e6d3', margin: 0 }}>
               {profile.full_name || 'Mon profil'}
             </h1>
+            <CertifiedBadge level={profile.certification_level} certified={profile.is_certified} size="md" />
             <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 999,
               letterSpacing: '0.08em',
               background: isFreelance ? 'rgba(201,168,76,0.12)' : 'rgba(96,165,250,0.12)',
@@ -302,7 +303,6 @@ export default function Profile() {
               border: `1px solid ${isFreelance ? 'rgba(201,168,76,0.3)' : 'rgba(96,165,250,0.3)'}` }}>
               {isFreelance ? 'FREELANCE' : 'ORGANISATEUR'}
             </span>
-            <CertifiedBadge level={profile.certification_level} size="md" />
             {isFreelance && (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11,
                 fontWeight: 600, padding: '3px 9px', borderRadius: 999,

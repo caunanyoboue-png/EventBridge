@@ -174,7 +174,7 @@ export default function AdminProfiles() {
                         <p className="font-medium" style={{ color: '#f0e6d3' }}>{p.full_name}</p>
                         <p className="text-xs" style={{ color: '#7a6a7a' }}>{p.email}</p>
                       </div>
-                      <CertifiedBadge level={p.certification_level} />
+                      <CertifiedBadge level={p.certification_level} certified={p.is_certified} />
                     </div>
                   </td>
                   <td className="py-3 px-4">
@@ -194,7 +194,7 @@ export default function AdminProfiles() {
                     ) : p.kyc_status === 'pending' ? (
                       <span className="px-2 py-0.5 rounded-full text-xs" style={{ background: 'rgba(245,158,11,0.2)', color: '#F59E0B' }}>À valider</span>
                     ) : (p.certification_level && p.certification_level !== 'none') ? (
-                      <CertifiedBadge level={p.certification_level} />
+                      <CertifiedBadge level={p.certification_level} certified={p.is_certified} />
                     ) : (
                       <span className="px-2 py-0.5 rounded-full text-xs" style={{ background: 'rgba(122,106,122,0.15)', color: '#7a6a7a' }}>Non certifié</span>
                     )}
