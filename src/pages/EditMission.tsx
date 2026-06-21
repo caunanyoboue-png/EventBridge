@@ -231,8 +231,11 @@ export default function EditMission() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Date *</label>
-                  <input type="date" className={inputClass} style={inputStyle}
+                  <input type="date" min={new Date().toISOString().slice(0, 10)} className={inputClass} style={inputStyle}
                     value={form.event_date} onChange={e => upd('event_date', e.target.value)} />
+                  {form.event_date && form.event_date < new Date().toISOString().slice(0, 10) && (
+                    <p className="text-xs mt-1" style={{ color: '#ef4444' }}>La date ne peut pas être dans le passé.</p>
+                  )}
                 </div>
                 <div>
                   <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Ville *</label>
@@ -326,7 +329,7 @@ export default function EditMission() {
               </div>
               <div className="flex gap-3">
                 <button onClick={() => setStep(0)} className="btn-outline-gold flex-1 py-3 rounded-xl">← Retour</button>
-                <button onClick={() => setStep(2)} disabled={!form.event_date || !form.start_time || !form.end_time || !form.location}
+                <button onClick={() => setStep(2)} disabled={!form.event_date || form.event_date < new Date().toISOString().slice(0, 10) || !form.start_time || !form.end_time || !form.location}
                   className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#261642]">
                   Continuer →
                 </button>

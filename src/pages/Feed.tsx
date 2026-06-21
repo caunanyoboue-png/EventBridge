@@ -466,7 +466,9 @@ export default function Feed() {
         .order('created_at', { ascending: false }).limit(60),
       supabase.from('missions')
         .select('*, organisateur:profiles!organisateur_id(id,full_name,avatar_url,role,company_name)')
-        .eq('status', 'open').order('created_at', { ascending: false }).limit(30),
+        .eq('status', 'open')
+        .gte('event_date', new Date().toISOString().slice(0, 10)) // masquer les missions dont la date est passée
+        .order('created_at', { ascending: false }).limit(30),
       supabase.from('post_likes').select('post_id').eq('user_id', profile!.id),
     ]);
     setPosts((postsRes.data || []) as Post[]);
