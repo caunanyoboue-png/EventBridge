@@ -24,6 +24,7 @@ export default function Missions() {
     const { data } = await supabase.from('missions')
       .select('*, organisateur:profiles!organisateur_id(*)')
       .eq('status', 'open')
+      .gte('event_date', new Date().toISOString().slice(0, 10)) // pas de mission dont la date est passée
       .order('created_at', { ascending: false });
     setMissions(data || []);
     setLoading(false);
