@@ -29,7 +29,7 @@ const PLANS: Plan[] = [
   },
   {
     key: 'blue', name: 'Certifié — Bleu', monthly: 4000, yearly: 40000, color: '#3b82f6', Icon: Crown, popular: true,
-    features: ['Tout le niveau Gris', 'Visibilité maximale (tout en haut)', 'Section « Top freelances »', 'Commission réduite à 8 % (au lieu de 10 %)', 'Portfolio complet mis en avant', 'Support prioritaire', 'Badge bleu « Pro »'],
+    features: ['Tout le niveau Gris', 'Visibilité maximale (tout en haut)', 'Section « Top freelances »', 'Réduction sur ta certification (renouvellement)', 'Portfolio complet mis en avant', 'Support prioritaire', 'Badge bleu « Pro »'],
   },
 ];
 
