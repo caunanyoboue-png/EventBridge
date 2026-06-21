@@ -4,6 +4,7 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchContract } from '../services/contractService';
 import ContractNegotiationView from '../components/contracts/ContractNegotiationView';
+import ContractTimeline from '../components/ContractTimeline';
 import { type Contract } from '../types';
 import toast from 'react-hot-toast';
 
@@ -50,6 +51,7 @@ export default function ContractDetail() {
             Contrat · {contract.job_title}
           </h1>
         </div>
+        <ContractTimeline contract={contract} />
         <ContractNegotiationView
           contract={contract}
           myRole={myRole}
