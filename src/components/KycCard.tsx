@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BadgeCheck, Clock, Upload, XCircle, Check, type LucideIcon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -6,8 +7,9 @@ import toast from 'react-hot-toast';
 
 // Carte de certification (KYC) — facultative : fournir sa pièce donne le badge
 // « Certifié » (plus de confiance / visibilité), sans bloquer l'accès aux missions.
-export default function KycCard({ alwaysShow = false }: { alwaysShow?: boolean }) {
+export default function KycCard({ alwaysShow = false, offersLink = true }: { alwaysShow?: boolean; offersLink?: boolean }) {
   const { profile, updateProfile } = useAuth();
+  const navigate = useNavigate();
   const rectoRef = useRef<HTMLInputElement>(null);
   const versoRef = useRef<HTMLInputElement>(null);
   const [recto, setRecto] = useState<File | null>(null);
@@ -104,6 +106,12 @@ export default function KycCard({ alwaysShow = false }: { alwaysShow?: boolean }
       <div style={{ flex: 1, minWidth: 180 }}>
         <div style={{ fontSize: 14, fontWeight: 700, color: '#f0e6d3' }}>{theme.title}</div>
         <div style={{ fontSize: 12.5, color: '#b8a898', marginTop: 2 }}>{theme.msg}</div>
+        {offersLink && canUpload && (
+          <button onClick={() => navigate('/certification')}
+            style={{ marginTop: 6, background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', color: '#d4af37', fontSize: 12, fontWeight: 700 }}>
+            Voir les offres de certification →
+          </button>
+        )}
       </div>
       {canUpload && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>

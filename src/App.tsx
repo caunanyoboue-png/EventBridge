@@ -36,6 +36,7 @@ import AdminDisputes from './pages/admin/AdminDisputes';
 import AdminReviews from './pages/admin/AdminReviews';
 import AdminPayouts from './pages/admin/AdminPayouts';
 import AdminSettings from './pages/admin/AdminSettings';
+import Certification from './pages/Certification';
 
 function ProtectedRoute({ children, role }: { children: ReactNode; role?: string }) {
   const { user, profile, loading } = useAuth();
@@ -106,6 +107,7 @@ function AppRoutes() {
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
       <Route path="/sos-brigade" element={<ProtectedRoute><SosBrigade /></ProtectedRoute>} />
+      <Route path="/certification" element={<ProtectedRoute role="freelance"><Certification /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       <Route path="/edit-mission" element={<ProtectedRoute role="organisateur"><EditMission /></ProtectedRoute>} />
       <Route path="/public-profile" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
