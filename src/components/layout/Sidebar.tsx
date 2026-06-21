@@ -114,6 +114,7 @@ const NAV_ITEMS_FREELANCE = [
   { Icon: IcoMessages,   label: 'Messages',          path: '/messages'             },
   { Icon: IcoDoc,        label: 'Mes candidatures',  path: '/my-applications'      },
   { Icon: IcoPerson,     label: 'Mon profil',        path: '/profile'              },
+  { Icon: IcoStar,       label: 'Certification',     path: '/certification'        },
   { Icon: IcoGear,       label: 'Paramètres',        path: '/settings'             },
 ];
 const NAV_ITEMS_ORG = [

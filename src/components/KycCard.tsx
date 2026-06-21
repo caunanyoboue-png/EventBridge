@@ -18,21 +18,25 @@ export default function KycCard({ alwaysShow = false, offersLink = true }: { alw
 
   if (!profile || profile.role !== 'freelance') return null;
   const status = profile.kyc_status || 'unverified';
+  const level = profile.certification_level || 'none';
 
-  // Déjà certifié : caché par défaut (ex. dashboard), confirmation sur le profil.
-  if (status === 'verified') {
+  // VRAIE certification = certification_level (gris/bleu), PAS kyc_status.
+  // (Le grandfather a posé kyc_status='verified' sans certifier → ne pas afficher "certifié".)
+  if (level !== 'none') {
     if (!alwaysShow) return null;
+    const blue = level === 'blue';
+    const col = blue ? '#3b82f6' : '#9ca3af';
     return (
       <div style={{
-        background: 'rgba(0,200,150,0.1)', border: '1px solid rgba(0,200,150,0.3)', borderRadius: 14,
+        background: `${col}1a`, border: `1px solid ${col}55`, borderRadius: 14,
         padding: '16px 18px', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 14,
       }}>
-        <div style={{ width: 42, height: 42, borderRadius: 11, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,200,150,0.18)' }}>
-          <BadgeCheck size={22} color="#00C896" />
+        <div style={{ width: 42, height: 42, borderRadius: 11, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: `${col}30` }}>
+          <BadgeCheck size={22} color={col} />
         </div>
         <div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#f0e6d3' }}>Profil certifié ✓</div>
-          <div style={{ fontSize: 12.5, color: '#b8a898', marginTop: 2 }}>Votre identité a été vérifiée. Le badge Certifié est visible par les organisateurs.</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#f0e6d3' }}>Profil certifié{blue ? ' — Pro (bleu)' : ' (gris)'} ✓</div>
+          <div style={{ fontSize: 12.5, color: '#b8a898', marginTop: 2 }}>Votre badge Certifié est visible par les organisateurs.</div>
         </div>
       </div>
     );
@@ -80,7 +84,8 @@ export default function KycCard({ alwaysShow = false, offersLink = true }: { alw
       : { bg: 'rgba(212,175,55,0.1)', bd: 'rgba(212,175,55,0.3)', col: '#d4af37', Icon: BadgeCheck,
           title: 'Obtenez votre badge Certifié', msg: 'Facultatif, mais ça rassure les organisateurs et booste votre visibilité. Envoyez le recto ET le verso de votre pièce (CNI ou passeport).' };
 
-  const canUpload = status === 'unverified' || status === 'rejected';
+  // Peut envoyer ses pièces tant qu'il n'est pas certifié et qu'aucune revue n'est en cours.
+  const canUpload = status !== 'pending';
 
   const pick = (file: File | null, label: string, ref: { current: HTMLInputElement | null }) => (
     <button type="button" onClick={() => ref.current?.click()}
