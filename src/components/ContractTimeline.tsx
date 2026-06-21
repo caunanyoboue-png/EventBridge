@@ -36,12 +36,12 @@ export default function ContractTimeline({ contract }: { contract: Contract }) {
 
   const rejected = contract.status === 'rejected' || contract.status === 'expired';
 
-  // Étape atteinte (0 = proposé fait … 4 = terminé fait)
-  let stage = 0;
-  if (['accepted_by_both', 'signed'].includes(contract.status)) stage = 1;
-  if (contract.status === 'signed') stage = 2;
-  if (paid) stage = 3;
-  if (missionDone) stage = 4;
+  // Nombre d'étapes franchies (le contrat existe → "proposé" est déjà fait).
+  let stage = 1;
+  if (['accepted_by_both', 'signed'].includes(contract.status)) stage = 2;
+  if (contract.status === 'signed') stage = 3;
+  if (paid) stage = 4;
+  if (missionDone) stage = 5;
 
   const steps: { label: string; Icon: typeof Check; hint: ReactNode }[] = [
     { label: 'Contrat proposé', Icon: FileText, hint: 'Termes soumis aux deux parties' },
@@ -70,7 +70,7 @@ export default function ContractTimeline({ contract }: { contract: Contract }) {
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
           {rejected
             ? <FileText size={17} color={COL.error} />
-            : stage >= 4
+            : stage >= 5
               ? <CheckCircle2 size={17} color={COL.success} />
               : <Loader2 size={17} color={COL.active} className="animate-spin" />}
           <span style={{ fontSize: 14, fontWeight: 700, color: '#f0e6d3', letterSpacing: '0.01em' }}>
