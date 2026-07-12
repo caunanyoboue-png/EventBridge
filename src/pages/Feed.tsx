@@ -251,30 +251,39 @@ function PostCard({ post, liked, reposted, onLike, onRepost, onToggleComment,
   const a = post.author;
   const isOrg = a.role === 'organisateur';
   const roleColor = isOrg ? '#60a5fa' : '#d4af37';
+  const rolePill: CSSProperties = {
+    display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9.5, fontWeight: 700,
+    letterSpacing: '0.04em', padding: '3px 9px', borderRadius: 999, whiteSpace: 'nowrap', flexShrink: 0,
+    background: isOrg ? 'rgba(96,165,250,0.12)' : 'rgba(201,168,76,0.12)',
+    color: roleColor, border: `1px solid ${roleColor}30`,
+  };
+  const pubPill: CSSProperties = {
+    display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9.5, fontWeight: 700,
+    letterSpacing: '0.06em', padding: '4px 9px', borderRadius: 999, whiteSpace: 'nowrap', flexShrink: 0,
+    background: 'rgba(212,175,55,0.13)', color: '#e8c97a', border: '1px solid rgba(212,175,55,0.4)',
+  };
 
   return (
-    <div className="card-glass overflow-hidden" style={{ position: 'relative' }}>
-      {/* Badge type — coin haut droit */}
-      <span style={{ position: 'absolute', top: 12, right: 12, zIndex: 2,
-        display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9.5, fontWeight: 700,
-        letterSpacing: '0.06em', padding: '4px 9px', borderRadius: 999,
-        background: 'rgba(212,175,55,0.14)', color: '#e8c97a', border: '1px solid rgba(212,175,55,0.4)' }}>
-        <PenLine size={11} /> PUBLICATION
-      </span>
-      {/* Header */}
-      <div style={{ padding: '15px 17px', display: 'flex', alignItems: 'center', gap: 11 }}>
+    <div className="card-glass overflow-hidden">
+      {/* Header — auteur · rôle · type de contenu (rangée alignée, sans chevauchement) */}
+      <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 11 }}>
         <Avatar src={a.avatar_url} name={a.full_name} size={44} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 14.5, fontWeight: 700, color: '#f0e6d3' }}>{a.full_name || 'Utilisateur'}</span>
-            <span style={{ fontSize: 9.5, fontWeight: 700, padding: '2px 8px', borderRadius: 999, letterSpacing: '0.04em',
-              background: isOrg ? 'rgba(96,165,250,0.12)' : 'rgba(201,168,76,0.12)',
-              color: roleColor, border: `1px solid ${roleColor}30` }}>
+            <span style={{ fontSize: 14.5, fontWeight: 700, color: '#f0e6d3', minWidth: 0,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {a.full_name || 'Utilisateur'}
+            </span>
+            <span style={rolePill}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: roleColor, display: 'inline-block' }} />
               {isOrg ? 'ORGANISATEUR' : 'FREELANCE'}
             </span>
           </div>
           <p style={{ fontSize: 11.5, color: '#7a6a8a', marginTop: 2 }}>{timeAgo(post.created_at)}</p>
         </div>
+        <span style={pubPill}>
+          <PenLine size={11} /> PUBLICATION
+        </span>
       </div>
 
       {/* Content */}
