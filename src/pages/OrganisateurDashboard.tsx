@@ -32,23 +32,6 @@ const sLabel: React.CSSProperties = {
   color: 'rgba(212,175,55,0.65)',
 };
 
-// ── Sparkline (micro-graphique sous les chiffres clés) ──────────────────────────
-function Sparkline({ data, color }: { data: number[]; color: string }) {
-  const w = 76, h = 22;
-  const max = Math.max(...data), min = Math.min(...data);
-  const rng = max - min || 1;
-  const pts = data.map((d, i) =>
-    `${(i / (data.length - 1)) * w},${h - ((d - min) / rng) * (h - 4) - 2}`).join(' ');
-  const last = pts.split(' ').slice(-1)[0].split(',');
-  return (
-    <svg width={w} height={h} style={{ display: 'block' }} aria-hidden="true">
-      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.6"
-        strokeLinecap="round" strokeLinejoin="round" opacity="0.9" />
-      <circle cx={last[0]} cy={last[1]} r="2.2" fill={color} />
-    </svg>
-  );
-}
-
 // ── Ligne candidature swipable (mobile : droite = accepter, gauche = refuser) ───
 function SwipeAppRow({ onAccept, onReject, disabled, children }: {
   onAccept: () => void; onReject: () => void; disabled?: boolean; children: React.ReactNode;
@@ -96,12 +79,11 @@ interface KpiProps {
   label: string;
   value: React.ReactNode;
   sub: string;
-  trend?: number[];
   hovered: boolean;
   onEnter: () => void;
   onLeave: () => void;
 }
-function KpiCard({ icon: Icon, accent, label, value, sub, trend, hovered, onEnter, onLeave }: KpiProps) {
+function KpiCard({ icon: Icon, accent, label, value, sub, hovered, onEnter, onLeave }: KpiProps) {
   return (
     <div
       onMouseEnter={onEnter}
@@ -130,7 +112,6 @@ function KpiCard({ icon: Icon, accent, label, value, sub, trend, hovered, onEnte
       </div>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 8 }}>
         <div style={{ fontSize: 26, fontWeight: 500, color: C.text, lineHeight: 1 }}>{value}</div>
-        {trend && <Sparkline data={trend} color={accent} />}
       </div>
       <p style={{ fontSize: 12.5, color: C.sec, lineHeight: 1.6, margin: 0 }}>{sub}</p>
     </div>
@@ -306,16 +287,16 @@ export default function OrganisateurDashboard() {
 
   const kpis = [
     { icon: FileText,  accent: '#3b82f6', label: 'Missions publiées',
-      value: totalMissions, trend: [3, 4, 4, 5, 6, 6, 7, 8],
+      value: totalMissions,
       sub: `${missionsOuvertes} actuellement ouverte${missionsOuvertes !== 1 ? 's' : ''}` },
     { icon: Target,    accent: '#00C896', label: 'En recrutement',
-      value: missionsOuvertes, trend: [2, 2, 3, 3, 4, 4, 5, 6],
+      value: missionsOuvertes,
       sub: totalMissions > 0 ? `${Math.round(missionsOuvertes / totalMissions * 100)}% du total` : 'Aucune mission' },
     { icon: Users,     accent: C.gold,   label: 'Candidatures',
-      value: candidaturesRecues, trend: [1, 2, 2, 3, 4, 5, 6, 7],
+      value: candidaturesRecues,
       sub: `${pendingApps.length} en attente de réponse` },
     { icon: Briefcase, accent: '#8b5cf6', label: 'Budget engagé',
-      value: budgetEngage > 0 ? formatCFA(budgetEngage) : '—', trend: [2, 3, 3, 4, 4, 5, 6, 7],
+      value: budgetEngage > 0 ? formatCFA(budgetEngage) : '—',
       sub: `${allApps.filter(a => a.status === 'accepted').length} freelance${allApps.filter(a => a.status === 'accepted').length !== 1 ? 's' : ''} confirmé${allApps.filter(a => a.status === 'accepted').length !== 1 ? 's' : ''}` },
   ];
 
@@ -391,7 +372,7 @@ export default function OrganisateurDashboard() {
             {kpis.map((k, i) => (
               <KpiCard key={i}
                 icon={k.icon} accent={k.accent}
-                label={k.label} value={k.value} sub={k.sub} trend={k.trend}
+                label={k.label} value={k.value} sub={k.sub}
                 hovered={hovKpi === i}
                 onEnter={() => setHovKpi(i)}
                 onLeave={() => setHovKpi(null)} />

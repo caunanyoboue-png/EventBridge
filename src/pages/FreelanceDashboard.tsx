@@ -26,24 +26,8 @@ const C = {
 } as const;
 
 // ─── KPI card ─────────────────────────────────────────────────────────────────
-function Sparkline({ data, color }: { data: number[]; color: string }) {
-  const w = 70, h = 20;
-  const max = Math.max(...data), min = Math.min(...data);
-  const rng = max - min || 1;
-  const pts = data.map((d, i) =>
-    `${(i / (data.length - 1)) * w},${h - ((d - min) / rng) * (h - 4) - 2}`).join(' ');
-  const last = pts.split(' ').slice(-1)[0].split(',');
-  return (
-    <svg width={w} height={h} style={{ display: 'block', marginTop: 8 }} aria-hidden="true">
-      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.6"
-        strokeLinecap="round" strokeLinejoin="round" opacity="0.9" />
-      <circle cx={last[0]} cy={last[1]} r="2.1" fill={color} />
-    </svg>
-  );
-}
-
 function KpiCard({
-  icon, iconBg, iconColor, value, label, sublabel, accent, trend,
+  icon, iconBg, iconColor, value, label, sublabel, accent,
 }: {
   icon: React.ReactNode;
   iconBg: string;
@@ -52,7 +36,6 @@ function KpiCard({
   label: string;
   sublabel: string;
   accent: string;
-  trend?: number[];
 }) {
   const [hov, setHov] = useState(false);
   return (
@@ -85,7 +68,6 @@ function KpiCard({
             {label}
           </div>
           <div style={{ fontSize: 12.5, color: C.textDim, marginTop: 4 }}>{sublabel}</div>
-          {trend && <Sparkline data={trend} color={accent} />}
         </div>
       </div>
     </div>
@@ -268,28 +250,24 @@ export default function FreelanceDashboard() {
               iconBg="rgba(201,168,76,0.12)" iconColor={C.gold}
               value={stats.total} label="Candidatures"
               sublabel="envoyées au total" accent={C.gold}
-              trend={[1, 2, 2, 3, 4, 4, 5, 6]}
             />
             <KpiCard
               icon={<CheckCircle size={18} />}
               iconBg="rgba(0,200,150,0.12)" iconColor="#00C896"
               value={stats.accepted} label="Acceptées"
               sublabel="missions décrochées" accent="#00C896"
-              trend={[0, 1, 1, 2, 2, 3, 3, 4]}
             />
             <KpiCard
               icon={<Star size={18} />}
               iconBg="rgba(251,191,36,0.12)" iconColor="#fbbf24"
               value={profile?.avg_rating ? profile.avg_rating.toFixed(1) : '—'} label="Note moyenne"
               sublabel="sur 5 étoiles" accent="#fbbf24"
-              trend={[3, 4, 4, 4, 5, 5, 5, 5]}
             />
             <KpiCard
               icon={<Award size={18} />}
               iconBg="rgba(139,92,246,0.12)" iconColor="#a78bfa"
               value={stats.completed} label="Missions réalisées"
               sublabel="avec succès" accent="#a78bfa"
-              trend={[0, 1, 1, 2, 2, 2, 3, 4]}
             />
           </div>
 
