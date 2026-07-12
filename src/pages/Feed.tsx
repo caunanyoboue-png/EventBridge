@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -360,33 +360,45 @@ function MissionFeedCard({ mission: m, isFreelance, onApply, onView }: {
   mission: FeedMission; isFreelance: boolean; onApply: () => void; onView: () => void;
 }) {
   const org = m.organisateur;
+  const pillBase: CSSProperties = {
+    display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 10, fontWeight: 700,
+    letterSpacing: '0.05em', padding: '4px 10px', borderRadius: 999, lineHeight: 1, whiteSpace: 'nowrap',
+  };
   return (
-    <div className="card-glass card-lift overflow-hidden" style={{ position: 'relative' }}>
-      {/* Badge type — coin haut droit */}
-      <span style={{ position: 'absolute', top: 12, right: 12, zIndex: 2,
-        display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9.5, fontWeight: 700,
-        letterSpacing: '0.06em', padding: '4px 9px', borderRadius: 999,
-        background: 'rgba(0,200,150,0.16)', color: '#00C896', border: '1px solid rgba(0,200,150,0.45)' }}>
-        <Briefcase size={11} /> MISSION
-      </span>
+    <div className="card-glass card-lift overflow-hidden">
+      {/* Photo du lieu (si présente) */}
       {m.venue_photo_url && (
         <div style={{ aspectRatio: '16/7', overflow: 'hidden', cursor: 'pointer' }} onClick={onView}>
           <img src={m.venue_photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
         </div>
       )}
       <div style={{ padding: 17 }}>
-        {/* Posted by */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 14 }}>
+        {/* Étiquettes — rangée homogène, identique avec ou sans photo */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 13 }}>
+          <span style={{ ...pillBase, background: 'rgba(0,200,150,0.15)', color: '#00C896', border: '1px solid rgba(0,200,150,0.42)' }}>
+            <Briefcase size={11} /> MISSION
+          </span>
+          {m.is_urgent && (
+            <span style={{ ...pillBase, background: 'rgba(239,68,68,0.15)', color: '#f87171', border: '1px solid rgba(239,68,68,0.45)' }}>
+              <Zap size={11} fill="#f87171" /> URGENT
+            </span>
+          )}
+          <span style={{ ...pillBase, background: 'rgba(122,106,138,0.14)', color: '#c7b8c0', border: '1px solid rgba(184,168,152,0.24)' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981',
+              display: 'inline-block', boxShadow: '0 0 5px rgba(16,185,129,0.9)' }} /> OUVERT
+          </span>
+        </div>
+
+        {/* Auteur + date de publication */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 15 }}>
           <Avatar src={org.avatar_url} name={org.full_name} size={28} />
           <span style={{ fontSize: 12, color: '#b8a898', flex: 1, minWidth: 0 }}>
             <span style={{ fontWeight: 700, color: '#f0e6d3' }}>{org.full_name || org.company_name}</span>
             {' '}a publié une mission
           </span>
-          <span style={{ fontSize: 9.5, padding: '3px 9px', borderRadius: 999, flexShrink: 0, letterSpacing: '0.04em',
-            background: 'rgba(16,185,129,0.1)', color: '#10b981',
-            border: '1px solid rgba(16,185,129,0.25)', fontWeight: 700 }}>
-            OUVERT
-          </span>
+          {m.created_at && (
+            <span style={{ fontSize: 11, color: '#7a6a8a', flexShrink: 0 }}>{timeAgo(m.created_at)}</span>
+          )}
         </div>
 
         {/* Mission info */}
