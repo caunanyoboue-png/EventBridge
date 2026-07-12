@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Check, X, Camera } from 'lucide-react';
+import { Check, X, Camera, Search } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { COMPETENCES, VILLES } from '../lib/utils';
 import MapPicker from '../components/MapPicker';
+import { geocodeAddress } from '../lib/geo';
 import toast from 'react-hot-toast';
 
 const SERVICE_TYPES = [
@@ -38,6 +39,20 @@ export default function EditMission() {
   const [venuePreview, setVenuePreview] = useState<string | null>(null);
   const [uploadingVenue, setUploadingVenue] = useState(false);
   const venueInputRef = useRef<HTMLInputElement>(null);
+  const [geocoding, setGeocoding] = useState(false);
+  const lastGeo = useRef(''); // dernière adresse déjà localisée → évite la boucle carte ↔ adresse
+
+  // Adresse saisie → géocodage → déplace l'épingle sur la carte (synchro adresse → carte)
+  async function searchAddress() {
+    const addr = form.location.trim();
+    if (!addr || addr === lastGeo.current) return;
+    lastGeo.current = addr;
+    setGeocoding(true);
+    const r = await geocodeAddress(addr);
+    if (r) setForm(p => ({ ...p, latitude: r.lat, longitude: r.lng }));
+    else toast.error('Adresse introuvable — placez l’épingle directement sur la carte.');
+    setGeocoding(false);
+  }
 
   useEffect(() => {
     if (!missionId) { navigate('/my-missions'); return; }
@@ -256,9 +271,23 @@ export default function EditMission() {
                 </div>
               </div>
               <div>
-                <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Adresse *</label>
-                <input className={inputClass} style={inputStyle}
-                  value={form.location} onChange={e => upd('location', e.target.value)} />
+                <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>
+                  Adresse * <span style={{ color: '#7a6a7a' }}>(synchronisée avec la carte)</span>
+                </label>
+                <div className="flex gap-2">
+                  <input className={inputClass} style={inputStyle} placeholder="Ex: Avenue Delafosse, Plateau"
+                    value={form.location}
+                    onChange={e => upd('location', e.target.value)}
+                    onBlur={searchAddress}
+                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); searchAddress(); } }} />
+                  <button type="button" onClick={searchAddress} disabled={geocoding || !form.location.trim()}
+                    className="px-4 rounded-xl text-sm font-semibold inline-flex items-center gap-2"
+                    style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.4)',
+                      color: '#d4af37', flexShrink: 0, cursor: 'pointer',
+                      opacity: (geocoding || !form.location.trim()) ? 0.6 : 1 }}>
+                    <Search size={15} /> {geocoding ? '...' : 'Localiser'}
+                  </button>
+                </div>
               </div>
 
               {/* Carte interactive */}
@@ -266,8 +295,8 @@ export default function EditMission() {
                 lat={form.latitude}
                 lng={form.longitude}
                 onSelect={(lat, lng, addr) => {
-                  upd('latitude', lat); upd('longitude', lng);
-                  if (!form.location) upd('location', addr);
+                  lastGeo.current = addr; // adresse issue de la carte → ne pas la re-géocoder
+                  setForm(p => ({ ...p, latitude: lat, longitude: lng, location: addr }));
                 }}
               />
 
