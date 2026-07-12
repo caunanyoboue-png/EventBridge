@@ -1,13 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard, Briefcase, Users, MessageSquare, User,
-  LogOut, ChevronRight, FileText, Check, AlertCircle,
-  Target, Calendar, PlusCircle, Zap, Menu, X, Settings, Trash2,
+  Briefcase, Users, ChevronRight, FileText, Check, AlertCircle,
+  Target, Calendar, PlusCircle, X, Trash2,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import Logo from '../components/Logo';
+import DashboardLayout from '../components/layout/DashboardLayout';
 import { type Mission, type Application, type Review } from '../types';
 import { formatCFA, formatDateShort } from '../lib/utils';
 import toast from 'react-hot-toast';
@@ -154,7 +153,7 @@ function Stars({ n }: { n: number }) {
 
 // ── Composant principal ───────────────────────────────────────────────────────
 export default function OrganisateurDashboard() {
-  const { profile, signOut } = useAuth();
+  const { profile } = useAuth();
   const navigate = useNavigate();
 
   const [missions, setMissions] = useState<Mission[]>([]);
@@ -166,7 +165,6 @@ export default function OrganisateurDashboard() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [hovKpi, setHovKpi] = useState<number | null>(null);
   const [hovBtn, setHovBtn] = useState<number | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -327,143 +325,15 @@ export default function OrganisateurDashboard() {
     { label: 'Messages',              sub: `${unread} non lu${unread !== 1 ? 's' : ''}`, color: '#34d399', bg: 'rgba(52,211,153,0.12)', bgH: 'rgba(52,211,153,0.22)', to: '/messages' },
   ];
 
-  const navItems = [
-    { icon: LayoutDashboard, label: "Fil d'actualité", to: '/feed',                   badge: undefined },
-    { icon: LayoutDashboard, label: 'Tableau de bord', to: '/organisateur-dashboard', badge: undefined },
-    { icon: Briefcase,       label: 'Mes missions',    to: '/my-missions',            badge: undefined },
-    { icon: PlusCircle,      label: 'Publier',         to: '/create-mission',         badge: undefined },
-    { icon: Users,           label: 'Freelances',      to: '/freelances',             badge: undefined },
-    { icon: MessageSquare,   label: 'Messages',        to: '/messages',               badge: unread > 0 ? unread : undefined },
-    { icon: User,            label: 'Mon profil',      to: '/profile',                badge: undefined },
-    { icon: Settings,        label: 'Paramètres',      to: '/settings',               badge: undefined },
-  ];
-
-  const initials = (profile?.company_name || profile?.full_name || 'O')
-    .split(' ').map(n => n[0] || '').join('').toUpperCase().slice(0, 2) || 'O';
   const firstName = profile?.company_name || profile?.full_name?.split(' ')[0] || '';
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir';
   const today = new Date().toLocaleDateString('fr-CI', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: C.bg,
-      fontFamily: 'Inter, system-ui, -apple-system, sans-serif', color: C.text, position: 'relative',
-      overflowX: 'hidden' }}>
-
-      {/* Overlay mobile */}
-      <div className={`eb-overlay${sidebarOpen ? ' open' : ''}`} onClick={() => setSidebarOpen(false)} />
-
-      {/* ── SIDEBAR ─────────────────────────────────────────────────────────── */}
-      {/* Spacer desktop pour compenser la sidebar fixed */}
-      <div style={{ width: 220, flexShrink: 0 }} className="eb-desktop-spacer" />
-
-      <aside className={`eb-sidebar${sidebarOpen ? ' open' : ''}`} style={{ width: 220, height: '100vh', position: 'fixed', top: 0, left: 0,
-        background: C.side, borderRight: `1px solid ${C.sideB}`, zIndex: 40,
-        display: 'flex', flexDirection: 'column', padding: '20px 14px', overflow: 'hidden' }}>
-
-        {/* Bouton fermeture mobile */}
-        <button className="eb-sidebar-close" onClick={() => setSidebarOpen(false)}>
-          <X size={16} />
-        </button>
-
-        {/* Logo */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
-          <Logo height={46} />
-        </div>
-
-        {/* Nav — seul élément scrollable si contenu trop long */}
-        <nav style={{ flex: 1, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 1 }}>
-          {navItems.map((item, i) => (
-            <NavLink key={i} to={item.to}
-              style={({ isActive }) => ({
-                display: 'flex', alignItems: 'center', gap: 10,
-                padding: '9px 12px', borderRadius: 9,
-                fontSize: 13, fontWeight: 500, textDecoration: 'none',
-                transition: 'all 0.15s', position: 'relative',
-                borderLeft: isActive ? `2px solid ${C.gold}` : '2px solid transparent',
-                background: isActive ? `${C.gold}0d` : 'transparent',
-                color: isActive ? C.gold : C.sec,
-              })}
-              onMouseEnter={e => {
-                const el = e.currentTarget as HTMLAnchorElement;
-                el.style.background = `rgba(201,168,76,0.07)`;
-                el.style.color = 'rgba(240,230,211,0.75)';
-              }}
-              onMouseLeave={e => {
-                const el = e.currentTarget as HTMLAnchorElement;
-                el.style.background = 'transparent';
-                el.style.color = C.sec;
-              }}>
-              <item.icon size={16} />
-              <span style={{ flex: 1 }}>{item.label}</span>
-              {item.badge !== undefined && item.badge > 0 && (
-                <span style={{ fontSize: 10, fontWeight: 500, padding: '2px 6px',
-                  borderRadius: 99, background: '#3b82f6', color: '#fff', lineHeight: 1.4 }}>
-                  {item.badge}
-                </span>
-              )}
-            </NavLink>
-          ))}
-        </nav>
-
-        {/* S.O.S Brigade */}
-        <button onClick={() => navigate('/sos-brigade')}
-          style={{ marginTop: 12, width: '100%', padding: '10px', borderRadius: 10,
-            fontWeight: 500, fontSize: 13, color: '#fff', border: 'none', cursor: 'pointer',
-            background: 'linear-gradient(135deg,#dc2626,#b91c1c)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
-          <Zap size={14} /> S.O.S Brigade
-        </button>
-
-        {/* Footer */}
-        <div style={{ borderTop: `1px solid ${C.sideB}`, paddingTop: 14, marginTop: 10,
-          display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {profile?.avatar_url ? (
-              <img src={profile.avatar_url} style={{ width: 34, height: 34, borderRadius: '50%',
-                objectFit: 'cover', flexShrink: 0 }} alt="" />
-            ) : (
-              <div style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 13, fontWeight: 500, color: '#261642',
-                background: `linear-gradient(135deg, ${C.gold}, ${C.goldLt})` }}>
-                {initials}
-              </div>
-            )}
-            <div style={{ overflow: 'hidden', flex: 1 }}>
-              <p style={{ fontSize: 13, fontWeight: 500, color: C.text, margin: 0,
-                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {profile?.company_name || profile?.full_name || '—'}
-              </p>
-              <p style={{ fontSize: 11, color: C.sec, margin: '2px 0 0' }}>Organisateur</p>
-            </div>
-          </div>
-          <button onClick={signOut}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%',
-              padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500,
-              background: 'transparent', border: '1px solid rgba(239,68,68,0.2)',
-              color: 'rgba(239,68,68,0.55)', cursor: 'pointer', transition: 'all 0.15s' }}
-            onMouseEnter={e => { const b = e.currentTarget as HTMLElement; b.style.background = 'rgba(239,68,68,0.08)'; b.style.color = '#ef4444'; }}
-            onMouseLeave={e => { const b = e.currentTarget as HTMLElement; b.style.background = 'transparent'; b.style.color = 'rgba(239,68,68,0.55)'; }}>
-            <LogOut size={14} /> Déconnexion
-          </button>
-        </div>
-      </aside>
-
-      {/* ── MAIN ────────────────────────────────────────────────────────────── */}
-      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflowY: 'auto', overflowX: 'hidden', minHeight: '100vh' }}>
-
-        {/* Top bar hamburger (mobile uniquement) */}
-        <div className="eb-topbar">
-          <button onClick={() => setSidebarOpen(true)} style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.2)', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', color: C.gold, display: 'flex' }}>
-            <Menu size={20} />
-          </button>
-          <Logo height={34} />
-          <div style={{ width: 36 }} />
-        </div>
-
-        {/* HERO BAND */}
-        <div className="eb-hero-band" style={{ position: 'relative', height: 180, flexShrink: 0, overflow: 'hidden' }}>
+    <DashboardLayout>
+      {/* HERO BAND — bannière de bienvenue arrondie */}
+      <div className="eb-hero-band" style={{ position: 'relative', height: 180, overflow: 'hidden', borderRadius: 16, marginBottom: 20 }}>
           <img src="/images/Dashboard-organisateur.jpeg" alt=""
             style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%' }} />
           <div style={{ position: 'absolute', inset: 0,
@@ -501,8 +371,8 @@ export default function OrganisateurDashboard() {
           </div>
         </div>
 
-        {/* CONTENU */}
-        <div className="eb-content-pad" style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 20, flex: 1 }}>
+      {/* CONTENU */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
           {/* Bannière candidatures en attente */}
           {pendingApps.length > 0 && (
@@ -893,7 +763,6 @@ export default function OrganisateurDashboard() {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+    </DashboardLayout>
   );
 }
