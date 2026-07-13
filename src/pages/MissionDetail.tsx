@@ -13,6 +13,7 @@ import MapView from '../components/MapView';
 import { fetchContractByMission } from '../services/contractService';
 import ContractWizard from '../components/contracts/ContractWizard';
 import ContractCard from '../components/contracts/ContractCard';
+import MatchedFreelances from '../components/MatchedFreelances';
 import toast from 'react-hot-toast';
 
 const OVERLAY: CSSProperties = {
@@ -450,6 +451,13 @@ export default function MissionDetail() {
             </div>
           )}
         </div>
+
+        {/* Freelances recommandés — matching multicritères (organisateur, phase recrutement) */}
+        {profile?.role === 'organisateur'
+          && mission.organisateur_id === profile?.id
+          && mission.status !== 'completed' && mission.status !== 'cancelled' && (
+          <MatchedFreelances missionId={mission.id} />
+        )}
 
         {/* Clôture, avis & litige */}
         {(profile?.role === 'organisateur' || myAppStatus === 'accepted') && (
