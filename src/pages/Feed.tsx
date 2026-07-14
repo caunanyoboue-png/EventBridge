@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
+import { useAuthGate } from '../contexts/AuthGateContext';
 import { supabase } from '../lib/supabase';
 import { type Mission, type SosSession } from '../types';
 import { formatCFA, getInitials } from '../lib/utils';
@@ -459,7 +460,9 @@ function MissionFeedCard({ mission: m, isFreelance, onApply, onView }: {
 /* ── Main Feed page ─────────────────────────────────────────────────── */
 export default function Feed() {
   const { profile } = useAuth();
+  const { requireAuth } = useAuthGate();
   const navigate = useNavigate();
+  const isGuest = !profile;
   const [posts, setPosts]         = useState<Post[]>([]);
   const [missions, setMissions]   = useState<FeedMission[]>([]);
   const [myLikes, setMyLikes]     = useState<Set<string>>(new Set());
@@ -477,28 +480,47 @@ export default function Feed() {
   const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { if (profile) fetchFeed(); }, [profile]);
+  useEffect(() => { fetchFeed(); }, [profile]);
 
   async function fetchFeed() {
     setLoading(true);
-    const [postsRes, missionsRes, likesRes] = await Promise.all([
+    const [postsRes, missionsRes] = await Promise.all([
       supabase.from('posts')
         .select('*, author:profiles!author_id(id,full_name,avatar_url,role,company_name)')
         .order('created_at', { ascending: false }).limit(60),
       supabase.from('missions')
-        .select('*, organisateur:profiles!organisateur_id(id,full_name,avatar_url,role,company_name)')
+        // colonnes sûres uniquement (pas d'adresse exacte ni GPS) — valable invité comme connecté
+        .select('id,organisateur_id,title,description,service_type,skills_required,ville,event_date,start_time,end_time,hourly_rate,slots_total,slots_filled,is_urgent,status,venue_photo_url,created_at, organisateur:profiles!organisateur_id(id,full_name,avatar_url,role,company_name)')
         .eq('status', 'open')
         .gte('event_date', new Date().toISOString().slice(0, 10)) // masquer les missions dont la date est passée
         .order('created_at', { ascending: false }).limit(30),
-      supabase.from('post_likes').select('post_id').eq('user_id', profile!.id),
     ]);
-    setPosts((postsRes.data || []) as Post[]);
-    setMissions((missionsRes.data || []) as FeedMission[]);
-    setMyLikes(new Set((likesRes.data || []).map((l: { post_id: string }) => l.post_id)));
+
+    let postsData = (postsRes.data || []) as Post[];
+    let missionsData = (missionsRes.data || []) as unknown as FeedMission[];
+
+    // Invité : masquer les noms complets (prénom uniquement)
+    if (isGuest) {
+      const first = (n?: string | null) => (n || '').trim().split(' ')[0] || 'Utilisateur';
+      postsData = postsData.map(p => p.author ? { ...p, author: { ...p.author, full_name: first(p.author.full_name) } } : p);
+      missionsData = missionsData.map(m => m.organisateur ? { ...m, organisateur: { ...m.organisateur, full_name: first(m.organisateur.full_name) } } : m);
+    }
+
+    setPosts(postsData);
+    setMissions(missionsData);
+
+    // État des « j'aime » uniquement pour un utilisateur connecté
+    if (profile) {
+      const { data: likes } = await supabase.from('post_likes').select('post_id').eq('user_id', profile.id);
+      setMyLikes(new Set((likes || []).map((l: { post_id: string }) => l.post_id)));
+    } else {
+      setMyLikes(new Set());
+    }
     setLoading(false);
   }
 
   async function toggleLike(post: Post) {
+    if (!requireAuth('aimer une publication')) return;
     if (!profile) return;
     const liked = myLikes.has(post.id);
     setMyLikes(prev => { const s = new Set(prev); liked ? s.delete(post.id) : s.add(post.id); return s; });
@@ -513,6 +535,7 @@ export default function Feed() {
   }
 
   async function repost(post: Post) {
+    if (!requireAuth('reposter une publication')) return;
     if (!profile || myReposts.has(post.id)) return;
     setMyReposts(prev => new Set([...prev, post.id]));
     setPosts(prev => prev.map(p => p.id === post.id ? { ...p, reposts_count: p.reposts_count + 1 } : p));
@@ -528,11 +551,14 @@ export default function Feed() {
       const { data } = await supabase.from('post_comments')
         .select('*, author:profiles!author_id(full_name,avatar_url)')
         .eq('post_id', postId).order('created_at', { ascending: true });
-      setComments(prev => ({ ...prev, [postId]: (data || []) as Comment[] }));
+      let cData = (data || []) as Comment[];
+      if (isGuest) cData = cData.map(c => ({ ...c, author: { ...c.author, full_name: (c.author?.full_name || '').trim().split(' ')[0] || 'Utilisateur' } }));
+      setComments(prev => ({ ...prev, [postId]: cData }));
     }
   }
 
   async function submitComment(post: Post) {
+    if (!requireAuth('commenter')) return;
     if (!commentText.trim() || !profile) return;
     setCommentLoading(true);
     const { data, error } = await supabase.from('post_comments')
@@ -560,6 +586,7 @@ export default function Feed() {
   }
 
   async function createPost() {
+    if (!requireAuth('publier une publication')) return;
     if (!postContent.trim() || !profile) return;
     setSubmitting(true);
     const { error } = await supabase.from('posts').insert({
@@ -573,6 +600,7 @@ export default function Feed() {
   }
 
   async function applyMission(missionId: string) {
+    if (!requireAuth('postuler à une mission')) return;
     if (!profile) return;
     const { error } = await supabase.from('applications').insert({
       mission_id: missionId, freelance_id: profile.id, status: 'pending',
@@ -611,7 +639,7 @@ export default function Feed() {
               <p style={{ fontSize: 12, color: '#7a6a8a', margin: 0 }}>La communauté EventBridge en direct</p>
             </div>
           </div>
-          <button onClick={() => { setCreating(c => !c); setPostContent(''); setPostImage(null); }}
+          <button onClick={() => { if (!requireAuth('publier une publication')) return; setCreating(c => !c); setPostContent(''); setPostImage(null); }}
             className="btn-gold px-4 py-2.5 rounded-xl text-sm font-bold text-[#261642] flex items-center gap-1.5">
             {creating ? <><X size={15} /> Annuler</> : <><Plus size={16} /> Publier</>}
           </button>
@@ -715,7 +743,7 @@ export default function Feed() {
                       commentLoading={commentLoading}
                     />
                   : <MissionFeedCard mission={item.mission}
-                      isFreelance={isFreelance}
+                      isFreelance={isFreelance || isGuest}
                       onApply={() => applyMission(item.mission.id)}
                       onView={() => navigate(`/MissionDetail?id=${item.mission.id}`)}
                     />}

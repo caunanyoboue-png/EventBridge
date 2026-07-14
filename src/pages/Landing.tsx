@@ -289,6 +289,15 @@ export default function Landing() {
                 Je suis Organisateur
               </button>
             </div>
+            <div className="mt-6 text-center">
+              <button onClick={() => navigate('/feed')}
+                className="text-sm font-medium inline-flex items-center gap-2"
+                style={{ color: '#b8a898', transition: 'color 0.2s' }}
+                onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color = '#e8c97a'}
+                onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.color = '#b8a898'}>
+                Explorer le fil sans compte <IconArrow />
+              </button>
+            </div>
           </Reveal>
         </div>
 

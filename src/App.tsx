@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { type ReactNode } from 'react';
+import { AuthGateProvider, RETURN_KEY } from './contexts/AuthGateContext';
+import { useEffect, type ReactNode } from 'react';
 
 // Pages publiques
 import Landing from './pages/Landing';
@@ -79,9 +80,36 @@ function ProtectedRoute({ children, role }: { children: ReactNode; role?: string
   return <>{children}</>;
 }
 
+// Route navigable connecté OU en invité (attend juste la résolution de la session).
+function BrowseRoute({ children }: { children: ReactNode }) {
+  const { loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#261642' }}>
+        <div className="w-12 h-12 rounded-full border-2 border-t-transparent animate-spin"
+          style={{ borderColor: '#d4af37', borderTopColor: 'transparent' }} />
+      </div>
+    );
+  }
+  return <>{children}</>;
+}
+
 function AppRoutes() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { profile } = useAuth();
   const reduceMotion = useReducedMotion();
+
+  // Après inscription/connexion depuis le mode invité → revenir là où on était
+  useEffect(() => {
+    if (profile && profile.onboarding_done !== false) {
+      const rt = localStorage.getItem(RETURN_KEY);
+      if (rt) {
+        localStorage.removeItem(RETURN_KEY);
+        if (rt !== window.location.pathname + window.location.search) navigate(rt);
+      }
+    }
+  }, [profile, navigate]);
   // Sur mobile (Android en particulier), les couches composites de l'animation
   // plein écran provoquent des artefacts GPU au scroll → on simplifie.
   const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 1023px)').matches;
@@ -95,7 +123,7 @@ function AppRoutes() {
       <Route path="/pour-les-organisateurs" element={<OrganisateurPage />} />
 
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
+      <Route path="/feed" element={<BrowseRoute><Feed /></BrowseRoute>} />
       <Route path="/freelance-dashboard" element={<ProtectedRoute role="freelance"><FreelanceDashboard /></ProtectedRoute>} />
       <Route path="/organisateur-dashboard" element={<ProtectedRoute role="organisateur"><OrganisateurDashboard /></ProtectedRoute>} />
       <Route path="/missions" element={<ProtectedRoute><Missions /></ProtectedRoute>} />
@@ -158,7 +186,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <AuthGateProvider>
+          <AppRoutes />
+        </AuthGateProvider>
       </AuthProvider>
     </BrowserRouter>
   );

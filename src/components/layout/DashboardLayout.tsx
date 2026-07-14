@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { type ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import NotificationBell from '../NotificationBell';
 import SosAlertBanner from '../SosAlertBanner';
 import Logo from '../Logo';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface Props {
   children: ReactNode;
@@ -12,6 +14,36 @@ interface Props {
 
 export default function DashboardLayout({ children, bgImage }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { profile } = useAuth();
+  const navigate = useNavigate();
+
+  // ── Mode invité : en-tête public (pas de menu latéral ni notifications) ──
+  if (!profile) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#261642' }}>
+        <header style={{ position: 'sticky', top: 0, zIndex: 40, display: 'flex', alignItems: 'center',
+          justifyContent: 'space-between', padding: '12px 20px', background: 'rgba(16,4,32,0.92)',
+          backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(201,168,76,0.12)' }}>
+          <div onClick={() => navigate('/')} style={{ cursor: 'pointer', display: 'flex' }}>
+            <Logo height={38} />
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button onClick={() => navigate('/onboarding')}
+              className="btn-outline-gold px-4 py-2 rounded-xl text-sm font-medium">
+              Se connecter
+            </button>
+            <button onClick={() => navigate('/onboarding')}
+              className="btn-gold px-4 py-2 rounded-xl text-sm font-bold text-[#261642]">
+              S'inscrire
+            </button>
+          </div>
+        </header>
+        <main style={{ padding: '28px 20px 64px' }}>
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#261642', position: 'relative' }}>
