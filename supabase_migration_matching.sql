@@ -80,12 +80,12 @@ as $$
   scored as (
     select
       b.*,
-      case when b.nreq = 0 then 1
-           else cardinality(b.matched)::numeric / b.nreq end as sc_comp,
-      case when b.dist is null then 0
-           else greatest(0, 1 - b.dist / 50.0) end          as sc_dist,
-      coalesce(b.avg_rating, 0) / 5.0                        as sc_note,
-      1::numeric                                            as sc_dispo
+      (case when b.nreq = 0 then 1
+            else cardinality(b.matched)::numeric / b.nreq end)::numeric as sc_comp,
+      (case when b.dist is null then 0
+            else greatest(0, 1 - b.dist / 50.0) end)::numeric           as sc_dist,
+      (coalesce(b.avg_rating, 0) / 5.0)::numeric                        as sc_note,
+      1::numeric                                                        as sc_dispo
     from base b
   )
   select
