@@ -226,6 +226,34 @@
   }
 }
 
+/* ─── Anti-artefacts GPU (Android) — bug visible UNIQUEMENT connecté ──────────
+   Le shell connecté monte une sidebar `position: fixed` 100vh. Sur Android, la
+   présence d'un élément fixe bascule le scroll en mode composité ; le contenu très
+   haut (fil, dashboard) dépasse la taille max de texture GPU → bandes de bruit
+   colorées au scroll. En invité : header `sticky`, pas de sidebar → scroll normal,
+   donc aucun bug. Correctifs :
+   (1) le drawer FERMÉ passe en display:none → plus aucun élément fixe pendant le
+       scroll (il revient avec un slide-in au tap du hamburger) ;
+   (2) on stoppe les animations infinies qui animent box-shadow / background
+       (cloche, SOS, shimmer) → fin des repaints continus qui empirent le bruit. */
+@media (max-width: 1023px) {
+  .eb-sidebar { display: none !important; box-shadow: none !important; }
+  .eb-sidebar.open {
+    display: flex !important;
+    box-shadow: 6px 0 32px rgba(0, 0, 0, 0.5) !important;
+    animation: drawerIn 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  /* Uniquement les animations qui animent box-shadow / background (= repaints).
+     On garde transform/opacity (twinkle, float, ping) : composite GPU, sans repaint. */
+  .animate-glow, .animate-sos, .notif-pulse, .text-gold-gradient {
+    animation: none !important;
+  }
+}
+@keyframes drawerIn {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
 /* ─── Onboarding ─────────────────────────────────────────── */
 @media (max-width: 480px) {
   .onboarding-card { padding: 24px 18px !important; }
