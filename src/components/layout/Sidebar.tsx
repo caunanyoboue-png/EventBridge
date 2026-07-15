@@ -1,109 +1,92 @@
 import { NavLink, useNavigate } from 'react-router-dom';
+import { type ReactNode } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getInitials } from '../../lib/utils';
 import Logo from '../Logo';
 
 // ── SVG icons — aucun emoji ───────────────────────────────────────────────────
-const IcoDashboard = () => (
-  <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-    <rect x="1" y="1" width="6.5" height="6.5" rx="1.2" stroke="currentColor" strokeWidth="1.4"/>
-    <rect x="9.5" y="1" width="6.5" height="6.5" rx="1.2" stroke="currentColor" strokeWidth="1.4"/>
-    <rect x="1" y="9.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" strokeWidth="1.4"/>
-    <rect x="9.5" y="9.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" strokeWidth="1.4"/>
-  </svg>
-);
-const IcoMissions = () => (
-  <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-    <circle cx="8.5" cy="8.5" r="7" stroke="currentColor" strokeWidth="1.4"/>
-    <circle cx="8.5" cy="8.5" r="3.5" stroke="currentColor" strokeWidth="1.4"/>
-    <circle cx="8.5" cy="8.5" r="1" fill="currentColor"/>
-  </svg>
-);
-const IcoUsers = () => (
-  <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-    <circle cx="6.5" cy="5" r="2.8" stroke="currentColor" strokeWidth="1.4"/>
-    <path d="M1 15c0-3 2.5-5 5.5-5s5.5 2 5.5 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-    <circle cx="13" cy="5.5" r="2.2" stroke="currentColor" strokeWidth="1.3"/>
-    <path d="M13.5 10.5c1.8.6 3 2 3 4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-  </svg>
-);
-const IcoMessages = () => (
-  <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-    <path d="M14.5 2.5H2.5a1 1 0 0 0-1 1v7.5a1 1 0 0 0 1 1H6l2.5 3 2.5-3h3.5a1 1 0 0 0 1-1V3.5a1 1 0 0 0-1-1Z"
-      stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
-  </svg>
-);
-const IcoClipboard = () => (
-  <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-    <rect x="2" y="3" width="13" height="13" rx="1.5" stroke="currentColor" strokeWidth="1.4"/>
-    <path d="M5 8l2.5 2.5 5-5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M6 2v2M11 2v2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-  </svg>
-);
-const IcoDoc = () => (
-  <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-    <rect x="2.5" y="1.5" width="12" height="14" rx="1.5" stroke="currentColor" strokeWidth="1.4"/>
-    <path d="M5 6h7M5 9h7M5 12h4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-  </svg>
-);
-const IcoPerson = () => (
-  <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-    <circle cx="8.5" cy="5.5" r="3" stroke="currentColor" strokeWidth="1.4"/>
-    <path d="M2 15.5c0-3.5 2.9-6.5 6.5-6.5s6.5 3 6.5 6.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-  </svg>
-);
-const IcoDashAdmin = () => (
-  <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-    <path d="M2 10h4v5H2zM6.5 6h4v9h-4zM11 2h4v13h-4z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
-  </svg>
-);
-const IcoShield = () => (
-  <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-    <path d="M8.5 1L2 4v4.5c0 4 2.8 7.7 6.5 8.5C12.2 16.2 15 12.5 15 8.5V4L8.5 1Z"
-      stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
-    <path d="M5.5 8.5l2 2 4-4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-const IcoStar = () => (
-  <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-    <path d="M8.5 1.5l2.1 4.3 4.9.7-3.5 3.4.8 4.8-4.3-2.2-4.3 2.2.8-4.8L1.5 6.5l4.9-.7 2.1-4.3Z"
-      stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
-  </svg>
-);
-const IcoGear = () => (
-  <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-    <circle cx="8.5" cy="8.5" r="2.5" stroke="currentColor" strokeWidth="1.4"/>
-    <path d="M8.5 1v2M8.5 14v2M1 8.5h2M14 8.5h2M3.1 3.1l1.4 1.4M12.5 12.5l1.4 1.4M3.1 13.9l1.4-1.4M12.5 4.5l1.4-1.4"
-      stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-  </svg>
-);
-const IcoWallet = () => (
-  <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-    <rect x="1.8" y="3.5" width="13.4" height="10" rx="2" stroke="currentColor" strokeWidth="1.4"/>
-    <path d="M11 8.5h3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-    <circle cx="11.5" cy="8.5" r="0.9" fill="currentColor"/>
-  </svg>
-);
-const IcoLogout = () => (
-  <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-    <path d="M7 14H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-    <path d="M11 11l3-2.5L11 6M14 8.5H7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-const IcoFeed = () => (
-  <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-    <path d="M2 7.5L8.5 2l6.5 5.5V15a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7.5Z"
-      stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
-    <path d="M6 16v-5.5h5V16" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-const IcoSOS = () => (
-  <svg width="17" height="17" viewBox="0 0 17 17" fill="none">
-    <path d="M8.5 2a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13Z" stroke="currentColor" strokeWidth="1.4"/>
-    <path d="M8.5 5.5v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    <circle cx="8.5" cy="12" r="1" fill="currentColor"/>
-  </svg>
-);
+// Style « doodle » : trait dessiné à la main, contours arrondis (couleur via currentColor).
+function Dood({ children }: { children: ReactNode }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{children}</svg>
+  );
+}
+const IcoDashboard = () => <Dood>
+  <rect x="3.5" y="3.5" width="7.2" height="7.2" rx="2.2"/>
+  <rect x="13.3" y="3.5" width="7.2" height="7.2" rx="2.2"/>
+  <rect x="3.5" y="13.3" width="7.2" height="7.2" rx="2.2"/>
+  <rect x="13.3" y="13.3" width="7.2" height="7.2" rx="2.2"/>
+</Dood>;
+const IcoMissions = () => <Dood>
+  <rect x="3" y="7.5" width="18" height="12.5" rx="3"/>
+  <path d="M8.5 7.5V6.2c0-1 .8-1.9 1.9-1.9h3.2c1 0 1.9.8 1.9 1.9v1.3"/>
+  <path d="M3 12.5c2.9 1.4 5.9 2.1 9 2.1s6.1-.7 9-2.1"/>
+</Dood>;
+const IcoUsers = () => <Dood>
+  <circle cx="9" cy="8" r="3.2"/>
+  <path d="M3.5 19c.4-3.1 2.8-5 5.5-5s5.1 1.9 5.5 5"/>
+  <path d="M16 5.4a3 3 0 0 1 .3 5.7"/>
+  <path d="M17.2 14.2c1.9.6 3.1 2.2 3.3 4.6"/>
+</Dood>;
+const IcoMessages = () => <Dood>
+  <path d="M20.5 12c0 3.7-3.8 6.6-8.5 6.6-1.1 0-2.2-.2-3.2-.5L4 20l1.4-3.6C4.5 15.3 4 13.7 4 12c0-3.7 3.8-6.6 8.5-6.6S20.5 8.3 20.5 12Z"/>
+  <circle cx="9" cy="12" r=".85" fill="currentColor" stroke="none"/>
+  <circle cx="12.5" cy="12" r=".85" fill="currentColor" stroke="none"/>
+  <circle cx="16" cy="12" r=".85" fill="currentColor" stroke="none"/>
+</Dood>;
+const IcoClipboard = () => <Dood>
+  <rect x="4.5" y="4.2" width="15" height="16.8" rx="3"/>
+  <path d="M9 3.2h6c.7 0 1.2.6 1.2 1.2v1.1c0 .7-.5 1.2-1.2 1.2H9c-.7 0-1.2-.5-1.2-1.2V4.4c0-.6.5-1.2 1.2-1.2Z"/>
+  <path d="M8.6 13.2l2.4 2.4 4.4-4.9"/>
+</Dood>;
+const IcoDoc = () => <Dood>
+  <path d="M6.2 3.5h6.9c.3 0 .6.1.8.4l3.7 3.9c.2.2.3.5.3.8V19.6c0 1-.8 1.9-1.9 1.9H6.2c-1 0-1.9-.8-1.9-1.9V5.4c0-1 .8-1.9 1.9-1.9Z"/>
+  <path d="M13 3.7V7c0 .8.6 1.4 1.4 1.4h3.2"/>
+  <path d="M8.7 12.6h6.6M8.7 15.9h6.6M8.7 9.3h3"/>
+</Dood>;
+const IcoPerson = () => <Dood>
+  <circle cx="12" cy="8" r="3.6"/>
+  <path d="M5.2 20c.4-3.8 3.3-6.2 6.8-6.2s6.4 2.4 6.8 6.2"/>
+</Dood>;
+const IcoDashAdmin = () => <Dood>
+  <path d="M4 20.5h16"/>
+  <rect x="5.8" y="12" width="3.4" height="8.5" rx="1.3"/>
+  <rect x="10.3" y="8" width="3.4" height="12.5" rx="1.3"/>
+  <rect x="14.8" y="4.5" width="3.4" height="16" rx="1.3"/>
+</Dood>;
+const IcoShield = () => <Dood>
+  <path d="M12 3.2l7.2 2.6v5.4c0 4.6-3.1 8.5-7.2 9.6-4.1-1.1-7.2-5-7.2-9.6V5.8L12 3.2Z"/>
+  <path d="M8.8 12.2l2.2 2.2 4.2-4.6"/>
+</Dood>;
+const IcoStar = () => <Dood>
+  <path d="M12 3.4l2.5 5.1 5.6.8-4.1 3.9 1 5.6-5-2.7-5 2.7 1-5.6L3.9 9.3l5.6-.8L12 3.4Z"/>
+</Dood>;
+const IcoGear = () => <Dood>
+  <circle cx="12" cy="12" r="3.3"/>
+  <path d="M12 2.6v3.1M12 18.3v3.1M21.4 12h-3.1M5.7 12H2.6M18.7 5.3l-2.2 2.2M7.5 16.5l-2.2 2.2M18.7 18.7l-2.2-2.2M7.5 7.5 5.3 5.3"/>
+</Dood>;
+const IcoWallet = () => <Dood>
+  <path d="M4 8.3C4 6.9 5.1 6 6.4 6H16c1.1 0 2 .9 2 2v.3"/>
+  <rect x="3.5" y="8" width="17" height="11.5" rx="3"/>
+  <path d="M20.5 12.6H16.2c-1.1 0-2 .8-2 1.9s.9 1.9 2 1.9h4.3"/>
+  <circle cx="16.4" cy="14.5" r=".75" fill="currentColor" stroke="none"/>
+</Dood>;
+const IcoLogout = () => <Dood>
+  <path d="M14 5.5H7.2c-1 0-1.7.8-1.7 1.7v9.6c0 1 .8 1.7 1.7 1.7H14"/>
+  <path d="M18.8 12H10"/>
+  <path d="M15.6 8.4 19.2 12l-3.6 3.6"/>
+</Dood>;
+const IcoFeed = () => <Dood>
+  <path d="M4 5.5C4 4.7 4.7 4 5.5 4h10c.8 0 1.5.7 1.5 1.5v13c0 .8-.7 1.5-1.5 1.5H5.5C4.7 20 4 19.3 4 18.5V5.5Z"/>
+  <path d="M17 7.5h1.5C19.3 7.5 20 8.2 20 9v8c0 .8-.7 1.5-1.5 1.5"/>
+  <path d="M7 8h6M7 11.5h6M7 15h4"/>
+</Dood>;
+const IcoSOS = () => <Dood>
+  <circle cx="12" cy="12" r="8.6"/>
+  <path d="M12 7.3v5.2"/>
+  <circle cx="12" cy="16" r=".85" fill="currentColor" stroke="none"/>
+</Dood>;
 
 // ── Items de nav ──────────────────────────────────────────────────────────────
 const NAV_ITEMS_FREELANCE = [
@@ -153,6 +136,14 @@ export default function Sidebar({ glassy, isOpen, onClose }: SidebarProps) {
       ? NAV_ITEMS_ORG
       : NAV_ITEMS_FREELANCE;
 
+  // Couleur des icônes/onglets selon le côté (rôle) — actif = pleine, inactif = atténuée.
+  const ROLE_PAL: Record<string, { active: string; inactive: string; bg: string; glow: string }> = {
+    freelance:    { active: '#e8c97a', inactive: 'rgba(232,201,122,0.5)', bg: 'rgba(212,175,55,0.16)', glow: 'rgba(212,175,55,0.14)' },
+    organisateur: { active: '#7cb3ff', inactive: 'rgba(124,179,255,0.5)', bg: 'rgba(96,165,250,0.16)', glow: 'rgba(96,165,250,0.14)' },
+    admin:        { active: '#4ade80', inactive: 'rgba(74,222,128,0.5)',  bg: 'rgba(52,211,153,0.16)', glow: 'rgba(52,211,153,0.14)' },
+  };
+  const pal = ROLE_PAL[profile?.role ?? 'freelance'] ?? ROLE_PAL.freelance;
+
   const bg   = glassy ? 'rgba(6,1,16,0.72)' : '#100420';
   const bdr  = glassy ? 'rgba(201,168,76,0.12)' : 'rgba(201,168,76,0.1)';
   const blur = glassy ? 'blur(22px)' : undefined;
@@ -200,7 +191,7 @@ export default function Sidebar({ glassy, isOpen, onClose }: SidebarProps) {
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {profile.full_name}
             </p>
-            <p style={{ fontSize: 11, color: '#d4af37', marginTop: 2, fontWeight: 500 }}>
+            <p style={{ fontSize: 11, color: pal.active, marginTop: 2, fontWeight: 500 }}>
               {profile.role === 'freelance' ? 'Freelance' : profile.role === 'organisateur' ? 'Organisateur' : 'Admin'}
             </p>
           </div>
@@ -216,12 +207,10 @@ export default function Sidebar({ glassy, isOpen, onClose }: SidebarProps) {
               padding: '11px 13px', borderRadius: 10, fontSize: 13.5,
               fontWeight: isActive ? 700 : 500,
               textDecoration: 'none', transition: 'all 0.18s',
-              background: isActive
-                ? (glassy ? 'rgba(212,175,55,0.2)' : 'rgba(212,175,55,0.16)')
-                : 'transparent',
-              borderLeft: isActive ? '3px solid #d4af37' : '3px solid transparent',
-              boxShadow: isActive ? 'inset 0 0 18px rgba(212,175,55,0.12)' : 'none',
-              color: isActive ? '#e8c97a' : (glassy ? 'rgba(240,230,211,0.7)' : '#b8a898'),
+              background: isActive ? pal.bg : 'transparent',
+              borderLeft: isActive ? `3px solid ${pal.active}` : '3px solid transparent',
+              boxShadow: isActive ? `inset 0 0 18px ${pal.glow}` : 'none',
+              color: isActive ? pal.active : pal.inactive,
             })}>
             <item.Icon />
             {item.label}
