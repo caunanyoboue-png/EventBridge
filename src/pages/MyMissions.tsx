@@ -6,6 +6,8 @@ import { supabase } from '../lib/supabase';
 import { type Mission, type MissionStatus } from '../types';
 import { formatDateShort, formatCFA } from '../lib/utils';
 import { ServiceIcon } from '../lib/serviceIcons';
+import { IcoClipboard } from '../components/icons/DoodleIcons';
+import { roleColor } from '../lib/roleTheme';
 import toast from 'react-hot-toast';
 
 const TABS: { key: MissionStatus | 'all'; label: string }[] = [
@@ -84,7 +86,7 @@ export default function MyMissions() {
   return (
     <DashboardLayout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-3xl font-bold" style={{ color: '#f0e6d3' }}>📋 Mes missions</h1>
+        <h1 className="font-display text-3xl font-bold flex items-center gap-3" style={{ color: '#f0e6d3' }}><IcoClipboard size={28} color={roleColor(profile?.role)} /> Mes missions</h1>
         <button onClick={() => navigate('/create-mission')} className="btn-gold px-5 py-2 rounded-xl text-sm font-bold text-[#261642]">
           + Nouvelle mission
         </button>

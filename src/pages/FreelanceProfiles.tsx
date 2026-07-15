@@ -8,6 +8,8 @@ import { type Profile } from '../types';
 import { formatCFA, getInitials, COMPETENCES } from '../lib/utils';
 import { distanceKm, formatDistance } from '../lib/geo';
 import CertifiedBadge from '../components/CertifiedBadge';
+import { IcoUsers } from '../components/icons/DoodleIcons';
+import { roleColor } from '../lib/roleTheme';
 
 export default function FreelanceProfiles() {
   const { profile: me } = useAuth();
@@ -39,7 +41,7 @@ export default function FreelanceProfiles() {
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><Users size={26} color="#d4af37" /> Freelances</h1>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><IcoUsers size={26} color={roleColor(me?.role)} /> Freelances</h1>
 
       {/* Filtres */}
       <div className="card-glass p-4 mb-6 flex flex-wrap gap-3 items-center">

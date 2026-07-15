@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Heart, MessageCircle, Repeat2, Send, ImagePlus, X, Plus,
-  Inbox, Calendar, MapPin, Users, Wallet, Newspaper, Loader2,
+  Inbox, Calendar, MapPin, Users, Wallet, Loader2,
   PenLine, Briefcase, Siren, Zap, Navigation,
   type LucideIcon,
 } from 'lucide-react';
@@ -14,6 +14,8 @@ import { supabase } from '../lib/supabase';
 import { type Mission, type SosSession } from '../types';
 import { formatCFA, getInitials } from '../lib/utils';
 import { ServiceIconBadge } from '../lib/serviceIcons';
+import { IcoFeed } from '../components/icons/DoodleIcons';
+import { roleColor } from '../lib/roleTheme';
 import { distanceKm, formatDistance, getBrowserPosition } from '../lib/geo';
 import toast from 'react-hot-toast';
 
@@ -632,7 +634,7 @@ export default function Feed() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               background: 'linear-gradient(135deg, rgba(201,168,76,0.16), rgba(201,168,76,0.05))',
               border: '1px solid rgba(201,168,76,0.28)' }}>
-              <Newspaper size={21} color="#d4af37" strokeWidth={1.7} />
+              <IcoFeed size={21} color={roleColor(profile?.role)} />
             </div>
             <div>
               <h1 className="font-display text-xl font-bold" style={{ color: '#f0e6d3', margin: 0 }}>Fil d'actualité</h1>

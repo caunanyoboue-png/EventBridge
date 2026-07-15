@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { supabase } from '../../lib/supabase';
-import { Scale } from 'lucide-react';
 import { formatRelative } from '../../lib/utils';
+import { IcoShield } from '../../components/icons/DoodleIcons';
+import { roleColor } from '../../lib/roleTheme';
 import toast from 'react-hot-toast';
 
 interface Dispute {
@@ -61,7 +62,7 @@ export default function AdminDisputes() {
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><Scale size={26} color="#d4af37" /> Gestion des litiges</h1>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><IcoShield size={26} color={roleColor('admin')} /> Gestion des litiges</h1>
 
       <div className="card-glass p-4 mb-6 flex flex-wrap gap-3">
         {(['open', 'investigating', 'resolved', 'closed', ''] as const).map(s => (

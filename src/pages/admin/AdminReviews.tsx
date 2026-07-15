@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { supabase } from '../../lib/supabase';
-import { Star } from 'lucide-react';
 import { formatRelative, getInitials } from '../../lib/utils';
+import { IcoStar } from '../../components/icons/DoodleIcons';
+import { roleColor } from '../../lib/roleTheme';
 import toast from 'react-hot-toast';
 
 interface Review {
@@ -67,7 +68,7 @@ export default function AdminReviews() {
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><Star size={25} fill="#d4af37" color="#d4af37" /> Gestion des avis</h1>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><IcoStar size={25} color={roleColor('admin')} /> Gestion des avis</h1>
 
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="card-glass p-4 text-center">

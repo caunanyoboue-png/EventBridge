@@ -7,7 +7,9 @@ import { getOrCreateConversation } from '../lib/messaging';
 import { type Application, type Mission, type ApplicationStatus } from '../types';
 import { formatDateShort, formatCFA } from '../lib/utils';
 import { ServiceIcon } from '../lib/serviceIcons';
-import { Mail, Inbox, Hourglass, CheckCircle2, XCircle, Undo2, MessageCircle, AlertTriangle, X, type LucideIcon } from 'lucide-react';
+import { IcoDoc } from '../components/icons/DoodleIcons';
+import { roleColor } from '../lib/roleTheme';
+import { Inbox, Hourglass, CheckCircle2, XCircle, Undo2, MessageCircle, AlertTriangle, X, type LucideIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const TABS: { key: ApplicationStatus | 'all'; label: string }[] = [
@@ -86,7 +88,7 @@ export default function MyApplications() {
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><Mail size={26} color="#d4af37" /> Mes candidatures</h1>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><IcoDoc size={26} color={roleColor('freelance')} /> Mes candidatures</h1>
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">

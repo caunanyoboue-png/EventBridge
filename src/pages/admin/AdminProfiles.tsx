@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { supabase } from '../../lib/supabase';
-import { Users, Star, ShieldCheck, FileText, Eye } from 'lucide-react';
+import { Star, ShieldCheck, FileText, Eye } from 'lucide-react';
 import { type Profile, type UserStatus, type CertificationLevel } from '../../types';
 import { getInitials } from '../../lib/utils';
 import CertifiedBadge from '../../components/CertifiedBadge';
+import { IcoUsers } from '../../components/icons/DoodleIcons';
+import { roleColor } from '../../lib/roleTheme';
 import toast from 'react-hot-toast';
 
 
@@ -127,7 +129,7 @@ export default function AdminProfiles() {
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><Users size={26} color="#d4af37" /> Gestion des profils</h1>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><IcoUsers size={26} color={roleColor('admin')} /> Gestion des profils</h1>
 
       <div className="card-glass p-4 mb-6 flex flex-wrap gap-3 items-center">
         <input className="px-3 py-2 rounded-lg text-sm outline-none flex-1 min-w-40"

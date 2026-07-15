@@ -7,6 +7,8 @@ import { supabase } from '../lib/supabase';
 import { type Mission } from '../types';
 import { formatDateShort, formatCFA } from '../lib/utils';
 import { ServiceIcon } from '../lib/serviceIcons';
+import { IcoMissions } from '../components/icons/DoodleIcons';
+import { roleColor } from '../lib/roleTheme';
 import { distanceKm, formatDistance } from '../lib/geo';
 import toast from 'react-hot-toast';
 
@@ -62,7 +64,7 @@ export default function Missions() {
   return (
     <DashboardLayout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-3xl font-bold" style={{ color: '#f0e6d3' }}>🎯 Missions disponibles</h1>
+        <h1 className="font-display text-3xl font-bold flex items-center gap-3" style={{ color: '#f0e6d3' }}><IcoMissions size={28} color={roleColor(profile?.role)} /> Missions disponibles</h1>
         {profile?.role === 'organisateur' && (
           <button onClick={() => navigate('/create-mission')} className="btn-gold px-5 py-2 rounded-xl text-sm font-bold text-[#261642]">
             + Nouvelle mission

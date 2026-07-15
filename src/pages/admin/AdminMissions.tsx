@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { supabase } from '../../lib/supabase';
 import { type Mission } from '../../types';
-import { Target, Eye } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { formatDateShort, formatCFA } from '../../lib/utils';
 import { ServiceIcon } from '../../lib/serviceIcons';
+import { IcoMissions } from '../../components/icons/DoodleIcons';
+import { roleColor } from '../../lib/roleTheme';
 import toast from 'react-hot-toast';
 
 const statusColor: Record<string, string> = {
@@ -45,7 +47,7 @@ export default function AdminMissions() {
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><Target size={26} color="#d4af37" /> Gestion des missions</h1>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><IcoMissions size={26} color={roleColor('admin')} /> Gestion des missions</h1>
 
       <div className="card-glass p-4 mb-6 flex flex-wrap gap-3 items-center">
         <input className="px-3 py-2 rounded-lg text-sm outline-none flex-1 min-w-40"

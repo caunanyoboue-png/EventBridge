@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { supabase } from '../../lib/supabase';
-import { Wallet, CheckCircle2, Phone } from 'lucide-react';
+import { CheckCircle2, Phone } from 'lucide-react';
 import { formatCFA, getInitials } from '../../lib/utils';
 import { type Payment } from '../../types';
+import { IcoWallet } from '../../components/icons/DoodleIcons';
+import { roleColor } from '../../lib/roleTheme';
 import toast from 'react-hot-toast';
 
 // Moyens de versement courants en Côte d'Ivoire (mobile money + Wave + espèces)
@@ -103,7 +105,7 @@ export default function AdminPayouts() {
   return (
     <DashboardLayout>
       <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}>
-        <Wallet size={25} color="#d4af37" /> Versements freelances
+        <IcoWallet size={25} color={roleColor('admin')} /> Versements freelances
       </h1>
 
       <div className="grid grid-cols-3 gap-4 mb-6">

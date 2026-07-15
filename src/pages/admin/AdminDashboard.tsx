@@ -1,12 +1,14 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Users, Target, Scale, Wallet, LayoutDashboard, UserCheck, Briefcase,
+  Users, Target, Scale, Wallet, UserCheck, Briefcase,
   CheckCircle2, Star, ChevronRight, TrendingUp, type LucideIcon,
 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { supabase } from '../../lib/supabase';
 import { formatCFA, formatDate } from '../../lib/utils';
+import { IcoDashAdmin } from '../../components/icons/DoodleIcons';
+import { roleColor } from '../../lib/roleTheme';
 
 // Cartes 100 % solides (aucun backdrop-filter / aucune couche composite) :
 // élimine les artefacts GPU mobiles tout en gardant le style premium.
@@ -97,7 +99,7 @@ export default function AdminDashboard() {
   return (
     <DashboardLayout>
       <h1 className="font-display text-3xl font-bold mb-1 flex items-center gap-3" style={{ color: '#f0e6d3' }}>
-        <LayoutDashboard size={26} color="#d4af37" /> Supervision
+        <IcoDashAdmin size={26} color={roleColor('admin')} /> Supervision
       </h1>
       <p className="text-sm mb-6" style={{ color: '#b8a898' }}>Vue d'ensemble de la plateforme EventBridge.</p>
 

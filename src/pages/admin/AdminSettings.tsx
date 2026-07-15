@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Settings, Wallet, Siren, ShieldCheck, Globe, Save, KeyRound, Mail, UserPlus, Crown, Trash2 } from 'lucide-react';
+import { Wallet, Siren, ShieldCheck, Globe, Save, KeyRound, Mail, UserPlus, Crown, Trash2 } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { type Profile } from '../../types';
 import { getInitials } from '../../lib/utils';
+import { IcoGear } from '../../components/icons/DoodleIcons';
+import { roleColor } from '../../lib/roleTheme';
 import toast from 'react-hot-toast';
 
 export default function AdminSettings() {
@@ -132,7 +134,7 @@ export default function AdminSettings() {
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><Settings size={26} color="#d4af37" /> Paramètres</h1>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><IcoGear size={26} color={roleColor('admin')} /> Paramètres</h1>
 
       {/* ── Mon compte ── */}
       <div className="card-glass p-6 mb-6">
