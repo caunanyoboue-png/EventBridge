@@ -2,6 +2,7 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
+import { useAuthGate } from '../contexts/AuthGateContext';
 import { supabase } from '../lib/supabase';
 import { getOrCreateConversation } from '../lib/messaging';
 import { type Mission, type Profile, type Contract } from '../types';
@@ -96,7 +97,9 @@ export default function MissionDetail() {
   const [params] = useSearchParams();
   const missionId = params.get('id');
   const { profile } = useAuth();
+  const { requireAuth } = useAuthGate();
   const navigate = useNavigate();
+  const isGuest = !profile;
   const [mission, setMission] = useState<Mission & { organisateur?: Profile } | null>(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
@@ -137,10 +140,19 @@ export default function MissionDetail() {
   }, [missionId, profile]);
 
   async function fetchMission() {
+    // Invité : colonnes sûres (pas d'adresse exacte, ni GPS, ni contact organisateur)
+    const cols = isGuest
+      ? 'id,organisateur_id,title,description,service_type,skills_required,ville,event_date,start_time,end_time,hourly_rate,slots_total,slots_filled,is_urgent,status,venue_photo_url,created_at'
+      : '*';
+    const org = isGuest ? 'id,full_name,avatar_url,role,company_name,avg_rating' : '*';
     const { data } = await supabase.from('missions')
-      .select('*, organisateur:profiles!organisateur_id(*)')
+      .select(`${cols}, organisateur:profiles!organisateur_id(${org})`)
       .eq('id', missionId!).single();
-    setMission(data);
+    const m = data as unknown as (Mission & { organisateur?: Profile }) | null;
+    if (isGuest && m?.organisateur) {
+      m.organisateur.full_name = (m.organisateur.full_name || '').trim().split(' ')[0] || 'Organisateur';
+    }
+    setMission(m);
     if (profile && data) {
       const { data: app } = await supabase.from('applications')
         .select('status').eq('mission_id', missionId!).eq('freelance_id', profile.id).maybeSingle();
@@ -151,6 +163,7 @@ export default function MissionDetail() {
   }
 
   async function contacter() {
+    if (!requireAuth('contacter l\'organisateur')) return;
     if (!profile || !mission?.organisateur_id) return;
     setContacting(true);
     try {
@@ -163,6 +176,7 @@ export default function MissionDetail() {
   }
 
   async function postuler() {
+    if (!requireAuth('postuler à cette mission')) return;
     if (!profile || !mission) return;
 
     const required = mission.skills_required || [];
@@ -310,7 +324,7 @@ export default function MissionDetail() {
               <Clock size={16} color="#d4af37" /><span>{mission.start_time?.substring(0,5)} – {mission.end_time?.substring(0,5)}</span>
             </div>
             <div className="flex items-center gap-2.5" style={{ color: '#b8a898' }}>
-              <MapPin size={16} color="#d4af37" /><span>{mission.location}{mission.ville ? `, ${mission.ville}` : ''}</span>
+              <MapPin size={16} color="#d4af37" /><span>{[mission.location, mission.ville].filter(Boolean).join(', ')}</span>
             </div>
             <div className="flex items-center gap-2.5">
               <Wallet size={16} color="#d4af37" />
@@ -406,8 +420,8 @@ export default function MissionDetail() {
             </div>
           )}
 
-          {/* Actions freelance */}
-          {profile?.role === 'freelance' && (
+          {/* Actions freelance / invité */}
+          {(profile?.role === 'freelance' || isGuest) && (
             <div className="space-y-3">
               <div className="flex flex-col sm:flex-row gap-3">
                 {alreadyApplied ? (

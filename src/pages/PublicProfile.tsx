@@ -7,6 +7,7 @@ import {
 import DashboardLayout from '../components/layout/DashboardLayout';
 import CertifiedBadge from '../components/CertifiedBadge';
 import { useAuth } from '../contexts/AuthContext';
+import { useAuthGate } from '../contexts/AuthGateContext';
 import { supabase } from '../lib/supabase';
 import { getOrCreateConversation } from '../lib/messaging';
 import { type Profile, type Review, type Mission } from '../types';
@@ -37,7 +38,9 @@ export default function PublicProfile() {
   const [params] = useSearchParams();
   const userId = params.get('id');
   const { profile: me } = useAuth();
+  const { requireAuth } = useAuthGate();
   const navigate = useNavigate();
+  const isGuest = !me;
 
   const [viewed, setViewed] = useState<Profile | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -47,27 +50,36 @@ export default function PublicProfile() {
 
   useEffect(() => {
     if (!userId) { navigate(-1); return; }
+    // Invité : colonnes d'affichage seulement (pas de contact/GPS) ; missions sans adresse exacte
+    const profileCols = isGuest
+      ? 'id,full_name,avatar_url,role,company_name,company_sector,ville,quartier,bio,skills,hourly_rate,avg_rating,total_reviews,total_missions,experience_years,is_certified,certification_level,is_available,banner_url'
+      : '*';
+    const missionCols = isGuest
+      ? 'id,title,status,event_date,service_type,slots_total,slots_filled'
+      : 'id,title,status,event_date,service_type,slots_total,slots_filled,location';
     Promise.all([
-      supabase.from('profiles').select('*').eq('id', userId).single(),
+      supabase.from('profiles').select(profileCols).eq('id', userId).single(),
       supabase.from('reviews')
         .select('*, reviewer:profiles!reviewer_id(full_name, avatar_url)')
         .eq('reviewed_id', userId)
         .order('created_at', { ascending: false })
         .limit(8),
       supabase.from('missions')
-        .select('id,title,status,event_date,service_type,slots_total,slots_filled,location')
+        .select(missionCols)
         .eq('organisateur_id', userId)
         .order('created_at', { ascending: false })
         .limit(4),
     ]).then(([{ data: p }, { data: r }, { data: m }]) => {
-      setViewed(p);
+      const prof = p as unknown as Profile | null;
+      setViewed(prof);
       setReviews(r || []);
-      if (p?.role !== 'freelance') setRecentMissions((m || []) as Mission[]);
+      if (prof?.role !== 'freelance') setRecentMissions((m || []) as unknown as Mission[]);
       setLoading(false);
     });
   }, [userId, navigate]);
 
   async function handleMessage() {
+    if (!requireAuth('envoyer un message')) return;
     if (!me || !viewed || me.id === viewed.id) return;
     setMessaging(true);
     try {
@@ -144,7 +156,7 @@ export default function PublicProfile() {
 
             {/* CTA buttons */}
             <div style={{ position: 'absolute', top: 14, right: 14, display: 'flex', gap: 8 }}>
-              {!isSelf && me && (
+              {!isSelf && (me || isGuest) && (
                 <button onClick={handleMessage} disabled={messaging}
                   className="btn-gold"
                   style={{ padding: '8px 18px', borderRadius: 9, fontSize: 12, fontWeight: 700,
@@ -490,7 +502,7 @@ export default function PublicProfile() {
             )}
 
             {/* Message CTA repeated in sidebar for easy access */}
-            {!isSelf && me && (
+            {!isSelf && (me || isGuest) && (
               <button onClick={handleMessage} disabled={messaging}
                 className="btn-gold"
                 style={{ width: '100%', padding: '12px', borderRadius: 10, fontSize: 13,

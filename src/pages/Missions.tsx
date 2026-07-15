@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
+import { useAuthGate } from '../contexts/AuthGateContext';
 import { supabase } from '../lib/supabase';
 import { type Mission } from '../types';
 import { formatDateShort, formatCFA } from '../lib/utils';
@@ -11,7 +12,9 @@ import toast from 'react-hot-toast';
 
 export default function Missions() {
   const { profile } = useAuth();
+  const { requireAuth } = useAuthGate();
   const navigate = useNavigate();
+  const isGuest = !profile;
   const [missions, setMissions] = useState<Mission[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterUrgent, setFilterUrgent] = useState(false);
@@ -21,16 +24,22 @@ export default function Missions() {
   useEffect(() => { fetchMissions(); }, []);
 
   async function fetchMissions() {
+    // Invité : colonnes sûres (pas d'adresse exacte ni GPS)
+    const cols = isGuest
+      ? 'id,organisateur_id,title,service_type,skills_required,ville,event_date,start_time,end_time,hourly_rate,slots_total,slots_filled,is_urgent,status,venue_photo_url,created_at'
+      : '*';
+    const org = isGuest ? 'id,full_name,avatar_url,role,company_name' : '*';
     const { data } = await supabase.from('missions')
-      .select('*, organisateur:profiles!organisateur_id(*)')
+      .select(`${cols}, organisateur:profiles!organisateur_id(${org})`)
       .eq('status', 'open')
       .gte('event_date', new Date().toISOString().slice(0, 10)) // pas de mission dont la date est passée
       .order('created_at', { ascending: false });
-    setMissions(data || []);
+    setMissions((data || []) as unknown as Mission[]);
     setLoading(false);
   }
 
   async function postuler(missionId: string) {
+    if (!requireAuth('postuler à une mission')) return;
     if (!profile) return;
     const { error } = await supabase.from('applications').insert({
       mission_id: missionId, freelance_id: profile.id, status: 'pending',
@@ -99,7 +108,7 @@ export default function Missions() {
           {filtered.map(m => (
             <MissionCard key={m.id} mission={m} onApply={() => postuler(m.id)}
               onView={() => navigate(`/MissionDetail?id=${m.id}`)}
-              isFreelance={profile?.role === 'freelance'}
+              isFreelance={profile?.role === 'freelance' || isGuest}
               userLat={profile?.latitude}
               userLng={profile?.longitude}
             />

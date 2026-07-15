@@ -126,19 +126,19 @@ function AppRoutes() {
       <Route path="/feed" element={<BrowseRoute><Feed /></BrowseRoute>} />
       <Route path="/freelance-dashboard" element={<ProtectedRoute role="freelance"><FreelanceDashboard /></ProtectedRoute>} />
       <Route path="/organisateur-dashboard" element={<ProtectedRoute role="organisateur"><OrganisateurDashboard /></ProtectedRoute>} />
-      <Route path="/missions" element={<ProtectedRoute><Missions /></ProtectedRoute>} />
+      <Route path="/missions" element={<BrowseRoute><Missions /></BrowseRoute>} />
       <Route path="/create-mission" element={<ProtectedRoute role="organisateur"><CreateMission /></ProtectedRoute>} />
-      <Route path="/MissionDetail" element={<ProtectedRoute><MissionDetail /></ProtectedRoute>} />
+      <Route path="/MissionDetail" element={<BrowseRoute><MissionDetail /></BrowseRoute>} />
       <Route path="/my-missions" element={<ProtectedRoute role="organisateur"><MyMissions /></ProtectedRoute>} />
       <Route path="/my-applications" element={<ProtectedRoute role="freelance"><MyApplications /></ProtectedRoute>} />
-      <Route path="/freelances" element={<ProtectedRoute><FreelanceProfiles /></ProtectedRoute>} />
+      <Route path="/freelances" element={<BrowseRoute><FreelanceProfiles /></BrowseRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
       <Route path="/sos-brigade" element={<ProtectedRoute><SosBrigade /></ProtectedRoute>} />
       <Route path="/certification" element={<ProtectedRoute role="freelance"><Certification /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       <Route path="/edit-mission" element={<ProtectedRoute role="organisateur"><EditMission /></ProtectedRoute>} />
-      <Route path="/public-profile" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
+      <Route path="/public-profile" element={<BrowseRoute><PublicProfile /></BrowseRoute>} />
       <Route path="/contracts/:id" element={<ProtectedRoute><ContractDetail /></ProtectedRoute>} />
 
       <Route path="/admin/AdminDashboard" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />

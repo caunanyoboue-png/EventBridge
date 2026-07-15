@@ -11,6 +11,7 @@ import CertifiedBadge from '../components/CertifiedBadge';
 
 export default function FreelanceProfiles() {
   const { profile: me } = useAuth();
+  const isGuest = !me;
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -20,10 +21,12 @@ export default function FreelanceProfiles() {
   useEffect(() => { fetchProfiles(); }, []);
 
   async function fetchProfiles() {
-    const { data } = await supabase.from('profiles')
-      .select('*').eq('role', 'freelance').eq('status', 'active')
-      .order('avg_rating', { ascending: false });
-    setProfiles(data || []);
+    // Invité : colonnes d'affichage seulement (la RLS limite déjà aux profils actifs)
+    const cols = 'id,full_name,avatar_url,role,ville,skills,hourly_rate,avg_rating,total_reviews,is_certified,certification_level,is_available';
+    let q = supabase.from('profiles').select(isGuest ? cols : '*').eq('role', 'freelance');
+    if (!isGuest) q = q.eq('status', 'active');
+    const { data } = await q.order('avg_rating', { ascending: false });
+    setProfiles((data || []) as unknown as Profile[]);
     setLoading(false);
   }
 

@@ -23,6 +23,12 @@ create policy post_comments_anon_select on public.post_comments
   for select to anon using (true);
 grant select on public.post_comments to anon;
 
+-- ── REVIEWS (avis) : lecture publique (affichés sur les profils) ─────────────
+drop policy if exists reviews_anon_select on public.reviews;
+create policy reviews_anon_select on public.reviews
+  for select to anon using (true);
+grant select on public.reviews to anon;
+
 -- ── MISSIONS : seules les missions OUVERTES, colonnes NON sensibles ──────────
 drop policy if exists missions_anon_select on public.missions;
 create policy missions_anon_select on public.missions
@@ -40,12 +46,13 @@ grant select (
 -- ── PROFILES : colonnes d'affichage uniquement ───────────────────────────────
 drop policy if exists profiles_anon_select on public.profiles;
 create policy profiles_anon_select on public.profiles
-  for select to anon using (true);
+  for select to anon using (status = 'active' or status is null);
 
 revoke select on public.profiles from anon;
 grant select (
-  id, full_name, avatar_url, role, company_name, ville, bio, skills,
-  hourly_rate, avg_rating, is_certified, certification_level, is_available
+  id, full_name, avatar_url, role, company_name, company_sector, ville, quartier,
+  bio, skills, hourly_rate, avg_rating, total_reviews, total_missions,
+  experience_years, is_certified, certification_level, is_available, banner_url
 ) on public.profiles to anon;
 -- Colonnes VOLONTAIREMENT exclues pour l'invité :
 --   email, phone, latitude, longitude, kyc_document_path, kyc_document_back_path,
