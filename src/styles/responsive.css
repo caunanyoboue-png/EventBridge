@@ -248,6 +248,10 @@
   .animate-glow, .animate-sos, .notif-pulse, .text-gold-gradient {
     animation: none !important;
   }
+  /* Aplatir le shell connecté comme en invité : ni flex, ni contexte d'empilement
+     sur le contenu (très haut) → Android ne compose plus toute la page en une couche. */
+  .eb-shell { display: block !important; }
+  .layout-main { position: static !important; z-index: auto !important; }
 }
 @keyframes drawerIn {
   from { transform: translateX(-100%); }

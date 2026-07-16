@@ -46,7 +46,7 @@ export default function DashboardLayout({ children, bgImage }: Props) {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#261642', position: 'relative' }}>
+    <div className="eb-shell" style={{ display: 'flex', minHeight: '100vh', background: '#261642', position: 'relative' }}>
       {bgImage && (
         <>
           <img src={bgImage} alt="" style={{ position: 'fixed', inset: 0, width: '100%', height: '100%',
