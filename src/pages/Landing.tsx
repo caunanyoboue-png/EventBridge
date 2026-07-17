@@ -295,7 +295,7 @@ export default function Landing() {
                 style={{ color: '#b8a898', transition: 'color 0.2s' }}
                 onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color = '#e8c97a'}
                 onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.color = '#b8a898'}>
-                Explorer le fil sans compte <IconArrow />
+                Explorer le fil <IconArrow />
               </button>
             </div>
           </Reveal>
