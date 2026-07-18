@@ -3,7 +3,7 @@
 -- Implémente RG10 / RG11 / RG12 du mémoire :
 --   Score = 0.40*compétences + 0.25*distance + 0.20*note + 0.15*disponibilité
 --   ProximityScore = 1 - (distance_km / 50), plancher 0 au-delà de 50 km
---   Ne retient que les freelances disponibles et de note >= 2.5 (ou sans note)
+--   Ne retient que les freelances VÉRIFIÉS (KYC), disponibles et de note >= 2.5 (ou sans note)
 --   Renvoie les N meilleurs profils triés par score décroissant (défaut 10)
 --
 -- À exécuter dans l'éditeur SQL Supabase.
@@ -74,6 +74,8 @@ as $$
     cross join m
     where p.role = 'freelance'
       and p.is_available = true
+      -- RG11 : identité vérifiée par l'admin (KYC) obligatoire pour entrer dans le matching
+      and p.kyc_status = 'verified'
       -- RG11 : note >= 2.5 OU aucune évaluation (avg_rating à 0 / null)
       and (p.avg_rating is null or p.avg_rating = 0 or p.avg_rating >= 2.5)
   ),
