@@ -87,3 +87,12 @@ export const IcoSOS = (p: IconProps) => <Dood {...p}>
   <path d="M12 7.3v5.2"/>
   <circle cx="12" cy="16" r=".85" fill="currentColor" stroke="none"/>
 </Dood>;
+export const IcoPlus = (p: IconProps) => <Dood {...p}>
+  <path d="M12 5.5v13M5.5 12h13"/>
+</Dood>;
+export const IcoGrid = (p: IconProps) => <Dood {...p}>
+  <circle cx="7" cy="7" r="1.7" fill="currentColor" stroke="none"/>
+  <circle cx="17" cy="7" r="1.7" fill="currentColor" stroke="none"/>
+  <circle cx="7" cy="17" r="1.7" fill="currentColor" stroke="none"/>
+  <circle cx="17" cy="17" r="1.7" fill="currentColor" stroke="none"/>
+</Dood>;

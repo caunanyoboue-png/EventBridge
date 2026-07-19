@@ -189,7 +189,7 @@
 @media (max-width: 1023px) {
   .layout-main {
     margin-left: 0 !important;
-    padding: 20px 16px !important;
+    padding: 20px 16px 92px !important;
     /* Pas de conteneur de scroll imbriqué sur mobile : c'est le body qui scrolle.
        (overflow:auto + 100vh imbriqués = artefacts GPU au scroll sur Android.) */
     overflow: visible !important;
@@ -209,7 +209,7 @@
 }
 @media (max-width: 540px) {
   .layout-main {
-    padding: 14px 12px !important;
+    padding: 14px 12px 92px !important;
   }
 }
 
@@ -287,3 +287,43 @@
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+
+/* ─── Barre d'onglets mobile (remplace le menu latéral en connecté) ─────────── */
+.eb-tabbar { display: none; }
+.eb-mobile-only { display: none; }
+@media (max-width: 1023px) {
+  .eb-tabbar {
+    display: flex; align-items: flex-end; justify-content: space-around;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+    height: 62px; padding: 0 4px 6px;
+    background: #0d0620; border-top: 1px solid rgba(201, 168, 76, 0.14);
+  }
+  .eb-mobile-only { display: inline-flex !important; }
+}
+.eb-tab, .eb-tab-center {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  background: none; border: none; cursor: pointer; padding: 6px 0 2px; line-height: 1;
+}
+.eb-cbtn {
+  width: 52px; height: 52px; border-radius: 50%; margin-top: -22px;
+  display: flex; align-items: center; justify-content: center;
+  border: 3px solid #140a26; box-shadow: 0 5px 14px rgba(0, 0, 0, 0.45);
+}
+.eb-tab-center:active .eb-cbtn { transform: scale(0.94); }
+.eb-sheet-ov {
+  position: fixed; inset: 0; z-index: 70; background: rgba(0, 0, 0, 0.55);
+  display: flex; align-items: flex-end;
+}
+.eb-sheet {
+  width: 100%; background: #160a2e; border-top: 1px solid rgba(201, 168, 76, 0.2);
+  border-radius: 20px 20px 0 0; padding: 10px 14px 24px;
+  animation: sheetUp 0.22s ease;
+}
+@keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.eb-sheet-handle { width: 40px; height: 4px; border-radius: 2px; background: rgba(201, 168, 76, 0.4); margin: 2px auto 12px; }
+.eb-sheet-row {
+  width: 100%; display: flex; align-items: center; gap: 12px; padding: 13px 8px;
+  background: none; border: none; border-radius: 10px; cursor: pointer;
+  font-size: 14px; font-weight: 500; text-align: left;
+}
+.eb-sheet-row:active { background: rgba(201, 168, 76, 0.08); }

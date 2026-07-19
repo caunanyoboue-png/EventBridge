@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import MobileTabBar from './MobileTabBar';
 import NotificationBell from '../NotificationBell';
 import SosAlertBanner from '../SosAlertBanner';
 import Logo from '../Logo';
@@ -81,31 +82,36 @@ export default function DashboardLayout({ children, bgImage }: Props) {
             borderBottom: '1px solid rgba(201,168,76,0.07)',
           }}
         >
-          {/* Gauche : hamburger + logo (mobile only via CSS) */}
+          {/* Gauche : logo (mobile only via CSS) — la nav passe en barre du bas */}
           <div className="eb-mobile-header" style={{ display: 'none', alignItems: 'center', gap: 10 }}>
-            <button
-              onClick={() => setSidebarOpen(true)}
-              style={{
-                background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.2)',
-                borderRadius: 8, padding: '6px 8px', cursor: 'pointer', display: 'flex',
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M2 5h16M2 10h16M2 15h16" stroke="#d4af37" strokeWidth="1.6" strokeLinecap="round"/>
-              </svg>
-            </button>
             <Logo height={36} />
           </div>
 
           {/* Espace vide sur desktop pour pousser la cloche à droite */}
           <div className="eb-desktop-spacer" style={{ flex: 1 }} />
 
-          {/* Droite : cloche toujours visible */}
-          <NotificationBell />
+          {/* Droite : S.O.S (organisateur, mobile) + cloche toujours visible */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {profile.role === 'organisateur' && (
+              <button className="eb-mobile-only animate-sos" onClick={() => navigate('/sos-brigade')}
+                style={{ alignItems: 'center', gap: 6, background: '#dc2626', color: '#fff',
+                  border: 'none', borderRadius: 10, padding: '7px 11px', fontWeight: 700, fontSize: 12,
+                  cursor: 'pointer' }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="8.6"/><path d="M12 7.3v5.2"/><circle cx="12" cy="16" r=".9" fill="currentColor" stroke="none"/>
+                </svg>
+                S.O.S
+              </button>
+            )}
+            <NotificationBell />
+          </div>
         </div>
 
         {children}
       </main>
+
+      {/* Barre d'onglets — mobile uniquement (remplace le menu latéral) */}
+      <MobileTabBar />
     </div>
   );
 }
