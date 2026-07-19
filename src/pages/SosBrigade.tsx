@@ -468,8 +468,9 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
     setCancelling(true);
     try {
       const applyPenalty = !inFreeWindow && confirmed.length > 0 && penaltyPerFreelance > 0;
+
+      // Compensation due aux freelances confirmés si l'annulation est hors du délai gratuit
       if (applyPenalty) {
-        // Enregistrer la pénalité due à chaque freelance confirmé + le notifier
         await supabase.from('sos_compensations').insert(
           confirmed.map(r => ({
             sos_session_id: session.id,
@@ -479,22 +480,38 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
             status: 'due',
           }))
         );
-        await supabase.from('notifications').insert(
-          confirmed.map(r => ({
-            user_id: r.freelance_id,
-            type: 'sos_alert',
-            title: 'S.O.S annulé — compensation due',
-            body: `L'organisateur a annulé le S.O.S après le délai gratuit. Une compensation de ${penaltyPerFreelance.toLocaleString('fr-CI')} FCFA vous est due.`,
-            data: { sos_session_id: session.id },
-            is_read: false,
-          }))
-        );
       }
+
+      // Prévenir TOUS les freelances impliqués que le S.O.S est annulé
+      // (confirmés + en attente). Les confirmés reçoivent aussi le montant dû.
+      const lieu = `« ${session.service_type} » à ${session.location}`;
+      const notifs = [
+        ...confirmed.map(r => ({
+          user_id: r.freelance_id,
+          type: 'sos_cancelled',
+          title: applyPenalty ? 'S.O.S annulé — compensation due' : 'S.O.S annulé',
+          body: applyPenalty
+            ? `L'organisateur a annulé le S.O.S ${lieu} après le délai gratuit. La mission n'aura pas lieu. Une compensation de ${penaltyPerFreelance.toLocaleString('fr-CI')} FCFA vous est due.`
+            : `L'organisateur a annulé le S.O.S ${lieu}. La mission n'aura pas lieu.`,
+          data: { sos_session_id: session.id },
+          is_read: false,
+        })),
+        ...pending.map(r => ({
+          user_id: r.freelance_id,
+          type: 'sos_cancelled',
+          title: 'S.O.S annulé',
+          body: `L'organisateur a annulé le S.O.S ${lieu}. Votre proposition n'a plus lieu d'être.`,
+          data: { sos_session_id: session.id },
+          is_read: false,
+        })),
+      ];
+      if (notifs.length > 0) await supabase.from('notifications').insert(notifs);
+
       await supabase.from('sos_sessions').update({ status: 'cancelled' }).eq('id', session.id);
       lsClear();
       toast.success(applyPenalty
-        ? `S.O.S annulé. Pénalité de ${penaltyTotal.toLocaleString('fr-CI')} FCFA enregistrée.`
-        : 'S.O.S annulé sans frais.');
+        ? `S.O.S annulé. ${notifs.length} freelance(s) notifié(s) · pénalité de ${penaltyTotal.toLocaleString('fr-CI')} FCFA enregistrée.`
+        : `S.O.S annulé. ${notifs.length} freelance(s) notifié(s).`);
       onReset();
     } catch (e: unknown) {
       toast.error((e as Error).message || "Erreur lors de l'annulation");
