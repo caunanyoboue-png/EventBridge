@@ -40,7 +40,7 @@ export default function SosBrigade() {
    HELPERS localStorage — session complète sérialisée
 ══════════════════════════════════════════════════════════════════════ */
 const SOS_KEY = 'eb_sos_active';
-const SOS_RADIUS_KM = 30; // rayon de matching géographique
+const SOS_RADIUS_KM = 20; // rayon de matching géographique (km)
 
 // Extrait les id de session des notifications S.O.S reçues par le freelance.
 function sosIdsFromNotifs(notifs: { data: unknown }[] | null): string[] {

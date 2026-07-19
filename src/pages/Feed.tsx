@@ -33,7 +33,7 @@ function SosFeedAlert() {
     if (!profile || profile.role !== 'freelance') return;
     let cancelled = false;
     (async () => {
-      // 1) Position GPS actuelle → maj du profil (le matching 30 km s'en sert)
+      // 1) Position GPS actuelle → maj du profil (le matching 20 km s'en sert)
       try {
         const c = await getBrowserPosition();
         if (cancelled) return;
@@ -60,7 +60,11 @@ function SosFeedAlert() {
       // Déjà répondu → ne plus afficher l'alerte en haut du fil
       const { data: resp } = await supabase.from('sos_responses')
         .select('id').eq('sos_session_id', session.id).eq('freelance_id', profile.id).maybeSingle();
-      if (!cancelled && !resp) setSos(session);
+      // Garde compétence : n'afficher que si le freelance a au moins une compétence demandée
+      const mySkills = profile.skills || [];
+      const svc = session.service_types?.length ? session.service_types : [session.service_type];
+      const skilled = svc.some(s => !!s && mySkills.includes(s));
+      if (!cancelled && !resp && skilled) setSos(session);
     })();
     return () => { cancelled = true; };
   }, [profile?.id]);

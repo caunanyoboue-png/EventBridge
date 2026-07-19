@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 type SosData = {
   id: string;
   service_type: string;
+  service_types?: string[] | null;
   location: string;
   slots_needed: number;
   message?: string | null;
@@ -49,7 +50,7 @@ export default function SosAlertBanner() {
     checkPendingAlert();
 
     // Temps réel : on écoute MES notifications. Une 'sos_alert' = je suis ciblé
-    // (le filtre des 30 km a déjà été appliqué au déclenchement).
+    // (les filtres compétence + 20 km ont déjà été appliqués au déclenchement).
     const channel = supabase
       .channel('sos-banner-notif')
       .on('postgres_changes', {
@@ -86,10 +87,15 @@ export default function SosAlertBanner() {
   async function showSession(sessionId: string): Promise<boolean> {
     if (!profile || isDismissed(sessionId)) return false;
     const { data } = await supabase.from('sos_sessions')
-      .select('id, service_type, location, slots_needed, message, expires_at, status')
+      .select('id, service_type, service_types, location, slots_needed, message, expires_at, status')
       .eq('id', sessionId).maybeSingle();
     if (!data || data.status !== 'active') return false;
     if (new Date(data.expires_at) < new Date()) return false;
+
+    // Garde compétence : ne rien afficher si le freelance n'a aucune des compétences demandées
+    const mySkills = profile.skills || [];
+    const svc = (data as SosData).service_types?.length ? (data as SosData).service_types as string[] : [data.service_type];
+    if (!svc.some(s => !!s && mySkills.includes(s))) return false;
 
     // Déjà répondu → ne pas réafficher
     const { data: existing } = await supabase.from('sos_responses')
