@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { rolePal } from '../../lib/roleTheme';
@@ -83,7 +84,7 @@ export default function MobileTabBar() {
     );
   };
 
-  return (
+  const ui = (
     <>
       <nav className="eb-tabbar" aria-label="Navigation">
         {cfg.left.map(it => <Tab key={it.path} item={it} />)}
@@ -124,4 +125,7 @@ export default function MobileTabBar() {
       )}
     </>
   );
+
+  // Rendu dans <body> : la barre reste fixée à l'écran même si un parent est transformé.
+  return typeof document !== 'undefined' ? createPortal(ui, document.body) : ui;
 }
