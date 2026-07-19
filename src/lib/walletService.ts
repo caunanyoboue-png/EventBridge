@@ -19,18 +19,32 @@ export async function getTransactions(userId: string, limit = 40): Promise<Walle
   return (data || []) as WalletTx[];
 }
 
-/** Recharge (simulation) — crédite le solde de l'utilisateur connecté. */
-export async function recharge(amount: number): Promise<number> {
-  const { data, error } = await supabase.rpc('wallet_recharge', { p_amount: amount });
-  if (error) throw error;
-  return data as number;
+// Appel d'une Edge Function avec le JWT de l'utilisateur.
+async function callFn<T = Record<string, unknown>>(name: string, body: unknown): Promise<T> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Non authentifié');
+  const base = import.meta.env.VITE_SUPABASE_URL;
+  const res = await fetch(`${base}/functions/v1/${name}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+    body: JSON.stringify(body),
+  });
+  const d = await res.json().catch(() => ({}));
+  if (!res.ok || (d as { error?: string }).error) {
+    throw new Error((d as { error?: string }).error || 'Service indisponible');
+  }
+  return d as T;
 }
 
-/** Retrait (simulation) — débite le solde et trace le versement. */
-export async function withdraw(amount: number, method: string): Promise<number> {
-  const { data, error } = await supabase.rpc('wallet_withdraw', { p_amount: amount, p_method: method });
-  if (error) throw error;
-  return data as number;
+/** Recharge via PayDunya — renvoie l'URL de paiement (l'appelant y redirige). */
+export async function initiateRecharge(amount: number): Promise<string> {
+  const d = await callFn<{ payment_url: string }>('paydunya-initiate', { amount });
+  return d.payment_url;
+}
+
+/** Retrait via PayDunya Disburse — versement automatique sur le mobile money. */
+export async function requestWithdraw(amount: number, phone: string, operator: string): Promise<void> {
+  await callFn('paydunya-withdraw', { amount, phone, operator });
 }
 
 /** Payer une mission depuis le solde (escrow). Renvoie l'id du paiement. */

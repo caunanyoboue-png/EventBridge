@@ -1,14 +1,19 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
-import { getWallet, getTransactions, recharge, withdraw, type Wallet as W, type WalletTx } from '../lib/walletService';
+import { getWallet, getTransactions, initiateRecharge, requestWithdraw, type Wallet as W, type WalletTx } from '../lib/walletService';
 import { formatCFA } from '../lib/utils';
 import { roleColor } from '../lib/roleTheme';
 import { IcoWallet } from '../components/icons/DoodleIcons';
 import toast from 'react-hot-toast';
 
 const QUICK = [5000, 10000, 25000, 50000];
-const METHODS = ['Orange Money', 'MTN MoMo', 'Wave', 'Moov Money'];
+const WITHDRAW_MODES = [
+  { value: 'orange-money-ci', label: 'Orange Money' },
+  { value: 'mtn-ci',          label: 'MTN MoMo' },
+  { value: 'moov-ci',         label: 'Moov Money' },
+  { value: 'wave-ci',         label: 'Wave' },
+];
 
 const TX_LABEL: Record<string, string> = {
   recharge: 'Recharge', hold: 'Mission payée (escrow)', release: 'Escrow libéré',
@@ -20,7 +25,8 @@ export default function Wallet() {
   const [w, setW] = useState<W>({ balance: 0, held: 0, currency: 'XOF' });
   const [txs, setTxs] = useState<WalletTx[]>([]);
   const [amount, setAmount] = useState<number>(10000);
-  const [method, setMethod] = useState(METHODS[0]);
+  const [phone, setPhone] = useState('');
+  const [operator, setOperator] = useState(WITHDRAW_MODES[0].value);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -34,20 +40,44 @@ export default function Wallet() {
   }
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [profile?.id]);
 
+  // Retour depuis PayDunya (?recharge=done|cancel) — le crédit arrive via le webhook (async).
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search).get('recharge');
+    if (!p) return;
+    window.history.replaceState({}, '', '/wallet');
+    if (p === 'done') {
+      toast.success('Paiement reçu — crédit du portefeuille en cours…');
+      setTimeout(load, 2500);
+    } else if (p === 'cancel') {
+      toast('Recharge annulée.');
+    }
+    /* eslint-disable-next-line */
+  }, []);
+
   async function doRecharge() {
-    if (amount <= 0) return;
+    if (amount < 200) { toast.error('Montant minimum : 200 FCFA.'); return; }
     setBusy(true);
-    try { await recharge(amount); toast.success('Portefeuille rechargé (simulation).'); await load(); }
-    catch (e) { toast.error((e as Error).message || 'Erreur'); }
-    finally { setBusy(false); }
+    try {
+      const url = await initiateRecharge(amount);
+      window.location.href = url; // redirection vers la page de paiement PayDunya
+    } catch (e) {
+      toast.error((e as Error).message || 'Erreur');
+      setBusy(false);
+    }
   }
+
   async function doWithdraw() {
-    if (amount <= 0) return;
+    if (amount < 200) { toast.error('Montant minimum : 200 FCFA.'); return; }
     if (amount > w.balance) { toast.error('Montant supérieur au solde disponible.'); return; }
+    if (!phone.trim()) { toast.error('Renseignez votre numéro mobile money.'); return; }
     setBusy(true);
-    try { await withdraw(amount, method); toast.success('Retrait effectué (simulation).'); await load(); }
-    catch (e) { toast.error((e as Error).message || 'Erreur'); }
-    finally { setBusy(false); }
+    try {
+      await requestWithdraw(amount, phone.trim(), operator);
+      toast.success('Retrait envoyé — versement en cours sur votre mobile money.');
+      await load();
+    } catch (e) {
+      toast.error((e as Error).message || 'Erreur');
+    } finally { setBusy(false); }
   }
 
   const inputStyle = { background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
@@ -78,7 +108,9 @@ export default function Wallet() {
           {isFreelance ? 'Retirer mes gains' : 'Recharger le portefeuille'}
         </h2>
         <p className="text-xs mb-4" style={{ color: '#7a6a8a' }}>
-          Mode simulation — aucun argent réel n'est déplacé. Le paiement Mobile Money réel (Orange, MTN, Wave…) sera branché ultérieurement.
+          {isFreelance
+            ? 'Versement automatique sur votre compte mobile money via PayDunya.'
+            : 'Paiement sécurisé par PayDunya (Orange Money, MTN, Moov, Wave, carte).'}
         </p>
 
         {!isFreelance && (
@@ -98,22 +130,30 @@ export default function Wallet() {
         <div className="flex flex-wrap gap-3 items-end">
           <div>
             <label className="text-xs block mb-1" style={{ color: '#b8a898' }}>Montant (FCFA)</label>
-            <input type="number" value={amount} min={500} step={500}
+            <input type="number" value={amount} min={200} step={500}
               onChange={e => setAmount(Number(e.target.value))}
-              className="px-3 py-2 rounded-lg text-sm outline-none" style={{ ...inputStyle, width: 160 }} />
+              className="px-3 py-2 rounded-lg text-sm outline-none" style={{ ...inputStyle, width: 150 }} />
           </div>
           {isFreelance && (
-            <div>
-              <label className="text-xs block mb-1" style={{ color: '#b8a898' }}>Vers</label>
-              <select value={method} onChange={e => setMethod(e.target.value)}
-                className="px-3 py-2 rounded-lg text-sm outline-none" style={inputStyle}>
-                {METHODS.map(m => <option key={m} value={m}>{m}</option>)}
-              </select>
-            </div>
+            <>
+              <div>
+                <label className="text-xs block mb-1" style={{ color: '#b8a898' }}>Numéro mobile money</label>
+                <input type="tel" value={phone} placeholder="+225 07 00 00 00 00"
+                  onChange={e => setPhone(e.target.value)}
+                  className="px-3 py-2 rounded-lg text-sm outline-none" style={{ ...inputStyle, width: 180 }} />
+              </div>
+              <div>
+                <label className="text-xs block mb-1" style={{ color: '#b8a898' }}>Opérateur</label>
+                <select value={operator} onChange={e => setOperator(e.target.value)}
+                  className="px-3 py-2 rounded-lg text-sm outline-none" style={inputStyle}>
+                  {WITHDRAW_MODES.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                </select>
+              </div>
+            </>
           )}
           <button onClick={isFreelance ? doWithdraw : doRecharge} disabled={busy}
             className="btn-gold px-6 py-2.5 rounded-xl text-sm font-bold text-[#261642] disabled:opacity-60">
-            {busy ? '…' : isFreelance ? 'Retirer' : 'Recharger'}
+            {busy ? '…' : isFreelance ? 'Retirer' : 'Payer avec PayDunya'}
           </button>
         </div>
       </div>
