@@ -28,6 +28,7 @@ import EditMission from './pages/EditMission';
 import PublicProfile from './pages/PublicProfile';
 import ContractDetail from './pages/ContractDetail';
 import Feed from './pages/Feed';
+import Wallet from './pages/Wallet';
 
 // Pages admin
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -137,6 +138,7 @@ function AppRoutes() {
       <Route path="/sos-brigade" element={<ProtectedRoute><SosBrigade /></ProtectedRoute>} />
       <Route path="/certification" element={<ProtectedRoute role="freelance"><Certification /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+      <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
       <Route path="/edit-mission" element={<ProtectedRoute role="organisateur"><EditMission /></ProtectedRoute>} />
       <Route path="/public-profile" element={<BrowseRoute><PublicProfile /></BrowseRoute>} />
       <Route path="/contracts/:id" element={<ProtectedRoute><ContractDetail /></ProtectedRoute>} />

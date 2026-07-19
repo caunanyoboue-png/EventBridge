@@ -18,6 +18,7 @@ const NAV_ITEMS_FREELANCE = [
   { Icon: IcoDoc,        label: 'Mes candidatures',  path: '/my-applications'      },
   { Icon: IcoPerson,     label: 'Mon profil',        path: '/profile'              },
   { Icon: IcoStar,       label: 'Certification',     path: '/certification'        },
+  { Icon: IcoWallet,     label: 'Portefeuille',      path: '/wallet'               },
   { Icon: IcoGear,       label: 'Paramètres',        path: '/settings'             },
 ];
 const NAV_ITEMS_ORG = [
@@ -28,6 +29,7 @@ const NAV_ITEMS_ORG = [
   { Icon: IcoMessages,   label: 'Messages',          path: '/messages'               },
   { Icon: IcoClipboard,  label: 'Mes missions',      path: '/my-missions'            },
   { Icon: IcoPerson,     label: 'Mon profil',        path: '/profile'                },
+  { Icon: IcoWallet,     label: 'Portefeuille',      path: '/wallet'                 },
   { Icon: IcoGear,       label: 'Paramètres',        path: '/settings'               },
 ];
 const ADMIN_ITEMS = [
