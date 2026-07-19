@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { rolePal } from '../../lib/roleTheme';
 import {
   IcoFeed, IcoMissions, IcoDoc, IcoMessages, IcoPerson, IcoDashboard, IcoUsers,
-  IcoStar, IcoGear, IcoClipboard, IcoDashAdmin, IcoShield, IcoWallet, IcoPlus, IcoGrid,
+  IcoStar, IcoGear, IcoClipboard, IcoDashAdmin, IcoShield, IcoWallet, IcoPlus, IcoGrid, IcoLogout,
   type IconProps,
 } from '../icons/DoodleIcons';
 
@@ -61,7 +61,7 @@ const CENTER: Record<string, { grad: string; on: string }> = {
 const MUTED = '#7d6f90';
 
 export default function MobileTabBar() {
-  const { profile } = useAuth();
+  const { profile, signOut } = useAuth();
   const nav = useNavigate();
   const loc = useLocation();
   const [sheet, setSheet] = useState(false);
@@ -120,6 +120,11 @@ export default function MobileTabBar() {
                 </button>
               );
             })}
+            <button className="eb-sheet-row" onClick={() => { setSheet(false); signOut(); }}
+              style={{ color: '#ef4444', borderTop: '1px solid rgba(255,255,255,0.06)', borderRadius: 0, marginTop: 4, paddingTop: 14 }}>
+              <IcoLogout size={20} color="#ef4444" />
+              Déconnexion
+            </button>
           </div>
         </div>
       )}

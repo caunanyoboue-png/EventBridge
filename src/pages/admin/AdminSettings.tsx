@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Wallet, Siren, ShieldCheck, Globe, Save, KeyRound, Mail, UserPlus, Crown, Trash2 } from 'lucide-react';
+import { Wallet, Siren, ShieldCheck, Globe, Save, KeyRound, Mail, UserPlus, Crown, Trash2, LogOut } from 'lucide-react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -10,7 +10,7 @@ import { roleColor } from '../../lib/roleTheme';
 import toast from 'react-hot-toast';
 
 export default function AdminSettings() {
-  const { profile } = useAuth();
+  const { profile, signOut } = useAuth();
   const isSuper = !!profile?.is_super_admin;
 
   // ── Mon compte ──────────────────────────────────────────────
@@ -171,6 +171,14 @@ export default function AdminSettings() {
               <KeyRound size={15} /> {busyPwd ? '…' : 'Changer le mot de passe'}
             </button>
           </div>
+        </div>
+
+        <div className="mt-6 pt-5" style={{ borderTop: '1px solid rgba(201,168,76,0.12)' }}>
+          <button onClick={signOut}
+            className="px-5 py-2.5 rounded-xl text-sm font-semibold inline-flex items-center gap-2"
+            style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.4)', color: '#ef4444' }}>
+            <LogOut size={16} /> Se déconnecter
+          </button>
         </div>
       </div>
 
