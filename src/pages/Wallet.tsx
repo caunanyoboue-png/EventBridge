@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
-import { getWallet, getTransactions, initiateRecharge, requestWithdraw, type Wallet as W, type WalletTx } from '../lib/walletService';
+import { getWallet, getTransactions, initiateRecharge, requestWithdraw, confirmRecharge, type Wallet as W, type WalletTx } from '../lib/walletService';
 import { formatCFA } from '../lib/utils';
 import { roleColor } from '../lib/roleTheme';
 import { IcoWallet } from '../components/icons/DoodleIcons';
@@ -46,8 +46,11 @@ export default function Wallet() {
     if (!p) return;
     window.history.replaceState({}, '', '/wallet');
     if (p === 'done') {
-      toast.success('Paiement reçu — crédit du portefeuille en cours…');
-      setTimeout(load, 2500);
+      toast.success('Paiement reçu — vérification du crédit…');
+      (async () => {
+        try { await confirmRecharge(); } catch { /* le webhook a peut-être déjà crédité */ }
+        await load();
+      })();
     } else if (p === 'cancel') {
       toast('Recharge annulée.');
     }
@@ -64,6 +67,17 @@ export default function Wallet() {
       toast.error((e as Error).message || 'Erreur');
       setBusy(false);
     }
+  }
+
+  async function doConfirm() {
+    setBusy(true);
+    try {
+      const r = await confirmRecharge();
+      if (r.credited) toast.success('Recharge créditée !');
+      else toast('Aucune recharge en attente à créditer.');
+      await load();
+    } catch (e) { toast.error((e as Error).message || 'Erreur'); }
+    finally { setBusy(false); }
   }
 
   async function doWithdraw() {
@@ -156,6 +170,12 @@ export default function Wallet() {
             {busy ? '…' : isFreelance ? 'Retirer' : 'Payer avec PayDunya'}
           </button>
         </div>
+        {!isFreelance && (
+          <button onClick={doConfirm} disabled={busy}
+            className="mt-3 text-xs" style={{ color: '#b8a898', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}>
+            Déjà payé ? Vérifier ma recharge
+          </button>
+        )}
       </div>
 
       {/* Historique */}

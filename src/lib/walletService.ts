@@ -47,6 +47,11 @@ export async function requestWithdraw(amount: number, phone: string, operator: s
   await callFn('paydunya-withdraw', { amount, phone, operator });
 }
 
+/** Filet de sécurité : vérifie la dernière recharge en attente auprès de PayDunya et crédite. */
+export async function confirmRecharge(): Promise<{ credited: boolean }> {
+  return await callFn<{ credited: boolean }>('paydunya-confirm', {});
+}
+
 /** Payer une mission depuis le solde (escrow). Renvoie l'id du paiement. */
 export async function payMission(missionId: string, freelanceId: string, amount: number): Promise<string> {
   const { data, error } = await supabase.rpc('wallet_pay_mission', {
