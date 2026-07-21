@@ -4,7 +4,8 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { type Mission, type MissionStatus } from '../types';
-import { formatDateShort, formatCFA } from '../lib/utils';
+import { formatDateShort } from '../lib/utils';
+import { formatRateLabel } from '../lib/missionPricing';
 import { ServiceIcon } from '../lib/serviceIcons';
 import { IcoClipboard } from '../components/icons/DoodleIcons';
 import { roleColor } from '../lib/roleTheme';
@@ -144,7 +145,7 @@ export default function MyMissions() {
                   <div>
                     <h3 className="font-semibold" style={{ color: '#f0e6d3' }}>{m.title}</h3>
                     <p className="text-sm" style={{ color: '#b8a898' }}>
-                      {formatDateShort(m.event_date)} · {m.start_time?.substring(0,5)} - {m.end_time?.substring(0,5)} · {formatCFA(m.hourly_rate)}/h
+                      {formatDateShort(m.event_date)}{m.nb_days && m.nb_days > 1 ? ` (+${m.nb_days - 1}j)` : ''} · {m.start_time?.substring(0,5)} - {m.end_time?.substring(0,5)} · {formatRateLabel(m.roles, m.hourly_rate)}
                     </p>
                     <p className="text-xs mt-1" style={{ color: '#b8a898' }}>
                       👥 {m.slots_filled || 0}/{m.slots_total} poste(s) · 📍 {m.ville}

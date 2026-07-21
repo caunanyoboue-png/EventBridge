@@ -5,7 +5,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useAuthGate } from '../contexts/AuthGateContext';
 import { supabase } from '../lib/supabase';
 import { type Mission } from '../types';
-import { formatDateShort, formatCFA } from '../lib/utils';
+import { formatDateShort } from '../lib/utils';
+import { formatRateLabel } from '../lib/missionPricing';
 import { ServiceIcon } from '../lib/serviceIcons';
 import { IcoMissions } from '../components/icons/DoodleIcons';
 import { roleColor } from '../lib/roleTheme';
@@ -28,7 +29,7 @@ export default function Missions() {
   async function fetchMissions() {
     // Invité : colonnes sûres (pas d'adresse exacte ni GPS)
     const cols = isGuest
-      ? 'id,organisateur_id,title,service_type,skills_required,ville,event_date,start_time,end_time,hourly_rate,slots_total,slots_filled,is_urgent,status,venue_photo_url,created_at'
+      ? 'id,organisateur_id,title,service_type,skills_required,roles,nb_days,ville,event_date,start_time,end_time,hourly_rate,slots_total,slots_filled,is_urgent,status,venue_photo_url,created_at'
       : '*';
     const org = isGuest ? 'id,full_name,avatar_url,role,company_name' : '*';
     const { data } = await supabase.from('missions')
@@ -174,7 +175,7 @@ function MissionCard({ mission: m, onApply, onView, isFreelance, userLat, userLn
           <div className="flex items-center gap-2 text-xs" style={{ color: '#b8a898' }}>
             <span>👥</span><span>{slots_filled}/{m.slots_total} poste(s)</span>
           </div>
-          <div className="text-sm font-bold" style={{ color: '#d4af37' }}>{formatCFA(m.hourly_rate)}/h</div>
+          <div className="text-sm font-bold" style={{ color: '#d4af37' }}>{formatRateLabel(m.roles, m.hourly_rate)}</div>
         </div>
       </div>
 

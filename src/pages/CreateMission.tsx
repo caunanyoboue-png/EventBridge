@@ -1,18 +1,19 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Zap, Search } from 'lucide-react';
+import { Check, Zap, Search, Plus, Minus } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { COMPETENCES, formatCFA } from '../lib/utils';
 import MapPicker from '../components/MapPicker';
 import { geocodeAddress } from '../lib/geo';
+import {
+  dayHours, totalHours, missionTotal, totalHeadcount, rateRange,
+  type MissionRole, type MissionDay,
+} from '../lib/missionPricing';
 import toast from 'react-hot-toast';
 
-const SERVICE_TYPES = [
-  'Service en salle', 'Bar / Barman', 'Cuisine gastronomique', 'Hôtesse accueil',
-  'Animation', 'MC / Présentateur', 'Son & Lumière', 'Photographie',
-  'Vidéographie', 'Sécurité', 'Chauffeur', 'Manutention', 'Décoration',
-];
+const emptyDay = (start = '', end = ''): MissionDay => ({ date: '', start, end });
 
 export default function CreateMission() {
   const { profile } = useAuth();
@@ -21,19 +22,24 @@ export default function CreateMission() {
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
-    title: '', service_type: '', description: '', dress_code: '', is_urgent: false,
-    event_date: '', start_time: '', end_time: '', location: '',
-    ville: 'Abidjan - Cocody',
-    slots_total: 1, hourly_rate: 3000, skills_required: [] as string[],
+    title: '', description: '', dress_code: '', is_urgent: false,
+    location: '', ville: 'Abidjan - Cocody',
     latitude: null as number | null,
     longitude: null as number | null,
     venue_photo_url: '' as string,
   });
+  // Postes : une compétence = un tarif horaire + un effectif propres
+  const [roles, setRoles] = useState<MissionRole[]>([]);
+  // Planning : 1 à 3 jours, chacun avec ses horaires
+  const [days, setDays] = useState<MissionDay[]>([emptyDay()]);
+
   const [venueFile, setVenueFile] = useState<File | null>(null);
   const [venuePreview, setVenuePreview] = useState('');
   const [uploadingVenue, setUploadingVenue] = useState(false);
   const [geocoding, setGeocoding] = useState(false);
   const lastGeo = useRef(''); // dernière adresse déjà localisée → évite la boucle carte ↔ adresse
+
+  const today = new Date().toISOString().slice(0, 10);
 
   function upd(k: string, v: unknown) { setForm(p => ({ ...p, [k]: v })); }
 
@@ -49,13 +55,27 @@ export default function CreateMission() {
     setGeocoding(false);
   }
 
-  function toggleServiceType(t: string) {
-    setForm(p => {
-      const next = p.skills_required.includes(t)
-        ? p.skills_required.filter(x => x !== t)
-        : [...p.skills_required, t];
-      return { ...p, skills_required: next, service_type: next[0] || '' };
+  // ── Postes ──────────────────────────────────────────────────────────────
+  function toggleRole(skill: string) {
+    setRoles(prev => prev.some(r => r.skill === skill)
+      ? prev.filter(r => r.skill !== skill)
+      : [...prev, { skill, count: 1, rate: 3000 }]);
+  }
+  function updRole(skill: string, patch: Partial<MissionRole>) {
+    setRoles(prev => prev.map(r => r.skill === skill ? { ...r, ...patch } : r));
+  }
+
+  // ── Jours ───────────────────────────────────────────────────────────────
+  function setDayCount(n: number) {
+    setDays(prev => {
+      const next = [...prev];
+      // nouveau jour : reprend les horaires du jour précédent (modifiables)
+      while (next.length < n) { const last = next[next.length - 1]; next.push(emptyDay(last?.start, last?.end)); }
+      return next.slice(0, n);
     });
+  }
+  function updDay(i: number, patch: Partial<MissionDay>) {
+    setDays(prev => prev.map((d, idx) => idx === i ? { ...d, ...patch } : d));
   }
 
   function handleVenueFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -79,18 +99,17 @@ export default function CreateMission() {
     } finally { setUploadingVenue(false); }
   }
 
-  const duration = (() => {
-    if (!form.start_time || !form.end_time) return 0;
-    const start = new Date(`2000-01-01T${form.start_time}`).getTime();
-    let end   = new Date(`2000-01-01T${form.end_time}`).getTime();
-    if (end <= start) end += 24 * 3600 * 1000; // mission nocturne (minuit+)
-    return (end - start) / 3600000;
-  })();
-  const total = form.hourly_rate * duration * form.slots_total;
+  // ── Calculs ─────────────────────────────────────────────────────────────
+  const totalHrs = totalHours(days);
+  const total = missionTotal(roles, days);
   const commission = total * 0.10;
   const net = total - commission;
+  const { min: minRate } = rateRange(roles);
 
-  const inputClass = "w-full px-4 py-3 rounded-xl text-sm outline-none";
+  const daysValid = days.length > 0 && days.every(d => d.date && d.date >= today && d.start && d.end && dayHours(d) > 0);
+  const rolesValid = roles.length > 0 && roles.every(r => r.count >= 1 && r.rate > 0);
+
+  const inputClass = 'w-full px-4 py-3 rounded-xl text-sm outline-none';
   const inputStyle = { background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
 
   async function submit(status: 'draft' | 'open') {
@@ -99,11 +118,32 @@ export default function CreateMission() {
       let venue_photo_url = form.venue_photo_url;
       if (venueFile) venue_photo_url = await uploadVenuePhoto();
 
+      const day1 = days[0];
+      const skills = roles.map(r => r.skill);
       const { data: mission, error } = await supabase.from('missions').insert({
-        ...form,
+        title: form.title,
+        description: form.description,
+        dress_code: form.dress_code,
+        is_urgent: form.is_urgent,
+        location: form.location,
+        ville: form.ville,
+        latitude: form.latitude,
+        longitude: form.longitude,
         venue_photo_url,
         organisateur_id: profile!.id,
-        duration_hours: duration,
+        // Détail publication
+        roles,
+        days,
+        nb_days: days.length,
+        // Champs « représentatifs » gardés pour compat (affichages, matching, contrat)
+        service_type: skills[0] || '',
+        skills_required: skills,
+        slots_total: totalHeadcount(roles),
+        hourly_rate: minRate,
+        duration_hours: dayHours(day1),
+        event_date: day1.date,
+        start_time: day1.start,
+        end_time: day1.end,
         total_amount: total,
         commission_rate: 0.10,
         status,
@@ -116,9 +156,9 @@ export default function CreateMission() {
         const { data: count } = await supabase.rpc('notify_matching_freelances', {
           p_mission_id:      mission.id,
           p_mission_title:   form.title,
-          p_hourly_rate:     form.hourly_rate,
+          p_hourly_rate:     minRate,
           p_ville:           form.ville,
-          p_skills_required: form.skills_required.length > 0 ? form.skills_required : null,
+          p_skills_required: skills.length > 0 ? skills : null,
         });
         toast.success(`Mission publiée ! ${count ?? 0} freelance(s) notifié(s)`);
       } else {
@@ -131,7 +171,7 @@ export default function CreateMission() {
     } finally { setLoading(false); }
   }
 
-  const steps = ['Informations', 'Détails & Tarif', 'Récapitulatif'];
+  const steps = ['Informations', 'Planning & Tarifs', 'Récapitulatif'];
 
   return (
     <DashboardLayout>
@@ -172,25 +212,28 @@ export default function CreateMission() {
 
               <div>
                 <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>
-                  Type(s) de prestation * &nbsp;
-                  <span style={{ color: '#7a6a7a' }}>(sélectionnez un ou plusieurs)</span>
+                  Compétence(s) recherchée(s) * &nbsp;
+                  <span style={{ color: '#7a6a7a' }}>(chacune aura son tarif à l'étape suivante)</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {SERVICE_TYPES.map(t => (
-                    <button key={t} type="button" onClick={() => toggleServiceType(t)}
-                      className="px-3 py-1.5 rounded-full text-xs font-medium transition-all border"
-                      style={{
-                        background: form.skills_required.includes(t) ? 'rgba(201,168,76,0.2)' : 'transparent',
-                        borderColor: form.skills_required.includes(t) ? '#d4af37' : 'rgba(201,168,76,0.2)',
-                        color: form.skills_required.includes(t) ? '#d4af37' : '#b8a898',
-                      }}>
-                      {t}
-                    </button>
-                  ))}
+                  {COMPETENCES.map(t => {
+                    const on = roles.some(r => r.skill === t);
+                    return (
+                      <button key={t} type="button" onClick={() => toggleRole(t)}
+                        className="px-3 py-1.5 rounded-full text-xs font-medium transition-all border"
+                        style={{
+                          background: on ? 'rgba(201,168,76,0.2)' : 'transparent',
+                          borderColor: on ? '#d4af37' : 'rgba(201,168,76,0.2)',
+                          color: on ? '#d4af37' : '#b8a898',
+                        }}>
+                        {t}
+                      </button>
+                    );
+                  })}
                 </div>
-                {form.skills_required.length > 0 && (
+                {roles.length > 0 && (
                   <p className="text-xs mt-2 flex items-center gap-1.5" style={{ color: 'rgba(201,168,76,0.7)' }}>
-                    <Check size={13} /> {form.skills_required.length} sélectionné(s) — type principal : {form.service_type}
+                    <Check size={13} /> {roles.length} compétence(s) sélectionnée(s)
                   </p>
                 )}
               </div>
@@ -219,35 +262,91 @@ export default function CreateMission() {
               </label>
 
               <button onClick={() => setStep(1)}
-                disabled={!form.title || form.skills_required.length === 0 || !form.description}
+                disabled={!form.title || roles.length === 0 || !form.description}
                 className="btn-gold w-full py-3 rounded-xl font-bold text-[#261642]">
                 Continuer →
               </button>
             </>
           )}
 
-          {/* ── Étape 2 : Détails & Tarif ── */}
+          {/* ── Étape 2 : Planning & Tarifs ── */}
           {step === 1 && (
             <>
+              {/* Durée : 1 à 3 jours */}
               <div>
-                <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Date *</label>
-                <input type="date" min={new Date().toISOString().slice(0, 10)} className={inputClass} style={inputStyle}
-                  value={form.event_date} onChange={e => upd('event_date', e.target.value)} />
-                {form.event_date && form.event_date < new Date().toISOString().slice(0, 10) && (
-                  <p className="text-xs mt-1" style={{ color: '#ef4444' }}>La date ne peut pas être dans le passé.</p>
-                )}
+                <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>Durée de l'événement * <span style={{ color: '#7a6a7a' }}>(max 3 jours, facturé au jour)</span></label>
+                <div className="flex gap-2">
+                  {[1, 2, 3].map(n => (
+                    <button key={n} type="button" onClick={() => setDayCount(n)}
+                      className="flex-1 py-2 rounded-xl text-sm font-semibold border transition-all"
+                      style={{
+                        background: days.length === n ? 'rgba(201,168,76,0.2)' : 'transparent',
+                        borderColor: days.length === n ? '#d4af37' : 'rgba(201,168,76,0.2)',
+                        color: days.length === n ? '#d4af37' : '#b8a898',
+                      }}>
+                      {n} jour{n > 1 ? 's' : ''}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Heure début *</label>
-                  <input type="time" className={inputClass} style={inputStyle}
-                    value={form.start_time} onChange={e => upd('start_time', e.target.value)} />
+              {/* Un bloc horaire par jour */}
+              {days.map((d, i) => (
+                <div key={i} className="rounded-xl p-4" style={{ background: 'rgba(82,54,124,0.25)', border: '1px solid rgba(201,168,76,0.12)' }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold" style={{ color: '#d4af37' }}>Jour {i + 1}</span>
+                    {d.start && d.end && <span className="text-xs" style={{ color: '#b8a898' }}>{Math.round(dayHours(d) * 100) / 100}h</span>}
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: '#8a7a9a' }}>Date</label>
+                      <input type="date" min={today} className="w-full px-2 py-2 rounded-lg text-sm outline-none" style={inputStyle}
+                        value={d.date} onChange={e => updDay(i, { date: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: '#8a7a9a' }}>Début</label>
+                      <input type="time" className="w-full px-2 py-2 rounded-lg text-sm outline-none" style={inputStyle}
+                        value={d.start} onChange={e => updDay(i, { start: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: '#8a7a9a' }}>Fin</label>
+                      <input type="time" className="w-full px-2 py-2 rounded-lg text-sm outline-none" style={inputStyle}
+                        value={d.end} onChange={e => updDay(i, { end: e.target.value })} />
+                    </div>
+                  </div>
+                  {d.date && d.date < today && (
+                    <p className="text-xs mt-1" style={{ color: '#ef4444' }}>La date ne peut pas être dans le passé.</p>
+                  )}
                 </div>
-                <div>
-                  <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Heure fin *</label>
-                  <input type="time" className={inputClass} style={inputStyle}
-                    value={form.end_time} onChange={e => upd('end_time', e.target.value)} />
+              ))}
+
+              {/* Tarif horaire par compétence */}
+              <div>
+                <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>Postes & tarifs horaires * <span style={{ color: '#7a6a7a' }}>(effectif + prix/heure par compétence)</span></label>
+                <div className="space-y-2">
+                  {roles.map(r => (
+                    <div key={r.skill} className="flex items-center gap-3 rounded-xl p-3 flex-wrap"
+                      style={{ background: 'rgba(82,54,124,0.25)', border: '1px solid rgba(201,168,76,0.12)' }}>
+                      <span className="text-sm font-medium flex-1 min-w-[120px]" style={{ color: '#f0e6d3' }}>{r.skill}</span>
+                      {/* effectif */}
+                      <div className="flex items-center gap-2">
+                        <button type="button" onClick={() => updRole(r.skill, { count: Math.max(1, r.count - 1) })}
+                          className="w-8 h-8 rounded-lg flex items-center justify-center"
+                          style={{ background: 'rgba(82,54,124,0.6)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}><Minus size={14} /></button>
+                        <span className="text-sm font-bold w-5 text-center" style={{ color: '#f0e6d3' }}>{r.count}</span>
+                        <button type="button" onClick={() => updRole(r.skill, { count: r.count + 1 })}
+                          className="w-8 h-8 rounded-lg flex items-center justify-center"
+                          style={{ background: 'rgba(82,54,124,0.6)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}><Plus size={14} /></button>
+                      </div>
+                      {/* tarif */}
+                      <div className="flex items-center gap-1">
+                        <input type="number" min={0} step={100} value={r.rate}
+                          onChange={e => updRole(r.skill, { rate: Number(e.target.value) })}
+                          className="px-2 py-2 rounded-lg text-sm outline-none text-right" style={{ ...inputStyle, width: 90 }} />
+                        <span className="text-xs" style={{ color: '#8a7a9a' }}>F/h</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -322,30 +421,18 @@ export default function CreateMission() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Nombre d'extras</label>
-                  <div className="flex items-center gap-3">
-                    <button onClick={() => upd('slots_total', Math.max(1, form.slots_total - 1))}
-                      className="w-10 h-10 rounded-lg font-bold text-lg"
-                      style={{ background: 'rgba(82,54,124,0.5)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}>-</button>
-                    <span className="text-xl font-bold" style={{ color: '#f0e6d3' }}>{form.slots_total}</span>
-                    <button onClick={() => upd('slots_total', form.slots_total + 1)}
-                      className="w-10 h-10 rounded-lg font-bold text-lg"
-                      style={{ background: 'rgba(82,54,124,0.5)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}>+</button>
-                  </div>
+              {/* Aperçu total */}
+              {total > 0 && (
+                <div className="flex items-center justify-between px-4 py-3 rounded-xl" style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)' }}>
+                  <span className="text-xs" style={{ color: '#b8a898' }}>Total estimé ({totalHrs}h · {days.length} jour{days.length > 1 ? 's' : ''})</span>
+                  <span className="font-bold" style={{ color: '#d4af37' }}>{formatCFA(total)}</span>
                 </div>
-                <div>
-                  <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Tarif horaire (FCFA)</label>
-                  <input type="number" className={inputClass} style={inputStyle}
-                    value={form.hourly_rate} onChange={e => upd('hourly_rate', Number(e.target.value))} />
-                </div>
-              </div>
+              )}
 
               <div className="flex gap-3">
                 <button onClick={() => setStep(0)} className="btn-outline-gold flex-1 py-3 rounded-xl">← Retour</button>
                 <button onClick={() => setStep(2)}
-                  disabled={!form.event_date || form.event_date < new Date().toISOString().slice(0, 10) || !form.start_time || !form.end_time || !form.location}
+                  disabled={!daysValid || !rolesValid || !form.location}
                   className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#261642]">
                   Continuer →
                 </button>
@@ -362,42 +449,53 @@ export default function CreateMission() {
                   <span>Mission</span>
                   <span style={{ color: '#f0e6d3' }} className="font-medium">{form.title}</span>
                 </div>
-                <div className="flex justify-between gap-4">
-                  <span className="shrink-0">Type(s)</span>
-                  <span style={{ color: '#f0e6d3', textAlign: 'right' }}>{form.skills_required.join(', ')}</span>
+
+                {/* Planning multi-jours */}
+                <div>
+                  <span className="block mb-1">Planning</span>
+                  <div className="space-y-1">
+                    {days.map((d, i) => (
+                      <div key={i} className="flex justify-between text-xs">
+                        <span>Jour {i + 1} · {d.date ? new Date(d.date).toLocaleDateString('fr-CI', { day: '2-digit', month: 'short' }) : '—'}</span>
+                        <span style={{ color: '#f0e6d3' }}>{d.start}–{d.end} ({Math.round(dayHours(d) * 100) / 100}h)</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>Date</span>
-                  <span style={{ color: '#f0e6d3' }}>{form.event_date} · {form.start_time} - {form.end_time}</span>
+
+                {/* Postes & tarifs */}
+                <div>
+                  <span className="block mb-1">Postes</span>
+                  <div className="space-y-1">
+                    {roles.map(r => (
+                      <div key={r.skill} className="flex justify-between text-xs">
+                        <span>{r.skill} ×{r.count}</span>
+                        <span style={{ color: '#f0e6d3' }}>{formatCFA(r.rate)}/h</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+
                 <div className="flex justify-between">
                   <span>Lieu</span>
-                  <span style={{ color: '#f0e6d3' }}>{form.location}</span>
+                  <span style={{ color: '#f0e6d3', textAlign: 'right' }}>{[form.location, form.ville].filter(Boolean).join(', ')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Extras</span>
-                  <span style={{ color: '#f0e6d3' }}>{form.slots_total} personne(s)</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Durée</span>
-                  <span style={{ color: '#f0e6d3' }}>{Math.round(duration * 100) / 100}h</span>
+                  <span>Durée totale</span>
+                  <span style={{ color: '#f0e6d3' }}>{totalHrs}h · {totalHeadcount(roles)} personne(s)</span>
                 </div>
                 <div className="h-px" style={{ background: 'rgba(201,168,76,0.15)' }} />
                 <div className="flex justify-between">
-                  <span>Tarif horaire</span>
-                  <span style={{ color: '#f0e6d3' }}>{form.hourly_rate.toLocaleString('fr-CI')} FCFA/h</span>
-                </div>
-                <div className="flex justify-between">
                   <span>Montant brut</span>
-                  <span style={{ color: '#f0e6d3' }}>{total.toLocaleString('fr-CI')} FCFA</span>
+                  <span style={{ color: '#f0e6d3' }}>{formatCFA(total)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Commission (10%)</span>
-                  <span style={{ color: '#ef4444' }}>-{commission.toLocaleString('fr-CI')} FCFA</span>
+                  <span style={{ color: '#ef4444' }}>-{formatCFA(commission)}</span>
                 </div>
                 <div className="flex justify-between font-bold">
                   <span>Net freelances</span>
-                  <span className="text-gold-gradient">{net.toLocaleString('fr-CI')} FCFA</span>
+                  <span className="text-gold-gradient">{formatCFA(net)}</span>
                 </div>
               </div>
               {form.is_urgent && (

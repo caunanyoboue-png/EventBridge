@@ -13,6 +13,7 @@ import { useAuthGate } from '../contexts/AuthGateContext';
 import { supabase } from '../lib/supabase';
 import { type Mission, type SosSession } from '../types';
 import { formatCFA, getInitials } from '../lib/utils';
+import { formatRateLabel } from '../lib/missionPricing';
 import { ServiceIconBadge } from '../lib/serviceIcons';
 import { IcoFeed } from '../components/icons/DoodleIcons';
 import { roleColor } from '../lib/roleTheme';
@@ -425,7 +426,7 @@ function MissionFeedCard({ mission: m, isFreelance, onApply, onView }: {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px 13px', fontSize: 12, color: '#b8a898' }}>
               {m.event_date && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                  <Calendar size={13} color="#8a7a9a" /> {new Date(m.event_date).toLocaleDateString('fr-CI', { day: '2-digit', month: 'short', year: 'numeric' })}
+                  <Calendar size={13} color="#8a7a9a" /> {new Date(m.event_date).toLocaleDateString('fr-CI', { day: '2-digit', month: 'short', year: 'numeric' })}{m.nb_days && m.nb_days > 1 ? ` · ${m.nb_days}j` : ''}
                 </span>
               )}
               {m.ville && (
@@ -437,7 +438,7 @@ function MissionFeedCard({ mission: m, isFreelance, onApply, onView }: {
                 <Users size={13} color="#8a7a9a" /> {m.slots_filled || 0}/{m.slots_total} poste(s)
               </span>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#d4af37', fontWeight: 700 }}>
-                <Wallet size={13} /> {formatCFA(m.hourly_rate)}/h
+                <Wallet size={13} /> {formatRateLabel(m.roles, m.hourly_rate)}
               </span>
             </div>
           </div>
@@ -496,7 +497,7 @@ export default function Feed() {
         .order('created_at', { ascending: false }).limit(60),
       supabase.from('missions')
         // colonnes sûres uniquement (pas d'adresse exacte ni GPS) — valable invité comme connecté
-        .select('id,organisateur_id,title,description,service_type,skills_required,ville,event_date,start_time,end_time,hourly_rate,slots_total,slots_filled,is_urgent,status,venue_photo_url,created_at, organisateur:profiles!organisateur_id(id,full_name,avatar_url,role,company_name)')
+        .select('id,organisateur_id,title,description,service_type,skills_required,roles,nb_days,ville,event_date,start_time,end_time,hourly_rate,slots_total,slots_filled,is_urgent,status,venue_photo_url,created_at, organisateur:profiles!organisateur_id(id,full_name,avatar_url,role,company_name)')
         .eq('status', 'open')
         .gte('event_date', new Date().toISOString().slice(0, 10)) // masquer les missions dont la date est passée
         .order('created_at', { ascending: false }).limit(30),

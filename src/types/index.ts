@@ -78,6 +78,11 @@ export interface Profile {
   updated_at?: string;
 }
 
+// Un poste de la mission : une compétence, avec son effectif et son tarif horaire propre.
+export interface MissionRole { skill: string; count: number; rate: number; }
+// Un jour de l'événement (multi-jours) : date + créneau horaire de la journée.
+export interface MissionDay { date: string; start: string; end: string; }
+
 export interface Mission {
   id: string;
   organisateur_id: string;
@@ -96,6 +101,10 @@ export interface Mission {
   slots_total: number;
   slots_filled?: number;
   skills_required?: string[];
+  // Publication détaillée : tarif par compétence + planning multi-jours (max 3)
+  roles?: MissionRole[];
+  days?: MissionDay[];
+  nb_days?: number;
   dress_code?: string;
   is_urgent?: boolean;
   is_sos?: boolean;
@@ -116,6 +125,8 @@ export interface Application {
   status: ApplicationStatus;
   cover_message?: string;
   matching_score?: number;
+  role_skill?: string;      // poste (compétence) visé sur une mission multi-postes
+  proposed_rate?: number;   // tarif horaire du poste visé
   applied_at?: string;
   responded_at?: string;
   mission?: Mission;

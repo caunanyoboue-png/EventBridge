@@ -5,9 +5,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { useAuthGate } from '../contexts/AuthGateContext';
 import { supabase } from '../lib/supabase';
 import { getOrCreateConversation } from '../lib/messaging';
-import { type Mission, type Profile, type Contract } from '../types';
+import { type Mission, type Profile, type Contract, type MissionRole, type MissionDay } from '../types';
 import { Zap, Calendar, Clock, MapPin, Wallet, Users, Shirt, Star, CheckCircle2, MessageCircle, FileText } from 'lucide-react';
 import { formatDate, formatCFA } from '../lib/utils';
+import { dayHours, formatRateLabel } from '../lib/missionPricing';
 import { ServiceIcon } from '../lib/serviceIcons';
 import { distanceKm, formatDistance } from '../lib/geo';
 import MapView from '../components/MapView';
@@ -103,6 +104,7 @@ export default function MissionDetail() {
   const [mission, setMission] = useState<Mission & { organisateur?: Profile } | null>(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
+  const [applyRole, setApplyRole] = useState('');   // poste choisi (mission multi-postes)
   const [alreadyApplied, setAlreadyApplied] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
   const [confirmWithdraw, setConfirmWithdraw] = useState(false);
@@ -142,7 +144,7 @@ export default function MissionDetail() {
   async function fetchMission() {
     // Invité : colonnes sûres (pas d'adresse exacte, ni GPS, ni contact organisateur)
     const cols = isGuest
-      ? 'id,organisateur_id,title,description,service_type,skills_required,ville,event_date,start_time,end_time,hourly_rate,slots_total,slots_filled,is_urgent,status,venue_photo_url,created_at'
+      ? 'id,organisateur_id,title,description,service_type,skills_required,roles,days,nb_days,total_amount,ville,event_date,start_time,end_time,hourly_rate,slots_total,slots_filled,is_urgent,status,venue_photo_url,created_at'
       : '*';
     const org = isGuest ? 'id,full_name,avatar_url,role,company_name,avg_rating' : '*';
     const { data } = await supabase.from('missions')
@@ -189,9 +191,17 @@ export default function MissionDetail() {
       }
     }
 
+    // Mission multi-postes : on retient le poste (compétence) visé + son tarif
+    const roleList = (mission.roles || []) as MissionRole[];
+    const mySkills: string[] = (profile as Profile & { skills?: string[] }).skills || [];
+    const matching = roleList.filter(r => mySkills.includes(r.skill));
+    const roleSkill = roleList.length ? (applyRole || matching[0]?.skill || null) : null;
+    const roleRate = roleSkill ? (roleList.find(r => r.skill === roleSkill)?.rate ?? null) : null;
+
     setApplying(true);
     const { error } = await supabase.from('applications').insert({
       mission_id: mission.id, freelance_id: profile.id, status: 'pending',
+      ...(roleSkill ? { role_skill: roleSkill, proposed_rate: roleRate } : {}),
     });
     if (error) {
       toast.error(error.code === '23505' ? 'Déjà postulé' : error.message || 'Erreur');
@@ -293,8 +303,15 @@ export default function MissionDetail() {
   if (!mission) return <DashboardLayout><div className="text-center py-20" style={{ color: '#b8a898' }}>Mission introuvable</div></DashboardLayout>;
 
   const org = mission.organisateur as Profile | undefined;
+  const roleList = (mission.roles || []) as MissionRole[];
+  const dayList = (mission.days || []) as MissionDay[];
+  const isMultiDay = dayList.length > 1;
   const slots_filled = mission.slots_filled || 0;
-  const totalAmount = mission.hourly_rate * Number(mission.duration_hours || 0);
+  const totalAmount = Number(mission.total_amount) || mission.hourly_rate * Number(mission.duration_hours || 0);
+  // Postes correspondant aux compétences du freelance (pour choisir sur quel poste postuler)
+  const mySkills: string[] = (profile as (Profile & { skills?: string[] }) | null)?.skills || [];
+  const matchingRoles = roleList.filter(r => mySkills.includes(r.skill));
+  const chosenRole = applyRole || matchingRoles[0]?.skill || '';
 
   return (
     <DashboardLayout>
@@ -318,23 +335,53 @@ export default function MissionDetail() {
           {/* Infos principales */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-sm">
             <div className="flex items-center gap-2.5" style={{ color: '#b8a898' }}>
-              <Calendar size={16} color="#d4af37" /><span>{formatDate(mission.event_date)}</span>
+              <Calendar size={16} color="#d4af37" /><span>{formatDate(mission.event_date)}{isMultiDay ? ` · ${dayList.length} jours` : ''}</span>
             </div>
             <div className="flex items-center gap-2.5" style={{ color: '#b8a898' }}>
-              <Clock size={16} color="#d4af37" /><span>{mission.start_time?.substring(0,5)} – {mission.end_time?.substring(0,5)}</span>
+              <Clock size={16} color="#d4af37" /><span>{mission.start_time?.substring(0,5)} – {mission.end_time?.substring(0,5)}{isMultiDay ? ' / jour' : ''}</span>
             </div>
             <div className="flex items-center gap-2.5" style={{ color: '#b8a898' }}>
               <MapPin size={16} color="#d4af37" /><span>{[mission.location, mission.ville].filter(Boolean).join(', ')}</span>
             </div>
             <div className="flex items-center gap-2.5">
               <Wallet size={16} color="#d4af37" />
-              <span className="font-bold" style={{ color: '#d4af37' }}>{formatCFA(mission.hourly_rate)}/h · Total: {formatCFA(totalAmount)}</span>
+              <span className="font-bold" style={{ color: '#d4af37' }}>{formatRateLabel(roleList, mission.hourly_rate)} · Total: {formatCFA(totalAmount)}</span>
             </div>
             <div className="flex items-center gap-2.5" style={{ color: '#b8a898' }}>
               <Users size={16} color="#d4af37" />
               <span>{slots_filled}/{mission.slots_total} poste(s) confirmé(s)</span>
             </div>
           </div>
+
+          {/* Planning (multi-jours) */}
+          {dayList.length > 0 && (
+            <div className="mb-6">
+              <h3 className="font-semibold mb-2" style={{ color: '#f0e6d3' }}>Planning{isMultiDay ? ` · ${dayList.length} jours` : ''}</h3>
+              <div className="space-y-1.5">
+                {dayList.map((d, i) => (
+                  <div key={i} className="flex items-center justify-between text-sm px-3 py-2 rounded-lg" style={{ background: 'rgba(82,54,124,0.3)' }}>
+                    <span style={{ color: '#b8a898' }}>{isMultiDay ? `Jour ${i + 1} · ` : ''}{d.date ? new Date(d.date).toLocaleDateString('fr-CI', { weekday: 'short', day: '2-digit', month: 'short' }) : ''}</span>
+                    <span style={{ color: '#f0e6d3' }}>{d.start}–{d.end} · {Math.round(dayHours(d) * 100) / 100}h</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Postes & tarifs (prix par compétence) */}
+          {roleList.length > 0 && (
+            <div className="mb-6">
+              <h3 className="font-semibold mb-2" style={{ color: '#f0e6d3' }}>Postes &amp; tarifs</h3>
+              <div className="space-y-1.5">
+                {roleList.map(r => (
+                  <div key={r.skill} className="flex items-center justify-between text-sm px-3 py-2 rounded-lg" style={{ background: 'rgba(82,54,124,0.3)' }}>
+                    <span style={{ color: '#f0e6d3' }}>{r.skill} <span style={{ color: '#8a7a9a' }}>×{r.count}</span></span>
+                    <span className="font-bold" style={{ color: '#d4af37' }}>{formatCFA(r.rate)}/h</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Progress bar */}
           <div className="mb-6">
@@ -349,8 +396,8 @@ export default function MissionDetail() {
             <p className="text-sm leading-relaxed" style={{ color: '#b8a898' }}>{mission.description}</p>
           </div>
 
-          {/* Compétences */}
-          {(mission.skills_required || []).length > 0 && (
+          {/* Compétences (missions anciennes sans postes détaillés) */}
+          {roleList.length === 0 && (mission.skills_required || []).length > 0 && (
             <div className="mb-6">
               <h3 className="font-semibold mb-2" style={{ color: '#f0e6d3' }}>Compétences requises</h3>
               <div className="flex flex-wrap gap-2">
@@ -423,7 +470,23 @@ export default function MissionDetail() {
           {/* Actions freelance / invité */}
           {(profile?.role === 'freelance' || isGuest) && (
             <div className="space-y-3">
+              {/* Choix du poste quand plusieurs compétences du freelance correspondent */}
+              {!alreadyApplied && matchingRoles.length > 1 && (
+                <div>
+                  <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Vous postulez comme</label>
+                  <select value={chosenRole} onChange={e => setApplyRole(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl text-sm outline-none"
+                    style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}>
+                    {matchingRoles.map(r => (
+                      <option key={r.skill} value={r.skill} style={{ background: '#1e0f3c', color: '#f0e6d3' }}>
+                        {r.skill} — {formatCFA(r.rate)}/h
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="flex flex-col sm:flex-row gap-3">
+
                 {alreadyApplied ? (
                   <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl"
                     style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.25)' }}>

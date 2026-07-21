@@ -1,22 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Check, X, Camera, Search } from 'lucide-react';
+import { Check, X, Camera, Search, Plus, Minus } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { COMPETENCES, VILLES } from '../lib/utils';
+import { COMPETENCES, VILLES, formatCFA } from '../lib/utils';
 import MapPicker from '../components/MapPicker';
 import { geocodeAddress } from '../lib/geo';
+import {
+  dayHours, totalHours, missionTotal, totalHeadcount, rateRange,
+  type MissionRole, type MissionDay,
+} from '../lib/missionPricing';
 import toast from 'react-hot-toast';
-
-const SERVICE_TYPES = [
-  'Service en salle', 'Bar / Barman', 'Cuisine gastronomique', 'Hôtesse accueil',
-  'Animation', 'MC / Présentateur', 'Son & Lumière', 'Photographie',
-  'Vidéographie', 'Sécurité', 'Chauffeur', 'Manutention', 'Décoration',
-];
 
 const inputClass = 'w-full px-4 py-3 rounded-xl text-sm outline-none';
 const inputStyle = { background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
+const emptyDay = (start = '', end = ''): MissionDay => ({ date: '', start, end });
 
 export default function EditMission() {
   const { profile } = useAuth();
@@ -29,11 +28,12 @@ export default function EditMission() {
   const [saving, setSaving]   = useState(false);
 
   const [form, setForm] = useState({
-    title: '', service_type: '', description: '', dress_code: '', is_urgent: false,
-    event_date: '', start_time: '', end_time: '', location: '', ville: 'Abidjan - Cocody',
-    slots_total: 1, hourly_rate: 3000, skills_required: [] as string[],
+    title: '', description: '', dress_code: '', is_urgent: false,
+    location: '', ville: 'Abidjan - Cocody',
     latitude: null as number | null, longitude: null as number | null, venue_photo_url: '',
   });
+  const [roles, setRoles] = useState<MissionRole[]>([]);
+  const [days, setDays]   = useState<MissionDay[]>([emptyDay()]);
 
   const [venueFile, setVenueFile]     = useState<File | null>(null);
   const [venuePreview, setVenuePreview] = useState<string | null>(null);
@@ -41,6 +41,8 @@ export default function EditMission() {
   const venueInputRef = useRef<HTMLInputElement>(null);
   const [geocoding, setGeocoding] = useState(false);
   const lastGeo = useRef(''); // dernière adresse déjà localisée → évite la boucle carte ↔ adresse
+
+  const today = new Date().toISOString().slice(0, 10);
 
   // Adresse saisie → géocodage → déplace l'épingle sur la carte (synchro adresse → carte)
   async function searchAddress() {
@@ -62,28 +64,55 @@ export default function EditMission() {
         if (data.organisateur_id !== profile?.id) { toast.error('Accès refusé'); navigate('/my-missions'); return; }
         setForm({
           title:           data.title            || '',
-          service_type:    data.service_type      || '',
           description:     data.description       || '',
           dress_code:      data.dress_code        || '',
           is_urgent:       data.is_urgent         || false,
-          event_date:      data.event_date        || '',
-          start_time:      data.start_time        || '',
-          end_time:        data.end_time          || '',
           location:        data.location          || '',
           ville:           data.ville             || 'Abidjan - Cocody',
-          slots_total:     data.slots_total       || 1,
-          hourly_rate:     data.hourly_rate       || 3000,
-          skills_required: data.skills_required   || [],
           latitude:        data.latitude          ?? null,
           longitude:       data.longitude         ?? null,
           venue_photo_url: data.venue_photo_url   || '',
         });
+        // Postes : format détaillé si présent, sinon reconstruit depuis les colonnes legacy
+        const skills: string[] = (data.skills_required?.length ? data.skills_required : [data.service_type]).filter(Boolean);
+        const legacyRoles: MissionRole[] = skills.map(s => ({
+          skill: s,
+          count: skills.length <= 1 ? (data.slots_total || 1) : 1,
+          rate: Number(data.hourly_rate) || 3000,
+        }));
+        setRoles(Array.isArray(data.roles) && data.roles.length ? (data.roles as MissionRole[]) : legacyRoles);
+        // Planning : format détaillé si présent, sinon un seul jour depuis les colonnes legacy
+        const legacyDays: MissionDay[] = [{ date: data.event_date || '', start: data.start_time || '', end: data.end_time || '' }];
+        setDays(Array.isArray(data.days) && data.days.length ? (data.days as MissionDay[]) : legacyDays);
+
         if (data.venue_photo_url) setVenuePreview(data.venue_photo_url);
         setLoading(false);
       });
   }, [missionId, profile, navigate]);
 
   function upd(k: string, v: unknown) { setForm(p => ({ ...p, [k]: v })); }
+
+  // ── Postes ──────────────────────────────────────────────────────────────
+  function toggleRole(skill: string) {
+    setRoles(prev => prev.some(r => r.skill === skill)
+      ? prev.filter(r => r.skill !== skill)
+      : [...prev, { skill, count: 1, rate: 3000 }]);
+  }
+  function updRole(skill: string, patch: Partial<MissionRole>) {
+    setRoles(prev => prev.map(r => r.skill === skill ? { ...r, ...patch } : r));
+  }
+
+  // ── Jours ───────────────────────────────────────────────────────────────
+  function setDayCount(n: number) {
+    setDays(prev => {
+      const next = [...prev];
+      while (next.length < n) { const last = next[next.length - 1]; next.push(emptyDay(last?.start, last?.end)); }
+      return next.slice(0, n);
+    });
+  }
+  function updDay(i: number, patch: Partial<MissionDay>) {
+    setDays(prev => prev.map((d, idx) => idx === i ? { ...d, ...patch } : d));
+  }
 
   function handleVenueFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -106,21 +135,15 @@ export default function EditMission() {
     } finally { setUploadingVenue(false); }
   }
 
-  function toggleSkill(s: string) {
-    setForm(p => ({
-      ...p,
-      skills_required: p.skills_required.includes(s)
-        ? p.skills_required.filter(x => x !== s)
-        : [...p.skills_required, s],
-    }));
-  }
-
-  const duration = form.start_time && form.end_time
-    ? Math.max(0, (new Date(`2000-01-01T${form.end_time}`).getTime() - new Date(`2000-01-01T${form.start_time}`).getTime()) / 3600000)
-    : 0;
-  const total      = form.hourly_rate * duration * form.slots_total;
+  // ── Calculs ─────────────────────────────────────────────────────────────
+  const totalHrs   = totalHours(days);
+  const total      = missionTotal(roles, days);
   const commission = total * 0.10;
   const net        = total - commission;
+  const { min: minRate } = rateRange(roles);
+
+  const daysValid  = days.length > 0 && days.every(d => d.date && d.date >= today && d.start && d.end && dayHours(d) > 0);
+  const rolesValid = roles.length > 0 && roles.every(r => r.count >= 1 && r.rate > 0);
 
   async function save(newStatus?: 'open' | 'draft') {
     if (!missionId) return;
@@ -129,11 +152,30 @@ export default function EditMission() {
       let photoUrl = form.venue_photo_url;
       if (venueFile) photoUrl = await uploadVenuePhoto();
 
+      const day1 = days[0];
+      const skills = roles.map(r => r.skill);
       const { error } = await supabase.from('missions').update({
-        ...form,
+        title: form.title,
+        description: form.description,
+        dress_code: form.dress_code,
+        is_urgent: form.is_urgent,
+        location: form.location,
+        ville: form.ville,
+        latitude: form.latitude,
+        longitude: form.longitude,
         venue_photo_url: photoUrl,
-        duration_hours: duration,
-        total_amount:   total,
+        roles,
+        days,
+        nb_days: days.length,
+        service_type: skills[0] || '',
+        skills_required: skills,
+        slots_total: totalHeadcount(roles),
+        hourly_rate: minRate,
+        duration_hours: dayHours(day1),
+        event_date: day1.date,
+        start_time: day1.start,
+        end_time: day1.end,
+        total_amount: total,
         ...(newStatus ? { status: newStatus } : {}),
       }).eq('id', missionId);
       if (error) throw error;
@@ -143,9 +185,9 @@ export default function EditMission() {
         const { data: count } = await supabase.rpc('notify_matching_freelances', {
           p_mission_id:      missionId,
           p_mission_title:   form.title,
-          p_hourly_rate:     form.hourly_rate,
+          p_hourly_rate:     minRate,
           p_ville:           form.ville,
-          p_skills_required: form.skills_required.length > 0 ? form.skills_required : null,
+          p_skills_required: skills.length > 0 ? skills : null,
         });
         toast.success(`Mission publiée ! ${count ?? 0} freelance(s) notifié(s)`);
       } else {
@@ -156,7 +198,7 @@ export default function EditMission() {
     finally { setSaving(false); }
   }
 
-  const steps = ['Informations', 'Détails & Tarif', 'Récapitulatif'];
+  const steps = ['Informations', 'Planning & Tarifs', 'Récapitulatif'];
 
   if (loading) {
     return (
@@ -207,12 +249,25 @@ export default function EditMission() {
                   value={form.title} onChange={e => upd('title', e.target.value)} />
               </div>
               <div>
-                <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Type de prestation *</label>
-                <select className={inputClass} style={inputStyle}
-                  value={form.service_type} onChange={e => upd('service_type', e.target.value)}>
-                  <option value="">Sélectionner...</option>
-                  {SERVICE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
+                <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>
+                  Compétence(s) recherchée(s) * <span style={{ color: '#7a6a7a' }}>(chacune a son tarif)</span>
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {COMPETENCES.map(c => {
+                    const on = roles.some(r => r.skill === c);
+                    return (
+                      <button key={c} type="button" onClick={() => toggleRole(c)}
+                        className="px-3 py-1 rounded-full text-xs transition-all border"
+                        style={{
+                          background: on ? 'rgba(201,168,76,0.2)' : 'transparent',
+                          borderColor: on ? '#d4af37' : 'rgba(201,168,76,0.2)',
+                          color: on ? '#d4af37' : '#b8a898',
+                        }}>
+                        {c}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
               <div>
                 <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Description *</label>
@@ -233,7 +288,7 @@ export default function EditMission() {
                 </div>
                 <span className="text-sm" style={{ color: '#b8a898' }}>Mission urgente</span>
               </label>
-              <button onClick={() => setStep(1)} disabled={!form.title || !form.service_type || !form.description}
+              <button onClick={() => setStep(1)} disabled={!form.title || roles.length === 0 || !form.description}
                 className="btn-gold w-full py-3 rounded-xl font-bold text-[#261642]">
                 Continuer →
               </button>
@@ -243,33 +298,90 @@ export default function EditMission() {
           {/* Étape 2 */}
           {step === 1 && (
             <>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Date *</label>
-                  <input type="date" min={new Date().toISOString().slice(0, 10)} className={inputClass} style={inputStyle}
-                    value={form.event_date} onChange={e => upd('event_date', e.target.value)} />
-                  {form.event_date && form.event_date < new Date().toISOString().slice(0, 10) && (
+              {/* Ville */}
+              <div>
+                <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Ville *</label>
+                <select className={inputClass} style={inputStyle}
+                  value={form.ville} onChange={e => upd('ville', e.target.value)}>
+                  {VILLES.map(v => <option key={v} value={v} style={{ background: '#1e0f3c', color: '#f0e6d3' }}>{v}</option>)}
+                </select>
+              </div>
+
+              {/* Durée : 1 à 3 jours */}
+              <div>
+                <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>Durée de l'événement * <span style={{ color: '#7a6a7a' }}>(max 3 jours, facturé au jour)</span></label>
+                <div className="flex gap-2">
+                  {[1, 2, 3].map(n => (
+                    <button key={n} type="button" onClick={() => setDayCount(n)}
+                      className="flex-1 py-2 rounded-xl text-sm font-semibold border transition-all"
+                      style={{
+                        background: days.length === n ? 'rgba(201,168,76,0.2)' : 'transparent',
+                        borderColor: days.length === n ? '#d4af37' : 'rgba(201,168,76,0.2)',
+                        color: days.length === n ? '#d4af37' : '#b8a898',
+                      }}>
+                      {n} jour{n > 1 ? 's' : ''}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {days.map((d, i) => (
+                <div key={i} className="rounded-xl p-4" style={{ background: 'rgba(82,54,124,0.25)', border: '1px solid rgba(201,168,76,0.12)' }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold" style={{ color: '#d4af37' }}>Jour {i + 1}</span>
+                    {d.start && d.end && <span className="text-xs" style={{ color: '#b8a898' }}>{Math.round(dayHours(d) * 100) / 100}h</span>}
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: '#8a7a9a' }}>Date</label>
+                      <input type="date" min={today} className="w-full px-2 py-2 rounded-lg text-sm outline-none" style={inputStyle}
+                        value={d.date} onChange={e => updDay(i, { date: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: '#8a7a9a' }}>Début</label>
+                      <input type="time" className="w-full px-2 py-2 rounded-lg text-sm outline-none" style={inputStyle}
+                        value={d.start} onChange={e => updDay(i, { start: e.target.value })} />
+                    </div>
+                    <div>
+                      <label className="text-[11px] mb-1 block" style={{ color: '#8a7a9a' }}>Fin</label>
+                      <input type="time" className="w-full px-2 py-2 rounded-lg text-sm outline-none" style={inputStyle}
+                        value={d.end} onChange={e => updDay(i, { end: e.target.value })} />
+                    </div>
+                  </div>
+                  {d.date && d.date < today && (
                     <p className="text-xs mt-1" style={{ color: '#ef4444' }}>La date ne peut pas être dans le passé.</p>
                   )}
                 </div>
-                <div>
-                  <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Ville *</label>
-                  <select className={inputClass} style={inputStyle}
-                    value={form.ville} onChange={e => upd('ville', e.target.value)}>
-                    {VILLES.map(v => <option key={v} value={v} style={{ background: '#1e0f3c', color: '#f0e6d3' }}>{v}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Heure début *</label>
-                  <input type="time" className={inputClass} style={inputStyle}
-                    value={form.start_time} onChange={e => upd('start_time', e.target.value)} />
-                </div>
-                <div>
-                  <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Heure fin *</label>
-                  <input type="time" className={inputClass} style={inputStyle}
-                    value={form.end_time} onChange={e => upd('end_time', e.target.value)} />
+              ))}
+
+              {/* Tarif horaire par compétence */}
+              <div>
+                <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>Postes & tarifs horaires * <span style={{ color: '#7a6a7a' }}>(effectif + prix/heure par compétence)</span></label>
+                <div className="space-y-2">
+                  {roles.map(r => (
+                    <div key={r.skill} className="flex items-center gap-3 rounded-xl p-3 flex-wrap"
+                      style={{ background: 'rgba(82,54,124,0.25)', border: '1px solid rgba(201,168,76,0.12)' }}>
+                      <span className="text-sm font-medium flex-1 min-w-[120px]" style={{ color: '#f0e6d3' }}>{r.skill}</span>
+                      <div className="flex items-center gap-2">
+                        <button type="button" onClick={() => updRole(r.skill, { count: Math.max(1, r.count - 1) })}
+                          className="w-8 h-8 rounded-lg flex items-center justify-center"
+                          style={{ background: 'rgba(82,54,124,0.6)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}><Minus size={14} /></button>
+                        <span className="text-sm font-bold w-5 text-center" style={{ color: '#f0e6d3' }}>{r.count}</span>
+                        <button type="button" onClick={() => updRole(r.skill, { count: r.count + 1 })}
+                          className="w-8 h-8 rounded-lg flex items-center justify-center"
+                          style={{ background: 'rgba(82,54,124,0.6)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}><Plus size={14} /></button>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <input type="number" min={0} step={100} value={r.rate}
+                          onChange={e => updRole(r.skill, { rate: Number(e.target.value) })}
+                          className="px-2 py-2 rounded-lg text-sm outline-none text-right" style={{ ...inputStyle, width: 90 }} />
+                        <span className="text-xs" style={{ color: '#8a7a9a' }}>F/h</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
+
               <div>
                 <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>
                   Adresse * <span style={{ color: '#7a6a7a' }}>(synchronisée avec la carte)</span>
@@ -321,44 +433,17 @@ export default function EditMission() {
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Nombre d'extras</label>
-                  <div className="flex items-center gap-3">
-                    <button onClick={() => upd('slots_total', Math.max(1, form.slots_total - 1))}
-                      className="w-10 h-10 rounded-lg font-bold text-lg"
-                      style={{ background: 'rgba(82,54,124,0.5)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}>-</button>
-                    <span className="text-xl font-bold" style={{ color: '#f0e6d3' }}>{form.slots_total}</span>
-                    <button onClick={() => upd('slots_total', form.slots_total + 1)}
-                      className="w-10 h-10 rounded-lg font-bold text-lg"
-                      style={{ background: 'rgba(82,54,124,0.5)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}>+</button>
-                  </div>
+              {/* Aperçu total */}
+              {total > 0 && (
+                <div className="flex items-center justify-between px-4 py-3 rounded-xl" style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)' }}>
+                  <span className="text-xs" style={{ color: '#b8a898' }}>Total estimé ({totalHrs}h · {days.length} jour{days.length > 1 ? 's' : ''})</span>
+                  <span className="font-bold" style={{ color: '#d4af37' }}>{formatCFA(total)}</span>
                 </div>
-                <div>
-                  <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Tarif horaire (FCFA)</label>
-                  <input type="number" className={inputClass} style={inputStyle}
-                    value={form.hourly_rate} onChange={e => upd('hourly_rate', Number(e.target.value))} />
-                </div>
-              </div>
-              <div>
-                <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>Compétences requises</label>
-                <div className="flex flex-wrap gap-2">
-                  {COMPETENCES.map(c => (
-                    <button key={c} onClick={() => toggleSkill(c)}
-                      className="px-3 py-1 rounded-full text-xs transition-all border"
-                      style={{
-                        background: form.skills_required.includes(c) ? 'rgba(201,168,76,0.2)' : 'transparent',
-                        borderColor: form.skills_required.includes(c) ? '#d4af37' : 'rgba(201,168,76,0.2)',
-                        color: form.skills_required.includes(c) ? '#d4af37' : '#b8a898',
-                      }}>
-                      {c}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              )}
+
               <div className="flex gap-3">
                 <button onClick={() => setStep(0)} className="btn-outline-gold flex-1 py-3 rounded-xl">← Retour</button>
-                <button onClick={() => setStep(2)} disabled={!form.event_date || form.event_date < new Date().toISOString().slice(0, 10) || !form.start_time || !form.end_time || !form.location}
+                <button onClick={() => setStep(2)} disabled={!daysValid || !rolesValid || !form.location}
                   className="btn-gold flex-1 py-3 rounded-xl font-bold text-[#261642]">
                   Continuer →
                 </button>
@@ -372,16 +457,34 @@ export default function EditMission() {
               <h2 className="font-semibold text-lg" style={{ color: '#f0e6d3' }}>Récapitulatif</h2>
               <div className="space-y-3 text-sm" style={{ color: '#b8a898' }}>
                 <div className="flex justify-between"><span>Mission</span><span style={{ color: '#f0e6d3' }} className="font-medium">{form.title}</span></div>
-                <div className="flex justify-between"><span>Type</span><span style={{ color: '#f0e6d3' }}>{form.service_type}</span></div>
-                <div className="flex justify-between"><span>Date</span><span style={{ color: '#f0e6d3' }}>{form.event_date} · {form.start_time} - {form.end_time}</span></div>
+                <div>
+                  <span className="block mb-1">Planning</span>
+                  <div className="space-y-1">
+                    {days.map((d, i) => (
+                      <div key={i} className="flex justify-between text-xs">
+                        <span>Jour {i + 1} · {d.date ? new Date(d.date).toLocaleDateString('fr-CI', { day: '2-digit', month: 'short' }) : '—'}</span>
+                        <span style={{ color: '#f0e6d3' }}>{d.start}–{d.end} ({Math.round(dayHours(d) * 100) / 100}h)</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <span className="block mb-1">Postes</span>
+                  <div className="space-y-1">
+                    {roles.map(r => (
+                      <div key={r.skill} className="flex justify-between text-xs">
+                        <span>{r.skill} ×{r.count}</span>
+                        <span style={{ color: '#f0e6d3' }}>{formatCFA(r.rate)}/h</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
                 <div className="flex justify-between"><span>Lieu</span><span style={{ color: '#f0e6d3' }}>{form.location}, {form.ville}</span></div>
-                <div className="flex justify-between"><span>Extras</span><span style={{ color: '#f0e6d3' }}>{form.slots_total} personne(s)</span></div>
-                <div className="flex justify-between"><span>Durée</span><span style={{ color: '#f0e6d3' }}>{duration}h</span></div>
+                <div className="flex justify-between"><span>Durée totale</span><span style={{ color: '#f0e6d3' }}>{totalHrs}h · {totalHeadcount(roles)} personne(s)</span></div>
                 <div className="h-px" style={{ background: 'rgba(201,168,76,0.15)' }} />
-                <div className="flex justify-between"><span>Tarif horaire</span><span style={{ color: '#f0e6d3' }}>{form.hourly_rate.toLocaleString('fr-CI')} FCFA/h</span></div>
-                <div className="flex justify-between"><span>Montant brut</span><span style={{ color: '#f0e6d3' }}>{total.toLocaleString('fr-CI')} FCFA</span></div>
-                <div className="flex justify-between"><span>Commission (10%)</span><span style={{ color: '#ef4444' }}>-{commission.toLocaleString('fr-CI')} FCFA</span></div>
-                <div className="flex justify-between font-bold"><span>Net freelances</span><span className="text-gold-gradient">{net.toLocaleString('fr-CI')} FCFA</span></div>
+                <div className="flex justify-between"><span>Montant brut</span><span style={{ color: '#f0e6d3' }}>{formatCFA(total)}</span></div>
+                <div className="flex justify-between"><span>Commission (10%)</span><span style={{ color: '#ef4444' }}>-{formatCFA(commission)}</span></div>
+                <div className="flex justify-between font-bold"><span>Net freelances</span><span className="text-gold-gradient">{formatCFA(net)}</span></div>
               </div>
               {form.is_urgent && (
                 <div className="badge-urgent px-3 py-2 rounded-lg text-sm text-center">Mission URGENTE</div>
