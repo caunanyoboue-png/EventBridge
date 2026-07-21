@@ -169,11 +169,11 @@ export default function Landing() {
   const heroWords = ['Le', 'pont', 'entre'];
 
   return (
-    <div className="min-h-screen eb-force-dark" style={{ background: '#0a0416' }}>
+    <div className="min-h-screen eb-landing" style={{ background: 'var(--eb-l-root)' }}>
 
       {/* ── NAVBAR ── */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-4 flex items-center justify-between"
-        style={{ background: 'rgba(8,3,18,0.9)', backdropFilter: 'blur(24px)', borderBottom: '1px solid rgba(201,168,76,0.1)' }}>
+        style={{ background: 'var(--eb-l-nav)', backdropFilter: 'blur(24px)', borderBottom: '1px solid var(--color-border)' }}>
         <Logo height={46} />
 
         <div className="hidden md:flex items-center gap-10">
@@ -200,7 +200,7 @@ export default function Landing() {
         <div className="absolute inset-0">
           <img src={HERO_BG} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0"
-            style={{ background: 'linear-gradient(160deg, rgba(8,3,18,0.9) 0%, rgba(20,8,40,0.82) 45%, rgba(8,3,18,0.92) 100%)' }} />
+            style={{ background: 'var(--eb-l-hero-veil)' }} />
           {/* Halo aurore doré en mouvement lent */}
           {!reduceMotion && (
             <div className="absolute animate-aurora" style={{
@@ -234,7 +234,7 @@ export default function Landing() {
           </Reveal>
 
           <h1 className="font-display font-bold mb-6 leading-tight"
-            style={{ fontSize: 'clamp(2rem, 4.8vw, 4.2rem)', color: '#f5ede0' }}>
+            style={{ fontSize: 'clamp(2rem, 4.8vw, 4.2rem)', color: 'var(--eb-l-hero-title)' }}>
             {reduceMotion ? (
               <>Le pont entre <span className="text-gold-gradient">talents</span> et <span className="text-gold-gradient">opportunités</span></>
             ) : (
@@ -285,7 +285,7 @@ export default function Landing() {
               </button>
               <button onClick={() => navigate('/pour-les-organisateurs')}
                 className="px-8 py-4 rounded-xl font-bold text-sm flex items-center gap-3 justify-center transition-all hover:bg-white/10 w-full sm:w-auto cursor-pointer"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1.5px solid rgba(255,255,255,0.18)', color: 'var(--color-text-primary)', backdropFilter: 'blur(8px)', letterSpacing: '0.04em' }}>
+                style={{ background: 'var(--eb-l-glass-btn-bg)', border: '1.5px solid var(--eb-l-glass-btn-border)', color: 'var(--color-text-primary)', backdropFilter: 'blur(8px)', letterSpacing: '0.04em' }}>
                 Je suis Organisateur
               </button>
             </div>
@@ -324,7 +324,7 @@ export default function Landing() {
       </section>
 
       {/* ── COMMENT ÇA MARCHE ── */}
-      <section id="comment" className="py-28 px-6" style={{ background: '#0f0520' }}>
+      <section id="comment" className="py-28 px-6" style={{ background: 'var(--eb-l-sec-a)' }}>
         <div className="max-w-6xl mx-auto">
           <Reveal className="text-center mb-16">
             <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--color-gold-primary)', letterSpacing: '0.15em' }}>
@@ -348,7 +348,7 @@ export default function Landing() {
                   <div className="w-28 h-28 rounded-full flex items-center justify-center transition-all duration-500 group-hover:scale-105"
                     style={{ background: 'rgba(201,168,76,0.04)', border: '1.5px solid rgba(201,168,76,0.18)' }}>
                     <div className="w-20 h-20 rounded-full flex items-center justify-center"
-                      style={{ background: 'linear-gradient(135deg,var(--color-card-bg),rgba(26,10,46,0.95))', border: '1px solid rgba(201,168,76,0.2)' }}>
+                      style={{ background: 'linear-gradient(135deg,var(--color-card-bg),var(--eb-l-step-inner))', border: '1px solid rgba(201,168,76,0.2)' }}>
                       {idx === 0 && <IconStepPost />}
                       {idx === 1 && <IconStepMatch />}
                       {idx === 2 && <IconStepDone />}
@@ -370,11 +370,11 @@ export default function Landing() {
       </section>
 
       {/* ── POUR LES FREELANCES ── */}
-      <section style={{ background: '#261642' }}>
+      <section style={{ background: 'var(--eb-l-sec-plum)' }}>
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 min-h-[520px]">
           <div className="relative overflow-hidden min-h-72">
             <img src={IMG_FREE} alt="Freelance événementiel" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, transparent 55%, #261642)' }} />
+            <div className="absolute inset-0" style={{ background: 'var(--eb-l-plum-fade-r)' }} />
           </div>
           <Reveal className="landing-px flex flex-col justify-center px-10 py-12 md:py-16" y={0}>
             <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--color-gold-primary)', letterSpacing: '0.15em' }}>
@@ -406,7 +406,7 @@ export default function Landing() {
       </section>
 
       {/* ── POUR LES ORGANISATEURS ── */}
-      <section style={{ background: '#1c1132' }}>
+      <section style={{ background: 'var(--eb-l-sec-deep)' }}>
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 min-h-[520px]">
           <Reveal className="flex flex-col justify-center px-10 py-16 order-2 md:order-1" y={0}>
             <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--color-gold-primary)', letterSpacing: '0.15em' }}>
@@ -435,13 +435,13 @@ export default function Landing() {
           </Reveal>
           <div className="relative overflow-hidden min-h-72 order-1 md:order-2">
             <img src={IMG_ORG} alt="Organisateur événementiel" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(to left, transparent 55%, #1c1132)' }} />
+            <div className="absolute inset-0" style={{ background: 'var(--eb-l-deep-fade-l)' }} />
           </div>
         </div>
       </section>
 
       {/* ── SERVICES ── */}
-      <section id="services" className="py-28 px-6" style={{ background: '#0a0416' }}>
+      <section id="services" className="py-28 px-6" style={{ background: 'var(--eb-l-root)' }}>
         <div className="max-w-6xl mx-auto">
           <Reveal className="text-center mb-14">
             <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--color-gold-primary)', letterSpacing: '0.15em' }}>
@@ -464,7 +464,7 @@ export default function Landing() {
                   <img src={s.img} alt={s.label}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                   <div className="absolute inset-0"
-                    style={{ background: 'linear-gradient(to top, rgba(8,3,18,0.94) 0%, rgba(8,3,18,0.35) 55%, rgba(8,3,18,0.1) 100%)' }} />
+                    style={{ background: 'var(--eb-l-img-bottom)' }} />
                   <div className="absolute bottom-0 left-0 right-0 p-5">
                     <p className="text-sm font-semibold tracking-wide" style={{ color: 'var(--color-text-primary)' }}>{s.label}</p>
                     <p className="text-xs mt-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -534,7 +534,7 @@ export default function Landing() {
       </section>
 
       {/* ── TÉMOIGNAGES ── */}
-      <section id="temoignages" className="py-28 px-6" style={{ background: '#0f0520' }}>
+      <section id="temoignages" className="py-28 px-6" style={{ background: 'var(--eb-l-sec-a)' }}>
         <div className="max-w-6xl mx-auto">
           <Reveal className="text-center mb-14">
             <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--color-gold-primary)', letterSpacing: '0.15em' }}>
@@ -549,7 +549,7 @@ export default function Landing() {
             {TESTIMONIALS.map((t, i) => (
               <Reveal key={t.name} delay={i * 0.15}>
                 <div className="p-7 rounded-2xl card-lift h-full"
-                  style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(201,168,76,0.12)' }}>
+                  style={{ background: 'var(--eb-l-card)', border: '1px solid var(--color-card-border)', boxShadow: 'var(--card-shadow)' }}>
                   <div className="flex gap-1 mb-5">
                     {Array.from({ length: 5 }).map((_, j) => <IconStar key={j} filled={j < t.rating} />)}
                   </div>
@@ -580,7 +580,7 @@ export default function Landing() {
       <section className="relative py-32 px-6 overflow-hidden">
         <div className="absolute inset-0">
           <img src={HERO_BG} alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0" style={{ background: 'rgba(8,3,18,0.92)' }} />
+          <div className="absolute inset-0" style={{ background: 'var(--eb-l-cta-veil)' }} />
           <div className="absolute inset-0"
             style={{ background: 'radial-gradient(ellipse at center, rgba(201,168,76,0.05) 0%, transparent 65%)' }} />
         </div>
@@ -615,7 +615,7 @@ export default function Landing() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="py-10 px-8" style={{ background: '#040110', borderTop: '1px solid rgba(201,168,76,0.07)' }}>
+      <footer className="py-10 px-8" style={{ background: 'var(--eb-l-footer)', borderTop: '1px solid var(--color-border)' }}>
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <Logo height={40} />
           <div className="flex gap-8">

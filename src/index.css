@@ -146,6 +146,44 @@
   --color-header-bg: rgba(16, 4, 32, 0.92);
 }
 
+/* ── Landing : surfaces sur-mesure (héros voilés, sections alternées, footer) ── */
+.eb-landing {
+  --eb-l-root: #0a0416;
+  --eb-l-sec-a: #0f0520;
+  --eb-l-sec-plum: #261642;
+  --eb-l-sec-deep: #1c1132;
+  --eb-l-footer: #040110;
+  --eb-l-nav: rgba(8, 3, 18, 0.9);
+  --eb-l-hero-veil: linear-gradient(160deg, rgba(8,3,18,0.9) 0%, rgba(20,8,40,0.82) 45%, rgba(8,3,18,0.92) 100%);
+  --eb-l-cta-veil: rgba(8, 3, 18, 0.92);
+  --eb-l-card: rgba(255, 255, 255, 0.025);
+  --eb-l-img-bottom: linear-gradient(to top, rgba(8,3,18,0.94) 0%, rgba(8,3,18,0.35) 55%, rgba(8,3,18,0.1) 100%);
+  --eb-l-hero-title: #f5ede0;
+  --eb-l-step-inner: rgba(26, 10, 46, 0.95);
+  --eb-l-glass-btn-bg: rgba(255, 255, 255, 0.05);
+  --eb-l-glass-btn-border: rgba(255, 255, 255, 0.18);
+  --eb-l-plum-fade-r: linear-gradient(to right, transparent 55%, #261642);
+  --eb-l-deep-fade-l: linear-gradient(to left, transparent 55%, #1c1132);
+}
+:root[data-theme='light'] .eb-landing {
+  --eb-l-root: #ffffff;
+  --eb-l-sec-a: #eef3f9;
+  --eb-l-sec-plum: #f4f7fb;
+  --eb-l-sec-deep: #eef3f9;
+  --eb-l-footer: #eef3f9;
+  --eb-l-nav: rgba(255, 255, 255, 0.86);
+  --eb-l-hero-veil: linear-gradient(160deg, rgba(244,247,251,0.86) 0%, rgba(233,239,247,0.72) 45%, rgba(244,247,251,0.9) 100%);
+  --eb-l-cta-veil: rgba(244, 247, 251, 0.9);
+  --eb-l-card: #ffffff;
+  --eb-l-img-bottom: linear-gradient(to top, rgba(244,247,251,0.96) 0%, rgba(244,247,251,0.45) 55%, transparent 100%);
+  --eb-l-hero-title: #16223d;
+  --eb-l-step-inner: #eef3f9;
+  --eb-l-glass-btn-bg: rgba(30, 95, 180, 0.06);
+  --eb-l-glass-btn-border: rgba(30, 95, 180, 0.28);
+  --eb-l-plum-fade-r: linear-gradient(to right, transparent 55%, #f4f7fb);
+  --eb-l-deep-fade-l: linear-gradient(to left, transparent 55%, #eef3f9);
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html { scroll-behavior: smooth; }
