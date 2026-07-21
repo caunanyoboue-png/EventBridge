@@ -138,3 +138,20 @@ export const COMPETENCES = [
   'Manutention',
   'Décoration',
 ];
+
+// Compétences facturées À L'HEURE. Les autres sont facturées au jour ou à la
+// prestation (l'organisateur choisit à la publication ; le freelance saisit un
+// prix par prestation à l'inscription). Règle : si un freelance a AU MOINS une
+// compétence horaire, l'horaire prime (il saisit un tarif/heure).
+export const HOURLY_COMPETENCES = new Set<string>([
+  'Service en salle',
+  'Bar / Barman',
+  'Plongeur',
+  'Hôtesse accueil',
+  'Sécurité',
+  'Manutention',
+  'MC / Présentateur',
+]);
+export function isHourlyCompetence(skill: string): boolean {
+  return HOURLY_COMPETENCES.has(skill);
+}

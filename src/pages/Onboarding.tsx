@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { COMPETENCES, VILLES } from '../lib/utils';
+import { COMPETENCES, VILLES, isHourlyCompetence } from '../lib/utils';
 import { type UserRole } from '../types';
 import toast from 'react-hot-toast';
 import Logo from '../components/Logo';
@@ -65,6 +65,7 @@ export default function Onboarding() {
   const [bio, setBio]             = useState('');
   const [skills, setSkills]       = useState<string[]>([]);
   const [hourlyRate, setHourlyRate] = useState(2500);
+  const [prestationRates, setPrestationRates] = useState<Record<string, number>>({}); // prix/prestation par compétence non-horaire
   const [expYears, setExpYears]   = useState(0);
   const [companyName, setCompanyName] = useState('');
   const [companySector, setCompanySector] = useState('');
@@ -144,6 +145,9 @@ export default function Onboarding() {
     setBusy(true);
     try {
       const currentRole = profile?.role || role;
+      const isFree = currentRole === 'freelance';
+      // Que des compétences non-horaires → prix par prestation ; sinon l'horaire prime.
+      const usePrestation = isFree && skills.length > 0 && !skills.some(isHourlyCompetence);
       await updateProfile({
         full_name:       fullName || profile?.full_name,
         phone:           phone    || undefined,
@@ -151,8 +155,9 @@ export default function Onboarding() {
         quartier:        quartier || undefined,
         bio:             bio      || undefined,
         skills:          skills.length ? skills : undefined,
-        hourly_rate:     currentRole === 'freelance' ? hourlyRate : undefined,
-        experience_years: currentRole === 'freelance' ? expYears : undefined,
+        hourly_rate:     isFree ? (usePrestation ? 0 : hourlyRate) : undefined,
+        prestation_rates: usePrestation ? Object.fromEntries(skills.map(s => [s, prestationRates[s] || 0] as [string, number])) : undefined,
+        experience_years: isFree ? expYears : undefined,
         company_name:    currentRole === 'organisateur' ? companyName  : undefined,
         company_sector:  currentRole === 'organisateur' ? companySector : undefined,
         onboarding_done: true,
@@ -318,24 +323,62 @@ export default function Onboarding() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                    <div>
-                      <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.5)', marginBottom: 6 }}>
-                        Tarif horaire (FCFA)
-                      </p>
-                      <input style={inp} type="number" min={0} placeholder="Ex: 2500"
-                        value={hourlyRate === 0 ? '' : hourlyRate}
-                        onChange={e => setHourlyRate(e.target.value === '' ? 0 : Math.abs(parseInt(e.target.value, 10) || 0))} />
-                    </div>
-                    <div>
-                      <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.5)', marginBottom: 6 }}>
-                        Années d'expérience
-                      </p>
-                      <input style={inp} type="number" min={0} placeholder="Ex: 3"
-                        value={expYears === 0 ? '' : expYears}
-                        onChange={e => setExpYears(e.target.value === '' ? 0 : Math.abs(parseInt(e.target.value, 10) || 0))} />
-                    </div>
-                  </div>
+                  {/* Tarification : si AU MOINS une compétence est horaire → tarif/heure (prime).
+                      Sinon (que des compétences non-horaires) → un prix par prestation, par compétence. */}
+                  {skills.length > 0 && !skills.some(isHourlyCompetence) ? (
+                    <>
+                      <div>
+                        <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.5)', marginBottom: 8 }}>
+                          Prix par prestation (FCFA)
+                        </p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          {skills.map(s => (
+                            <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <span style={{ fontSize: 12, color: 'rgba(240,230,211,0.7)', flex: 1 }}>{s}</span>
+                              <input style={{ ...inp, width: 140 }} type="number" min={0} placeholder="Ex: 50000"
+                                value={prestationRates[s] ? prestationRates[s] : ''}
+                                onChange={e => setPrestationRates(p => ({ ...p, [s]: e.target.value === '' ? 0 : Math.abs(parseInt(e.target.value, 10) || 0) }))} />
+                              <span style={{ fontSize: 11, color: 'rgba(240,230,211,0.4)', whiteSpace: 'nowrap' }}>/ prestation</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.5)', marginBottom: 6 }}>
+                          Années d'expérience
+                        </p>
+                        <input style={inp} type="number" min={0} placeholder="Ex: 3"
+                          value={expYears === 0 ? '' : expYears}
+                          onChange={e => setExpYears(e.target.value === '' ? 0 : Math.abs(parseInt(e.target.value, 10) || 0))} />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                        <div>
+                          <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.5)', marginBottom: 6 }}>
+                            Tarif horaire (FCFA)
+                          </p>
+                          <input style={inp} type="number" min={0} placeholder="Ex: 2500"
+                            value={hourlyRate === 0 ? '' : hourlyRate}
+                            onChange={e => setHourlyRate(e.target.value === '' ? 0 : Math.abs(parseInt(e.target.value, 10) || 0))} />
+                        </div>
+                        <div>
+                          <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.5)', marginBottom: 6 }}>
+                            Années d'expérience
+                          </p>
+                          <input style={inp} type="number" min={0} placeholder="Ex: 3"
+                            value={expYears === 0 ? '' : expYears}
+                            onChange={e => setExpYears(e.target.value === '' ? 0 : Math.abs(parseInt(e.target.value, 10) || 0))} />
+                        </div>
+                      </div>
+                      {skills.some(isHourlyCompetence) && skills.some(s => !isHourlyCompetence(s)) && (
+                        <p style={{ fontSize: 11, color: 'rgba(240,230,211,0.4)', margin: 0 }}>
+                          Vous avez une compétence facturée à l'heure : c'est votre tarif horaire qui s'applique.
+                        </p>
+                      )}
+                    </>
+                  )}
                 </>
               )}
 

@@ -62,6 +62,7 @@ export interface Profile {
   skills?: string[];
   experience_years?: number;
   hourly_rate?: number;
+  prestation_rates?: Record<string, number>;  // prix par prestation, par compétence non-horaire
   avg_rating?: number;
   total_missions?: number;
   total_reviews?: number;
@@ -78,8 +79,13 @@ export interface Profile {
   updated_at?: string;
 }
 
-// Un poste de la mission : une compétence, avec son effectif et son tarif horaire propre.
-export interface MissionRole { skill: string; count: number; rate: number; }
+// Mode de facturation d'un poste :
+//  'hourly'     → rate = tarif/heure  (× heures × jours)
+//  'daily'      → rate = prix/jour    (× nombre de jours)
+//  'prestation' → rate = forfait unique pour tout l'événement
+export type BillingMode = 'hourly' | 'daily' | 'prestation';
+// Un poste de la mission : une compétence, avec son effectif, son prix et son mode de facturation.
+export interface MissionRole { skill: string; count: number; rate: number; billing?: BillingMode; }
 // Un jour de l'événement (multi-jours) : date + créneau horaire de la journée.
 export interface MissionDay { date: string; start: string; end: string; }
 

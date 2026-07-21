@@ -8,7 +8,7 @@ import { getOrCreateConversation } from '../lib/messaging';
 import { type Mission, type Profile, type Contract, type MissionRole, type MissionDay } from '../types';
 import { Zap, Calendar, Clock, MapPin, Wallet, Users, Shirt, Star, CheckCircle2, MessageCircle, FileText } from 'lucide-react';
 import { formatDate, formatCFA } from '../lib/utils';
-import { dayHours, formatRateLabel } from '../lib/missionPricing';
+import { dayHours, formatRateLabel, billingUnit } from '../lib/missionPricing';
 import { ServiceIcon } from '../lib/serviceIcons';
 import { distanceKm, formatDistance } from '../lib/geo';
 import MapView from '../components/MapView';
@@ -376,7 +376,7 @@ export default function MissionDetail() {
                 {roleList.map(r => (
                   <div key={r.skill} className="flex items-center justify-between text-sm px-3 py-2 rounded-lg" style={{ background: 'rgba(82,54,124,0.3)' }}>
                     <span style={{ color: '#f0e6d3' }}>{r.skill} <span style={{ color: '#8a7a9a' }}>×{r.count}</span></span>
-                    <span className="font-bold" style={{ color: '#d4af37' }}>{formatCFA(r.rate)}/h</span>
+                    <span className="font-bold" style={{ color: '#d4af37' }}>{formatCFA(r.rate)}{billingUnit(r.billing)}</span>
                   </div>
                 ))}
               </div>
@@ -479,7 +479,7 @@ export default function MissionDetail() {
                     style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}>
                     {matchingRoles.map(r => (
                       <option key={r.skill} value={r.skill} style={{ background: '#1e0f3c', color: '#f0e6d3' }}>
-                        {r.skill} — {formatCFA(r.rate)}/h
+                        {r.skill} — {formatCFA(r.rate)}{billingUnit(r.billing)}
                       </option>
                     ))}
                   </select>

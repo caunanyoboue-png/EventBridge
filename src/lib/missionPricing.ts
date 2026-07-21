@@ -1,16 +1,15 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Calcul de tarif d'une mission : tarif horaire PAR COMPÉTENCE + planning multi-jours.
+// Calcul de tarif d'une mission — facturation MIXTE par compétence :
+//   • 'hourly'     : rate = tarif/heure   → rate × effectif × heures cumulées (tous les jours)
+//   • 'daily'      : rate = prix/jour      → rate × effectif × nombre de jours
+//   • 'prestation' : rate = forfait unique → rate × effectif (quel que soit le nb de jours)
 //
-//   Total brut = (heures cumulées de tous les jours) × Σ (tarif_poste × effectif_poste)
-//   càd, jour par jour : Σ_jours [ heures_du_jour × Σ_postes(tarif × effectif) ]
-//
-// Un poste = { skill, count, rate }. Un jour = { date, start, end }.
-// Chaque poste est présent tous les jours de l'événement.
+// Un poste = { skill, count, rate, billing }. Un jour = { date, start, end }.
 // ─────────────────────────────────────────────────────────────────────────────
 import { formatCFA } from './utils';
-import type { MissionRole, MissionDay } from '../types';
+import type { MissionRole, MissionDay, BillingMode } from '../types';
 
-export type { MissionRole, MissionDay } from '../types';
+export type { MissionRole, MissionDay, BillingMode } from '../types';
 
 /** Heures d'une journée (gère les créneaux qui passent minuit). */
 export function dayHours(d: { start?: string; end?: string } | null | undefined): number {
@@ -26,41 +25,65 @@ export function totalHours(days: MissionDay[] | null | undefined): number {
   return (days || []).reduce((sum, d) => sum + dayHours(d), 0);
 }
 
-/** Coût horaire cumulé de tous les postes = Σ (tarif × effectif). */
-export function rolesHourlyCost(roles: MissionRole[] | null | undefined): number {
-  return (roles || []).reduce((sum, r) => sum + (Number(r.rate) || 0) * (Number(r.count) || 0), 0);
-}
-
 /** Effectif total (toutes compétences confondues). */
 export function totalHeadcount(roles: MissionRole[] | null | undefined): number {
   return (roles || []).reduce((sum, r) => sum + (Number(r.count) || 0), 0);
 }
 
-/** Total brut de la mission (tous jours, tous postes). */
+/** Unité d'affichage du prix selon le mode de facturation. */
+export function billingUnit(billing?: BillingMode | string): string {
+  return billing === 'daily' ? '/jour' : billing === 'prestation' ? '/prestation' : '/h';
+}
+
+/** Coût d'un poste (effectif compris) selon son mode de facturation. */
+export function roleCost(role: MissionRole, days: MissionDay[] | null | undefined): number {
+  const rate = Number(role.rate) || 0;
+  const count = Number(role.count) || 0;
+  const nbDays = (days || []).length || 1;
+  switch (role.billing) {
+    case 'prestation': return rate * count;
+    case 'daily':      return rate * count * nbDays;
+    default:           return rate * count * totalHours(days); // 'hourly'
+  }
+}
+
+/** Coût d'un poste pour UNE personne (sans l'effectif). */
+export function roleTotalPerPerson(role: MissionRole, days: MissionDay[] | null | undefined): number {
+  return roleCost({ ...role, count: 1 }, days);
+}
+
+/** Total brut de la mission (tous jours, tous postes, tous modes). */
 export function missionTotal(roles: MissionRole[] | null | undefined, days: MissionDay[] | null | undefined): number {
-  return totalHours(days) * rolesHourlyCost(roles);
-}
-
-/** Coût d'un poste pour UNE personne sur tout l'événement = tarif × heures cumulées. */
-export function roleTotalPerPerson(rate: number, days: MissionDay[] | null | undefined): number {
-  return (Number(rate) || 0) * totalHours(days);
-}
-
-/** Fourchette de tarif horaire (min/max) parmi les postes. */
-export function rateRange(roles: MissionRole[] | null | undefined): { min: number; max: number } {
-  const rates = (roles || []).map(r => Number(r.rate) || 0).filter(r => r > 0);
-  if (rates.length === 0) return { min: 0, max: 0 };
-  return { min: Math.min(...rates), max: Math.max(...rates) };
+  return (roles || []).reduce((sum, r) => sum + roleCost(r, days), 0);
 }
 
 /**
- * Libellé compact du tarif pour les cartes/listes :
- *   un seul tarif        → « 2 500 FCFA/h »
- *   plusieurs tarifs     → « dès 1 700 FCFA/h »
- *   pas de postes (legacy) → « <fallback> FCFA/h »
+ * Tarif « représentatif » stocké dans la colonne legacy `hourly_rate`
+ * (affichages/matching/contrat) : le plus bas tarif HORAIRE s'il existe, sinon
+ * le plus bas prix parmi les postes.
+ */
+export function representativeRate(roles: MissionRole[] | null | undefined): number {
+  const list = roles || [];
+  const hourly = list.filter(r => (r.billing ?? 'hourly') === 'hourly').map(r => Number(r.rate) || 0).filter(r => r > 0);
+  const pool = hourly.length ? hourly : list.map(r => Number(r.rate) || 0).filter(r => r > 0);
+  return pool.length ? Math.min(...pool) : 0;
+}
+
+/**
+ * Libellé compact du tarif pour les cartes/listes. L'horaire prime :
+ *   au moins un poste horaire → « dès 1 700 FCFA/h »
+ *   sinon (jour/prestation homogène) → « dès 50 000 FCFA/jour » / « /prestation »
+ *   sinon (modes mélangés)   → « dès 50 000 FCFA »
  */
 export function formatRateLabel(roles: MissionRole[] | null | undefined, fallback: number): string {
-  const { min, max } = rateRange(roles);
-  if (!min && !max) return `${formatCFA(fallback)}/h`;
-  return min === max ? `${formatCFA(min)}/h` : `dès ${formatCFA(min)}/h`;
+  const list = roles || [];
+  if (!list.length) return `${formatCFA(fallback)}/h`;
+  const hourly = list.filter(r => (r.billing ?? 'hourly') === 'hourly');
+  const pool = hourly.length ? hourly : list;
+  const rates = pool.map(r => Number(r.rate) || 0).filter(r => r > 0);
+  if (!rates.length) return `${formatCFA(fallback)}/h`;
+  const min = Math.min(...rates), max = Math.max(...rates);
+  const modes = new Set(pool.map(r => r.billing ?? 'hourly'));
+  const unit = modes.size === 1 ? billingUnit([...modes][0]) : '';
+  return `${min === max ? '' : 'dès '}${formatCFA(min)}${unit}`;
 }

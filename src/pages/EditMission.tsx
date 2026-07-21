@@ -4,11 +4,11 @@ import { Check, X, Camera, Search, Plus, Minus } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { COMPETENCES, VILLES, formatCFA } from '../lib/utils';
+import { COMPETENCES, VILLES, formatCFA, isHourlyCompetence } from '../lib/utils';
 import MapPicker from '../components/MapPicker';
 import { geocodeAddress } from '../lib/geo';
 import {
-  dayHours, totalHours, missionTotal, totalHeadcount, rateRange,
+  dayHours, totalHours, missionTotal, totalHeadcount, representativeRate, billingUnit,
   type MissionRole, type MissionDay,
 } from '../lib/missionPricing';
 import toast from 'react-hot-toast';
@@ -79,6 +79,7 @@ export default function EditMission() {
           skill: s,
           count: skills.length <= 1 ? (data.slots_total || 1) : 1,
           rate: Number(data.hourly_rate) || 3000,
+          billing: isHourlyCompetence(s) ? 'hourly' : 'prestation',
         }));
         setRoles(Array.isArray(data.roles) && data.roles.length ? (data.roles as MissionRole[]) : legacyRoles);
         // Planning : format détaillé si présent, sinon un seul jour depuis les colonnes legacy
@@ -96,7 +97,9 @@ export default function EditMission() {
   function toggleRole(skill: string) {
     setRoles(prev => prev.some(r => r.skill === skill)
       ? prev.filter(r => r.skill !== skill)
-      : [...prev, { skill, count: 1, rate: 3000 }]);
+      : [...prev, isHourlyCompetence(skill)
+          ? { skill, count: 1, rate: 3000, billing: 'hourly' }
+          : { skill, count: 1, rate: 50000, billing: 'prestation' }]);
   }
   function updRole(skill: string, patch: Partial<MissionRole>) {
     setRoles(prev => prev.map(r => r.skill === skill ? { ...r, ...patch } : r));
@@ -140,7 +143,7 @@ export default function EditMission() {
   const total      = missionTotal(roles, days);
   const commission = total * 0.10;
   const net        = total - commission;
-  const { min: minRate } = rateRange(roles);
+  const repRate    = representativeRate(roles);
 
   const daysValid  = days.length > 0 && days.every(d => d.date && d.date >= today && d.start && d.end && dayHours(d) > 0);
   const rolesValid = roles.length > 0 && roles.every(r => r.count >= 1 && r.rate > 0);
@@ -170,7 +173,7 @@ export default function EditMission() {
         service_type: skills[0] || '',
         skills_required: skills,
         slots_total: totalHeadcount(roles),
-        hourly_rate: minRate,
+        hourly_rate: repRate,
         duration_hours: dayHours(day1),
         event_date: day1.date,
         start_time: day1.start,
@@ -185,7 +188,7 @@ export default function EditMission() {
         const { data: count } = await supabase.rpc('notify_matching_freelances', {
           p_mission_id:      missionId,
           p_mission_title:   form.title,
-          p_hourly_rate:     minRate,
+          p_hourly_rate:     repRate,
           p_ville:           form.ville,
           p_skills_required: skills.length > 0 ? skills : null,
         });
@@ -358,27 +361,48 @@ export default function EditMission() {
               <div>
                 <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>Postes & tarifs horaires * <span style={{ color: '#7a6a7a' }}>(effectif + prix/heure par compétence)</span></label>
                 <div className="space-y-2">
-                  {roles.map(r => (
-                    <div key={r.skill} className="flex items-center gap-3 rounded-xl p-3 flex-wrap"
-                      style={{ background: 'rgba(82,54,124,0.25)', border: '1px solid rgba(201,168,76,0.12)' }}>
-                      <span className="text-sm font-medium flex-1 min-w-[120px]" style={{ color: '#f0e6d3' }}>{r.skill}</span>
-                      <div className="flex items-center gap-2">
-                        <button type="button" onClick={() => updRole(r.skill, { count: Math.max(1, r.count - 1) })}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center"
-                          style={{ background: 'rgba(82,54,124,0.6)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}><Minus size={14} /></button>
-                        <span className="text-sm font-bold w-5 text-center" style={{ color: '#f0e6d3' }}>{r.count}</span>
-                        <button type="button" onClick={() => updRole(r.skill, { count: r.count + 1 })}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center"
-                          style={{ background: 'rgba(82,54,124,0.6)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}><Plus size={14} /></button>
+                  {roles.map(r => {
+                    const hourly = isHourlyCompetence(r.skill);
+                    const unit = hourly ? 'F/h' : (r.billing === 'daily' ? 'F/jour' : 'F/forfait');
+                    return (
+                      <div key={r.skill} className="rounded-xl p-3 space-y-2"
+                        style={{ background: 'rgba(82,54,124,0.25)', border: '1px solid rgba(201,168,76,0.12)' }}>
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className="text-sm font-medium flex-1 min-w-[110px]" style={{ color: '#f0e6d3' }}>{r.skill}</span>
+                          <div className="flex items-center gap-2">
+                            <button type="button" onClick={() => updRole(r.skill, { count: Math.max(1, r.count - 1) })}
+                              className="w-8 h-8 rounded-lg flex items-center justify-center"
+                              style={{ background: 'rgba(82,54,124,0.6)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}><Minus size={14} /></button>
+                            <span className="text-sm font-bold w-5 text-center" style={{ color: '#f0e6d3' }}>{r.count}</span>
+                            <button type="button" onClick={() => updRole(r.skill, { count: r.count + 1 })}
+                              className="w-8 h-8 rounded-lg flex items-center justify-center"
+                              style={{ background: 'rgba(82,54,124,0.6)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}><Plus size={14} /></button>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <input type="number" min={0} step={100} value={r.rate}
+                              onChange={e => updRole(r.skill, { rate: Number(e.target.value) })}
+                              className="px-2 py-2 rounded-lg text-sm outline-none text-right" style={{ ...inputStyle, width: 96 }} />
+                            <span className="text-xs whitespace-nowrap" style={{ color: '#8a7a9a' }}>{unit}</span>
+                          </div>
+                        </div>
+                        {!hourly && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px]" style={{ color: '#8a7a9a' }}>Facturé :</span>
+                            <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid rgba(201,168,76,0.2)' }}>
+                              {(['daily', 'prestation'] as const).map(b => (
+                                <button key={b} type="button" onClick={() => updRole(r.skill, { billing: b })}
+                                  className="px-3 py-1 text-xs font-medium"
+                                  style={{ background: (r.billing || 'prestation') === b ? 'rgba(201,168,76,0.2)' : 'transparent',
+                                    color: (r.billing || 'prestation') === b ? '#d4af37' : '#b8a898' }}>
+                                  {b === 'daily' ? 'Par jour' : 'Par prestation'}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex items-center gap-1">
-                        <input type="number" min={0} step={100} value={r.rate}
-                          onChange={e => updRole(r.skill, { rate: Number(e.target.value) })}
-                          className="px-2 py-2 rounded-lg text-sm outline-none text-right" style={{ ...inputStyle, width: 90 }} />
-                        <span className="text-xs" style={{ color: '#8a7a9a' }}>F/h</span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
@@ -474,7 +498,7 @@ export default function EditMission() {
                     {roles.map(r => (
                       <div key={r.skill} className="flex justify-between text-xs">
                         <span>{r.skill} ×{r.count}</span>
-                        <span style={{ color: '#f0e6d3' }}>{formatCFA(r.rate)}/h</span>
+                        <span style={{ color: '#f0e6d3' }}>{formatCFA(r.rate)}{billingUnit(r.billing)}</span>
                       </div>
                     ))}
                   </div>
