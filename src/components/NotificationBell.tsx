@@ -113,8 +113,8 @@ export default function NotificationBell() {
       >
         <svg width="17" height="17" viewBox="0 0 18 20" fill="none">
           <path d="M9 2a6 6 0 0 0-6 6v3.5L1.5 14h15L15 11.5V8A6 6 0 0 0 9 2Z"
-            stroke="#d4af37" strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
-          <path d="M7.5 17a1.5 1.5 0 0 0 3 0" stroke="#d4af37" strokeWidth="1.5" strokeLinecap="round"/>
+            stroke="var(--color-gold-primary)" strokeWidth="1.5" strokeLinejoin="round" fill="none"/>
+          <path d="M7.5 17a1.5 1.5 0 0 0 3 0" stroke="var(--color-gold-primary)" strokeWidth="1.5" strokeLinecap="round"/>
         </svg>
         {unread > 0 && (
           <span className="notif-pulse" style={{
@@ -147,17 +147,17 @@ export default function NotificationBell() {
             borderBottom: '1px solid rgba(201,168,76,0.08)',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#f0e6d3' }}>Notifications</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-primary)' }}>Notifications</span>
               {unread > 0 && (
                 <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 7px',
-                  borderRadius: 999, background: 'rgba(201,168,76,0.15)', color: '#d4af37' }}>
+                  borderRadius: 999, background: 'rgba(201,168,76,0.15)', color: 'var(--color-gold-primary)' }}>
                   {unread} non lu{unread > 1 ? 's' : ''}
                 </span>
               )}
             </div>
             {unread > 0 && (
               <button onClick={markAllRead} style={{
-                fontSize: 11, color: '#d4af37', background: 'none',
+                fontSize: 11, color: 'var(--color-gold-primary)', background: 'none',
                 border: 'none', cursor: 'pointer', fontWeight: 500,
               }}>
                 Tout marquer lu
@@ -194,12 +194,12 @@ export default function NotificationBell() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   background: 'rgba(201,168,76,0.1)',
                 }}>
-                  {(() => { const Icon = ICONS[n.type] || ICONS.default; return <Icon size={16} color="#d4af37" />; })()}
+                  {(() => { const Icon = ICONS[n.type] || ICONS.default; return <Icon size={16} color="var(--color-gold-primary)" />; })()}
                 </div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{
-                    fontSize: 12, fontWeight: n.is_read ? 400 : 600, color: '#f0e6d3', margin: '0 0 2px',
+                    fontSize: 12, fontWeight: n.is_read ? 400 : 600, color: 'var(--color-text-primary)', margin: '0 0 2px',
                     ...(expandedId === n.id ? {} : { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }),
                   }}>
                     {n.title}
@@ -219,7 +219,7 @@ export default function NotificationBell() {
                     <span role="button" tabIndex={0}
                       onClick={e => { e.stopPropagation(); goTo(n); }}
                       style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 8,
-                        fontSize: 11, fontWeight: 600, color: '#d4af37', cursor: 'pointer' }}>
+                        fontSize: 11, fontWeight: 600, color: 'var(--color-gold-primary)', cursor: 'pointer' }}>
                       Voir →
                     </span>
                   )}
@@ -229,7 +229,7 @@ export default function NotificationBell() {
                 {!n.is_read && (
                   <div style={{
                     width: 7, height: 7, borderRadius: '50%',
-                    background: '#d4af37', flexShrink: 0, marginTop: 5,
+                    background: 'var(--color-gold-primary)', flexShrink: 0, marginTop: 5,
                   }} />
                 )}
               </button>

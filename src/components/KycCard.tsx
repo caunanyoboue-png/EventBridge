@@ -35,8 +35,8 @@ export default function KycCard({ alwaysShow = false, offersLink = true }: { alw
           <BadgeCheck size={22} color={col} />
         </div>
         <div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#f0e6d3' }}>Profil certifié{blue ? ' — Pro (bleu)' : ' (gris)'} ✓</div>
-          <div style={{ fontSize: 12.5, color: '#b8a898', marginTop: 2 }}>Votre badge Certifié est visible par les organisateurs.</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-primary)' }}>Profil certifié{blue ? ' — Pro (bleu)' : ' (gris)'} ✓</div>
+          <div style={{ fontSize: 12.5, color: 'var(--color-text-secondary)', marginTop: 2 }}>Votre badge Certifié est visible par les organisateurs.</div>
         </div>
       </div>
     );
@@ -81,7 +81,7 @@ export default function KycCard({ alwaysShow = false, offersLink = true }: { alw
       : status === 'rejected'
       ? { bg: 'rgba(239,68,68,0.1)', bd: 'rgba(239,68,68,0.3)', col: '#ef4444', Icon: XCircle,
           title: 'Pièce refusée', msg: profile.kyc_rejection_reason || 'Vos pièces ont été refusées. Merci d\'en renvoyer de nouvelles (recto + verso, bien lisibles).' }
-      : { bg: 'rgba(212,175,55,0.1)', bd: 'rgba(212,175,55,0.3)', col: '#d4af37', Icon: BadgeCheck,
+      : { bg: 'rgba(212,175,55,0.1)', bd: 'rgba(212,175,55,0.3)', col: 'var(--color-gold-primary)', Icon: BadgeCheck,
           title: 'Obtenez votre badge Certifié', msg: 'Facultatif, mais ça rassure les organisateurs et booste votre visibilité. Envoyez le recto ET le verso de votre pièce (CNI ou passeport).' };
 
   // Peut envoyer ses pièces tant qu'il n'est pas certifié et qu'aucune revue n'est en cours.
@@ -92,9 +92,9 @@ export default function KycCard({ alwaysShow = false, offersLink = true }: { alw
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 13px', borderRadius: 10, fontSize: 12.5, fontWeight: 600,
         cursor: 'pointer',
-        background: file ? 'rgba(0,200,150,0.14)' : 'rgba(82,54,124,0.5)',
+        background: file ? 'rgba(0,200,150,0.14)' : 'var(--color-input-bg)',
         border: `1px solid ${file ? 'rgba(0,200,150,0.4)' : 'rgba(201,168,76,0.25)'}`,
-        color: file ? '#00C896' : '#f0e6d3',
+        color: file ? '#00C896' : 'var(--color-text-primary)',
       }}>
       {file ? <Check size={14} /> : <Upload size={14} />} {label}{file ? ' ✓' : ''}
     </button>
@@ -109,11 +109,11 @@ export default function KycCard({ alwaysShow = false, offersLink = true }: { alw
         <theme.Icon size={22} color={theme.col} />
       </div>
       <div style={{ flex: 1, minWidth: 180 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: '#f0e6d3' }}>{theme.title}</div>
-        <div style={{ fontSize: 12.5, color: '#b8a898', marginTop: 2 }}>{theme.msg}</div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-primary)' }}>{theme.title}</div>
+        <div style={{ fontSize: 12.5, color: 'var(--color-text-secondary)', marginTop: 2 }}>{theme.msg}</div>
         {offersLink && canUpload && (
           <button onClick={() => navigate('/certification')}
-            style={{ marginTop: 6, background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', color: '#d4af37', fontSize: 12, fontWeight: 700 }}>
+            style={{ marginTop: 6, background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--color-gold-primary)', fontSize: 12, fontWeight: 700 }}>
             Voir les offres de certification →
           </button>
         )}
@@ -129,7 +129,7 @@ export default function KycCard({ alwaysShow = false, offersLink = true }: { alw
           <button type="button" onClick={submit} disabled={busy || !recto || !verso}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 16px', borderRadius: 10,
-              background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642', fontSize: 13, fontWeight: 700,
+              background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642', fontSize: 13, fontWeight: 700,
               border: 'none', cursor: busy || !recto || !verso ? 'not-allowed' : 'pointer', opacity: busy || !recto || !verso ? 0.55 : 1,
             }}>
             {busy ? 'Envoi…' : 'Envoyer'}

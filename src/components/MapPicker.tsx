@@ -160,7 +160,7 @@ export default function MapPicker({ lat, lng, onSelect, markerColor }: Props) {
             marginLeft: 10, flexShrink: 0,
             padding: '5px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600,
             cursor: locating ? 'wait' : 'pointer',
-            background: 'linear-gradient(135deg,#d4af37,#e8c97a)',
+            background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))',
             color: '#261642', border: 'none', opacity: locating ? 0.7 : 1,
             transition: 'opacity 0.15s',
           }}

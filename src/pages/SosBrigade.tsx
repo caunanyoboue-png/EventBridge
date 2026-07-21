@@ -140,7 +140,7 @@ function OrgView() {
   }, []); // Une seule fois au montage pour refresh des compteurs
 
   const inputClass = "w-full px-4 py-3 rounded-xl text-sm outline-none";
-  const inputStyle = { background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
+  const inputStyle = { background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)' };
 
   async function declencher() {
     if (!profile || form.service_types.length === 0 || !form.location || form.latitude == null || form.longitude == null) return;
@@ -208,8 +208,8 @@ function OrgView() {
   if (checkingActive) {
     return (
       <DashboardLayout>
-        <div style={{ textAlign: 'center', padding: '80px 0', color: '#b8a898' }}>
-          <div style={{ width: 36, height: 36, borderRadius: '50%', border: '2px solid #d4af37',
+        <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--color-text-secondary)' }}>
+          <div style={{ width: 36, height: 36, borderRadius: '50%', border: '2px solid var(--color-gold-primary)',
             borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px' }} />
           <p>Vérification d'une alerte active...</p>
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -226,8 +226,8 @@ function OrgView() {
             borderRadius: '50%', background: 'linear-gradient(135deg,#dc2626,#b91c1c)' }}>
             <Siren size={34} color="#fff" strokeWidth={2} />
           </div>
-          <h1 className="font-display text-3xl font-bold" style={{ color: '#f0e6d3' }}>S.O.S Brigade</h1>
-          <p className="mt-2" style={{ color: '#b8a898' }}>
+          <h1 className="font-display text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>S.O.S Brigade</h1>
+          <p className="mt-2" style={{ color: 'var(--color-text-secondary)' }}>
             Besoin d'extras en urgence ? Mobilisez les freelances disponibles en moins de 10 minutes.
           </p>
         </div>
@@ -235,8 +235,8 @@ function OrgView() {
         {!session ? (
           <div className="card-glass p-8 space-y-5">
             <div>
-              <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>
-                Type(s) de prestation * <span style={{ color: '#7a6a8a' }}>(1 à 3)</span>
+              <label className="text-xs mb-2 block" style={{ color: 'var(--color-text-secondary)' }}>
+                Type(s) de prestation * <span style={{ color: 'var(--color-text-muted)' }}>(1 à 3)</span>
               </label>
               <div className="flex flex-wrap gap-2">
                 {SERVICE_TYPES.map(t => {
@@ -246,8 +246,8 @@ function OrgView() {
                       className="px-3 py-1.5 rounded-full text-xs font-medium transition-all border inline-flex items-center gap-1.5"
                       style={{
                         background: on ? 'rgba(212,175,55,0.2)' : 'transparent',
-                        borderColor: on ? '#d4af37' : 'rgba(201,168,76,0.25)',
-                        color: on ? '#e8c97a' : '#b8a898',
+                        borderColor: on ? 'var(--color-gold-primary)' : 'rgba(201,168,76,0.25)',
+                        color: on ? 'var(--color-gold-light)' : 'var(--color-text-secondary)',
                       }}>
                       {on && <Check size={12} />} {t} {on && <X size={12} />}
                     </button>
@@ -255,12 +255,12 @@ function OrgView() {
                 })}
               </div>
               {form.service_types.length > 0 && (
-                <p className="text-xs mt-2" style={{ color: '#7a6a8a' }}>{form.service_types.length}/3 sélectionné(s)</p>
+                <p className="text-xs mt-2" style={{ color: 'var(--color-text-muted)' }}>{form.service_types.length}/3 sélectionné(s)</p>
               )}
             </div>
             <div>
-              <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>
-                Adresse exacte * <span style={{ color: '#7a6a8a' }}>(synchronisée avec la carte)</span>
+              <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>
+                Adresse exacte * <span style={{ color: 'var(--color-text-muted)' }}>(synchronisée avec la carte)</span>
               </label>
               <div className="flex gap-2">
                 <input className={inputClass} style={inputStyle}
@@ -271,15 +271,15 @@ function OrgView() {
                 <button type="button" onClick={searchAddress} disabled={geocoding || !form.location.trim()}
                   className="px-4 rounded-xl text-sm font-semibold inline-flex items-center gap-2"
                   style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.4)',
-                    color: '#d4af37', flexShrink: 0, cursor: 'pointer',
+                    color: 'var(--color-gold-primary)', flexShrink: 0, cursor: 'pointer',
                     opacity: (geocoding || !form.location.trim()) ? 0.6 : 1 }}>
                   <Search size={15} /> {geocoding ? '...' : 'Localiser'}
                 </button>
               </div>
             </div>
             <div>
-              <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>
-                Lieu sur la carte * <span style={{ color: '#7a6a8a' }}>(centre du rayon de 30 km)</span>
+              <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>
+                Lieu sur la carte * <span style={{ color: 'var(--color-text-muted)' }}>(centre du rayon de 30 km)</span>
               </label>
               <MapPicker lat={form.latitude} lng={form.longitude} markerColor="#ef4444"
                 onSelect={(lat, lng, addr) => setForm(p => ({ ...p, latitude: lat, longitude: lng, location: addr }))} />
@@ -290,39 +290,39 @@ function OrgView() {
               )}
             </div>
             <div>
-              <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>Nombre d'extras requis</label>
+              <label className="text-xs mb-2 block" style={{ color: 'var(--color-text-secondary)' }}>Nombre d'extras requis</label>
               <div className="flex items-center gap-4">
                 <button onClick={() => setForm(p => ({ ...p, slots_needed: Math.max(1, p.slots_needed - 1) }))}
                   className="w-12 h-12 rounded-xl font-bold text-xl"
-                  style={{ background: 'rgba(82,54,124,0.5)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}>-</button>
+                  style={{ background: 'var(--color-input-bg)', color: 'var(--color-gold-primary)', border: '1px solid rgba(201,168,76,0.2)' }}>-</button>
                 <span className="text-3xl font-bold text-gold-gradient">{form.slots_needed}</span>
                 <button onClick={() => setForm(p => ({ ...p, slots_needed: p.slots_needed + 1 }))}
                   className="w-12 h-12 rounded-xl font-bold text-xl"
-                  style={{ background: 'rgba(82,54,124,0.5)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}>+</button>
+                  style={{ background: 'var(--color-input-bg)', color: 'var(--color-gold-primary)', border: '1px solid rgba(201,168,76,0.2)' }}>+</button>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Tarif horaire (FCFA)</label>
+                <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Tarif horaire (FCFA)</label>
                 <input type="number" min={0} step={500} className={inputClass} style={inputStyle}
                   value={form.hourly_rate}
                   onChange={e => setForm(p => ({ ...p, hourly_rate: Number(e.target.value) }))} />
               </div>
               <div>
-                <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Durée estimée (h)</label>
+                <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Durée estimée (h)</label>
                 <input type="number" min={1} step={1} className={inputClass} style={inputStyle}
                   value={form.estimated_hours}
                   onChange={e => setForm(p => ({ ...p, estimated_hours: Number(e.target.value) }))} />
               </div>
             </div>
-            <p className="text-xs" style={{ color: '#7a6a8a', marginTop: -8 }}>
+            <p className="text-xs" style={{ color: 'var(--color-text-muted)', marginTop: -8 }}>
               En cas d'annulation, chaque freelance déjà confirmé reçoit 10 % ={' '}
-              <span style={{ color: '#d4af37', fontWeight: 600 }}>
+              <span style={{ color: 'var(--color-gold-primary)', fontWeight: 600 }}>
                 {Math.round(0.1 * form.hourly_rate * form.estimated_hours).toLocaleString('fr-CI')} FCFA
               </span>.
             </p>
             <div>
-              <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Message (optionnel)</label>
+              <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Message (optionnel)</label>
               <textarea className={inputClass} style={{ ...inputStyle, resize: 'none' }} rows={3}
                 placeholder="Précisions supplémentaires..."
                 value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))} />
@@ -572,7 +572,7 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 1,
           background: 'rgba(255,255,255,0.04)' }}>
           {[
-            { val: session.notified_count, label: 'Notifiés',    color: '#d4af37' },
+            { val: session.notified_count, label: 'Notifiés',    color: 'var(--color-gold-primary)' },
             { val: pending.length,         label: 'En attente',  color: '#f59e0b' },
             { val: confirmed.length,       label: `/${session.slots_needed} Confirmés`, color: '#10b981' },
           ].map(({ val, label, color }) => (
@@ -605,9 +605,9 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
       {/* ── Propositions en attente ── */}
       <div className="card-glass p-5">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 700, color: '#f0e6d3', margin: 0,
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-primary)', margin: 0,
             display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Inbox size={16} color="#d4af37" /> Propositions reçues
+            <Inbox size={16} color="var(--color-gold-primary)" /> Propositions reçues
           </h3>
           {pending.length > 0 && (
             <span style={{ fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
@@ -620,8 +620,8 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
 
         {pending.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '28px 0' }}>
-            <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'center' }}><Hourglass size={28} color="#7a6a8a" /></div>
-            <p style={{ fontSize: 13, color: '#7a6a8a' }}>
+            <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'center' }}><Hourglass size={28} color="var(--color-text-muted)" /></div>
+            <p style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
               {expired ? 'Session expirée — aucune réponse reçue.' : 'En attente de réponses des freelances...'}
             </p>
           </div>
@@ -660,11 +660,11 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
                 <span style={{ fontSize: 13, fontWeight: 700, color: '#10b981', minWidth: 20 }}>#{i+1}</span>
                 <AvatarMini name={r.freelance?.full_name} src={r.freelance?.avatar_url} />
                 <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: '#f0e6d3', margin: 0 }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>
                     {r.freelance?.full_name || '—'}
                   </p>
                   {r.freelance?.phone && (
-                    <p style={{ fontSize: 11, color: '#d4af37', margin: '2px 0 0',
+                    <p style={{ fontSize: 11, color: 'var(--color-gold-primary)', margin: '2px 0 0',
                       display: 'flex', alignItems: 'center', gap: 5 }}>
                       <Phone size={11} /> {r.freelance.phone}
                     </p>
@@ -673,7 +673,7 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
                 <button onClick={() => navigate(`/public-profile?id=${r.freelance_id}`)}
                   style={{ padding: '5px 10px', borderRadius: 7, fontSize: 11, fontWeight: 600,
                     background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.3)',
-                    color: '#d4af37', cursor: 'pointer' }}>
+                    color: 'var(--color-gold-primary)', cursor: 'pointer' }}>
                   Profil
                 </button>
               </div>
@@ -691,26 +691,26 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
           }}
           style={{ padding: '11px', borderRadius: 12, fontSize: 13, fontWeight: 600,
             background: 'transparent', border: '1px solid rgba(201,168,76,0.25)',
-            color: '#d4af37', cursor: 'pointer' }}>
+            color: 'var(--color-gold-primary)', cursor: 'pointer' }}>
           + Nouvelle alerte S.O.S
         </button>
       ) : cancelStep ? (
         <div style={{ borderRadius: 12, padding: '14px 16px',
           background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.25)' }}>
           {inFreeWindow ? (
-            <p style={{ fontSize: 13, color: '#f0e6d3', margin: '0 0 12px', lineHeight: 1.6 }}>
+            <p style={{ fontSize: 13, color: 'var(--color-text-primary)', margin: '0 0 12px', lineHeight: 1.6 }}>
               Vous êtes dans le délai gratuit ({freeMin} min restante(s)). L'annulation est{' '}
               <strong style={{ color: '#00C896' }}>sans frais</strong>. Confirmer ?
             </p>
           ) : confirmed.length > 0 ? (
-            <p style={{ fontSize: 13, color: '#f0e6d3', margin: '0 0 12px', lineHeight: 1.6 }}>
+            <p style={{ fontSize: 13, color: 'var(--color-text-primary)', margin: '0 0 12px', lineHeight: 1.6 }}>
               Attention : l'annulation après le délai gratuit entraîne des frais de{' '}
               <strong style={{ color: '#ef4444' }}>{penaltyTotal.toLocaleString('fr-CI')} FCFA</strong>{' '}
-              (10 % du total de <strong style={{ color: '#d4af37' }}>{totalDue.toLocaleString('fr-CI')} FCFA</strong>),
+              (10 % du total de <strong style={{ color: 'var(--color-gold-primary)' }}>{totalDue.toLocaleString('fr-CI')} FCFA</strong>),
               répartis entre {confirmed.length} freelance(s) confirmé(s). Confirmer l'annulation ?
             </p>
           ) : (
-            <p style={{ fontSize: 13, color: '#f0e6d3', margin: '0 0 12px', lineHeight: 1.6 }}>
+            <p style={{ fontSize: 13, color: 'var(--color-text-primary)', margin: '0 0 12px', lineHeight: 1.6 }}>
               Aucun freelance confirmé — l'annulation est sans frais. Confirmer ?
             </p>
           )}
@@ -724,7 +724,7 @@ function OrgTracker({ session, onReset }: { session: SosSession; onReset: () => 
             <button onClick={() => setCancelStep(false)} disabled={cancelling}
               style={{ flex: 1, padding: '10px', borderRadius: 10, fontSize: 13, fontWeight: 600,
                 background: 'transparent', border: '1px solid rgba(201,168,76,0.25)',
-                color: '#b8a898', cursor: 'pointer' }}>
+                color: 'var(--color-text-secondary)', cursor: 'pointer' }}>
               Retour
             </button>
           </div>
@@ -752,18 +752,18 @@ function PropositionCard({ resp, distance, onConfirm, onReject, onViewProfile, b
 
   return (
     <div style={{ borderRadius: 12, overflow: 'hidden',
-      background: 'rgba(82,54,124,0.25)', border: '1px solid rgba(201,168,76,0.12)' }}>
+      background: 'var(--color-surface)', border: '1px solid rgba(201,168,76,0.12)' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px' }}>
         <AvatarMini name={fl?.full_name} src={fl?.avatar_url} size={40} />
         <div style={{ flex: 1 }}>
-          <p style={{ fontSize: 14, fontWeight: 700, color: '#f0e6d3', margin: 0 }}>
+          <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>
             {fl?.full_name || '—'}
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
             {fl?.avg_rating && fl.avg_rating > 0 && (
-              <span style={{ fontSize: 12, color: '#d4af37', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                <Star size={12} fill="#d4af37" /> {fl.avg_rating.toFixed(1)}
+              <span style={{ fontSize: 12, color: 'var(--color-gold-primary)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <Star size={12} fill="var(--color-gold-primary)" /> {fl.avg_rating.toFixed(1)}
               </span>
             )}
             {distance != null && (
@@ -772,7 +772,7 @@ function PropositionCard({ resp, distance, onConfirm, onReject, onViewProfile, b
               </span>
             )}
             {fl?.ville && (
-              <span style={{ fontSize: 11, color: '#8a7a9a', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ fontSize: 11, color: 'var(--color-text-muted)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                 <MapPin size={11} /> {fl.ville}
               </span>
             )}
@@ -787,7 +787,7 @@ function PropositionCard({ resp, distance, onConfirm, onReject, onViewProfile, b
           </a>
         )}
         <button onClick={() => setShowDetails(v => !v)}
-          style={{ fontSize: 11, color: '#d4af37', background: 'transparent',
+          style={{ fontSize: 11, color: 'var(--color-gold-primary)', background: 'transparent',
             border: 'none', cursor: 'pointer', padding: '4px 8px' }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
             {showDetails ? <><ChevronUp size={13} /> Moins</> : <><ChevronDown size={13} /> Détails</>}
@@ -802,7 +802,7 @@ function PropositionCard({ resp, distance, onConfirm, onReject, onViewProfile, b
             <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {fl.skills.map(s => (
                 <span key={s} style={{ fontSize: 11, padding: '3px 9px', borderRadius: 999,
-                  background: 'rgba(201,168,76,0.1)', color: '#d4af37',
+                  background: 'rgba(201,168,76,0.1)', color: 'var(--color-gold-primary)',
                   border: '1px solid rgba(201,168,76,0.2)' }}>
                   {s}
                 </span>
@@ -830,8 +830,8 @@ function PropositionCard({ resp, distance, onConfirm, onReject, onViewProfile, b
         </button>
         <button onClick={onConfirm} disabled={busy || !canConfirm}
           style={{ padding: '11px', fontSize: 13, fontWeight: 700, cursor: canConfirm ? 'pointer' : 'not-allowed',
-            background: canConfirm ? 'rgba(16,185,129,0.12)' : 'rgba(82,54,124,0.2)',
-            border: 'none', color: canConfirm ? '#10b981' : '#5a4a6a',
+            background: canConfirm ? 'rgba(16,185,129,0.12)' : 'var(--color-surface)',
+            border: 'none', color: canConfirm ? '#10b981' : 'var(--color-text-muted)',
             opacity: (busy || !canConfirm) ? 0.5 : 1, transition: 'background 0.15s',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
           {busy ? '...' : !canConfirm ? 'Complet' : <><Check size={15} /> Confirmer</>}
@@ -961,28 +961,28 @@ function FreelanceView() {
             borderRadius: '50%', background: 'linear-gradient(135deg,#dc2626,#b91c1c)' }}>
             <Siren size={28} color="#fff" strokeWidth={2} />
           </div>
-          <h1 className="font-display text-2xl font-bold" style={{ color: '#f0e6d3' }}>S.O.S Brigade</h1>
-          <p className="mt-2 text-sm" style={{ color: '#b8a898' }}>Alerte urgente en cours dans votre zone</p>
+          <h1 className="font-display text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>S.O.S Brigade</h1>
+          <p className="mt-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>Alerte urgente en cours dans votre zone</p>
         </div>
 
         {dueComp > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', marginBottom: 16,
             borderRadius: 12, background: 'rgba(0,200,150,0.08)', border: '1px solid rgba(0,200,150,0.3)' }}>
             <Wallet size={18} color="#00C896" />
-            <span style={{ fontSize: 13, color: '#f0e6d3' }}>
+            <span style={{ fontSize: 13, color: 'var(--color-text-primary)' }}>
               Compensation(s) due(s) : <strong style={{ color: '#00C896' }}>{formatCFA(dueComp)}</strong>
-              <span style={{ color: '#7a6a8a' }}> — S.O.S annulés après le délai gratuit.</span>
+              <span style={{ color: 'var(--color-text-muted)' }}> — S.O.S annulés après le délai gratuit.</span>
             </span>
           </div>
         )}
 
         {loading ? (
-          <div className="text-center py-12" style={{ color: '#b8a898' }}>Chargement...</div>
+          <div className="text-center py-12" style={{ color: 'var(--color-text-secondary)' }}>Chargement...</div>
         ) : !activeSos ? (
           <div className="card-glass p-8 text-center">
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><BellOff size={38} color="#7a6a8a" strokeWidth={1.5} /></div>
-            <p style={{ color: '#b8a898' }}>Aucune alerte S.O.S active dans votre zone.</p>
-            <p className="text-sm mt-2" style={{ color: '#5a4a6a' }}>Vous serez alerté dès qu'une urgence correspond à vos compétences.</p>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}><BellOff size={38} color="var(--color-text-muted)" strokeWidth={1.5} /></div>
+            <p style={{ color: 'var(--color-text-secondary)' }}>Aucune alerte S.O.S active dans votre zone.</p>
+            <p className="text-sm mt-2" style={{ color: 'var(--color-text-muted)' }}>Vous serez alerté dès qu'une urgence correspond à vos compétences.</p>
           </div>
         ) : !myResponse ? (
           /* ── Pas encore répondu ── */
@@ -1010,11 +1010,11 @@ function FreelanceView() {
                   ];
                   return rows.map(({ Icon, label, val }) => (
                     <div key={label} style={{ display: 'flex', gap: 12, alignItems: 'flex-start',
-                      padding: '10px 14px', borderRadius: 10, background: 'rgba(82,54,124,0.3)' }}>
-                      <span style={{ flexShrink: 0, marginTop: 1 }}><Icon size={18} color="#d4af37" /></span>
+                      padding: '10px 14px', borderRadius: 10, background: 'var(--color-surface)' }}>
+                      <span style={{ flexShrink: 0, marginTop: 1 }}><Icon size={18} color="var(--color-gold-primary)" /></span>
                       <div>
-                        <p style={{ fontSize: 11, color: '#7a6a7a', margin: 0 }}>{label}</p>
-                        <p style={{ fontSize: 14, fontWeight: 600, color: '#f0e6d3', margin: '2px 0 0' }}>{val}</p>
+                        <p style={{ fontSize: 11, color: 'var(--color-text-muted)', margin: 0 }}>{label}</p>
+                        <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)', margin: '2px 0 0' }}>{val}</p>
                       </div>
                     </div>
                   ));
@@ -1037,12 +1037,12 @@ function FreelanceView() {
           /* ── En attente de confirmation ── */
           <div className="card-glass p-8 text-center">
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}><Hourglass size={44} color="#f59e0b" /></div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: '#f0e6d3', margin: '0 0 10px' }}>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--color-text-primary)', margin: '0 0 10px' }}>
               Réponse envoyée !
             </h2>
-            <p style={{ fontSize: 14, color: '#b8a898', lineHeight: 1.7, marginBottom: 20 }}>
-              Votre candidature pour <strong style={{ color: '#d4af37' }}>{activeSos.service_type}</strong>
-              <br />à <strong style={{ color: '#d4af37' }}>{activeSos.location}</strong>
+            <p style={{ fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.7, marginBottom: 20 }}>
+              Votre candidature pour <strong style={{ color: 'var(--color-gold-primary)' }}>{activeSos.service_type}</strong>
+              <br />à <strong style={{ color: 'var(--color-gold-primary)' }}>{activeSos.location}</strong>
               <br />est en attente de confirmation par l'organisateur.
             </p>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -1060,10 +1060,10 @@ function FreelanceView() {
             <h2 style={{ fontSize: 20, fontWeight: 800, color: '#10b981', margin: '0 0 10px' }}>
               Vous êtes confirmé !
             </h2>
-            <p style={{ fontSize: 14, color: '#b8a898', lineHeight: 1.7 }}>
+            <p style={{ fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.7 }}>
               L'organisateur vous a sélectionné pour le poste<br />
-              <strong style={{ color: '#d4af37' }}>{activeSos.service_type}</strong><br />
-              Rendez-vous à : <strong style={{ color: '#f0e6d3' }}>{activeSos.location}</strong>
+              <strong style={{ color: 'var(--color-gold-primary)' }}>{activeSos.service_type}</strong><br />
+              Rendez-vous à : <strong style={{ color: 'var(--color-text-primary)' }}>{activeSos.location}</strong>
             </p>
           </div>
         ) : (
@@ -1073,7 +1073,7 @@ function FreelanceView() {
             <h2 style={{ fontSize: 18, fontWeight: 700, color: '#ef4444', margin: '0 0 10px' }}>
               Non retenu
             </h2>
-            <p style={{ fontSize: 14, color: '#b8a898' }}>
+            <p style={{ fontSize: 14, color: 'var(--color-text-secondary)' }}>
               Vous n'avez pas été retenu pour cette alerte.<br />Restez disponible pour les prochaines !
             </p>
           </div>
@@ -1089,7 +1089,7 @@ function AvatarMini({ name, src, size = 34 }: { name?: string | null; src?: stri
     ? <img src={src} alt="" style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
     : <div style={{ width: size, height: size, borderRadius: '50%', flexShrink: 0, display: 'flex',
         alignItems: 'center', justifyContent: 'center', fontSize: size * 0.33, fontWeight: 800,
-        color: '#261642', background: 'linear-gradient(135deg,#d4af37,#e8c97a)' }}>
+        color: '#261642', background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))' }}>
         {initials}
       </div>;
 }

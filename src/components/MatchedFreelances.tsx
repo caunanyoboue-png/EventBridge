@@ -45,17 +45,17 @@ export default function MatchedFreelances({ missionId }: { missionId: string }) 
   return (
     <div className="card-glass p-6 mb-6">
       <div className="flex items-center gap-2 mb-1">
-        <Target size={17} color="#d4af37" />
-        <h2 className="font-semibold" style={{ color: '#f0e6d3' }}>Freelances recommandés</h2>
+        <Target size={17} color="var(--color-gold-primary)" />
+        <h2 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>Freelances recommandés</h2>
       </div>
-      <p className="text-xs mb-4" style={{ color: '#7a6a8a' }}>
+      <p className="text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>
         Classés par compatibilité — compétences 40&nbsp;% · distance 25&nbsp;% · note 20&nbsp;% · disponibilité 15&nbsp;%
       </p>
 
       {loading ? (
-        <p className="text-sm" style={{ color: '#b8a898' }}>Calcul des correspondances…</p>
+        <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Calcul des correspondances…</p>
       ) : rows.length === 0 ? (
-        <p className="text-sm" style={{ color: '#b8a898' }}>
+        <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
           Aucun freelance disponible ne correspond pour l'instant.
         </p>
       ) : (
@@ -72,22 +72,22 @@ export default function MatchedFreelances({ missionId }: { missionId: string }) 
 function Row({ r, onView }: { r: Match; onView: () => void }) {
   const pct = Math.round(Number(r.score_pct ?? 0));
   const rating = r.avg_rating != null ? Number(r.avg_rating) : 0;
-  const scoreColor = pct >= 75 ? '#00C896' : pct >= 50 ? '#d4af37' : '#b8a898';
+  const scoreColor = pct >= 75 ? '#00C896' : pct >= 50 ? 'var(--color-gold-primary)' : 'var(--color-text-secondary)';
 
   return (
     <div className="flex items-center gap-3 p-3 rounded-xl"
-      style={{ background: 'rgba(82,54,124,0.28)', border: '1px solid rgba(201,168,76,0.12)' }}>
+      style={{ background: 'var(--color-surface)', border: '1px solid rgba(201,168,76,0.12)' }}>
       {/* Score de compatibilité */}
       <div style={{ width: 54, flexShrink: 0, textAlign: 'center' }}>
         <div style={{ fontSize: 20, fontWeight: 800, color: scoreColor, lineHeight: 1 }}>{pct}%</div>
-        <div style={{ fontSize: 9, color: '#7a6a8a', marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.04em' }}>match</div>
+        <div style={{ fontSize: 9, color: 'var(--color-text-muted)', marginTop: 2, textTransform: 'uppercase', letterSpacing: '0.04em' }}>match</div>
       </div>
 
       {/* Avatar */}
       {r.avatar_url ? (
         <img src={r.avatar_url} alt="" style={{ width: 42, height: 42, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid rgba(201,168,76,0.25)' }} />
       ) : (
-        <div style={{ width: 42, height: 42, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: '#261642', background: 'linear-gradient(135deg,#d4af37,#e8c97a)' }}>
+        <div style={{ width: 42, height: 42, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: '#261642', background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))' }}>
           {getInitials(r.full_name || 'U')}
         </div>
       )}
@@ -95,21 +95,21 @@ function Row({ r, onView }: { r: Match; onView: () => void }) {
       {/* Infos */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div className="flex items-center gap-1.5">
-          <span style={{ fontSize: 14, fontWeight: 700, color: '#f0e6d3', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {r.full_name || 'Freelance'}
           </span>
           <CertifiedBadge level={(r.certification_level as CertificationLevel) || 'none'} certified={!!r.is_certified} />
         </div>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1" style={{ fontSize: 11.5, color: '#b8a898' }}>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1" style={{ fontSize: 11.5, color: 'var(--color-text-secondary)' }}>
           {rating > 0 && (
-            <span className="inline-flex items-center gap-1"><Star size={12} fill="#d4af37" color="#d4af37" /> {rating.toFixed(1)}</span>
+            <span className="inline-flex items-center gap-1"><Star size={12} fill="var(--color-gold-primary)" color="var(--color-gold-primary)" /> {rating.toFixed(1)}</span>
           )}
           {r.distance_km != null && (
             <span className="inline-flex items-center gap-1"><MapPin size={12} /> {formatDistance(Number(r.distance_km))}</span>
           )}
           {r.ville && <span>{r.ville}</span>}
           {r.hourly_rate != null && (
-            <span className="inline-flex items-center gap-1" style={{ color: '#d4af37', fontWeight: 600 }}>
+            <span className="inline-flex items-center gap-1" style={{ color: 'var(--color-gold-primary)', fontWeight: 600 }}>
               <Wallet size={12} /> {formatCFA(Number(r.hourly_rate))}/h
             </span>
           )}

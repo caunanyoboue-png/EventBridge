@@ -61,7 +61,7 @@ interface ServiceIconProps {
 }
 
 /** Icône de prestation, style doodle. Par défaut dorée. */
-export function ServiceIcon({ type, size = 22, color = '#d4af37', strokeWidth = 1.6, className }: ServiceIconProps) {
+export function ServiceIcon({ type, size = 22, color = 'var(--color-gold-primary)', strokeWidth = 1.6, className }: ServiceIconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
       strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round"

@@ -54,7 +54,7 @@ export default function AdminDisputes() {
   const filtered = disputes.filter(d => !filterStatus || d.status === filterStatus);
 
   const statusColor: Record<string, string> = {
-    open: '#ef4444', investigating: '#f59e0b', resolved: '#10b981', closed: '#7a6a7a',
+    open: '#ef4444', investigating: '#f59e0b', resolved: '#10b981', closed: 'var(--color-text-muted)',
   };
   const statusLabel: Record<string, string> = {
     open: 'Ouvert', investigating: 'En cours', resolved: 'Résolu', closed: 'Fermé',
@@ -62,25 +62,25 @@ export default function AdminDisputes() {
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><IcoShield size={26} color={roleColor('admin')} /> Gestion des litiges</h1>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: 'var(--color-text-primary)' }}><IcoShield size={26} color={roleColor('admin')} /> Gestion des litiges</h1>
 
       <div className="card-glass p-4 mb-6 flex flex-wrap gap-3">
         {(['open', 'investigating', 'resolved', 'closed', ''] as const).map(s => (
           <button key={s} onClick={() => setFilterStatus(s as string)}
             className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
             style={filterStatus === s
-              ? { background: 'rgba(201,168,76,0.2)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.4)' }
-              : { background: 'rgba(82,54,124,0.4)', color: '#7a6a7a', border: '1px solid rgba(201,168,76,0.1)' }}>
+              ? { background: 'rgba(201,168,76,0.2)', color: 'var(--color-gold-primary)', border: '1px solid rgba(201,168,76,0.4)' }
+              : { background: 'var(--color-surface)', color: 'var(--color-text-muted)', border: '1px solid rgba(201,168,76,0.1)' }}>
             {s === '' ? 'Tous' : statusLabel[s]}
           </button>
         ))}
-        <span className="text-sm my-auto ml-auto" style={{ color: '#b8a898' }}>{filtered.length} litige(s)</span>
+        <span className="text-sm my-auto ml-auto" style={{ color: 'var(--color-text-secondary)' }}>{filtered.length} litige(s)</span>
       </div>
 
       {loading ? (
-        <div className="text-center py-16" style={{ color: '#b8a898' }}>Chargement...</div>
+        <div className="text-center py-16" style={{ color: 'var(--color-text-secondary)' }}>Chargement...</div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16" style={{ color: '#b8a898' }}>Aucun litige</div>
+        <div className="text-center py-16" style={{ color: 'var(--color-text-secondary)' }}>Aucun litige</div>
       ) : (
         <div className="space-y-3">
           {filtered.map(d => (
@@ -92,16 +92,16 @@ export default function AdminDisputes() {
                       style={{ background: `${statusColor[d.status]}20`, color: statusColor[d.status] }}>
                       {statusLabel[d.status] || d.status}
                     </span>
-                    <span className="text-xs" style={{ color: '#7a6a7a' }}>{formatRelative(d.created_at)}</span>
+                    <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{formatRelative(d.created_at)}</span>
                   </div>
-                  <p className="font-medium mb-1" style={{ color: '#f0e6d3' }}>Mission : {d.mission?.title || d.mission_id}</p>
-                  <p className="text-sm mb-1" style={{ color: '#b8a898' }}>
-                    Plaignant : <span style={{ color: '#f0e6d3' }}>{d.reporter?.full_name || '–'}</span>
+                  <p className="font-medium mb-1" style={{ color: 'var(--color-text-primary)' }}>Mission : {d.mission?.title || d.mission_id}</p>
+                  <p className="text-sm mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+                    Plaignant : <span style={{ color: 'var(--color-text-primary)' }}>{d.reporter?.full_name || '–'}</span>
                     {' · '}
-                    Accusé : <span style={{ color: '#f0e6d3' }}>{d.reported?.full_name || '–'}</span>
+                    Accusé : <span style={{ color: 'var(--color-text-primary)' }}>{d.reported?.full_name || '–'}</span>
                   </p>
-                  <p className="text-sm" style={{ color: '#b8a898' }}>Motif : {d.reason}</p>
-                  {d.description && <p className="text-xs mt-1" style={{ color: '#7a6a7a' }}>{d.description}</p>}
+                  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Motif : {d.reason}</p>
+                  {d.description && <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>{d.description}</p>}
                   {d.resolution && (
                     <div className="mt-2 px-3 py-2 rounded-lg" style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
                       <p className="text-xs" style={{ color: '#10b981' }}>Résolution : {d.resolution}</p>
@@ -119,7 +119,7 @@ export default function AdminDisputes() {
                     )}
                     <button onClick={() => { setSelected(d); setResolution(''); }}
                       className="px-3 py-1.5 rounded-lg text-xs"
-                      style={{ background: 'rgba(201,168,76,0.15)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}>
+                      style={{ background: 'rgba(201,168,76,0.15)', color: 'var(--color-gold-primary)', border: '1px solid rgba(201,168,76,0.2)' }}>
                       Traiter
                     </button>
                   </div>
@@ -135,20 +135,20 @@ export default function AdminDisputes() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: 'rgba(0,0,0,0.7)' }} onClick={() => setSelected(null)}>
           <div className="card-glass p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
-            <h3 className="font-bold text-lg mb-4" style={{ color: '#f0e6d3' }}>Résoudre le litige</h3>
-            <p className="text-sm mb-4" style={{ color: '#b8a898' }}>
+            <h3 className="font-bold text-lg mb-4" style={{ color: 'var(--color-text-primary)' }}>Résoudre le litige</h3>
+            <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
               Mission : {selected.mission?.title}<br />
               Entre {selected.reporter?.full_name} et {selected.reported?.full_name}
             </p>
             <textarea
               className="w-full px-4 py-3 rounded-xl text-sm outline-none mb-4"
-              style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3', resize: 'none' }}
+              style={{ background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)', resize: 'none' }}
               rows={4} placeholder="Décision de l'admin..."
               value={resolution} onChange={e => setResolution(e.target.value)} />
             <div className="flex gap-3">
               <button onClick={() => resolve(selected.id, 'resolved')}
                 className="flex-1 py-2 rounded-xl text-sm font-bold"
-                style={{ background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }}>
+                style={{ background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }}>
                 Résoudre
               </button>
               <button onClick={() => resolve(selected.id, 'closed')}

@@ -48,8 +48,8 @@ function ProtectedRoute({ children, role }: { children: ReactNode; role?: string
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#261642' }}>
         <div className="text-center">
           <div className="w-16 h-16 rounded-full border-2 border-t-transparent animate-spin mx-auto mb-4"
-            style={{ borderColor: '#d4af37', borderTopColor: 'transparent' }} />
-          <p style={{ color: '#b8a898' }}>Chargement...</p>
+            style={{ borderColor: 'var(--color-gold-primary)', borderTopColor: 'transparent' }} />
+          <p style={{ color: 'var(--color-text-secondary)' }}>Chargement...</p>
         </div>
       </div>
     );
@@ -61,7 +61,7 @@ function ProtectedRoute({ children, role }: { children: ReactNode; role?: string
   if (!profile) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f0a1e' }}>
-        <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #d4af37',
+        <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid var(--color-gold-primary)',
           borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -88,7 +88,7 @@ function BrowseRoute({ children }: { children: ReactNode }) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#261642' }}>
         <div className="w-12 h-12 rounded-full border-2 border-t-transparent animate-spin"
-          style={{ borderColor: '#d4af37', borderTopColor: 'transparent' }} />
+          style={{ borderColor: 'var(--color-gold-primary)', borderTopColor: 'transparent' }} />
       </div>
     );
   }

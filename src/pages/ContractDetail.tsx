@@ -26,7 +26,7 @@ export default function ContractDetail() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="text-center py-20" style={{ color: '#b8a898' }}>Chargement du contrat...</div>
+        <div className="text-center py-20" style={{ color: 'var(--color-text-secondary)' }}>Chargement du contrat...</div>
       </DashboardLayout>
     );
   }
@@ -34,7 +34,7 @@ export default function ContractDetail() {
   if (!contract || !profile) {
     return (
       <DashboardLayout>
-        <div className="text-center py-20" style={{ color: '#b8a898' }}>Contrat introuvable.</div>
+        <div className="text-center py-20" style={{ color: 'var(--color-text-secondary)' }}>Contrat introuvable.</div>
       </DashboardLayout>
     );
   }
@@ -46,8 +46,8 @@ export default function ContractDetail() {
     <DashboardLayout>
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => navigate(-1)} style={{ color: '#b8a898' }}>← Retour</button>
-          <h1 className="font-display text-xl font-bold" style={{ color: '#f0e6d3' }}>
+          <button onClick={() => navigate(-1)} style={{ color: 'var(--color-text-secondary)' }}>← Retour</button>
+          <h1 className="font-display text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
             Contrat · {contract.job_title}
           </h1>
         </div>

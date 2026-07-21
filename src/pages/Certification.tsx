@@ -45,11 +45,11 @@ export default function Certification() {
       <div className="max-w-5xl mx-auto">
         {/* En-tête */}
         <div className="text-center mb-8">
-          <h1 className="font-display text-3xl md:text-4xl font-bold mb-2" style={{ color: '#f0e6d3' }}>
+          <h1 className="font-display text-3xl md:text-4xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
             Faites-vous certifier
           </h1>
-          <p className="text-sm md:text-base" style={{ color: '#b8a898', maxWidth: 560, margin: '0 auto' }}>
-            Inspirez confiance aux organisateurs et décrochez plus de missions. La certification est un <b style={{ color: '#d4af37' }}>badge de professionnalisme</b> — pas une obligation.
+          <p className="text-sm md:text-base" style={{ color: 'var(--color-text-secondary)', maxWidth: 560, margin: '0 auto' }}>
+            Inspirez confiance aux organisateurs et décrochez plus de missions. La certification est un <b style={{ color: 'var(--color-gold-primary)' }}>badge de professionnalisme</b> — pas une obligation.
           </p>
         </div>
 
@@ -62,8 +62,8 @@ export default function Certification() {
               <button key={p} onClick={() => setAnnual(isAnnual)}
                 className="px-4 py-2 rounded-xl text-sm font-semibold transition-all"
                 style={active
-                  ? { background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }
-                  : { background: 'rgba(82,54,124,0.4)', color: '#b8a898', border: '1px solid rgba(201,168,76,0.2)' }}>
+                  ? { background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }
+                  : { background: 'var(--color-surface)', color: 'var(--color-text-secondary)', border: '1px solid rgba(201,168,76,0.2)' }}>
                 {isAnnual ? 'Annuel' : 'Mensuel'}
                 {isAnnual && <span style={{ marginLeft: 6, fontSize: 11, color: active ? '#261642' : '#00C896' }}>2 mois offerts</span>}
               </button>
@@ -102,20 +102,20 @@ export default function Certification() {
                 {/* Nom */}
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
                   <plan.Icon size={18} color={plan.color} />
-                  <span style={{ fontSize: 14, fontWeight: 700, color: '#f0e6d3' }}>{plan.name}</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-primary)' }}>{plan.name}</span>
                 </div>
 
                 {/* Prix */}
                 <div style={{ textAlign: 'center', marginTop: 16 }}>
                   {plan.key === 'none' ? (
-                    <span style={{ fontSize: 34, fontWeight: 800, color: '#d4af37' }}>Gratuit</span>
+                    <span style={{ fontSize: 34, fontWeight: 800, color: 'var(--color-gold-primary)' }}>Gratuit</span>
                   ) : (
                     <>
-                      <span style={{ fontSize: 30, fontWeight: 800, color: '#d4af37' }}>{formatCFA(price)}</span>
-                      <span style={{ fontSize: 13, color: '#b8a898', fontWeight: 600 }}> /{annual ? 'an' : 'mois'}</span>
+                      <span style={{ fontSize: 30, fontWeight: 800, color: 'var(--color-gold-primary)' }}>{formatCFA(price)}</span>
+                      <span style={{ fontSize: 13, color: 'var(--color-text-secondary)', fontWeight: 600 }}> /{annual ? 'an' : 'mois'}</span>
                     </>
                   )}
-                  <div style={{ fontSize: 11, color: '#7a6a7a', marginTop: 4, minHeight: 14 }}>
+                  <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 4, minHeight: 14 }}>
                     {plan.key !== 'none' && (annual ? 'facturé une fois par an' : 'facturé chaque mois')}
                   </div>
                 </div>
@@ -140,8 +140,8 @@ export default function Certification() {
                     border: plan.popular ? 'none' : `1px solid ${plan.color}55`,
                     background: isCurrent ? 'rgba(0,200,150,0.15)'
                       : plan.popular ? `linear-gradient(135deg, ${plan.color}, #60a5fa)`
-                      : plan.key === 'none' ? 'rgba(82,54,124,0.4)' : 'transparent',
-                    color: isCurrent ? '#00C896' : plan.popular ? '#fff' : plan.key === 'none' ? '#7a6a7a' : '#f0e6d3',
+                      : plan.key === 'none' ? 'var(--color-surface)' : 'transparent',
+                    color: isCurrent ? '#00C896' : plan.popular ? '#fff' : plan.key === 'none' ? 'var(--color-text-muted)' : 'var(--color-text-primary)',
                     opacity: plan.key === 'none' && !isCurrent ? 0.7 : 1,
                   }}>
                   {isCurrent ? 'Votre formule actuelle' : plan.key === 'none' ? 'Formule par défaut' : 'Envoyer mes pièces'}
@@ -152,13 +152,13 @@ export default function Certification() {
         </div>
 
         {/* Note paiement */}
-        <p className="text-center text-xs mt-6" style={{ color: '#7a6a7a', maxWidth: 600, margin: '24px auto 0' }}>
-          💡 Le paiement mobile money (Orange · MTN · Moov · Wave) arrive bientôt. En attendant, <b style={{ color: '#b8a898' }}>envoie tes pièces</b> ci-dessous : notre équipe vérifie et t'attribue ton badge.
+        <p className="text-center text-xs mt-6" style={{ color: 'var(--color-text-muted)', maxWidth: 600, margin: '24px auto 0' }}>
+          💡 Le paiement mobile money (Orange · MTN · Moov · Wave) arrive bientôt. En attendant, <b style={{ color: 'var(--color-text-secondary)' }}>envoie tes pièces</b> ci-dessous : notre équipe vérifie et t'attribue ton badge.
         </p>
 
         {/* Zone d'envoi des pièces (KYC) */}
         <div id="kyc-upload" style={{ marginTop: 28 }}>
-          <h2 className="font-semibold mb-3" style={{ color: '#f0e6d3' }}>Mes pièces</h2>
+          <h2 className="font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>Mes pièces</h2>
           <KycCard alwaysShow offersLink={false} />
         </div>
       </div>

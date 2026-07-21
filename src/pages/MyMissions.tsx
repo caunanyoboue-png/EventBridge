@@ -77,7 +77,7 @@ export default function MyMissions() {
 
   const statusColor: Record<string, string> = {
     open: '#10b981', in_progress: '#f59e0b', completed: '#3b82f6',
-    cancelled: '#ef4444', draft: '#7a6a7a', disputed: '#ef4444',
+    cancelled: '#ef4444', draft: 'var(--color-text-muted)', disputed: '#ef4444',
   };
   const statusLabel: Record<string, string> = {
     open: 'Ouverte', in_progress: 'En cours', completed: 'Terminée',
@@ -87,7 +87,7 @@ export default function MyMissions() {
   return (
     <DashboardLayout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-3xl font-bold flex items-center gap-3" style={{ color: '#f0e6d3' }}><IcoClipboard size={28} color={roleColor(profile?.role)} /> Mes missions</h1>
+        <h1 className="font-display text-3xl font-bold flex items-center gap-3" style={{ color: 'var(--color-text-primary)' }}><IcoClipboard size={28} color={roleColor(profile?.role)} /> Mes missions</h1>
         <button onClick={() => navigate('/create-mission')} className="btn-gold px-5 py-2 rounded-xl text-sm font-bold text-[#261642]">
           + Nouvelle mission
         </button>
@@ -102,8 +102,8 @@ export default function MyMissions() {
               className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all border"
               style={{
                 background: tab === t.key ? 'rgba(201,168,76,0.15)' : 'transparent',
-                borderColor: tab === t.key ? '#d4af37' : 'rgba(201,168,76,0.2)',
-                color: tab === t.key ? '#d4af37' : '#b8a898',
+                borderColor: tab === t.key ? 'var(--color-gold-primary)' : 'rgba(201,168,76,0.2)',
+                color: tab === t.key ? 'var(--color-gold-primary)' : 'var(--color-text-secondary)',
               }}>
               {t.label} {count > 0 && <span className="ml-1 text-xs opacity-70">({count})</span>}
             </button>
@@ -112,11 +112,11 @@ export default function MyMissions() {
       </div>
 
       {loading ? (
-        <div className="text-center py-16" style={{ color: '#b8a898' }}>Chargement...</div>
+        <div className="text-center py-16" style={{ color: 'var(--color-text-secondary)' }}>Chargement...</div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 card-glass">
           <p className="text-4xl mb-4">📋</p>
-          <p style={{ color: '#b8a898' }}>Aucune mission dans cette catégorie</p>
+          <p style={{ color: 'var(--color-text-secondary)' }}>Aucune mission dans cette catégorie</p>
           <button onClick={() => navigate('/create-mission')}
             className="btn-gold mt-4 px-6 py-2 rounded-xl text-sm font-bold text-[#261642]">
             Publier une mission
@@ -143,11 +143,11 @@ export default function MyMissions() {
                 <div className="flex items-center gap-3">
                   <ServiceIcon type={m.service_type} size={26} />
                   <div>
-                    <h3 className="font-semibold" style={{ color: '#f0e6d3' }}>{m.title}</h3>
-                    <p className="text-sm" style={{ color: '#b8a898' }}>
+                    <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{m.title}</h3>
+                    <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                       {formatDateShort(m.event_date)}{m.nb_days && m.nb_days > 1 ? ` (+${m.nb_days - 1}j)` : ''} · {m.start_time?.substring(0,5)} - {m.end_time?.substring(0,5)} · {formatRateLabel(m.roles, m.hourly_rate)}
                     </p>
-                    <p className="text-xs mt-1" style={{ color: '#b8a898' }}>
+                    <p className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>
                       👥 {m.slots_filled || 0}/{m.slots_total} poste(s) · 📍 {m.ville}
                     </p>
                   </div>
@@ -177,19 +177,19 @@ export default function MyMissions() {
                 {(m.status === 'open' || m.status === 'draft') && (
                   <button onClick={() => navigate(`/edit-mission?id=${m.id}`)}
                     className="px-4 py-2 rounded-lg text-sm border transition-all hover:opacity-80"
-                    style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#d4af37' }}>
+                    style={{ borderColor: 'rgba(201,168,76,0.3)', color: 'var(--color-gold-primary)' }}>
                     Modifier
                   </button>
                 )}
                 <button onClick={() => navigate('/messages')}
                   className="px-4 py-2 rounded-lg text-sm border transition-all hover:opacity-80"
-                  style={{ borderColor: 'rgba(201,168,76,0.2)', color: '#b8a898' }}>
+                  style={{ borderColor: 'rgba(201,168,76,0.2)', color: 'var(--color-text-secondary)' }}>
                   💬 Messages
                 </button>
                 {(m.status === 'draft' || m.status === 'open') && (
                   confirmId === m.id ? (
                     <div className="flex items-center gap-2 ml-auto">
-                      <span className="text-xs" style={{ color: '#b8a898' }}>
+                      <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
                         {m.status === 'draft' ? 'Supprimer définitivement ?' : 'Annuler cette mission ?'}
                       </span>
                       <button onClick={() => handleDelete(m)} disabled={actionBusy}
@@ -199,7 +199,7 @@ export default function MyMissions() {
                       </button>
                       <button onClick={() => setConfirmId(null)}
                         className="px-3 py-1.5 rounded-lg text-xs border"
-                        style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#b8a898' }}>
+                        style={{ borderColor: 'rgba(201,168,76,0.3)', color: 'var(--color-text-secondary)' }}>
                         Non
                       </button>
                     </div>

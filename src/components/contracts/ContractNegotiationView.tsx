@@ -17,7 +17,7 @@ import toast from 'react-hot-toast';
 
 const inp: React.CSSProperties = {
   width: '100%', padding: '10px 14px', borderRadius: 10, fontSize: 13, outline: 'none',
-  background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3',
+  background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)',
 };
 
 interface Props {
@@ -46,7 +46,7 @@ export default function ContractNegotiationView({ contract: initialContract, myR
   const handleRealtime = useCallback((updated: Contract) => {
     setContract(updated);
     onUpdate(updated);
-    toast('Contrat mis à jour en temps réel', { icon: <BellRing size={18} color="#d4af37" /> });
+    toast('Contrat mis à jour en temps réel', { icon: <BellRing size={18} color="var(--color-gold-primary)" /> });
   }, [onUpdate]);
 
   useContractRealtime(contract.id, handleRealtime);
@@ -174,8 +174,8 @@ export default function ContractNegotiationView({ contract: initialContract, myR
       {/* Header statut */}
       <div className="card-glass p-5 flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="font-semibold" style={{ color: '#f0e6d3' }}>{contract.job_title}</h2>
-          <p className="text-xs mt-1" style={{ color: '#b8a898' }}>Version {contract.version} · Contrat CDD</p>
+          <h2 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{contract.job_title}</h2>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>Version {contract.version} · Contrat CDD</p>
         </div>
         <div className="flex items-center gap-3">
           <ContractStatusBadge status={contract.status} />
@@ -190,8 +190,8 @@ export default function ContractNegotiationView({ contract: initialContract, myR
 
       {/* Résumé du contrat */}
       <div className="card-glass p-5">
-        <h3 className="text-sm font-semibold mb-4" style={{ color: '#d4af37' }}>Détails du contrat</h3>
-        <div className="grid grid-cols-2 gap-2 text-xs" style={{ color: '#b8a898' }}>
+        <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--color-gold-primary)' }}>Détails du contrat</h3>
+        <div className="grid grid-cols-2 gap-2 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
           {[
             ['Organisateur', contract.organizer_name],
             ['Freelance', contract.freelance_name],
@@ -207,7 +207,7 @@ export default function ContractNegotiationView({ contract: initialContract, myR
             ['Indemnité (3%)', formatCFA(contract.end_of_contract_indemnity)],
           ].map(([k, v]) => (
             <div key={k} className="flex justify-between gap-2">
-              <span>{k}</span><span style={{ color: '#f0e6d3' }}>{v}</span>
+              <span>{k}</span><span style={{ color: 'var(--color-text-primary)' }}>{v}</span>
             </div>
           ))}
         </div>
@@ -219,11 +219,11 @@ export default function ContractNegotiationView({ contract: initialContract, myR
             { label: 'Freelance', signed: contract.freelance_signed_at },
           ].map(({ label, signed }) => (
             <div key={label} className="text-xs px-3 py-2 rounded-lg text-center"
-              style={{ background: signed ? 'rgba(16,185,129,0.1)' : 'rgba(82,54,124,0.3)', border: `1px solid ${signed ? 'rgba(16,185,129,0.3)' : 'rgba(201,168,76,0.1)'}` }}>
-              <p style={{ color: signed ? '#10b981' : '#b8a898', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+              style={{ background: signed ? 'rgba(16,185,129,0.1)' : 'var(--color-surface)', border: `1px solid ${signed ? 'rgba(16,185,129,0.3)' : 'rgba(201,168,76,0.1)'}` }}>
+              <p style={{ color: signed ? '#10b981' : 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
                 {signed ? <><Check size={13} /> Signé le {new Date(signed).toLocaleDateString('fr-CI')}</> : <><Hourglass size={12} /> En attente de signature</>}
               </p>
-              <p style={{ color: '#7a6a7a' }}>{label}</p>
+              <p style={{ color: 'var(--color-text-muted)' }}>{label}</p>
             </div>
           ))}
         </div>
@@ -232,7 +232,7 @@ export default function ContractNegotiationView({ contract: initialContract, myR
       {/* Zone d'actions */}
       {STATUS_ACTIONS['Action'] && (
         <div className="card-glass p-5 space-y-3">
-          <h3 className="text-sm font-semibold" style={{ color: '#d4af37' }}>Actions</h3>
+          <h3 className="text-sm font-semibold" style={{ color: 'var(--color-gold-primary)' }}>Actions</h3>
 
           {/* L'autre partie a proposé */}
           {otherProposed && !showReject && !showCounter && (
@@ -243,7 +243,7 @@ export default function ContractNegotiationView({ contract: initialContract, myR
               </button>
               <button onClick={() => setShowCounter(true)}
                 className="px-5 py-2.5 rounded-xl text-sm font-medium border inline-flex items-center gap-2"
-                style={{ borderColor: '#d4af37', color: '#d4af37', background: 'transparent' }}>
+                style={{ borderColor: 'var(--color-gold-primary)', color: 'var(--color-gold-primary)', background: 'transparent' }}>
                 <Pencil size={15} /> Contre-proposer
               </button>
               <button onClick={() => setShowReject(true)}
@@ -258,15 +258,15 @@ export default function ContractNegotiationView({ contract: initialContract, myR
           {iWaited && (
             <div className="flex items-center gap-3 px-4 py-3 rounded-xl"
               style={{ background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.2)' }}>
-              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#d4af37' }} />
-              <p className="text-sm" style={{ color: '#b8a898' }}>En attente de réponse de l'autre partie...</p>
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: 'var(--color-gold-primary)' }} />
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>En attente de réponse de l'autre partie...</p>
             </div>
           )}
 
           {/* Refus */}
           {showReject && (
             <div className="space-y-3">
-              <label className="text-xs block" style={{ color: '#b8a898' }}>Motif de refus (obligatoire)</label>
+              <label className="text-xs block" style={{ color: 'var(--color-text-secondary)' }}>Motif de refus (obligatoire)</label>
               <textarea style={{ ...inp, resize: 'none' }} rows={3}
                 placeholder="Expliquez la raison du refus..."
                 value={rejectReason} onChange={e => setRejectReason(e.target.value)} />
@@ -284,19 +284,19 @@ export default function ContractNegotiationView({ contract: initialContract, myR
           {/* Contre-proposition */}
           {showCounter && (
             <div className="space-y-3">
-              <p className="text-xs font-semibold" style={{ color: '#d4af37' }}>Votre contre-proposition</p>
+              <p className="text-xs font-semibold" style={{ color: 'var(--color-gold-primary)' }}>Votre contre-proposition</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs block mb-1" style={{ color: '#b8a898' }}>Taux horaire (FCFA/h)</label>
+                  <label className="text-xs block mb-1" style={{ color: 'var(--color-text-secondary)' }}>Taux horaire (FCFA/h)</label>
                   <input type="number" style={inp} value={counterRate} onChange={e => setCounterRate(Number(e.target.value))} />
                 </div>
                 <div>
-                  <label className="text-xs block mb-1" style={{ color: '#b8a898' }}>Nombre de jours</label>
+                  <label className="text-xs block mb-1" style={{ color: 'var(--color-text-secondary)' }}>Nombre de jours</label>
                   <input type="number" style={inp} value={counterDays} onChange={e => setCounterDays(Number(e.target.value))} />
                 </div>
               </div>
               <div>
-                <label className="text-xs block mb-1" style={{ color: '#b8a898' }}>Message (optionnel)</label>
+                <label className="text-xs block mb-1" style={{ color: 'var(--color-text-secondary)' }}>Message (optionnel)</label>
                 <textarea style={{ ...inp, resize: 'none' }} rows={2}
                   placeholder="Expliquez votre proposition..."
                   value={counterMsg} onChange={e => setCounterMsg(e.target.value)} />
@@ -324,7 +324,7 @@ export default function ContractNegotiationView({ contract: initialContract, myR
       {/* Section paiement (contrat signé) */}
       {contract.status === 'signed' && (
         <div className="card-glass p-5">
-          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: '#d4af37' }}><CreditCard size={16} /> Paiement</h3>
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--color-gold-primary)' }}><CreditCard size={16} /> Paiement</h3>
           <PaymentButton
             contractId={contract.id}
             amount={contract.total_gross + contract.end_of_contract_indemnity}
@@ -336,26 +336,26 @@ export default function ContractNegotiationView({ contract: initialContract, myR
       {/* Historique des versions */}
       {history.length > 0 && (
         <div className="card-glass p-5">
-          <h3 className="text-sm font-semibold mb-4" style={{ color: '#d4af37' }}>Historique des négociations</h3>
+          <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--color-gold-primary)' }}>Historique des négociations</h3>
           <div className="space-y-3">
             {history.map((entry, i) => (
               <div key={entry.id} className="flex gap-3">
                 <div className="flex flex-col items-center">
                   <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                    style={{ background: 'rgba(201,168,76,0.2)', color: '#d4af37' }}>v{entry.version}</div>
+                    style={{ background: 'rgba(201,168,76,0.2)', color: 'var(--color-gold-primary)' }}>v{entry.version}</div>
                   {i < history.length - 1 && <div className="w-px flex-1 mt-1" style={{ background: 'rgba(201,168,76,0.15)' }} />}
                 </div>
                 <div className="flex-1 pb-3">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-semibold capitalize" style={{ color: '#f0e6d3' }}>
+                    <span className="text-xs font-semibold capitalize" style={{ color: 'var(--color-text-primary)' }}>
                       {entry.actor_role === 'organizer' ? 'Organisateur' : 'Freelance'} — {entry.action.replace('_', ' ')}
                     </span>
-                    <span className="text-xs" style={{ color: '#7a6a7a' }}>
+                    <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
                       {new Date(entry.created_at).toLocaleDateString('fr-CI')}
                     </span>
                   </div>
                   {entry.message && (
-                    <p className="text-xs" style={{ color: '#b8a898' }}>"{entry.message}"</p>
+                    <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>"{entry.message}"</p>
                   )}
                 </div>
               </div>
@@ -367,7 +367,7 @@ export default function ContractNegotiationView({ contract: initialContract, myR
       {/* Diff avec version précédente */}
       {contract.version > 1 && history.length > 0 && (
         <div className="card-glass p-5">
-          <h3 className="text-sm font-semibold mb-4" style={{ color: '#d4af37' }}>
+          <h3 className="text-sm font-semibold mb-4" style={{ color: 'var(--color-gold-primary)' }}>
             Modifications (v{contract.version - 1} → v{contract.version})
           </h3>
           <ContractDiffViewer

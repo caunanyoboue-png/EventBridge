@@ -17,9 +17,9 @@ const C = {
   bg:        '#0f0a1e',
   sidebar:   '#13102a',
   card:      '#1a1232',
-  gold:      '#d4af37',
-  goldLt:    '#e8c97a',
-  text:      '#f0e6d3',
+  gold:      'var(--color-gold-primary)',
+  goldLt:    'var(--color-gold-light)',
+  text:      'var(--color-text-primary)',
   textDim:   'rgba(240,230,211,0.55)',
   border:    'rgba(201,168,76,0.12)',
   cardBd:    'rgba(201,168,76,0.10)',
@@ -116,7 +116,7 @@ function SuggestRow({ Icon, color, title, sub, onClick }: {
         <Icon size={17} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontSize: 13.5, fontWeight: 600, color: '#f0e6d3', margin: 0 }}>{title}</p>
+        <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>{title}</p>
         <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.55)', margin: '2px 0 0', lineHeight: 1.45 }}>{sub}</p>
       </div>
       <ChevronRight size={16} color={color} style={{ flexShrink: 0 }} />
@@ -328,7 +328,7 @@ export default function FreelanceDashboard() {
                         className="card-lift"
                         style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer',
                           padding: '12px 14px', borderRadius: 12, borderLeft: '3px solid #00C896',
-                          background: 'rgba(82,54,124,0.28)', border: '1px solid rgba(201,168,76,0.1)' }}>
+                          background: 'var(--color-surface)', border: '1px solid rgba(201,168,76,0.1)' }}>
                         <div style={{ width: 40, height: 40, borderRadius: 11, flexShrink: 0,
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           background: 'rgba(212,175,55,0.14)', border: '1px solid rgba(212,175,55,0.28)' }}>

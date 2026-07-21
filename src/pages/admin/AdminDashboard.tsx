@@ -77,13 +77,13 @@ export default function AdminDashboard() {
   const actions = [
     { label: 'Freelances à valider', count: s.freelancePending, color: '#F59E0B', Icon: UserCheck, path: '/admin/AdminProfiles' },
     { label: 'Litiges ouverts',      count: s.disputesOpen,     color: '#EF4444', Icon: Scale,    path: '/admin/AdminDisputes' },
-    { label: 'Versements en attente', count: s.payoutPending,   color: '#d4af37', Icon: Wallet,   path: '/admin/AdminPayouts' },
+    { label: 'Versements en attente', count: s.payoutPending,   color: 'var(--color-gold-primary)', Icon: Wallet,   path: '/admin/AdminPayouts' },
   ];
   const kpis: { label: string; value: string | number; Icon: LucideIcon; color: string }[] = [
-    { label: 'Utilisateurs',       value: s.users,             Icon: Users,        color: '#d4af37' },
+    { label: 'Utilisateurs',       value: s.users,             Icon: Users,        color: 'var(--color-gold-primary)' },
     { label: 'Freelances',         value: s.freelances,        Icon: UserCheck,    color: '#00C896' },
     { label: 'Organisateurs',      value: s.organisateurs,     Icon: Briefcase,    color: '#3b82f6' },
-    { label: 'Missions',           value: s.missions,          Icon: Target,       color: '#e8c97a' },
+    { label: 'Missions',           value: s.missions,          Icon: Target,       color: 'var(--color-gold-light)' },
     { label: 'Missions actives',   value: s.missionsOpen,      Icon: TrendingUp,   color: '#00C896' },
     { label: 'Missions terminées', value: s.missionsCompleted, Icon: CheckCircle2, color: '#10b981' },
     { label: 'Litiges ouverts',    value: s.disputesOpen,      Icon: Scale,        color: '#EF4444' },
@@ -98,13 +98,13 @@ export default function AdminDashboard() {
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-1 flex items-center gap-3" style={{ color: '#f0e6d3' }}>
+      <h1 className="font-display text-3xl font-bold mb-1 flex items-center gap-3" style={{ color: 'var(--color-text-primary)' }}>
         <IcoDashAdmin size={26} color={roleColor('admin')} /> Supervision
       </h1>
-      <p className="text-sm mb-6" style={{ color: '#b8a898' }}>Vue d'ensemble de la plateforme EventBridge.</p>
+      <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>Vue d'ensemble de la plateforme EventBridge.</p>
 
       {loading ? (
-        <div className="text-center py-16" style={{ color: '#b8a898' }}>Chargement...</div>
+        <div className="text-center py-16" style={{ color: 'var(--color-text-secondary)' }}>Chargement...</div>
       ) : (
         <div className="space-y-6">
           {/* Actions requises */}
@@ -118,26 +118,26 @@ export default function AdminDashboard() {
                     <a.Icon size={18} color={a.color} />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold" style={{ color: a.count > 0 ? a.color : '#f0e6d3' }}>{a.count}</div>
-                    <div className="text-xs" style={{ color: '#b8a898' }}>{a.label}</div>
+                    <div className="text-2xl font-bold" style={{ color: a.count > 0 ? a.color : 'var(--color-text-primary)' }}>{a.count}</div>
+                    <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{a.label}</div>
                   </div>
                 </div>
-                <ChevronRight size={18} color="#7a6a7a" />
+                <ChevronRight size={18} color="var(--color-text-muted)" />
               </button>
             ))}
           </div>
 
           {/* Flux financiers */}
           <div style={CARD} className="p-6">
-            <h2 className="font-semibold mb-4 flex items-center gap-2" style={{ color: '#f0e6d3' }}>
-              <Wallet size={17} color="#d4af37" /> Flux financiers
+            <h2 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+              <Wallet size={17} color="var(--color-gold-primary)" /> Flux financiers
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {flux.map(f => (
                 <div key={f.label}>
-                  <div className="text-xl font-bold" style={{ color: '#d4af37' }}>{formatCFA(f.value)}</div>
-                  <div className="text-xs mt-1" style={{ color: '#f0e6d3' }}>{f.label}</div>
-                  <div className="text-[11px]" style={{ color: '#7a6a7a' }}>{f.hint}</div>
+                  <div className="text-xl font-bold" style={{ color: 'var(--color-gold-primary)' }}>{formatCFA(f.value)}</div>
+                  <div className="text-xs mt-1" style={{ color: 'var(--color-text-primary)' }}>{f.label}</div>
+                  <div className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>{f.hint}</div>
                 </div>
               ))}
             </div>
@@ -149,23 +149,23 @@ export default function AdminDashboard() {
               <div key={k.label} style={CARD} className="p-5">
                 <div className="mb-2"><k.Icon size={24} color={k.color} /></div>
                 <div className="text-2xl font-bold mb-0.5" style={{ color: k.color }}>{k.value}</div>
-                <div className="text-xs" style={{ color: '#b8a898' }}>{k.label}</div>
+                <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{k.label}</div>
               </div>
             ))}
           </div>
 
           {/* Missions récentes (liste, pas de table → meilleur mobile) */}
           <div style={CARD} className="p-6">
-            <h2 className="font-semibold mb-4" style={{ color: '#f0e6d3' }}>Missions récentes</h2>
+            <h2 className="font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>Missions récentes</h2>
             {recent.length === 0 ? (
-              <p className="text-center py-6" style={{ color: '#b8a898' }}>Aucune mission</p>
+              <p className="text-center py-6" style={{ color: 'var(--color-text-secondary)' }}>Aucune mission</p>
             ) : (
               <div className="space-y-2">
                 {recent.map(m => (
                   <div key={m.id} className="flex items-center justify-between gap-3 py-2.5 px-3 rounded-xl"
-                    style={{ background: 'rgba(82,54,124,0.3)' }}>
-                    <span className="text-sm font-medium truncate" style={{ color: '#f0e6d3' }}>{m.title}</span>
-                    <span className="text-xs whitespace-nowrap" style={{ color: '#b8a898' }}>
+                    style={{ background: 'var(--color-surface)' }}>
+                    <span className="text-sm font-medium truncate" style={{ color: 'var(--color-text-primary)' }}>{m.title}</span>
+                    <span className="text-xs whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
                       {m.service_type} · {m.event_date ? formatDate(m.event_date) : '—'}
                     </span>
                   </div>

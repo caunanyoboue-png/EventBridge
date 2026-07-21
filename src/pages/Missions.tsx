@@ -65,7 +65,7 @@ export default function Missions() {
   return (
     <DashboardLayout>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-3xl font-bold flex items-center gap-3" style={{ color: '#f0e6d3' }}><IcoMissions size={28} color={roleColor(profile?.role)} /> Missions disponibles</h1>
+        <h1 className="font-display text-3xl font-bold flex items-center gap-3" style={{ color: 'var(--color-text-primary)' }}><IcoMissions size={28} color={roleColor(profile?.role)} /> Missions disponibles</h1>
         {profile?.role === 'organisateur' && (
           <button onClick={() => navigate('/create-mission')} className="btn-gold px-5 py-2 rounded-xl text-sm font-bold text-[#261642]">
             + Nouvelle mission
@@ -77,12 +77,12 @@ export default function Missions() {
       <div className="card-glass p-4 mb-6 flex flex-wrap gap-3 items-center">
         <input
           className="px-3 py-2 rounded-lg text-sm outline-none flex-1 min-w-40"
-          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
+          style={{ background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)' }}
           placeholder="🔍 Rechercher..."
           value={search} onChange={e => setSearch(e.target.value)}
         />
         <select className="px-3 py-2 rounded-lg text-sm outline-none"
-          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
+          style={{ background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)' }}
           value={filterType} onChange={e => setFilterType(e.target.value)}>
           <option value="">Tous les types</option>
           {types.map(t => <option key={t} value={t}>{t}</option>)}
@@ -92,19 +92,19 @@ export default function Missions() {
           style={{
             background: filterUrgent ? 'rgba(239,68,68,0.2)' : 'transparent',
             borderColor: filterUrgent ? '#ef4444' : 'rgba(201,168,76,0.2)',
-            color: filterUrgent ? '#ef4444' : '#b8a898',
+            color: filterUrgent ? '#ef4444' : 'var(--color-text-secondary)',
           }}>
           ⚡ Urgent
         </button>
-        <span className="text-sm ml-auto" style={{ color: '#b8a898' }}>{filtered.length} mission(s)</span>
+        <span className="text-sm ml-auto" style={{ color: 'var(--color-text-secondary)' }}>{filtered.length} mission(s)</span>
       </div>
 
       {loading ? (
-        <div className="text-center py-16" style={{ color: '#b8a898' }}>Chargement des missions...</div>
+        <div className="text-center py-16" style={{ color: 'var(--color-text-secondary)' }}>Chargement des missions...</div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 card-glass">
           <p className="text-4xl mb-4">🔍</p>
-          <p style={{ color: '#b8a898' }}>Aucune mission trouvée</p>
+          <p style={{ color: 'var(--color-text-secondary)' }}>Aucune mission trouvée</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -149,8 +149,8 @@ function MissionCard({ mission: m, onApply, onView, isFreelance, userLat, userLn
         <div className="flex items-center gap-2">
           <ServiceIcon type={m.service_type} size={26} />
           <div>
-            <h3 className="font-semibold text-sm line-clamp-1" style={{ color: '#f0e6d3' }}>{m.title}</h3>
-            <p className="text-xs" style={{ color: '#b8a898' }}>{m.service_type}</p>
+            <h3 className="font-semibold text-sm line-clamp-1" style={{ color: 'var(--color-text-primary)' }}>{m.title}</h3>
+            <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{m.service_type}</p>
           </div>
         </div>
         {m.is_urgent && (
@@ -159,29 +159,29 @@ function MissionCard({ mission: m, onApply, onView, isFreelance, userLat, userLn
       </div>
 
       <div className="space-y-1.5 mb-4 flex-1">
-        <div className="flex items-center gap-2 text-xs" style={{ color: '#b8a898' }}>
+        <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
           <span>📅</span><span>{formatDateShort(m.event_date)} · {m.start_time?.substring(0,5)} - {m.end_time?.substring(0,5)}</span>
         </div>
-        <div className="flex items-center gap-2 text-xs" style={{ color: '#b8a898' }}>
+        <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
           <span>📍</span>
           <span>{m.location}{m.ville ? `, ${m.ville}` : ''}</span>
           {dist !== null && (
-            <span style={{ marginLeft: 4, color: '#d4af37', fontWeight: 600 }}>
+            <span style={{ marginLeft: 4, color: 'var(--color-gold-primary)', fontWeight: 600 }}>
               · {formatDistance(dist)}
             </span>
           )}
         </div>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs" style={{ color: '#b8a898' }}>
+          <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
             <span>👥</span><span>{slots_filled}/{m.slots_total} poste(s)</span>
           </div>
-          <div className="text-sm font-bold" style={{ color: '#d4af37' }}>{formatRateLabel(m.roles, m.hourly_rate)}</div>
+          <div className="text-sm font-bold" style={{ color: 'var(--color-gold-primary)' }}>{formatRateLabel(m.roles, m.hourly_rate)}</div>
         </div>
       </div>
 
       <div className="mb-4">
         <div className="w-full h-1 rounded-full" style={{ background: '#52367c' }}>
-          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: 'linear-gradient(to right,#d4af37,#e8c97a)' }} />
+          <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: 'linear-gradient(to right,var(--color-gold-primary),var(--color-gold-light))' }} />
         </div>
       </div>
 

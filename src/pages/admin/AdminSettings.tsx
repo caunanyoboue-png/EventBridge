@@ -121,12 +121,12 @@ export default function AdminSettings() {
   }
 
   const inputClass = 'w-full px-4 py-2.5 rounded-xl text-sm outline-none';
-  const inputStyle = { background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
+  const inputStyle = { background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)' };
 
   function Field({ label, children }: { label: string; children: React.ReactNode }) {
     return (
       <div>
-        <label className="text-xs mb-1.5 block font-medium" style={{ color: '#b8a898' }}>{label}</label>
+        <label className="text-xs mb-1.5 block font-medium" style={{ color: 'var(--color-text-secondary)' }}>{label}</label>
         {children}
       </div>
     );
@@ -134,16 +134,16 @@ export default function AdminSettings() {
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><IcoGear size={26} color={roleColor('admin')} /> Paramètres</h1>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: 'var(--color-text-primary)' }}><IcoGear size={26} color={roleColor('admin')} /> Paramètres</h1>
 
       {/* ── Mon compte ── */}
       <div className="card-glass p-6 mb-6">
-        <h2 className="font-semibold mb-4 flex items-center gap-2" style={{ color: '#d4af37' }}><KeyRound size={18} /> Mon compte</h2>
+        <h2 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-gold-primary)' }}><KeyRound size={18} /> Mon compte</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Email */}
           <div>
-            <p className="text-xs mb-2" style={{ color: '#7a6a7a' }}>
-              Email actuel : <span style={{ color: '#f0e6d3' }}>{profile?.email}</span>
+            <p className="text-xs mb-2" style={{ color: 'var(--color-text-muted)' }}>
+              Email actuel : <span style={{ color: 'var(--color-text-primary)' }}>{profile?.email}</span>
             </p>
             <Field label="Nouvel email">
               <input type="email" className={inputClass} style={inputStyle} placeholder="nouveau@email.com"
@@ -185,24 +185,24 @@ export default function AdminSettings() {
       {/* ── Administrateurs (admin principal uniquement) ── */}
       {isSuper && (
         <div className="card-glass p-6 mb-6">
-          <h2 className="font-semibold mb-1 flex items-center gap-2" style={{ color: '#d4af37' }}><Crown size={18} /> Administrateurs</h2>
-          <p className="text-xs mb-4" style={{ color: '#7a6a7a' }}>Réservé à l'admin principal.</p>
+          <h2 className="font-semibold mb-1 flex items-center gap-2" style={{ color: 'var(--color-gold-primary)' }}><Crown size={18} /> Administrateurs</h2>
+          <p className="text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>Réservé à l'admin principal.</p>
 
           {/* Liste */}
           <div className="space-y-2 mb-5">
             {admins.map(a => (
-              <div key={a.id} className="flex items-center justify-between gap-3 p-3 rounded-xl" style={{ background: 'rgba(82,54,124,0.3)' }}>
+              <div key={a.id} className="flex items-center justify-between gap-3 p-3 rounded-xl" style={{ background: 'var(--color-surface)' }}>
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                    style={{ background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }}>
+                    style={{ background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }}>
                     {getInitials(a.full_name)}
                   </div>
                   <div>
-                    <p className="text-sm font-medium flex items-center gap-1.5" style={{ color: '#f0e6d3' }}>
+                    <p className="text-sm font-medium flex items-center gap-1.5" style={{ color: 'var(--color-text-primary)' }}>
                       {a.full_name}
-                      {a.is_super_admin && <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(212,175,55,0.18)', color: '#d4af37' }}><Crown size={11} /> Principal</span>}
+                      {a.is_super_admin && <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(212,175,55,0.18)', color: 'var(--color-gold-primary)' }}><Crown size={11} /> Principal</span>}
                     </p>
-                    <p className="text-xs" style={{ color: '#7a6a7a' }}>{a.email}</p>
+                    <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{a.email}</p>
                   </div>
                 </div>
                 {!a.is_super_admin && a.id !== profile?.id && (
@@ -217,8 +217,8 @@ export default function AdminSettings() {
           </div>
 
           {/* Créer un admin */}
-          <div className="p-4 rounded-xl" style={{ background: 'rgba(82,54,124,0.25)', border: '1px solid rgba(201,168,76,0.15)' }}>
-            <p className="text-sm font-medium mb-3" style={{ color: '#f0e6d3' }}>Créer un nouvel administrateur</p>
+          <div className="p-4 rounded-xl" style={{ background: 'var(--color-surface)', border: '1px solid rgba(201,168,76,0.15)' }}>
+            <p className="text-sm font-medium mb-3" style={{ color: 'var(--color-text-primary)' }}>Créer un nouvel administrateur</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <input className={inputClass} style={inputStyle} placeholder="Nom complet"
                 value={caName} onChange={e => setCaName(e.target.value)} />
@@ -238,7 +238,7 @@ export default function AdminSettings() {
       {/* ── Réglages plateforme ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card-glass p-6 space-y-4">
-          <h2 className="font-semibold mb-4 flex items-center gap-2" style={{ color: '#d4af37' }}><Wallet size={18} /> Paramètres financiers</h2>
+          <h2 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-gold-primary)' }}><Wallet size={18} /> Paramètres financiers</h2>
           <Field label="Taux de commission (%)">
             <input type="number" className={inputClass} style={inputStyle}
               value={settings.commission_rate} min={0} max={50}
@@ -274,24 +274,24 @@ export default function AdminSettings() {
           <h2 className="font-semibold mb-4 flex items-center gap-2" style={{ color: '#10b981' }}><ShieldCheck size={18} /> Vérification & Certification</h2>
           <div className="flex items-center justify-between py-2">
             <div>
-              <p className="text-sm font-medium" style={{ color: '#f0e6d3' }}>Certification automatique</p>
-              <p className="text-xs" style={{ color: '#7a6a7a' }}>Certifier après 10 missions réussies</p>
+              <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>Certification automatique</p>
+              <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Certifier après 10 missions réussies</p>
             </div>
             <button onClick={() => setSettings(p => ({ ...p, auto_certify: !p.auto_certify }))}
               className="relative w-12 h-6 rounded-full transition-all"
-              style={{ background: settings.auto_certify ? '#d4af37' : 'rgba(82,54,124,0.8)' }}>
+              style={{ background: settings.auto_certify ? 'var(--color-gold-primary)' : 'var(--color-surface-strong)' }}>
               <span className="absolute top-1 w-4 h-4 rounded-full bg-white transition-all"
                 style={{ left: settings.auto_certify ? '26px' : '4px' }} />
             </button>
           </div>
           <div className="flex items-center justify-between py-2">
             <div>
-              <p className="text-sm font-medium" style={{ color: '#f0e6d3' }}>Vérification d'identité</p>
-              <p className="text-xs" style={{ color: '#7a6a7a' }}>Obligatoire pour les freelances</p>
+              <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>Vérification d'identité</p>
+              <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Obligatoire pour les freelances</p>
             </div>
             <button onClick={() => setSettings(p => ({ ...p, require_id_verification: !p.require_id_verification }))}
               className="relative w-12 h-6 rounded-full transition-all"
-              style={{ background: settings.require_id_verification ? '#d4af37' : 'rgba(82,54,124,0.8)' }}>
+              style={{ background: settings.require_id_verification ? 'var(--color-gold-primary)' : 'var(--color-surface-strong)' }}>
               <span className="absolute top-1 w-4 h-4 rounded-full bg-white transition-all"
                 style={{ left: settings.require_id_verification ? '26px' : '4px' }} />
             </button>

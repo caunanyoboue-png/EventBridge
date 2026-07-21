@@ -27,20 +27,20 @@ function PayoutModal({ payment, onClose, onConfirm }: {
     <div onClick={onClose}
       style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, background: 'rgba(15,10,30,0.85)', zIndex: 1000 }}>
       <div onClick={e => e.stopPropagation()} className="card-glass p-6 w-full max-w-md">
-        <h3 className="font-semibold mb-1" style={{ color: '#f0e6d3' }}>Enregistrer le versement</h3>
-        <p className="text-xs mb-4" style={{ color: '#b8a898' }}>
+        <h3 className="font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>Enregistrer le versement</h3>
+        <p className="text-xs mb-4" style={{ color: 'var(--color-text-secondary)' }}>
           {payment.payee?.full_name} — <span style={{ color: '#00C896', fontWeight: 700 }}>{formatCFA(netOf(payment))}</span>
           {payment.payee?.phone && <> · {payment.payee.phone}</>}
         </p>
-        <label className="text-xs" style={{ color: '#b8a898' }}>Moyen utilisé</label>
+        <label className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>Moyen utilisé</label>
         <select value={method} onChange={e => setMethod(e.target.value)}
           className="w-full px-4 py-3 rounded-xl text-sm outline-none mb-3 mt-1"
-          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}>
+          style={{ background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)' }}>
           {PAYOUT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
         </select>
         <input value={ref} onChange={e => setRef(e.target.value)} placeholder="Référence de la transaction (optionnel)"
           className="w-full px-4 py-3 rounded-xl text-sm outline-none mb-4"
-          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }} />
+          style={{ background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)' }} />
         <div className="flex gap-2">
           <button type="button" disabled={busy}
             onClick={async () => { setBusy(true); await onConfirm(method, ref); setBusy(false); }}
@@ -48,7 +48,7 @@ function PayoutModal({ payment, onClose, onConfirm }: {
             {busy ? '…' : 'Confirmer le versement'}
           </button>
           <button type="button" onClick={onClose} className="px-4 rounded-xl text-sm border"
-            style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#b8a898' }}>Annuler</button>
+            style={{ borderColor: 'rgba(201,168,76,0.3)', color: 'var(--color-text-secondary)' }}>Annuler</button>
         </div>
       </div>
     </div>
@@ -104,22 +104,22 @@ export default function AdminPayouts() {
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: 'var(--color-text-primary)' }}>
         <IcoWallet size={25} color={roleColor('admin')} /> Versements freelances
       </h1>
 
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="card-glass p-4 text-center">
           <div className="text-2xl font-bold" style={{ color: '#F59E0B' }}>{pending.length}</div>
-          <div className="text-xs mt-1" style={{ color: '#b8a898' }}>À verser</div>
+          <div className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>À verser</div>
         </div>
         <div className="card-glass p-4 text-center">
-          <div className="text-xl font-bold" style={{ color: '#d4af37' }}>{formatCFA(totalPending)}</div>
-          <div className="text-xs mt-1" style={{ color: '#b8a898' }}>Montant en attente</div>
+          <div className="text-xl font-bold" style={{ color: 'var(--color-gold-primary)' }}>{formatCFA(totalPending)}</div>
+          <div className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>Montant en attente</div>
         </div>
         <div className="card-glass p-4 text-center">
           <div className="text-xl font-bold" style={{ color: '#00C896' }}>{formatCFA(totalPaid)}</div>
-          <div className="text-xs mt-1" style={{ color: '#b8a898' }}>Total versé</div>
+          <div className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>Total versé</div>
         </div>
       </div>
 
@@ -128,17 +128,17 @@ export default function AdminPayouts() {
           <button key={t} onClick={() => setTab(t)}
             className="px-4 py-2 rounded-xl text-sm font-medium"
             style={tab === t
-              ? { background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }
-              : { background: 'rgba(82,54,124,0.4)', color: '#b8a898', border: '1px solid rgba(201,168,76,0.2)' }}>
+              ? { background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }
+              : { background: 'var(--color-surface)', color: 'var(--color-text-secondary)', border: '1px solid rgba(201,168,76,0.2)' }}>
             {t === 'pending' ? `À verser (${pending.length})` : `Versés (${paid.length})`}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div className="text-center py-16" style={{ color: '#b8a898' }}>Chargement...</div>
+        <div className="text-center py-16" style={{ color: 'var(--color-text-secondary)' }}>Chargement...</div>
       ) : list.length === 0 ? (
-        <div className="text-center py-16" style={{ color: '#b8a898' }}>
+        <div className="text-center py-16" style={{ color: 'var(--color-text-secondary)' }}>
           {tab === 'pending' ? 'Aucun versement en attente' : 'Aucun versement effectué'}
         </div>
       ) : (
@@ -147,12 +147,12 @@ export default function AdminPayouts() {
             <div key={p.id} className="card-glass p-5 flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3 flex-1 min-w-48">
                 <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                  style={{ background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }}>
+                  style={{ background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }}>
                   {getInitials(p.payee?.full_name || '?')}
                 </div>
                 <div>
-                  <div className="font-medium text-sm" style={{ color: '#f0e6d3' }}>{p.payee?.full_name || '–'}</div>
-                  <div className="text-xs flex items-center gap-2 flex-wrap" style={{ color: '#7a6a7a' }}>
+                  <div className="font-medium text-sm" style={{ color: 'var(--color-text-primary)' }}>{p.payee?.full_name || '–'}</div>
+                  <div className="text-xs flex items-center gap-2 flex-wrap" style={{ color: 'var(--color-text-muted)' }}>
                     {p.payee?.phone && <span className="inline-flex items-center gap-1"><Phone size={11} /> {p.payee.phone}</span>}
                     <span>{p.description || 'Contrat'}</span>
                   </div>
@@ -160,8 +160,8 @@ export default function AdminPayouts() {
               </div>
 
               <div className="text-right">
-                <div className="text-lg font-bold" style={{ color: '#f0e6d3' }}>{formatCFA(netOf(p))}</div>
-                <div className="text-xs" style={{ color: '#7a6a7a' }}>
+                <div className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>{formatCFA(netOf(p))}</div>
+                <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
                   brut {formatCFA(p.amount)} · comm. {formatCFA(p.commission_amount ?? Math.round(p.amount * 0.10))}
                 </div>
               </div>

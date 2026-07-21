@@ -22,31 +22,31 @@ export default function ContractCard({ contract, myRole }: {
     >
       <div className="flex items-start justify-between mb-3">
         <div>
-          <h3 className="font-semibold text-sm" style={{ color: '#f0e6d3' }}>{contract.job_title}</h3>
-          <p className="text-xs mt-0.5 flex items-center gap-1.5" style={{ color: '#b8a898' }}>
+          <h3 className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>{contract.job_title}</h3>
+          <p className="text-xs mt-0.5 flex items-center gap-1.5" style={{ color: 'var(--color-text-secondary)' }}>
             {myRole === 'organizer' ? <><User size={12} /> Freelance</> : <><Building2 size={12} /> Org.</>} : {other?.full_name || other?.company_name || '—'}
           </p>
         </div>
         <ContractStatusBadge status={contract.status} />
       </div>
 
-      <div className="space-y-1 text-xs mb-4" style={{ color: '#b8a898' }}>
+      <div className="space-y-1 text-xs mb-4" style={{ color: 'var(--color-text-secondary)' }}>
         <div className="flex items-center gap-2">
-          <Calendar size={13} color="#8a7a9a" /><span>{startDate}</span>
+          <Calendar size={13} color="var(--color-text-muted)" /><span>{startDate}</span>
         </div>
         <div className="flex items-center gap-2">
-          <MapPin size={13} color="#8a7a9a" /><span className="truncate">{contract.location}</span>
+          <MapPin size={13} color="var(--color-text-muted)" /><span className="truncate">{contract.location}</span>
         </div>
         <div className="flex items-center gap-2">
-          <Wallet size={13} color="#d4af37" />
-          <span style={{ color: '#d4af37', fontWeight: 600 }}>
+          <Wallet size={13} color="var(--color-gold-primary)" />
+          <span style={{ color: 'var(--color-gold-primary)', fontWeight: 600 }}>
             {formatCFA(contract.total_gross)} brut
           </span>
         </div>
       </div>
 
       <div className="flex items-center justify-between">
-        <span className="text-xs" style={{ color: '#7a6a7a' }}>v{contract.version}</span>
+        <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>v{contract.version}</span>
         <button
           onClick={e => { e.stopPropagation(); navigate(`/contracts/${contract.id}`); }}
           className="btn-outline-gold px-3 py-1 rounded-lg text-xs">

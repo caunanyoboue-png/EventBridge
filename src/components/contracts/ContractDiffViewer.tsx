@@ -25,7 +25,7 @@ export default function ContractDiffViewer({
 
   if (diffs.length === 0) {
     return (
-      <p className="text-xs text-center py-4" style={{ color: '#b8a898' }}>
+      <p className="text-xs text-center py-4" style={{ color: 'var(--color-text-secondary)' }}>
         Aucune modification détectée par rapport à la version précédente.
       </p>
     );
@@ -33,7 +33,7 @@ export default function ContractDiffViewer({
 
   return (
     <div className="space-y-2">
-      <p className="text-xs font-semibold mb-3" style={{ color: '#b8a898' }}>
+      <p className="text-xs font-semibold mb-3" style={{ color: 'var(--color-text-secondary)' }}>
         {diffs.length} champ(s) modifié(s) par rapport à la version précédente :
       </p>
       {diffs.map(({ key, label, format }) => {
@@ -41,8 +41,8 @@ export default function ContractDiffViewer({
         const newVal = format ? format(current[key])  : String(current[key]  ?? '—');
         return (
           <div key={key} className="rounded-lg p-3"
-            style={{ background: 'rgba(82,54,124,0.3)', border: '1px solid rgba(201,168,76,0.15)' }}>
-            <p className="text-xs font-semibold mb-1" style={{ color: '#d4af37' }}>{label}</p>
+            style={{ background: 'var(--color-surface)', border: '1px solid rgba(201,168,76,0.15)' }}>
+            <p className="text-xs font-semibold mb-1" style={{ color: 'var(--color-gold-primary)' }}>{label}</p>
             <div className="flex gap-3 text-xs">
               <div className="flex-1 rounded px-2 py-1" style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171' }}>
                 <span style={{ opacity: 0.7 }}>Avant : </span>{oldVal}

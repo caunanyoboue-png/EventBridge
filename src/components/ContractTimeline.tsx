@@ -12,8 +12,8 @@ type StepStatus = 'success' | 'active' | 'pending' | 'error';
 // Palette EventBridge (pas de tokens shadcn).
 const COL: Record<StepStatus, string> = {
   success: '#00C896',
-  active: '#d4af37',
-  pending: '#7a6a7a',
+  active: 'var(--color-gold-primary)',
+  pending: 'var(--color-text-muted)',
   error: '#EF4444',
 };
 
@@ -73,14 +73,14 @@ export default function ContractTimeline({ contract }: { contract: Contract }) {
             : stage >= 5
               ? <CheckCircle2 size={17} color={COL.success} />
               : <Loader2 size={17} color={COL.active} className="animate-spin" />}
-          <span style={{ fontSize: 14, fontWeight: 700, color: '#f0e6d3', letterSpacing: '0.01em' }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-primary)', letterSpacing: '0.01em' }}>
             Avancement du contrat
           </span>
-          <span style={{ fontSize: 11, color: '#7a6a7a', fontFamily: 'monospace' }}>
+          <span style={{ fontSize: 11, color: 'var(--color-text-muted)', fontFamily: 'monospace' }}>
             {rejected ? 'arrêté' : `${stage}/5`}
           </span>
         </span>
-        {open ? <ChevronDown size={17} color="#7a6a7a" /> : <ChevronRight size={17} color="#7a6a7a" />}
+        {open ? <ChevronDown size={17} color="var(--color-text-muted)" /> : <ChevronRight size={17} color="var(--color-text-muted)" />}
       </button>
 
       {/* Timeline */}
@@ -120,13 +120,13 @@ export default function ContractTimeline({ contract }: { contract: Contract }) {
                 <div style={{ flex: 1, paddingBottom: 16, minWidth: 0 }}>
                   <div style={{
                     fontSize: 13.5, fontWeight: st === 'active' || st === 'error' ? 700 : 500,
-                    color: st === 'error' ? COL.error : st === 'pending' ? '#b8a898' : '#f0e6d3',
+                    color: st === 'error' ? COL.error : st === 'pending' ? 'var(--color-text-secondary)' : 'var(--color-text-primary)',
                   }}>
                     {step.label}
                     {st === 'active' && !rejected && <span style={{ color: COL.active, fontWeight: 600 }}> · en cours</span>}
                     {st === 'error' && <span style={{ fontWeight: 600 }}> · refusé</span>}
                   </div>
-                  <div style={{ fontSize: 11.5, color: '#7a6a7a', marginTop: 2 }}>{step.hint}</div>
+                  <div style={{ fontSize: 11.5, color: 'var(--color-text-muted)', marginTop: 2 }}>{step.hint}</div>
                 </div>
               </div>
             );

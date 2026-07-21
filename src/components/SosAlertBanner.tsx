@@ -177,7 +177,7 @@ export default function SosAlertBanner() {
             <div key={label} style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
               <span style={{ fontSize: 12, color: 'rgba(255,200,200,0.6)', minWidth: 70 }}>{label}</span>
               <span style={{ fontSize: 13, fontWeight: bold ? 700 : 400,
-                color: bold ? '#fca5a5' : '#f0e6d3' }}>{val}</span>
+                color: bold ? '#fca5a5' : 'var(--color-text-primary)' }}>{val}</span>
             </div>
           ))}
           {sos.message && (

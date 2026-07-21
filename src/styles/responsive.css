@@ -54,7 +54,7 @@
     border-radius: 8px;
     background: rgba(201, 168, 76, 0.08);
     border: 1px solid rgba(201, 168, 76, 0.2);
-    color: #d4af37;
+    color: var(--color-gold-primary);
     cursor: pointer;
     align-self: flex-end;
     margin-bottom: 8px;

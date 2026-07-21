@@ -16,7 +16,7 @@ import MapView from '../components/MapView';
 import toast from 'react-hot-toast';
 
 const sT: React.CSSProperties = {
-  fontSize: 13, fontWeight: 700, color: '#f0e6d3',
+  fontSize: 13, fontWeight: 700, color: 'var(--color-text-primary)',
   textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 14px',
 };
 
@@ -25,7 +25,7 @@ function Stars({ rating }: { rating: number }) {
     <span style={{ display: 'inline-flex', gap: 3 }}>
       {Array.from({ length: 5 }).map((_, i) => (
         <svg key={i} width="13" height="13" viewBox="0 0 13 13"
-          fill={i < Math.round(rating) ? '#d4af37' : 'none'} stroke="#d4af37" strokeWidth="0.9">
+          fill={i < Math.round(rating) ? 'var(--color-gold-primary)' : 'none'} stroke="var(--color-gold-primary)" strokeWidth="0.9">
           <path d="M6.5 1l1.6 3.3 3.7.5-2.7 2.6.6 3.7-3.2-1.7-3.2 1.7.6-3.7L1.8 4.8l3.7-.5L6.5 1z"
             strokeLinejoin="round"/>
         </svg>
@@ -159,7 +159,7 @@ export default function Profile() {
   if (!profile) return (
     <DashboardLayout>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <p style={{ color: '#5a4a6a', fontSize: 14 }}>Chargement du profil...</p>
+        <p style={{ color: 'var(--color-text-muted)', fontSize: 14 }}>Chargement du profil...</p>
       </div>
     </DashboardLayout>
   );
@@ -178,10 +178,10 @@ export default function Profile() {
   const completionPct = Math.round((completionChecks.filter(Boolean).length / completionChecks.length) * 100);
 
   const mSt: Record<string, { label: string; color: string }> = {
-    draft: { label: 'Brouillon', color: '#6a5a7a' },
+    draft: { label: 'Brouillon', color: 'var(--color-text-muted)' },
     open: { label: 'Ouverte', color: '#10b981' },
     in_progress: { label: 'En cours', color: '#3b82f6' },
-    completed: { label: 'Terminée', color: '#d4af37' },
+    completed: { label: 'Terminée', color: 'var(--color-gold-primary)' },
     cancelled: { label: 'Annulée', color: '#ef4444' },
     disputed: { label: 'Litige', color: '#f59e0b' },
   };
@@ -189,7 +189,7 @@ export default function Profile() {
   const fld = (label: string, key: keyof typeof form, type: 'text' | 'number' | 'textarea' | 'select' = 'text') => (
     <div key={key}>
       <label style={{ display: 'block', fontSize: 11, fontWeight: 600, letterSpacing: '0.06em',
-        textTransform: 'uppercase', color: '#6a5a7a', marginBottom: 8 }}>{label}</label>
+        textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: 8 }}>{label}</label>
       {type === 'textarea' ? (
         <textarea rows={4} style={{ ...inputSt, resize: 'none' }}
           value={form[key] as string}
@@ -197,7 +197,7 @@ export default function Profile() {
       ) : type === 'select' ? (
         <select style={inputSt} value={form[key] as string}
           onChange={e => setForm(p => ({ ...p, [key]: e.target.value }))}>
-          {VILLES.map(v => <option key={v} value={v} style={{ background: '#1e0f3c', color: '#f0e6d3' }}>{v}</option>)}
+          {VILLES.map(v => <option key={v} value={v} style={{ background: 'var(--color-option-bg)', color: 'var(--color-text-primary)' }}>{v}</option>)}
         </select>
       ) : (
         <input type={type} style={inputSt}
@@ -229,7 +229,7 @@ export default function Profile() {
               {editing && (
                 <button onClick={() => setEditing(false)}
                   style={{ padding: '8px 14px', borderRadius: 9, fontSize: 12, fontWeight: 600,
-                    background: 'rgba(0,0,0,0.45)', color: '#f0e6d3', backdropFilter: 'blur(8px)',
+                    background: 'rgba(0,0,0,0.45)', color: 'var(--color-text-primary)', backdropFilter: 'blur(8px)',
                     border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer' }}>
                   Annuler
                 </button>
@@ -247,7 +247,7 @@ export default function Profile() {
               <label style={{ position: 'absolute', bottom: 12, right: 14, display: 'flex',
                 alignItems: 'center', gap: 6, padding: '7px 12px', borderRadius: 8,
                 fontSize: 11, fontWeight: 600, cursor: bannerUploading ? 'wait' : 'pointer',
-                background: 'rgba(0,0,0,0.45)', color: '#f0e6d3', backdropFilter: 'blur(8px)',
+                background: 'rgba(0,0,0,0.45)', color: 'var(--color-text-primary)', backdropFilter: 'blur(8px)',
                 border: '1px solid rgba(255,255,255,0.15)' }}>
                 <input type="file" accept="image/*" style={{ display: 'none' }} onChange={uploadBanner} />
                 {bannerUploading ? 'Upload…' : <><ImagePlus size={13} /> Changer la bannière</>}
@@ -265,14 +265,14 @@ export default function Profile() {
                       outline: '2px solid rgba(201,168,76,0.4)' }} />
                 : <div style={{ width: 100, height: 100, borderRadius: '50%', display: 'flex',
                     alignItems: 'center', justifyContent: 'center', fontSize: 30, fontWeight: 800,
-                    color: '#261642', background: 'linear-gradient(135deg,#d4af37,#e8c97a)',
+                    color: '#261642', background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))',
                     border: '3px solid #261642', outline: '2px solid rgba(201,168,76,0.3)' }}>
                     {initials}
                   </div>
               }
               <label title="Changer la photo"
                 style={{ position: 'absolute', bottom: 2, right: 2, width: 28, height: 28,
-                  borderRadius: '50%', background: '#d4af37', cursor: 'pointer',
+                  borderRadius: '50%', background: 'var(--color-gold-primary)', cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   border: '2px solid #261642' }}>
                 <input type="file" accept="image/*" style={{ display: 'none' }} onChange={uploadAvatar} />
@@ -292,14 +292,14 @@ export default function Profile() {
         {/* ── PROFILE HEADER ───────────────────────────────── */}
         <div className="profile-header" style={{ paddingLeft: 152, marginBottom: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 6 }}>
-            <h1 style={{ fontSize: 24, fontWeight: 800, color: '#f0e6d3', margin: 0 }}>
+            <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--color-text-primary)', margin: 0 }}>
               {profile.full_name || 'Mon profil'}
             </h1>
             <CertifiedBadge level={profile.certification_level} certified={profile.is_certified} size="md" />
             <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 999,
               letterSpacing: '0.08em',
               background: isFreelance ? 'rgba(201,168,76,0.12)' : 'rgba(96,165,250,0.12)',
-              color: isFreelance ? '#d4af37' : '#60a5fa',
+              color: isFreelance ? 'var(--color-gold-primary)' : '#60a5fa',
               border: `1px solid ${isFreelance ? 'rgba(201,168,76,0.3)' : 'rgba(96,165,250,0.3)'}` }}>
               {isFreelance ? 'FREELANCE' : 'ORGANISATEUR'}
             </span>
@@ -318,16 +318,16 @@ export default function Profile() {
           {(profile.avg_rating ?? 0) > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
               <Stars rating={profile.avg_rating || 0} />
-              <span style={{ fontSize: 14, fontWeight: 700, color: '#d4af37' }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-gold-primary)' }}>
                 {(profile.avg_rating || 0).toFixed(1)}
               </span>
-              <span style={{ fontSize: 12, color: '#5a4a6a' }}>· {profile.total_reviews || 0} avis</span>
+              <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>· {profile.total_reviews || 0} avis</span>
             </div>
           )}
-          <p style={{ fontSize: 13, color: '#8a7a9a', margin: 0, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          <p style={{ fontSize: 13, color: 'var(--color-text-muted)', margin: 0, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
             <MapPin size={13} /> {[profile.ville, profile.quartier].filter(Boolean).join(', ') || 'Localisation non renseignée'}
             {!isFreelance && profile.company_name && (
-              <span style={{ color: '#d4af37', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5 }}> · <Building2 size={13} /> {profile.company_name}</span>
+              <span style={{ color: 'var(--color-gold-primary)', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 5 }}> · <Building2 size={13} /> {profile.company_name}</span>
             )}
           </p>
         </div>
@@ -362,7 +362,7 @@ export default function Profile() {
                       {fld("Années d'expérience", 'experience_years', 'number')}
                     </div>
                     <label style={{ display: 'block', fontSize: 11, fontWeight: 600, letterSpacing: '0.06em',
-                      textTransform: 'uppercase', color: '#6a5a7a', marginBottom: 10 }}>
+                      textTransform: 'uppercase', color: 'var(--color-text-muted)', marginBottom: 10 }}>
                       Compétences
                     </label>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 22 }}>
@@ -371,8 +371,8 @@ export default function Profile() {
                           style={{ padding: '7px 13px', borderRadius: 999, fontSize: 12, fontWeight: 600,
                             cursor: 'pointer', transition: 'all 0.15s',
                             background: form.skills.includes(c) ? 'rgba(201,168,76,0.15)' : 'transparent',
-                            border: `1px solid ${form.skills.includes(c) ? '#d4af37' : 'rgba(201,168,76,0.18)'}`,
-                            color: form.skills.includes(c) ? '#d4af37' : '#6a5a7a' }}>
+                            border: `1px solid ${form.skills.includes(c) ? 'var(--color-gold-primary)' : 'rgba(201,168,76,0.18)'}`,
+                            color: form.skills.includes(c) ? 'var(--color-gold-primary)' : 'var(--color-text-muted)' }}>
                           {c}
                         </button>
                       ))}
@@ -380,16 +380,16 @@ export default function Profile() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                       <button onClick={() => setForm(p => ({ ...p, is_available: !p.is_available }))}
                         style={{ width: 44, height: 24, borderRadius: 999, border: 'none', cursor: 'pointer',
-                          background: form.is_available ? '#10b981' : 'rgba(82,54,124,0.8)',
+                          background: form.is_available ? '#10b981' : 'var(--color-surface-strong)',
                           position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
                         <div style={{ position: 'absolute', top: 2, width: 20, height: 20, borderRadius: '50%',
                           background: '#fff', transition: 'left 0.2s', left: form.is_available ? 22 : 2 }} />
                       </button>
                       <div>
-                        <p style={{ fontSize: 13, fontWeight: 600, color: '#f0e6d3', margin: 0 }}>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>
                           {form.is_available ? 'Disponible aux missions' : 'Indisponible'}
                         </p>
-                        <p style={{ fontSize: 11, color: '#4a3a5a', marginTop: 2 }}>
+                        <p style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 }}>
                           {form.is_available ? 'Visible dans les recherches' : 'Masqué des recherches'}
                         </p>
                       </div>
@@ -415,7 +415,7 @@ export default function Profile() {
                   <button type="button" onClick={detectLocation} disabled={locating}
                     style={{ padding: '10px 18px', borderRadius: 10, fontSize: 13, fontWeight: 600,
                       cursor: locating ? 'wait' : 'pointer',
-                      background: 'linear-gradient(135deg,#d4af37,#e8c97a)',
+                      background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))',
                       color: '#261642', border: 'none', opacity: locating ? 0.7 : 1 }}>
                     {locating ? 'Localisation…' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><MapPin size={15} /> Détecter ma position</span>}
                   </button>
@@ -428,7 +428,7 @@ export default function Profile() {
                 {geoLat && geoLng && (
                   <MapView lat={geoLat} lng={geoLng} label={geoAddr || 'Ma position'} zoom={14} />
                 )}
-                <p style={{ fontSize: 11, color: '#4a3a5a', marginTop: 8 }}>
+                <p style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 8 }}>
                   Utilisée pour le matching avec les missions à proximité.
                 </p>
               </div>
@@ -438,7 +438,7 @@ export default function Profile() {
                 {profile.bio && (
                   <div className="card-glass" style={{ padding: 24 }}>
                     <h3 style={sT}>À propos</h3>
-                    <p style={{ fontSize: 14, color: '#b8a898', lineHeight: 1.85, margin: 0 }}>{profile.bio}</p>
+                    <p style={{ fontSize: 14, color: 'var(--color-text-secondary)', lineHeight: 1.85, margin: 0 }}>{profile.bio}</p>
                   </div>
                 )}
 
@@ -447,7 +447,7 @@ export default function Profile() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
                       <h3 style={{ ...sT, margin: 0 }}>Compétences</h3>
                       {profile.hourly_rate && (
-                        <span style={{ fontSize: 14, fontWeight: 700, color: '#d4af37' }}>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-gold-primary)' }}>
                           {formatCFA(profile.hourly_rate)}/h
                         </span>
                       )}
@@ -455,7 +455,7 @@ export default function Profile() {
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                       {(profile.skills || []).map(s => (
                         <span key={s} style={{ padding: '7px 14px', borderRadius: 999, fontSize: 13,
-                          fontWeight: 600, background: 'rgba(201,168,76,0.1)', color: '#d4af37',
+                          fontWeight: 600, background: 'rgba(201,168,76,0.1)', color: 'var(--color-gold-primary)',
                           border: '1px solid rgba(201,168,76,0.22)' }}>
                           {s}
                         </span>
@@ -480,7 +480,7 @@ export default function Profile() {
                         color: profile.is_available ? '#10b981' : '#ef4444' }}>
                         {profile.is_available ? 'Disponible pour des missions' : 'Indisponible en ce moment'}
                       </p>
-                      <p style={{ fontSize: 11, color: '#4a3a5a', marginTop: 2 }}>
+                      <p style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 }}>
                         Modifiable via le formulaire d'édition
                       </p>
                     </div>
@@ -497,23 +497,23 @@ export default function Profile() {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                       {profile.company_name && (
                         <div>
-                          <p style={{ fontSize: 11, color: '#5a4a6a', margin: '0 0 4px', fontWeight: 600,
+                          <p style={{ fontSize: 11, color: 'var(--color-text-muted)', margin: '0 0 4px', fontWeight: 600,
                             textTransform: 'uppercase', letterSpacing: '0.06em' }}>Structure</p>
-                          <p style={{ fontSize: 14, color: '#b8a898', margin: 0, display: 'flex', alignItems: 'center', gap: 7 }}><Building2 size={14} color="#d4af37" /> {profile.company_name}</p>
+                          <p style={{ fontSize: 14, color: 'var(--color-text-secondary)', margin: 0, display: 'flex', alignItems: 'center', gap: 7 }}><Building2 size={14} color="var(--color-gold-primary)" /> {profile.company_name}</p>
                         </div>
                       )}
                       {profile.company_sector && (
                         <div>
-                          <p style={{ fontSize: 11, color: '#5a4a6a', margin: '0 0 4px', fontWeight: 600,
+                          <p style={{ fontSize: 11, color: 'var(--color-text-muted)', margin: '0 0 4px', fontWeight: 600,
                             textTransform: 'uppercase', letterSpacing: '0.06em' }}>Secteur</p>
-                          <p style={{ fontSize: 14, color: '#b8a898', margin: 0, display: 'flex', alignItems: 'center', gap: 7 }}><Target size={14} color="#d4af37" /> {profile.company_sector}</p>
+                          <p style={{ fontSize: 14, color: 'var(--color-text-secondary)', margin: 0, display: 'flex', alignItems: 'center', gap: 7 }}><Target size={14} color="var(--color-gold-primary)" /> {profile.company_sector}</p>
                         </div>
                       )}
                       {profile.rccm && (
                         <div>
-                          <p style={{ fontSize: 11, color: '#5a4a6a', margin: '0 0 4px', fontWeight: 600,
+                          <p style={{ fontSize: 11, color: 'var(--color-text-muted)', margin: '0 0 4px', fontWeight: 600,
                             textTransform: 'uppercase', letterSpacing: '0.06em' }}>RCCM</p>
-                          <p style={{ fontSize: 14, color: '#b8a898', margin: 0, display: 'flex', alignItems: 'center', gap: 7 }}><FileText size={14} color="#d4af37" /> {profile.rccm}</p>
+                          <p style={{ fontSize: 14, color: 'var(--color-text-secondary)', margin: 0, display: 'flex', alignItems: 'center', gap: 7 }}><FileText size={14} color="var(--color-gold-primary)" /> {profile.rccm}</p>
                         </div>
                       )}
                     </div>
@@ -529,17 +529,17 @@ export default function Profile() {
                     <h3 style={sT}>Missions publiées récentes</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                       {recentMissions.map(m => {
-                        const st = mSt[m.status || 'draft'] || { label: 'Inconnu', color: '#6a5a7a' };
+                        const st = mSt[m.status || 'draft'] || { label: 'Inconnu', color: 'var(--color-text-muted)' };
                         return (
                           <div key={m.id} style={{ padding: '14px 16px', borderRadius: 12,
-                            background: 'rgba(82,54,124,0.3)', border: '1px solid rgba(201,168,76,0.07)',
+                            background: 'var(--color-surface)', border: '1px solid rgba(201,168,76,0.07)',
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                             flexWrap: 'wrap', gap: 8 }}>
                             <div>
-                              <p style={{ fontSize: 14, fontWeight: 600, color: '#f0e6d3', margin: '0 0 4px' }}>
+                              <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)', margin: '0 0 4px' }}>
                                 {m.title}
                               </p>
-                              <p style={{ fontSize: 12, color: '#6a5a7a', margin: 0 }}>
+                              <p style={{ fontSize: 12, color: 'var(--color-text-muted)', margin: 0 }}>
                                 {m.service_type}{m.event_date ? ` · ${new Date(m.event_date).toLocaleDateString('fr-CI')}` : ''}
                               </p>
                             </div>
@@ -562,10 +562,10 @@ export default function Profile() {
                     {(profile.avg_rating ?? 0) > 0 && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <Stars rating={profile.avg_rating || 0} />
-                        <span style={{ fontSize: 15, fontWeight: 800, color: '#d4af37' }}>
+                        <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--color-gold-primary)' }}>
                           {(profile.avg_rating || 0).toFixed(1)}
                         </span>
-                        <span style={{ fontSize: 12, color: '#4a3a5a' }}>({profile.total_reviews || 0})</span>
+                        <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>({profile.total_reviews || 0})</span>
                       </div>
                     )}
                   </div>
@@ -574,9 +574,9 @@ export default function Profile() {
                       <svg width="40" height="40" viewBox="0 0 40 40" fill="none"
                         style={{ margin: '0 auto 14px', display: 'block' }}>
                         <path d="M20 4l4.9 10 11 1.6-8 7.7 1.9 10.8L20 29.5l-9.8 5.2 1.9-10.8-8-7.7L16.1 14 20 4Z"
-                          stroke="#d4af37" strokeWidth="1.5" strokeLinejoin="round" strokeOpacity="0.4"/>
+                          stroke="var(--color-gold-primary)" strokeWidth="1.5" strokeLinejoin="round" strokeOpacity="0.4"/>
                       </svg>
-                      <p style={{ fontSize: 13, color: '#4a3a5a' }}>
+                      <p style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>
                         {isFreelance
                           ? 'Réalisez votre première mission pour obtenir des avis.'
                           : 'Recrutez votre première équipe !'}
@@ -595,13 +595,13 @@ export default function Profile() {
                             : <div style={{ width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 fontSize: 13, fontWeight: 700,
-                                background: 'rgba(201,168,76,0.1)', color: '#d4af37' }}>
+                                background: 'rgba(201,168,76,0.1)', color: 'var(--color-gold-primary)' }}>
                                 {(rev?.full_name || '?').charAt(0)}
                               </div>
                           }
                           <div style={{ flex: 1 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 5 }}>
-                              <span style={{ fontSize: 13, fontWeight: 700, color: '#f0e6d3' }}>
+                              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text-primary)' }}>
                                 {rev?.full_name || 'Anonyme'}
                               </span>
                               <Stars rating={r.rating} />
@@ -637,12 +637,12 @@ export default function Profile() {
                   ] : []),
                 ] as { Icon: LucideIcon; label: string; value: string }[]).map(stat => (
                   <div key={stat.label} style={{ display: 'flex', justifyContent: 'space-between',
-                    alignItems: 'center', padding: '10px 12px', background: 'rgba(82,54,124,0.3)',
+                    alignItems: 'center', padding: '10px 12px', background: 'var(--color-surface)',
                     borderRadius: 10, border: '1px solid rgba(201,168,76,0.06)' }}>
-                    <span style={{ fontSize: 12, color: '#8a7a9a', display: 'inline-flex', alignItems: 'center', gap: 7 }}>
-                      <stat.Icon size={14} color="#d4af37" /> {stat.label}
+                    <span style={{ fontSize: 12, color: 'var(--color-text-muted)', display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                      <stat.Icon size={14} color="var(--color-gold-primary)" /> {stat.label}
                     </span>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: '#d4af37' }}>{stat.value}</span>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-gold-primary)' }}>{stat.value}</span>
                   </div>
                 ))}
               </div>
@@ -657,34 +657,34 @@ export default function Profile() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {profile.phone && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <Phone size={15} color="#d4af37" />
-                      <span style={{ fontSize: 13, color: '#b8a898' }}>{profile.phone}</span>
+                      <Phone size={15} color="var(--color-gold-primary)" />
+                      <span style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>{profile.phone}</span>
                     </div>
                   )}
                   {(profile.ville || profile.quartier) && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <MapPin size={15} color="#d4af37" />
-                      <span style={{ fontSize: 13, color: '#b8a898' }}>
+                      <MapPin size={15} color="var(--color-gold-primary)" />
+                      <span style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>
                         {[profile.ville, profile.quartier].filter(Boolean).join(', ')}
                       </span>
                     </div>
                   )}
                   {!isFreelance && profile.company_name && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <Building2 size={15} color="#d4af37" />
-                      <span style={{ fontSize: 13, color: '#b8a898' }}>{profile.company_name}</span>
+                      <Building2 size={15} color="var(--color-gold-primary)" />
+                      <span style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>{profile.company_name}</span>
                     </div>
                   )}
                   {!isFreelance && profile.company_sector && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <Target size={15} color="#d4af37" />
-                      <span style={{ fontSize: 13, color: '#b8a898' }}>{profile.company_sector}</span>
+                      <Target size={15} color="var(--color-gold-primary)" />
+                      <span style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>{profile.company_sector}</span>
                     </div>
                   )}
                   {isFreelance && profile.hourly_rate && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <Banknote size={15} color="#d4af37" />
-                      <span style={{ fontSize: 13, color: '#b8a898' }}>{formatCFA(profile.hourly_rate)}/h</span>
+                      <Banknote size={15} color="var(--color-gold-primary)" />
+                      <span style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>{formatCFA(profile.hourly_rate)}/h</span>
                     </div>
                   )}
                 </div>
@@ -695,15 +695,15 @@ export default function Profile() {
             <div className="card-glass" style={{ padding: 20 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                 <h3 style={{ ...sT, margin: 0 }}>Complétude</h3>
-                <span style={{ fontSize: 18, fontWeight: 800, color: '#d4af37' }}>{completionPct}%</span>
+                <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--color-gold-primary)' }}>{completionPct}%</span>
               </div>
-              <div style={{ height: 6, background: 'rgba(82,54,124,0.8)', borderRadius: 999, marginBottom: 10 }}>
+              <div style={{ height: 6, background: 'var(--color-surface-strong)', borderRadius: 999, marginBottom: 10 }}>
                 <div style={{ height: '100%', borderRadius: 999, width: `${completionPct}%`,
-                  background: 'linear-gradient(to right,#d4af37,#e8c97a)', transition: 'width 0.3s' }} />
+                  background: 'linear-gradient(to right,var(--color-gold-primary),var(--color-gold-light))', transition: 'width 0.3s' }} />
               </div>
-              <p style={{ fontSize: 11, color: '#7a6a8a', lineHeight: 1.5, margin: 0,
+              <p style={{ fontSize: 11, color: 'var(--color-text-muted)', lineHeight: 1.5, margin: 0,
                 display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                {completionPct === 100 ? <><Trophy size={13} color="#d4af37" /> Profil complet !</> :
+                {completionPct === 100 ? <><Trophy size={13} color="var(--color-gold-primary)" /> Profil complet !</> :
                  completionPct >= 80 ? 'Presque complet — encore un effort !' :
                  completionPct >= 50 ? "Bon début — ajoutez plus d'infos." :
                  'Complétez votre profil pour plus de visibilité.'}
@@ -728,7 +728,7 @@ export default function Profile() {
                   textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   Profil certifié
                 </p>
-                <p style={{ fontSize: 11, color: '#4a3a5a', lineHeight: 1.5, margin: 0 }}>
+                <p style={{ fontSize: 11, color: 'var(--color-text-muted)', lineHeight: 1.5, margin: 0 }}>
                   Vérifié par l'équipe EventBridge
                 </p>
               </div>
@@ -741,9 +741,9 @@ export default function Profile() {
 }
 
 const inputSt: React.CSSProperties = {
-  background: 'rgba(82,54,124,0.5)',
+  background: 'var(--color-input-bg)',
   border: '1px solid rgba(201,168,76,0.18)',
-  color: '#f0e6d3',
+  color: 'var(--color-text-primary)',
   width: '100%',
   padding: '11px 14px',
   borderRadius: 10,

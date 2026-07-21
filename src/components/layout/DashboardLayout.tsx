@@ -6,6 +6,7 @@ import MobileTabBar from './MobileTabBar';
 import NotificationBell from '../NotificationBell';
 import SosAlertBanner from '../SosAlertBanner';
 import Logo from '../Logo';
+import ThemeToggle from '../ThemeToggle';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface Props {
@@ -21,14 +22,15 @@ export default function DashboardLayout({ children, bgImage }: Props) {
   // ── Mode invité : en-tête public (pas de menu latéral ni notifications) ──
   if (!profile) {
     return (
-      <div style={{ minHeight: '100vh', background: '#261642' }}>
+      <div style={{ minHeight: '100vh', background: 'var(--color-bg-primary)' }}>
         <header style={{ position: 'sticky', top: 0, zIndex: 40, display: 'flex', alignItems: 'center',
-          justifyContent: 'space-between', padding: '12px 20px', background: 'rgba(16,4,32,0.92)',
-          backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(201,168,76,0.12)' }}>
+          justifyContent: 'space-between', padding: '12px 20px', background: 'var(--color-header-bg)',
+          backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--color-border)' }}>
           <div onClick={() => navigate('/')} style={{ cursor: 'pointer', display: 'flex' }}>
             <Logo height={38} />
           </div>
-          <div style={{ display: 'flex', gap: 10 }}>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+            <ThemeToggle compact />
             <button onClick={() => navigate('/onboarding')}
               className="btn-outline-gold px-4 py-2 rounded-xl text-sm font-medium">
               Se connecter
@@ -47,7 +49,7 @@ export default function DashboardLayout({ children, bgImage }: Props) {
   }
 
   return (
-    <div className="eb-shell" style={{ display: 'flex', minHeight: '100vh', background: '#261642', position: 'relative' }}>
+    <div className="eb-shell" style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-bg-primary)', position: 'relative' }}>
       {bgImage && (
         <>
           <img src={bgImage} alt="" style={{ position: 'fixed', inset: 0, width: '100%', height: '100%',
@@ -103,6 +105,7 @@ export default function DashboardLayout({ children, bgImage }: Props) {
                 S.O.S
               </button>
             )}
+            <ThemeToggle compact />
             <NotificationBell />
           </div>
         </div>

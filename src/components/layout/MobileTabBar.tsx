@@ -55,7 +55,7 @@ const NAV: Record<string, RoleNav> = {
 
 // Dégradé + couleur d'icône du bouton central selon le côté.
 const CENTER: Record<string, { grad: string; on: string }> = {
-  freelance:    { grad: 'linear-gradient(135deg,#d4af37,#e8c97a)', on: '#261642' },
+  freelance:    { grad: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', on: '#261642' },
   organisateur: { grad: 'linear-gradient(135deg,#3b82f6,#60a5fa)', on: '#ffffff' },
   admin:        { grad: 'linear-gradient(135deg,#16a34a,#4ade80)', on: '#06281a' },
 };
@@ -116,8 +116,8 @@ export default function MobileTabBar() {
               return (
                 <button key={it.path} className="eb-sheet-row"
                   onClick={() => { setSheet(false); nav(it.path); }}
-                  style={{ color: on ? pal.active : '#f0e6d3' }}>
-                  <it.Icon size={20} color={on ? pal.active : '#b8a898'} />
+                  style={{ color: on ? pal.active : 'var(--color-text-primary)' }}>
+                  <it.Icon size={20} color={on ? pal.active : 'var(--color-text-secondary)'} />
                   {it.label}
                 </button>
               );

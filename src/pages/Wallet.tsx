@@ -94,23 +94,23 @@ export default function Wallet() {
     } finally { setBusy(false); }
   }
 
-  const inputStyle = { background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
+  const inputStyle = { background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)' };
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: 'var(--color-text-primary)' }}>
         <IcoWallet size={26} color={accent} /> Portefeuille
       </h1>
 
       {/* Solde */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
         <div className="card-glass p-6">
-          <p className="text-xs" style={{ color: '#b8a898' }}>{isFreelance ? 'Gains disponibles' : 'Solde disponible'}</p>
+          <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{isFreelance ? 'Gains disponibles' : 'Solde disponible'}</p>
           <p className="font-display text-4xl font-bold mt-1" style={{ color: accent }}>{formatCFA(w.balance)}</p>
         </div>
         {!isFreelance && (
           <div className="card-glass p-6">
-            <p className="text-xs" style={{ color: '#b8a898' }}>Bloqué en escrow (missions en cours)</p>
+            <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>Bloqué en escrow (missions en cours)</p>
             <p className="font-display text-4xl font-bold mt-1" style={{ color: '#f59e0b' }}>{formatCFA(w.held)}</p>
           </div>
         )}
@@ -118,10 +118,10 @@ export default function Wallet() {
 
       {/* Action : recharge (organisateur) ou retrait (freelance) */}
       <div className="card-glass p-6 mb-6">
-        <h2 className="font-semibold mb-1" style={{ color: '#d4af37' }}>
+        <h2 className="font-semibold mb-1" style={{ color: 'var(--color-gold-primary)' }}>
           {isFreelance ? 'Retirer mes gains' : 'Recharger le portefeuille'}
         </h2>
-        <p className="text-xs mb-4" style={{ color: '#7a6a8a' }}>
+        <p className="text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>
           {isFreelance
             ? 'Versement automatique sur votre compte mobile money via PayDunya.'
             : 'Paiement sécurisé par PayDunya (Orange Money, MTN, Moov, Wave, carte).'}
@@ -133,7 +133,7 @@ export default function Wallet() {
               <button key={q} onClick={() => setAmount(q)}
                 className="px-3 py-1.5 rounded-full text-xs font-medium border transition-all"
                 style={{ borderColor: amount === q ? accent : 'rgba(201,168,76,0.25)',
-                  color: amount === q ? accent : '#b8a898',
+                  color: amount === q ? accent : 'var(--color-text-secondary)',
                   background: amount === q ? 'rgba(212,175,55,0.12)' : 'transparent' }}>
                 {formatCFA(q)}
               </button>
@@ -143,7 +143,7 @@ export default function Wallet() {
 
         <div className="flex flex-wrap gap-3 items-end">
           <div>
-            <label className="text-xs block mb-1" style={{ color: '#b8a898' }}>Montant (FCFA)</label>
+            <label className="text-xs block mb-1" style={{ color: 'var(--color-text-secondary)' }}>Montant (FCFA)</label>
             <input type="number" value={amount} min={200} step={500}
               onChange={e => setAmount(Number(e.target.value))}
               className="px-3 py-2 rounded-lg text-sm outline-none" style={{ ...inputStyle, width: 150 }} />
@@ -151,13 +151,13 @@ export default function Wallet() {
           {isFreelance && (
             <>
               <div>
-                <label className="text-xs block mb-1" style={{ color: '#b8a898' }}>Numéro mobile money</label>
+                <label className="text-xs block mb-1" style={{ color: 'var(--color-text-secondary)' }}>Numéro mobile money</label>
                 <input type="tel" value={phone} placeholder="+225 07 00 00 00 00"
                   onChange={e => setPhone(e.target.value)}
                   className="px-3 py-2 rounded-lg text-sm outline-none" style={{ ...inputStyle, width: 180 }} />
               </div>
               <div>
-                <label className="text-xs block mb-1" style={{ color: '#b8a898' }}>Opérateur</label>
+                <label className="text-xs block mb-1" style={{ color: 'var(--color-text-secondary)' }}>Opérateur</label>
                 <select value={operator} onChange={e => setOperator(e.target.value)}
                   className="px-3 py-2 rounded-lg text-sm outline-none" style={inputStyle}>
                   {WITHDRAW_MODES.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
@@ -172,7 +172,7 @@ export default function Wallet() {
         </div>
         {!isFreelance && (
           <button onClick={doConfirm} disabled={busy}
-            className="mt-3 text-xs" style={{ color: '#b8a898', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}>
+            className="mt-3 text-xs" style={{ color: 'var(--color-text-secondary)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}>
             Déjà payé ? Vérifier ma recharge
           </button>
         )}
@@ -180,11 +180,11 @@ export default function Wallet() {
 
       {/* Historique */}
       <div className="card-glass p-6">
-        <h2 className="font-semibold mb-4" style={{ color: '#d4af37' }}>Historique</h2>
+        <h2 className="font-semibold mb-4" style={{ color: 'var(--color-gold-primary)' }}>Historique</h2>
         {loading ? (
-          <p className="text-sm" style={{ color: '#b8a898' }}>Chargement…</p>
+          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Chargement…</p>
         ) : txs.length === 0 ? (
-          <p className="text-sm" style={{ color: '#7a6a8a' }}>Aucune opération pour l'instant.</p>
+          <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Aucune opération pour l'instant.</p>
         ) : (
           <div>
             {txs.map(t => {
@@ -193,8 +193,8 @@ export default function Wallet() {
                 <div key={t.id} className="flex items-center justify-between py-2.5"
                   style={{ borderBottom: '1px solid rgba(201,168,76,0.06)' }}>
                   <div>
-                    <p className="text-sm font-medium" style={{ color: '#f0e6d3' }}>{t.label || TX_LABEL[t.type] || t.type}</p>
-                    <p className="text-xs" style={{ color: '#7a6a8a' }}>{new Date(t.created_at).toLocaleString('fr-FR')}</p>
+                    <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{t.label || TX_LABEL[t.type] || t.type}</p>
+                    <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{new Date(t.created_at).toLocaleString('fr-FR')}</p>
                   </div>
                   <p className="text-sm font-bold" style={{ color: positive ? '#00C896' : '#ef4444' }}>
                     {positive ? '+' : '−'}{formatCFA(Math.abs(t.amount))}

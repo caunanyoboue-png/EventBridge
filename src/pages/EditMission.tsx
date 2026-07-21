@@ -14,7 +14,7 @@ import {
 import toast from 'react-hot-toast';
 
 const inputClass = 'w-full px-4 py-3 rounded-xl text-sm outline-none';
-const inputStyle = { background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' };
+const inputStyle = { background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)' };
 const emptyDay = (start = '', end = ''): MissionDay => ({ date: '', start, end });
 
 export default function EditMission() {
@@ -207,7 +207,7 @@ export default function EditMission() {
     return (
       <DashboardLayout>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
-          <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid #d4af37',
+          <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid var(--color-gold-primary)',
             borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
@@ -219,8 +219,8 @@ export default function EditMission() {
     <DashboardLayout>
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-4 mb-8">
-          <button onClick={() => navigate(-1)} style={{ color: '#b8a898' }}>← Retour</button>
-          <h1 className="font-display text-2xl font-bold" style={{ color: '#f0e6d3' }}>Modifier la mission</h1>
+          <button onClick={() => navigate(-1)} style={{ color: 'var(--color-text-secondary)' }}>← Retour</button>
+          <h1 className="font-display text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Modifier la mission</h1>
         </div>
 
         {/* Stepper */}
@@ -230,13 +230,13 @@ export default function EditMission() {
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all"
                   style={i <= step
-                    ? { background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }
-                    : { border: '1px solid rgba(201,168,76,0.3)', color: '#7a6a7a' }}>
+                    ? { background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }
+                    : { border: '1px solid rgba(201,168,76,0.3)', color: 'var(--color-text-muted)' }}>
                   {i < step ? <Check size={15} /> : i + 1}
                 </div>
-                <span className="text-xs hidden sm:block" style={{ color: i === step ? '#d4af37' : '#7a6a7a' }}>{s}</span>
+                <span className="text-xs hidden sm:block" style={{ color: i === step ? 'var(--color-gold-primary)' : 'var(--color-text-muted)' }}>{s}</span>
               </div>
-              {i < steps.length - 1 && <div className="w-8 h-px mx-2" style={{ background: i < step ? '#d4af37' : 'rgba(201,168,76,0.2)' }} />}
+              {i < steps.length - 1 && <div className="w-8 h-px mx-2" style={{ background: i < step ? 'var(--color-gold-primary)' : 'rgba(201,168,76,0.2)' }} />}
             </div>
           ))}
         </div>
@@ -247,13 +247,13 @@ export default function EditMission() {
           {step === 0 && (
             <>
               <div>
-                <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Titre *</label>
+                <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Titre *</label>
                 <input className={inputClass} style={inputStyle}
                   value={form.title} onChange={e => upd('title', e.target.value)} />
               </div>
               <div>
-                <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>
-                  Compétence(s) recherchée(s) * <span style={{ color: '#7a6a7a' }}>(chacune a son tarif)</span>
+                <label className="text-xs mb-2 block" style={{ color: 'var(--color-text-secondary)' }}>
+                  Compétence(s) recherchée(s) * <span style={{ color: 'var(--color-text-muted)' }}>(chacune a son tarif)</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {COMPETENCES.map(c => {
@@ -263,8 +263,8 @@ export default function EditMission() {
                         className="px-3 py-1 rounded-full text-xs transition-all border"
                         style={{
                           background: on ? 'rgba(201,168,76,0.2)' : 'transparent',
-                          borderColor: on ? '#d4af37' : 'rgba(201,168,76,0.2)',
-                          color: on ? '#d4af37' : '#b8a898',
+                          borderColor: on ? 'var(--color-gold-primary)' : 'rgba(201,168,76,0.2)',
+                          color: on ? 'var(--color-gold-primary)' : 'var(--color-text-secondary)',
                         }}>
                         {c}
                       </button>
@@ -273,23 +273,23 @@ export default function EditMission() {
                 </div>
               </div>
               <div>
-                <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Description *</label>
+                <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Description *</label>
                 <textarea className={inputClass} style={{ ...inputStyle, resize: 'none' }} rows={4}
                   value={form.description} onChange={e => upd('description', e.target.value)} />
               </div>
               <div>
-                <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Dress code</label>
+                <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Dress code</label>
                 <input className={inputClass} style={inputStyle}
                   value={form.dress_code} onChange={e => upd('dress_code', e.target.value)} />
               </div>
               <label className="flex items-center gap-3 cursor-pointer">
                 <div onClick={() => upd('is_urgent', !form.is_urgent)}
                   className="w-11 h-6 rounded-full transition-all relative"
-                  style={{ background: form.is_urgent ? '#ef4444' : 'rgba(82,54,124,0.5)' }}>
+                  style={{ background: form.is_urgent ? '#ef4444' : 'var(--color-input-bg)' }}>
                   <div className="absolute w-4 h-4 bg-white rounded-full top-1 transition-all"
                     style={{ left: form.is_urgent ? '24px' : '4px' }} />
                 </div>
-                <span className="text-sm" style={{ color: '#b8a898' }}>Mission urgente</span>
+                <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Mission urgente</span>
               </label>
               <button onClick={() => setStep(1)} disabled={!form.title || roles.length === 0 || !form.description}
                 className="btn-gold w-full py-3 rounded-xl font-bold text-[#261642]">
@@ -303,24 +303,24 @@ export default function EditMission() {
             <>
               {/* Ville */}
               <div>
-                <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Ville *</label>
+                <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Ville *</label>
                 <select className={inputClass} style={inputStyle}
                   value={form.ville} onChange={e => upd('ville', e.target.value)}>
-                  {VILLES.map(v => <option key={v} value={v} style={{ background: '#1e0f3c', color: '#f0e6d3' }}>{v}</option>)}
+                  {VILLES.map(v => <option key={v} value={v} style={{ background: 'var(--color-option-bg)', color: 'var(--color-text-primary)' }}>{v}</option>)}
                 </select>
               </div>
 
               {/* Durée : 1 à 3 jours */}
               <div>
-                <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>Durée de l'événement * <span style={{ color: '#7a6a7a' }}>(max 3 jours, facturé au jour)</span></label>
+                <label className="text-xs mb-2 block" style={{ color: 'var(--color-text-secondary)' }}>Durée de l'événement * <span style={{ color: 'var(--color-text-muted)' }}>(max 3 jours, facturé au jour)</span></label>
                 <div className="flex gap-2">
                   {[1, 2, 3].map(n => (
                     <button key={n} type="button" onClick={() => setDayCount(n)}
                       className="flex-1 py-2 rounded-xl text-sm font-semibold border transition-all"
                       style={{
                         background: days.length === n ? 'rgba(201,168,76,0.2)' : 'transparent',
-                        borderColor: days.length === n ? '#d4af37' : 'rgba(201,168,76,0.2)',
-                        color: days.length === n ? '#d4af37' : '#b8a898',
+                        borderColor: days.length === n ? 'var(--color-gold-primary)' : 'rgba(201,168,76,0.2)',
+                        color: days.length === n ? 'var(--color-gold-primary)' : 'var(--color-text-secondary)',
                       }}>
                       {n} jour{n > 1 ? 's' : ''}
                     </button>
@@ -329,24 +329,24 @@ export default function EditMission() {
               </div>
 
               {days.map((d, i) => (
-                <div key={i} className="rounded-xl p-4" style={{ background: 'rgba(82,54,124,0.25)', border: '1px solid rgba(201,168,76,0.12)' }}>
+                <div key={i} className="rounded-xl p-4" style={{ background: 'var(--color-surface)', border: '1px solid rgba(201,168,76,0.12)' }}>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold" style={{ color: '#d4af37' }}>Jour {i + 1}</span>
-                    {d.start && d.end && <span className="text-xs" style={{ color: '#b8a898' }}>{Math.round(dayHours(d) * 100) / 100}h</span>}
+                    <span className="text-xs font-semibold" style={{ color: 'var(--color-gold-primary)' }}>Jour {i + 1}</span>
+                    {d.start && d.end && <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{Math.round(dayHours(d) * 100) / 100}h</span>}
                   </div>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <label className="text-[11px] mb-1 block" style={{ color: '#8a7a9a' }}>Date</label>
+                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--color-text-muted)' }}>Date</label>
                       <input type="date" min={today} className="w-full px-2 py-2 rounded-lg text-sm outline-none" style={inputStyle}
                         value={d.date} onChange={e => updDay(i, { date: e.target.value })} />
                     </div>
                     <div>
-                      <label className="text-[11px] mb-1 block" style={{ color: '#8a7a9a' }}>Début</label>
+                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--color-text-muted)' }}>Début</label>
                       <input type="time" className="w-full px-2 py-2 rounded-lg text-sm outline-none" style={inputStyle}
                         value={d.start} onChange={e => updDay(i, { start: e.target.value })} />
                     </div>
                     <div>
-                      <label className="text-[11px] mb-1 block" style={{ color: '#8a7a9a' }}>Fin</label>
+                      <label className="text-[11px] mb-1 block" style={{ color: 'var(--color-text-muted)' }}>Fin</label>
                       <input type="time" className="w-full px-2 py-2 rounded-lg text-sm outline-none" style={inputStyle}
                         value={d.end} onChange={e => updDay(i, { end: e.target.value })} />
                     </div>
@@ -359,41 +359,41 @@ export default function EditMission() {
 
               {/* Tarif horaire par compétence */}
               <div>
-                <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>Postes & tarifs horaires * <span style={{ color: '#7a6a7a' }}>(effectif + prix/heure par compétence)</span></label>
+                <label className="text-xs mb-2 block" style={{ color: 'var(--color-text-secondary)' }}>Postes & tarifs horaires * <span style={{ color: 'var(--color-text-muted)' }}>(effectif + prix/heure par compétence)</span></label>
                 <div className="space-y-2">
                   {roles.map(r => {
                     const hourly = isHourlyCompetence(r.skill);
                     const unit = hourly ? 'F/h' : (r.billing === 'daily' ? 'F/jour' : 'F/forfait');
                     return (
                       <div key={r.skill} className="rounded-xl p-3 space-y-2"
-                        style={{ background: 'rgba(82,54,124,0.25)', border: '1px solid rgba(201,168,76,0.12)' }}>
+                        style={{ background: 'var(--color-surface)', border: '1px solid rgba(201,168,76,0.12)' }}>
                         <div className="flex items-center gap-3 flex-wrap">
-                          <span className="text-sm font-medium flex-1 min-w-[110px]" style={{ color: '#f0e6d3' }}>{r.skill}</span>
+                          <span className="text-sm font-medium flex-1 min-w-[110px]" style={{ color: 'var(--color-text-primary)' }}>{r.skill}</span>
                           <div className="flex items-center gap-2">
                             <button type="button" onClick={() => updRole(r.skill, { count: Math.max(1, r.count - 1) })}
                               className="w-8 h-8 rounded-lg flex items-center justify-center"
-                              style={{ background: 'rgba(82,54,124,0.6)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}><Minus size={14} /></button>
-                            <span className="text-sm font-bold w-5 text-center" style={{ color: '#f0e6d3' }}>{r.count}</span>
+                              style={{ background: 'var(--color-surface-strong)', color: 'var(--color-gold-primary)', border: '1px solid rgba(201,168,76,0.2)' }}><Minus size={14} /></button>
+                            <span className="text-sm font-bold w-5 text-center" style={{ color: 'var(--color-text-primary)' }}>{r.count}</span>
                             <button type="button" onClick={() => updRole(r.skill, { count: r.count + 1 })}
                               className="w-8 h-8 rounded-lg flex items-center justify-center"
-                              style={{ background: 'rgba(82,54,124,0.6)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}><Plus size={14} /></button>
+                              style={{ background: 'var(--color-surface-strong)', color: 'var(--color-gold-primary)', border: '1px solid rgba(201,168,76,0.2)' }}><Plus size={14} /></button>
                           </div>
                           <div className="flex items-center gap-1">
                             <input type="number" min={0} step={100} value={r.rate}
                               onChange={e => updRole(r.skill, { rate: Number(e.target.value) })}
                               className="px-2 py-2 rounded-lg text-sm outline-none text-right" style={{ ...inputStyle, width: 96 }} />
-                            <span className="text-xs whitespace-nowrap" style={{ color: '#8a7a9a' }}>{unit}</span>
+                            <span className="text-xs whitespace-nowrap" style={{ color: 'var(--color-text-muted)' }}>{unit}</span>
                           </div>
                         </div>
                         {!hourly && (
                           <div className="flex items-center gap-2">
-                            <span className="text-[11px]" style={{ color: '#8a7a9a' }}>Facturé :</span>
+                            <span className="text-[11px]" style={{ color: 'var(--color-text-muted)' }}>Facturé :</span>
                             <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid rgba(201,168,76,0.2)' }}>
                               {(['daily', 'prestation'] as const).map(b => (
                                 <button key={b} type="button" onClick={() => updRole(r.skill, { billing: b })}
                                   className="px-3 py-1 text-xs font-medium"
                                   style={{ background: (r.billing || 'prestation') === b ? 'rgba(201,168,76,0.2)' : 'transparent',
-                                    color: (r.billing || 'prestation') === b ? '#d4af37' : '#b8a898' }}>
+                                    color: (r.billing || 'prestation') === b ? 'var(--color-gold-primary)' : 'var(--color-text-secondary)' }}>
                                   {b === 'daily' ? 'Par jour' : 'Par prestation'}
                                 </button>
                               ))}
@@ -407,8 +407,8 @@ export default function EditMission() {
               </div>
 
               <div>
-                <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>
-                  Adresse * <span style={{ color: '#7a6a7a' }}>(synchronisée avec la carte)</span>
+                <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>
+                  Adresse * <span style={{ color: 'var(--color-text-muted)' }}>(synchronisée avec la carte)</span>
                 </label>
                 <div className="flex gap-2">
                   <input className={inputClass} style={inputStyle} placeholder="Ex: Avenue Delafosse, Plateau"
@@ -419,7 +419,7 @@ export default function EditMission() {
                   <button type="button" onClick={searchAddress} disabled={geocoding || !form.location.trim()}
                     className="px-4 rounded-xl text-sm font-semibold inline-flex items-center gap-2"
                     style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.4)',
-                      color: '#d4af37', flexShrink: 0, cursor: 'pointer',
+                      color: 'var(--color-gold-primary)', flexShrink: 0, cursor: 'pointer',
                       opacity: (geocoding || !form.location.trim()) ? 0.6 : 1 }}>
                     <Search size={15} /> {geocoding ? '...' : 'Localiser'}
                   </button>
@@ -438,7 +438,7 @@ export default function EditMission() {
 
               {/* Photo du lieu */}
               <div>
-                <label className="text-xs mb-2 block" style={{ color: '#b8a898' }}>Photo du lieu (optionnel)</label>
+                <label className="text-xs mb-2 block" style={{ color: 'var(--color-text-secondary)' }}>Photo du lieu (optionnel)</label>
                 <input ref={venueInputRef} type="file" accept="image/*" className="hidden" onChange={handleVenueFile} />
                 {venuePreview ? (
                   <div className="relative">
@@ -450,8 +450,8 @@ export default function EditMission() {
                 ) : (
                   <button onClick={() => venueInputRef.current?.click()}
                     className="w-full h-32 rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-all"
-                    style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#b8a898' }}>
-                    <Camera size={26} color="#d4af37" />
+                    style={{ borderColor: 'rgba(201,168,76,0.3)', color: 'var(--color-text-secondary)' }}>
+                    <Camera size={26} color="var(--color-gold-primary)" />
                     <span className="text-xs">Ajouter une photo du lieu</span>
                   </button>
                 )}
@@ -460,8 +460,8 @@ export default function EditMission() {
               {/* Aperçu total */}
               {total > 0 && (
                 <div className="flex items-center justify-between px-4 py-3 rounded-xl" style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)' }}>
-                  <span className="text-xs" style={{ color: '#b8a898' }}>Total estimé ({totalHrs}h · {days.length} jour{days.length > 1 ? 's' : ''})</span>
-                  <span className="font-bold" style={{ color: '#d4af37' }}>{formatCFA(total)}</span>
+                  <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>Total estimé ({totalHrs}h · {days.length} jour{days.length > 1 ? 's' : ''})</span>
+                  <span className="font-bold" style={{ color: 'var(--color-gold-primary)' }}>{formatCFA(total)}</span>
                 </div>
               )}
 
@@ -478,16 +478,16 @@ export default function EditMission() {
           {/* Étape 3 — Récapitulatif */}
           {step === 2 && (
             <>
-              <h2 className="font-semibold text-lg" style={{ color: '#f0e6d3' }}>Récapitulatif</h2>
-              <div className="space-y-3 text-sm" style={{ color: '#b8a898' }}>
-                <div className="flex justify-between"><span>Mission</span><span style={{ color: '#f0e6d3' }} className="font-medium">{form.title}</span></div>
+              <h2 className="font-semibold text-lg" style={{ color: 'var(--color-text-primary)' }}>Récapitulatif</h2>
+              <div className="space-y-3 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                <div className="flex justify-between"><span>Mission</span><span style={{ color: 'var(--color-text-primary)' }} className="font-medium">{form.title}</span></div>
                 <div>
                   <span className="block mb-1">Planning</span>
                   <div className="space-y-1">
                     {days.map((d, i) => (
                       <div key={i} className="flex justify-between text-xs">
                         <span>Jour {i + 1} · {d.date ? new Date(d.date).toLocaleDateString('fr-CI', { day: '2-digit', month: 'short' }) : '—'}</span>
-                        <span style={{ color: '#f0e6d3' }}>{d.start}–{d.end} ({Math.round(dayHours(d) * 100) / 100}h)</span>
+                        <span style={{ color: 'var(--color-text-primary)' }}>{d.start}–{d.end} ({Math.round(dayHours(d) * 100) / 100}h)</span>
                       </div>
                     ))}
                   </div>
@@ -498,15 +498,15 @@ export default function EditMission() {
                     {roles.map(r => (
                       <div key={r.skill} className="flex justify-between text-xs">
                         <span>{r.skill} ×{r.count}</span>
-                        <span style={{ color: '#f0e6d3' }}>{formatCFA(r.rate)}{billingUnit(r.billing)}</span>
+                        <span style={{ color: 'var(--color-text-primary)' }}>{formatCFA(r.rate)}{billingUnit(r.billing)}</span>
                       </div>
                     ))}
                   </div>
                 </div>
-                <div className="flex justify-between"><span>Lieu</span><span style={{ color: '#f0e6d3' }}>{form.location}, {form.ville}</span></div>
-                <div className="flex justify-between"><span>Durée totale</span><span style={{ color: '#f0e6d3' }}>{totalHrs}h · {totalHeadcount(roles)} personne(s)</span></div>
+                <div className="flex justify-between"><span>Lieu</span><span style={{ color: 'var(--color-text-primary)' }}>{form.location}, {form.ville}</span></div>
+                <div className="flex justify-between"><span>Durée totale</span><span style={{ color: 'var(--color-text-primary)' }}>{totalHrs}h · {totalHeadcount(roles)} personne(s)</span></div>
                 <div className="h-px" style={{ background: 'rgba(201,168,76,0.15)' }} />
-                <div className="flex justify-between"><span>Montant brut</span><span style={{ color: '#f0e6d3' }}>{formatCFA(total)}</span></div>
+                <div className="flex justify-between"><span>Montant brut</span><span style={{ color: 'var(--color-text-primary)' }}>{formatCFA(total)}</span></div>
                 <div className="flex justify-between"><span>Commission (10%)</span><span style={{ color: '#ef4444' }}>-{formatCFA(commission)}</span></div>
                 <div className="flex justify-between font-bold"><span>Net freelances</span><span className="text-gold-gradient">{formatCFA(net)}</span></div>
               </div>

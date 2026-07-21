@@ -76,7 +76,7 @@ export default function Sidebar({ glassy, isOpen, onClose }: SidebarProps) {
       {onClose && (
         <button className="eb-sidebar-close" onClick={onClose}>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M2 2l12 12M14 2L2 14" stroke="#d4af37" strokeWidth="1.6" strokeLinecap="round"/>
+            <path d="M2 2l12 12M14 2L2 14" stroke="var(--color-gold-primary)" strokeWidth="1.6" strokeLinecap="round"/>
           </svg>
         </button>
       )}
@@ -91,7 +91,7 @@ export default function Sidebar({ glassy, isOpen, onClose }: SidebarProps) {
       {profile && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
           borderRadius: 12, marginBottom: 20,
-          background: glassy ? 'rgba(255,255,255,0.05)' : 'rgba(61,39,100,0.6)',
+          background: glassy ? 'rgba(255,255,255,0.05)' : 'var(--color-card-bg)',
           border: '1px solid rgba(201,168,76,0.1)' }}>
           {profile.avatar_url ? (
             <img src={profile.avatar_url} style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} alt="" />
@@ -99,12 +99,12 @@ export default function Sidebar({ glassy, isOpen, onClose }: SidebarProps) {
             <div style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 13, fontWeight: 800, color: '#261642',
-              background: 'linear-gradient(135deg,#d4af37,#e8c97a)' }}>
+              background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))' }}>
               {getInitials(profile.full_name || 'U')}
             </div>
           )}
           <div style={{ overflow: 'hidden', flex: 1 }}>
-            <p style={{ fontSize: 13, fontWeight: 600, color: '#f0e6d3',
+            <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-primary)',
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {profile.full_name}
             </p>
@@ -150,7 +150,7 @@ export default function Sidebar({ glassy, isOpen, onClose }: SidebarProps) {
       <button onClick={signOut}
         style={{ marginTop: 8, width: '100%', padding: '10px', borderRadius: 10,
           fontSize: 13, fontWeight: 500, cursor: 'pointer', background: 'transparent',
-          border: '1px solid rgba(239,68,68,0.2)', color: '#6a5a7a',
+          border: '1px solid rgba(239,68,68,0.2)', color: 'var(--color-text-muted)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
           transition: 'all 0.15s' }}
         onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.08)'; }}

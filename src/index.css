@@ -2,32 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Palette d'origine */
+:root, :root[data-theme='dark'] {
+  /* Fonds (sombre — identité historique) */
   --color-bg-primary: #261642;
   --color-bg-secondary: #3d2764;
   --color-bg-card: #52367c;
   --color-bg-overlay: #1c1132;
+  --color-night: #0f0a1e;
+  --color-night-deep: #160e2c;
+
+  /* Surfaces génériques (issues des fonds prune translucides) */
+  --color-surface: rgba(82, 54, 124, 0.3);
+  --color-surface-strong: rgba(82, 54, 124, 0.6);
+  --color-input-bg: rgba(82, 54, 124, 0.5);
+  --color-option-bg: #1e0f3c;
+  --color-card-bg: rgba(61, 39, 100, 0.6);
+  --card-shadow: none;
+
+  /* Or */
   --color-gold-primary: #d4af37;
   --color-gold-light: #e8c97a;
   --color-gold-dark: #a07830;
+  --color-gold-pale: #f5e6c4;
+  --color-gold-deep: #7d5a20;
+  --color-champagne: #f7edd8;
+
+  /* Texte */
   --color-text-primary: #f0e6d3;
   --color-text-secondary: #b8a898;
-  --color-text-muted: #7a6a7a;
+  --color-text-muted: #8a7a9a;
+  --color-text-soft: #a0a0b8;
+
+  /* Bordures / verre */
   --color-border: rgba(201, 168, 76, 0.2);
   --color-border-hover: rgba(201, 168, 76, 0.5);
   --glass-bg: rgba(61, 39, 100, 0.6);
   --glass-border: rgba(201, 168, 76, 0.15);
+  --color-card-border: rgba(201, 168, 76, 0.15);
 
-  /* Variations dérivées — profondeur et richesse sans trahir l'original */
-  --color-night: #0f0a1e;
-  --color-night-deep: #160e2c;
+  /* Accent bleu (logo) */
+  --color-blue: #7cb3ff;
+
+  /* Divers */
   --color-plum: #6b4a9e;
   --color-plum-light: #8a67c0;
   --color-orchid: #a98ed6;
-  --color-gold-pale: #f5e6c4;
-  --color-gold-deep: #7d5a20;
-  --color-champagne: #f7edd8;
+  --color-toast-bg: rgba(28, 17, 50, 0.96);
+  --color-header-bg: rgba(16, 4, 32, 0.92);
+  --eb-shadow: 0 12px 36px rgba(15, 10, 30, 0.6);
+  --eb-card-shadow: 0 16px 40px rgba(15, 10, 30, 0.5);
 
   /* Dégradés signature */
   --gradient-gold: linear-gradient(135deg, #a07830 0%, #d4af37 35%, #e8c97a 60%, #d4af37 100%);
@@ -38,7 +61,6 @@
   --color-success: #00C896;
   --color-warning: #F59E0B;
   --color-danger:  #EF4444;
-  --color-text-soft: #A0A0B8;
   --gold-glow: 0 0 12px rgba(212, 175, 55, 0.5);
 
   /* Typographie */
@@ -46,19 +68,98 @@
   --font-body: 'Manrope', 'Helvetica Neue', sans-serif;
 }
 
+/* ─── Thème CLAIR (façon logo : blanc bleuté, marine, bleu roi + or ambré) ─── */
+:root[data-theme='light'] {
+  --color-bg-primary: #f4f7fb;
+  --color-bg-secondary: #e9eff7;
+  --color-bg-card: #ffffff;
+  --color-bg-overlay: #ffffff;
+  --color-night: #e9eff7;
+  --color-night-deep: #dde6f1;
+
+  --color-surface: #eef3f9;
+  --color-surface-strong: #e3ebf4;
+  --color-input-bg: #eef3f9;
+  --color-option-bg: #ffffff;
+  --color-card-bg: #ffffff;
+  --card-shadow: 0 2px 12px rgba(30, 60, 120, 0.07);
+
+  /* Or ambré plus profond → lisible sur blanc */
+  --color-gold-primary: #b5820f;
+  --color-gold-light: #c89a2e;
+  --color-gold-dark: #8a6110;
+  --color-gold-pale: #8a6110;
+  --color-gold-deep: #c89a2e;
+  --color-champagne: #8a6110;
+
+  --color-text-primary: #16223d;
+  --color-text-secondary: #4e5d72;
+  --color-text-muted: #8390a2;
+  --color-text-soft: #6b7688;
+
+  --color-border: rgba(30, 95, 180, 0.18);
+  --color-border-hover: rgba(30, 95, 180, 0.42);
+  --glass-bg: #ffffff;
+  --glass-border: rgba(30, 95, 180, 0.14);
+  --color-card-border: rgba(30, 95, 180, 0.12);
+
+  --color-blue: #1e5fb4;
+
+  --color-plum: #4a90d9;
+  --color-plum-light: #6ba6e4;
+  --color-orchid: #1e5fb4;
+  --color-toast-bg: rgba(255, 255, 255, 0.98);
+  --color-header-bg: rgba(244, 247, 251, 0.92);
+  --eb-shadow: 0 12px 32px rgba(30, 60, 120, 0.16);
+  --eb-card-shadow: 0 14px 34px rgba(30, 60, 120, 0.12);
+
+  --gradient-gold: linear-gradient(135deg, #b5820f 0%, #e0a93a 45%, #c89a2e 100%);
+  --gradient-royal: linear-gradient(160deg, #ffffff 0%, #f4f7fb 45%, #e9eff7 100%);
+}
+
+/* Écrans à fond sombre sur-mesure (Landing, connexion) : on fige la palette
+   sombre localement pour éviter tout état cassé tant qu'ils ne sont pas
+   redessinés en clair. */
+.eb-force-dark {
+  --color-bg-primary: #261642;
+  --color-bg-secondary: #3d2764;
+  --color-bg-card: #52367c;
+  --color-bg-overlay: #1c1132;
+  --color-surface: rgba(82, 54, 124, 0.3);
+  --color-surface-strong: rgba(82, 54, 124, 0.6);
+  --color-input-bg: rgba(82, 54, 124, 0.5);
+  --color-option-bg: #1e0f3c;
+  --color-card-bg: rgba(61, 39, 100, 0.6);
+  --card-shadow: none;
+  --color-gold-primary: #d4af37;
+  --color-gold-light: #e8c97a;
+  --color-gold-dark: #a07830;
+  --color-text-primary: #f0e6d3;
+  --color-text-secondary: #b8a898;
+  --color-text-muted: #8a7a9a;
+  --color-text-soft: #a0a0b8;
+  --color-border: rgba(201, 168, 76, 0.2);
+  --color-border-hover: rgba(201, 168, 76, 0.5);
+  --glass-bg: rgba(61, 39, 100, 0.6);
+  --glass-border: rgba(201, 168, 76, 0.15);
+  --color-card-border: rgba(201, 168, 76, 0.15);
+  --color-header-bg: rgba(16, 4, 32, 0.92);
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html { scroll-behavior: smooth; }
 
 body {
-  background-color: #261642;
-  color: #f0e6d3;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
   font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.65;
   letter-spacing: 0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Playfair Display : serif éditorial en casse normale pour les grands titres. */
@@ -78,19 +179,19 @@ h3 {
 
 ::selection {
   background: rgba(201, 168, 76, 0.35);
-  color: #f7edd8;
+  color: var(--color-text-primary);
 }
 
 :focus-visible {
-  outline: 2px solid rgba(201, 168, 76, 0.7);
+  outline: 2px solid var(--color-border-hover);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #261642; }
-::-webkit-scrollbar-thumb { background: rgba(201, 168, 76, 0.3); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(201, 168, 76, 0.5); }
+::-webkit-scrollbar-track { background: var(--color-bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--color-border-hover); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-gold-primary); }
 
 @keyframes twinkle {
   0%, 100% { opacity: 0.1; transform: scale(1); }
@@ -157,7 +258,7 @@ h3 {
   .animate-scale-in { animation: scale-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
   .text-gold-gradient {
-    background: linear-gradient(135deg, #d4af37 0%, #e8c97a 50%, #d4af37 100%);
+    background: linear-gradient(135deg, var(--color-gold-primary) 0%, var(--color-gold-light) 50%, var(--color-gold-primary) 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -166,11 +267,12 @@ h3 {
   }
 
   .card-glass {
-    background: rgba(61, 39, 100, 0.6);
+    background: var(--glass-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(201, 168, 76, 0.15);
+    border: 1px solid var(--glass-border);
     border-radius: 16px;
+    box-shadow: var(--card-shadow);
   }
 
   .card-lift {
@@ -179,13 +281,13 @@ h3 {
   }
   .card-lift:hover {
     transform: translateY(-4px);
-    box-shadow: 0 16px 40px rgba(15, 10, 30, 0.5), 0 0 0 1px rgba(201, 168, 76, 0.25);
+    box-shadow: var(--eb-card-shadow), 0 0 0 1px var(--color-border-hover);
   }
 
   .btn-gold {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, #d4af37, #e8c97a);
+    background: linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light));
     color: #261642;
     font-weight: 700;
     border-radius: 8px;
@@ -218,16 +320,16 @@ h3 {
 
   .btn-outline-gold {
     background: transparent;
-    border: 1px solid rgba(201, 168, 76, 0.5);
-    color: #d4af37;
+    border: 1px solid var(--color-border-hover);
+    color: var(--color-gold-primary);
     border-radius: 8px;
     transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
     cursor: pointer;
   }
   .btn-outline-gold:hover {
     background: rgba(201, 168, 76, 0.1);
-    border-color: #d4af37;
-    color: #e8c97a;
+    border-color: var(--color-gold-primary);
+    color: var(--color-gold-light);
   }
 
   .badge-urgent {
@@ -243,7 +345,7 @@ h3 {
   /* Hover doré des liens de navigation (sidebar) */
   .eb-nav-link:hover {
     background: rgba(201, 168, 76, 0.07) !important;
-    color: #e8c97a !important;
+    color: var(--color-gold-light) !important;
   }
 
   /* Hover des actions du fil d'actualité */
@@ -281,7 +383,7 @@ h3 {
     transform: translateX(-50%);
     width: 56px;
     height: 1px;
-    background: linear-gradient(90deg, transparent, #d4af37 30%, #e8c97a 50%, #d4af37 70%, transparent);
+    background: linear-gradient(90deg, transparent, var(--color-gold-primary) 30%, var(--color-gold-light) 50%, var(--color-gold-primary) 70%, transparent);
   }
 
   .line-clamp-2 {

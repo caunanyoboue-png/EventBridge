@@ -41,18 +41,18 @@ export default function FreelanceProfiles() {
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><IcoUsers size={26} color={roleColor(me?.role)} /> Freelances</h1>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: 'var(--color-text-primary)' }}><IcoUsers size={26} color={roleColor(me?.role)} /> Freelances</h1>
 
       {/* Filtres */}
       <div className="card-glass p-4 mb-6 flex flex-wrap gap-3 items-center">
         <input
           className="px-3 py-2 rounded-lg text-sm outline-none flex-1 min-w-40"
-          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
+          style={{ background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)' }}
           placeholder="Rechercher un freelance..."
           value={search} onChange={e => setSearch(e.target.value)}
         />
         <select className="px-3 py-2 rounded-lg text-sm outline-none"
-          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
+          style={{ background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)' }}
           value={filterSkill} onChange={e => setFilterSkill(e.target.value)}>
           <option value="">Toutes compétences</option>
           {COMPETENCES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -62,22 +62,22 @@ export default function FreelanceProfiles() {
           style={{
             background: filterDispo ? 'rgba(16,185,129,0.15)' : 'transparent',
             borderColor: filterDispo ? '#10b981' : 'rgba(201,168,76,0.2)',
-            color: filterDispo ? '#10b981' : '#b8a898',
+            color: filterDispo ? '#10b981' : 'var(--color-text-secondary)',
           }}>
           <span className="inline-flex items-center gap-2">
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
             Disponibles
           </span>
         </button>
-        <span className="text-sm ml-auto" style={{ color: '#b8a898' }}>{filtered.length} freelance(s)</span>
+        <span className="text-sm ml-auto" style={{ color: 'var(--color-text-secondary)' }}>{filtered.length} freelance(s)</span>
       </div>
 
       {loading ? (
-        <div className="text-center py-16" style={{ color: '#b8a898' }}>Chargement...</div>
+        <div className="text-center py-16" style={{ color: 'var(--color-text-secondary)' }}>Chargement...</div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 card-glass">
-          <div className="flex justify-center mb-4"><Users size={40} color="#7a6a8a" strokeWidth={1.5} /></div>
-          <p style={{ color: '#b8a898' }}>Aucun freelance trouvé</p>
+          <div className="flex justify-center mb-4"><Users size={40} color="var(--color-text-muted)" strokeWidth={1.5} /></div>
+          <p style={{ color: 'var(--color-text-secondary)' }}>Aucun freelance trouvé</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -107,21 +107,21 @@ function FreelanceCard({ profile: p, userLat, userLng }: {
           <img src={p.avatar_url} className="w-14 h-14 rounded-full object-cover" alt="" />
         ) : (
           <div className="w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg"
-            style={{ background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }}>
+            style={{ background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }}>
             {getInitials(p.full_name)}
           </div>
         )}
         <div>
-          <h3 className="font-semibold flex items-center gap-1.5" style={{ color: '#f0e6d3' }}>
+          <h3 className="font-semibold flex items-center gap-1.5" style={{ color: 'var(--color-text-primary)' }}>
             {p.full_name}
             <CertifiedBadge level={p.certification_level} certified={p.is_certified} />
           </h3>
           <div className="flex items-center gap-1 mt-0.5">
             {Array.from({ length: 5 }).map((_, i) => {
               const on = i < Math.round(p.avg_rating || 0);
-              return <Star key={i} size={13} color={on ? '#d4af37' : '#52367c'} fill={on ? '#d4af37' : 'none'} />;
+              return <Star key={i} size={13} color={on ? 'var(--color-gold-primary)' : '#52367c'} fill={on ? 'var(--color-gold-primary)' : 'none'} />;
             })}
-            <span className="text-xs ml-1" style={{ color: '#b8a898' }}>{p.avg_rating?.toFixed(1) || '–'} ({p.total_reviews || 0})</span>
+            <span className="text-xs ml-1" style={{ color: 'var(--color-text-secondary)' }}>{p.avg_rating?.toFixed(1) || '–'} ({p.total_reviews || 0})</span>
           </div>
         </div>
       </div>
@@ -136,7 +136,7 @@ function FreelanceCard({ profile: p, userLat, userLng }: {
             </span>
           ))}
           {(p.skills || []).length > 3 && (
-            <span className="px-2 py-0.5 rounded-full text-xs" style={{ background: 'rgba(82,54,124,0.5)', color: '#7a6a7a' }}>
+            <span className="px-2 py-0.5 rounded-full text-xs" style={{ background: 'var(--color-input-bg)', color: 'var(--color-text-muted)' }}>
               +{(p.skills || []).length - 3}
             </span>
           )}
@@ -144,8 +144,8 @@ function FreelanceCard({ profile: p, userLat, userLng }: {
       )}
 
       <div className="flex items-center justify-between text-sm mb-4">
-        {p.hourly_rate && <span className="font-bold" style={{ color: '#d4af37' }}>{formatCFA(p.hourly_rate)}/h</span>}
-        {p.ville && <span style={{ color: '#b8a898' }} className="inline-flex items-center gap-1.5"><MapPin size={13} /> {p.ville}</span>}
+        {p.hourly_rate && <span className="font-bold" style={{ color: 'var(--color-gold-primary)' }}>{formatCFA(p.hourly_rate)}/h</span>}
+        {p.ville && <span style={{ color: 'var(--color-text-secondary)' }} className="inline-flex items-center gap-1.5"><MapPin size={13} /> {p.ville}</span>}
       </div>
 
       <div className="flex items-center justify-between">
@@ -162,7 +162,7 @@ function FreelanceCard({ profile: p, userLat, userLng }: {
             </span>
           </span>
           {dist !== null && (
-            <span style={{ fontSize: 11, color: '#d4af37', fontWeight: 600, paddingLeft: 8 }} className="inline-flex items-center gap-1">
+            <span style={{ fontSize: 11, color: 'var(--color-gold-primary)', fontWeight: 600, paddingLeft: 8 }} className="inline-flex items-center gap-1">
               <MapPin size={11} /> à {formatDistance(dist)}
             </span>
           )}

@@ -111,7 +111,7 @@ function SosFeedAlert() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', marginBottom: 16,
         borderRadius: 12, background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)' }}>
         <Navigation size={18} color="#F59E0B" />
-        <span style={{ fontSize: 13, color: '#f0e6d3' }}>
+        <span style={{ fontSize: 13, color: 'var(--color-text-primary)' }}>
           Activez votre localisation pour voir les S.O.S Brigade près de vous.
         </span>
       </div>
@@ -161,7 +161,7 @@ function SosFeedAlert() {
             </span>
           )}
           {total > 0 && (
-            <span style={{ fontSize: 12, color: '#e8c97a', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <span style={{ fontSize: 12, color: 'var(--color-gold-light)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
               <Wallet size={13} /> {formatCFA(total)}
             </span>
           )}
@@ -223,7 +223,7 @@ function Avatar({ src, name, size = 40 }: { src?: string | null; name?: string |
     ? <img src={src} alt="" style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid rgba(201,168,76,0.25)' }} />
     : <div style={{ width: size, height: size, borderRadius: '50%', flexShrink: 0, display: 'flex',
         alignItems: 'center', justifyContent: 'center', fontSize: size * 0.34, fontWeight: 700,
-        color: '#261642', background: 'linear-gradient(135deg,#d4af37,#e8c97a)' }}>
+        color: '#261642', background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))' }}>
         {getInitials(name || 'U')}
       </div>;
 }
@@ -237,7 +237,7 @@ function ActionBtn({ onClick, active, Icon, label, activeColor, fill }: {
       flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
       padding: '11px 4px', borderRadius: 10, border: 'none', cursor: 'pointer', fontSize: 13,
       background: active ? `${activeColor}14` : 'transparent',
-      color: active ? activeColor : '#9a8a9a',
+      color: active ? activeColor : 'var(--color-text-muted)',
       fontWeight: active ? 700 : 500, transition: 'all 0.18s',
     }}>
       <Icon size={17} strokeWidth={2} fill={active && fill ? activeColor : 'none'} />
@@ -258,7 +258,7 @@ function PostCard({ post, liked, reposted, onLike, onRepost, onToggleComment,
 }) {
   const a = post.author;
   const isOrg = a.role === 'organisateur';
-  const roleColor = isOrg ? '#60a5fa' : '#d4af37';
+  const roleColor = isOrg ? '#60a5fa' : 'var(--color-gold-primary)';
   const rolePill: CSSProperties = {
     display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9.5, fontWeight: 700,
     letterSpacing: '0.04em', padding: '3px 9px', borderRadius: 999, whiteSpace: 'nowrap', flexShrink: 0,
@@ -268,7 +268,7 @@ function PostCard({ post, liked, reposted, onLike, onRepost, onToggleComment,
   const pubPill: CSSProperties = {
     display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 9.5, fontWeight: 700,
     letterSpacing: '0.06em', padding: '4px 9px', borderRadius: 999, whiteSpace: 'nowrap', flexShrink: 0,
-    background: 'rgba(212,175,55,0.13)', color: '#e8c97a', border: '1px solid rgba(212,175,55,0.4)',
+    background: 'rgba(212,175,55,0.13)', color: 'var(--color-gold-light)', border: '1px solid rgba(212,175,55,0.4)',
   };
 
   return (
@@ -278,7 +278,7 @@ function PostCard({ post, liked, reposted, onLike, onRepost, onToggleComment,
         <Avatar src={a.avatar_url} name={a.full_name} size={44} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 14.5, fontWeight: 700, color: '#f0e6d3', minWidth: 0,
+            <span style={{ fontSize: 14.5, fontWeight: 700, color: 'var(--color-text-primary)', minWidth: 0,
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {a.full_name || 'Utilisateur'}
             </span>
@@ -287,7 +287,7 @@ function PostCard({ post, liked, reposted, onLike, onRepost, onToggleComment,
               {isOrg ? 'ORGANISATEUR' : 'FREELANCE'}
             </span>
           </div>
-          <p style={{ fontSize: 11.5, color: '#7a6a8a', marginTop: 2 }}>{timeAgo(post.created_at)}</p>
+          <p style={{ fontSize: 11.5, color: 'var(--color-text-muted)', marginTop: 2 }}>{timeAgo(post.created_at)}</p>
         </div>
         <span style={pubPill}>
           <PenLine size={11} /> PUBLICATION
@@ -311,17 +311,17 @@ function PostCard({ post, liked, reposted, onLike, onRepost, onToggleComment,
         <div style={{ padding: '9px 17px', display: 'flex', gap: 16, alignItems: 'center',
           borderTop: '1px solid rgba(201,168,76,0.06)' }}>
           {post.likes_count > 0 && (
-            <span style={{ fontSize: 12, color: '#7a6a8a', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <span style={{ fontSize: 12, color: 'var(--color-text-muted)', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
               <Heart size={13} fill="#ef4444" color="#ef4444" /> {post.likes_count}
             </span>
           )}
           {post.comments_count > 0 && (
-            <span style={{ fontSize: 12, color: '#7a6a8a', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <span style={{ fontSize: 12, color: 'var(--color-text-muted)', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
               <MessageCircle size={13} /> {post.comments_count}
             </span>
           )}
           {post.reposts_count > 0 && (
-            <span style={{ fontSize: 12, color: '#7a6a8a', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <span style={{ fontSize: 12, color: 'var(--color-text-muted)', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
               <Repeat2 size={14} /> {post.reposts_count}
             </span>
           )}
@@ -331,7 +331,7 @@ function PostCard({ post, liked, reposted, onLike, onRepost, onToggleComment,
       {/* Actions */}
       <div style={{ display: 'flex', padding: '4px 8px', borderTop: '1px solid rgba(201,168,76,0.08)' }}>
         <ActionBtn onClick={onLike}          active={liked}        Icon={Heart}         label="J'aime"    activeColor="#ef4444" fill />
-        <ActionBtn onClick={onToggleComment} active={commentsOpen} Icon={MessageCircle} label="Commenter" activeColor="#d4af37" />
+        <ActionBtn onClick={onToggleComment} active={commentsOpen} Icon={MessageCircle} label="Commenter" activeColor="var(--color-gold-primary)" />
         <ActionBtn onClick={onRepost}        active={reposted}     Icon={Repeat2}       label="Reposter"  activeColor="#10b981" />
       </div>
 
@@ -343,8 +343,8 @@ function PostCard({ post, liked, reposted, onLike, onRepost, onToggleComment,
               {comments.map(c => (
                 <div key={c.id} style={{ display: 'flex', gap: 9 }}>
                   <Avatar src={c.author.avatar_url} name={c.author.full_name} size={30} />
-                  <div style={{ background: 'rgba(82,54,124,0.4)', borderRadius: 12, padding: '7px 12px', flex: 1 }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#d4af37' }}>{c.author.full_name}</span>
+                  <div style={{ background: 'var(--color-surface)', borderRadius: 12, padding: '7px 12px', flex: 1 }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-gold-primary)' }}>{c.author.full_name}</span>
                     <p style={{ fontSize: 13, color: '#d8cabb', margin: '3px 0 0', lineHeight: 1.5 }}>{c.content}</p>
                   </div>
                 </div>
@@ -355,12 +355,12 @@ function PostCard({ post, liked, reposted, onLike, onRepost, onToggleComment,
             <input value={commentText} onChange={e => onCommentChange(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); onCommentSubmit(); } }}
               placeholder="Écrire un commentaire..."
-              style={{ flex: 1, background: 'rgba(82,54,124,0.4)', border: '1px solid rgba(201,168,76,0.2)',
-                borderRadius: 22, padding: '9px 15px', color: '#f0e6d3', fontSize: 13, outline: 'none' }}
+              style={{ flex: 1, background: 'var(--color-surface)', border: '1px solid rgba(201,168,76,0.2)',
+                borderRadius: 22, padding: '9px 15px', color: 'var(--color-text-primary)', fontSize: 13, outline: 'none' }}
             />
             <button onClick={onCommentSubmit} disabled={!commentText.trim() || commentLoading}
               style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: 'linear-gradient(135deg,#d4af37,#e8c97a)', border: 'none', borderRadius: '50%',
+                background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', border: 'none', borderRadius: '50%',
                 color: '#261642', cursor: 'pointer', flexShrink: 0,
                 opacity: (!commentText.trim() || commentLoading) ? 0.45 : 1 }}>
               {commentLoading ? <Loader2 size={17} className="animate-spin" /> : <Send size={16} />}
@@ -409,12 +409,12 @@ function MissionFeedCard({ mission: m, isFreelance, onApply, onView }: {
         {/* Auteur + date de publication */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 15 }}>
           <Avatar src={org.avatar_url} name={org.full_name} size={28} />
-          <span style={{ fontSize: 12, color: '#b8a898', flex: 1, minWidth: 0 }}>
-            <span style={{ fontWeight: 700, color: '#f0e6d3' }}>{org.full_name || org.company_name}</span>
+          <span style={{ fontSize: 12, color: 'var(--color-text-secondary)', flex: 1, minWidth: 0 }}>
+            <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>{org.full_name || org.company_name}</span>
             {' '}a publié une mission
           </span>
           {m.created_at && (
-            <span style={{ fontSize: 11, color: '#7a6a8a', flexShrink: 0 }}>{timeAgo(m.created_at)}</span>
+            <span style={{ fontSize: 11, color: 'var(--color-text-muted)', flexShrink: 0 }}>{timeAgo(m.created_at)}</span>
           )}
         </div>
 
@@ -422,22 +422,22 @@ function MissionFeedCard({ mission: m, isFreelance, onApply, onView }: {
         <div style={{ display: 'flex', gap: 13, marginBottom: 15, cursor: 'pointer' }} onClick={onView}>
           <ServiceIconBadge type={m.service_type} size={48} />
           <div style={{ minWidth: 0 }}>
-            <h3 style={{ fontSize: 15.5, fontWeight: 700, color: '#f0e6d3', margin: '0 0 7px' }}>{m.title}</h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px 13px', fontSize: 12, color: '#b8a898' }}>
+            <h3 style={{ fontSize: 15.5, fontWeight: 700, color: 'var(--color-text-primary)', margin: '0 0 7px' }}>{m.title}</h3>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px 13px', fontSize: 12, color: 'var(--color-text-secondary)' }}>
               {m.event_date && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                  <Calendar size={13} color="#8a7a9a" /> {new Date(m.event_date).toLocaleDateString('fr-CI', { day: '2-digit', month: 'short', year: 'numeric' })}{m.nb_days && m.nb_days > 1 ? ` · ${m.nb_days}j` : ''}
+                  <Calendar size={13} color="var(--color-text-muted)" /> {new Date(m.event_date).toLocaleDateString('fr-CI', { day: '2-digit', month: 'short', year: 'numeric' })}{m.nb_days && m.nb_days > 1 ? ` · ${m.nb_days}j` : ''}
                 </span>
               )}
               {m.ville && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                  <MapPin size={13} color="#8a7a9a" /> {m.ville}
+                  <MapPin size={13} color="var(--color-text-muted)" /> {m.ville}
                 </span>
               )}
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                <Users size={13} color="#8a7a9a" /> {m.slots_filled || 0}/{m.slots_total} poste(s)
+                <Users size={13} color="var(--color-text-muted)" /> {m.slots_filled || 0}/{m.slots_total} poste(s)
               </span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#d4af37', fontWeight: 700 }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--color-gold-primary)', fontWeight: 700 }}>
                 <Wallet size={13} /> {formatRateLabel(m.roles, m.hourly_rate)}
               </span>
             </div>
@@ -642,8 +642,8 @@ export default function Feed() {
               <IcoFeed size={21} color={roleColor(profile?.role)} />
             </div>
             <div>
-              <h1 className="font-display text-xl font-bold" style={{ color: '#f0e6d3', margin: 0 }}>Fil d'actualité</h1>
-              <p style={{ fontSize: 12, color: '#7a6a8a', margin: 0 }}>La communauté EventBridge en direct</p>
+              <h1 className="font-display text-xl font-bold" style={{ color: 'var(--color-text-primary)', margin: 0 }}>Fil d'actualité</h1>
+              <p style={{ fontSize: 12, color: 'var(--color-text-muted)', margin: 0 }}>La communauté EventBridge en direct</p>
             </div>
           </div>
           <button onClick={() => { if (!requireAuth('publier une publication')) return; setCreating(c => !c); setPostContent(''); setPostImage(null); }}
@@ -663,9 +663,9 @@ export default function Feed() {
                   placeholder={isFreelance
                     ? 'Partagez votre expérience, une mission réussie...'
                     : 'Partagez votre after-event, retour d\'expérience...'}
-                  style={{ width: '100%', background: 'rgba(82,54,124,0.4)',
+                  style={{ width: '100%', background: 'var(--color-surface)',
                     border: '1px solid rgba(201,168,76,0.2)', borderRadius: 12,
-                    padding: '11px 15px', color: '#f0e6d3', fontSize: 14.5,
+                    padding: '11px 15px', color: 'var(--color-text-primary)', fontSize: 14.5,
                     resize: 'none', outline: 'none', boxSizing: 'border-box', lineHeight: 1.6 }}
                 />
                 {postImage && (
@@ -682,9 +682,9 @@ export default function Feed() {
                 <div style={{ display: 'flex', alignItems: 'center', marginTop: 11, gap: 10 }}>
                   <input type="file" accept="image/*" ref={fileRef} style={{ display: 'none' }} onChange={uploadPostImage} />
                   <button onClick={() => fileRef.current?.click()}
-                    style={{ fontSize: 13, color: '#b8a898', background: 'transparent', border: 'none',
+                    style={{ fontSize: 13, color: 'var(--color-text-secondary)', background: 'transparent', border: 'none',
                       cursor: uploadingImg ? 'wait' : 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    {uploadingImg ? <Loader2 size={16} className="animate-spin" /> : <ImagePlus size={16} color="#d4af37" />} Photo
+                    {uploadingImg ? <Loader2 size={16} className="animate-spin" /> : <ImagePlus size={16} color="var(--color-gold-primary)" />} Photo
                   </button>
                   <button onClick={createPost} disabled={!postContent.trim() || submitting}
                     className="btn-gold px-5 py-2 rounded-lg text-sm font-bold text-[#261642]"
@@ -704,8 +704,8 @@ export default function Feed() {
             <button key={key} onClick={() => setTab(key)}
               style={{ padding: '7px 18px', borderRadius: 9, fontSize: 13, fontWeight: 600,
                 cursor: 'pointer', transition: 'all 0.18s', border: 'none',
-                background: tab === key ? 'linear-gradient(135deg,#d4af37,#e8c97a)' : 'transparent',
-                color: tab === key ? '#261642' : '#b8a898' }}>
+                background: tab === key ? 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))' : 'transparent',
+                color: tab === key ? '#261642' : 'var(--color-text-secondary)' }}>
               {label}
             </button>
           ))}
@@ -713,18 +713,18 @@ export default function Feed() {
 
         {/* Feed */}
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '64px 0', color: '#b8a898',
+          <div style={{ textAlign: 'center', padding: '64px 0', color: 'var(--color-text-secondary)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-            <Loader2 size={28} className="animate-spin" color="#d4af37" />
+            <Loader2 size={28} className="animate-spin" color="var(--color-gold-primary)" />
             Chargement du fil...
           </div>
         ) : feedItems.length === 0 ? (
           <div className="card-glass" style={{ textAlign: 'center', padding: '56px 24px' }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-              <Inbox size={40} color="#7a6a8a" strokeWidth={1.5} />
+              <Inbox size={40} color="var(--color-text-muted)" strokeWidth={1.5} />
             </div>
-            <p style={{ color: '#f0e6d3', fontSize: 15, fontWeight: 600 }}>Aucun contenu pour l'instant</p>
-            <p style={{ fontSize: 12.5, color: '#7a6a8a', marginTop: 6 }}>Soyez le premier à publier !</p>
+            <p style={{ color: 'var(--color-text-primary)', fontSize: 15, fontWeight: 600 }}>Aucun contenu pour l'instant</p>
+            <p style={{ fontSize: 12.5, color: 'var(--color-text-muted)', marginTop: 6 }}>Soyez le premier à publier !</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

@@ -16,7 +16,7 @@ const STATUS_UI: Record<string, { label: string; color: string; Icon: LucideIcon
   processing: { label: 'En cours',   color: '#3b82f6', Icon: Loader2 },
   completed:  { label: 'Payé',       color: '#10b981', Icon: CheckCircle2 },
   failed:     { label: 'Échoué',     color: '#ef4444', Icon: XCircle },
-  cancelled:  { label: 'Annulé',     color: '#7a6a7a', Icon: Undo2 },
+  cancelled:  { label: 'Annulé',     color: 'var(--color-text-muted)', Icon: Undo2 },
 };
 
 // Commission/net : valeurs stockées, sinon repli sur 10 % (avant redéploiement de l'Edge Function).
@@ -78,7 +78,7 @@ export default function PaymentButton({ contractId, amount, myRole }: Props) {
   // Freelance : affichage statut uniquement
   if (myRole === 'freelance') {
     if (!payment) return (
-      <div className="px-4 py-3 rounded-xl text-sm text-center flex items-center justify-center gap-2" style={{ background: 'rgba(82,54,124,0.3)', color: '#b8a898' }}>
+      <div className="px-4 py-3 rounded-xl text-sm text-center flex items-center justify-center gap-2" style={{ background: 'var(--color-surface)', color: 'var(--color-text-secondary)' }}>
         <Hourglass size={15} /> En attente du paiement de l'organisateur
       </div>
     );
@@ -92,13 +92,13 @@ export default function PaymentButton({ contractId, amount, myRole }: Props) {
           <ui.Icon size={15} /> Paiement {ui.label}
         </div>
         {payment.status === 'completed' && (
-          <div className="px-4 py-3 rounded-xl text-sm" style={{ background: 'rgba(82,54,124,0.3)' }}>
+          <div className="px-4 py-3 rounded-xl text-sm" style={{ background: 'var(--color-surface)' }}>
             <div className="flex justify-between">
-              <span style={{ color: '#b8a898' }}>Net à recevoir</span>
-              <span style={{ color: '#f0e6d3', fontWeight: 700 }}>{formatCFA(net)}</span>
+              <span style={{ color: 'var(--color-text-secondary)' }}>Net à recevoir</span>
+              <span style={{ color: 'var(--color-text-primary)', fontWeight: 700 }}>{formatCFA(net)}</span>
             </div>
             <div className="flex justify-between mt-1">
-              <span style={{ color: '#b8a898' }}>Versement</span>
+              <span style={{ color: 'var(--color-text-secondary)' }}>Versement</span>
               <span style={{ color: paidOut ? '#00C896' : '#F59E0B', fontWeight: 600 }}>
                 {paidOut
                   ? `Versé${payment.payout_at ? ' le ' + new Date(payment.payout_at).toLocaleDateString('fr-CI') : ''}`
@@ -106,7 +106,7 @@ export default function PaymentButton({ contractId, amount, myRole }: Props) {
               </span>
             </div>
             {paidOut && payment.payout_method && (
-              <div className="text-xs mt-1" style={{ color: '#b8a898' }}>
+              <div className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>
                 via {payment.payout_method}{payment.payout_ref ? ` · réf ${payment.payout_ref}` : ''}
               </div>
             )}
@@ -125,19 +125,19 @@ export default function PaymentButton({ contractId, amount, myRole }: Props) {
           style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', color: '#10b981' }}>
           <CheckCircle2 size={16} /> Paiement effectué — {formatCFA(payment.amount)}
           {payment.paid_at && (
-            <span className="block text-xs mt-1" style={{ color: '#b8a898' }}>
+            <span className="block text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>
               le {new Date(payment.paid_at).toLocaleDateString('fr-CI')}
             </span>
           )}
         </div>
-        <div className="px-4 py-2.5 rounded-xl text-xs" style={{ background: 'rgba(82,54,124,0.3)' }}>
+        <div className="px-4 py-2.5 rounded-xl text-xs" style={{ background: 'var(--color-surface)' }}>
           <div className="flex justify-between">
-            <span style={{ color: '#b8a898' }}>Commission plateforme</span>
-            <span style={{ color: '#f0e6d3' }}>{formatCFA(commission)}</span>
+            <span style={{ color: 'var(--color-text-secondary)' }}>Commission plateforme</span>
+            <span style={{ color: 'var(--color-text-primary)' }}>{formatCFA(commission)}</span>
           </div>
           <div className="flex justify-between mt-0.5">
-            <span style={{ color: '#b8a898' }}>Net reversé au freelance</span>
-            <span style={{ color: '#f0e6d3' }}>{formatCFA(net)}</span>
+            <span style={{ color: 'var(--color-text-secondary)' }}>Net reversé au freelance</span>
+            <span style={{ color: 'var(--color-text-primary)' }}>{formatCFA(net)}</span>
           </div>
         </div>
       </div>
@@ -153,7 +153,7 @@ export default function PaymentButton({ contractId, amount, myRole }: Props) {
         </div>
         <button onClick={handlePay} disabled={paying}
           className="w-full py-2 rounded-xl text-xs border"
-          style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#b8a898' }}>
+          style={{ borderColor: 'rgba(201,168,76,0.3)', color: 'var(--color-text-secondary)' }}>
           Reprendre le paiement
         </button>
       </div>

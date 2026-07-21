@@ -61,7 +61,7 @@ const TESTIMONIALS = [
 function IconCheck() {
   return (
     <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-      <path d="M2 6l3 3 5-5" stroke="#d4af37" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M2 6l3 3 5-5" stroke="var(--color-gold-primary)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }
@@ -83,34 +83,34 @@ function IconWarning() {
 function IconStepPost() {
   return (
     <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
-      <path d="M7 5h14l7 7v18H7V5Z" stroke="#d4af37" strokeWidth="1.8" strokeLinejoin="round"/>
-      <path d="M21 5v7h7" stroke="#d4af37" strokeWidth="1.8" strokeLinejoin="round"/>
-      <path d="M12 16h10M12 20h10M12 24h6" stroke="#d4af37" strokeWidth="1.7" strokeLinecap="round"/>
+      <path d="M7 5h14l7 7v18H7V5Z" stroke="var(--color-gold-primary)" strokeWidth="1.8" strokeLinejoin="round"/>
+      <path d="M21 5v7h7" stroke="var(--color-gold-primary)" strokeWidth="1.8" strokeLinejoin="round"/>
+      <path d="M12 16h10M12 20h10M12 24h6" stroke="var(--color-gold-primary)" strokeWidth="1.7" strokeLinecap="round"/>
     </svg>
   );
 }
 function IconStepMatch() {
   return (
     <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
-      <circle cx="12" cy="12" r="5.5" stroke="#d4af37" strokeWidth="1.8"/>
-      <circle cx="24" cy="12" r="5.5" stroke="#d4af37" strokeWidth="1.8"/>
-      <path d="M3 30c0-5 4-9 9-9h10c5 0 9 4 9 9" stroke="#d4af37" strokeWidth="1.8" strokeLinecap="round"/>
+      <circle cx="12" cy="12" r="5.5" stroke="var(--color-gold-primary)" strokeWidth="1.8"/>
+      <circle cx="24" cy="12" r="5.5" stroke="var(--color-gold-primary)" strokeWidth="1.8"/>
+      <path d="M3 30c0-5 4-9 9-9h10c5 0 9 4 9 9" stroke="var(--color-gold-primary)" strokeWidth="1.8" strokeLinecap="round"/>
     </svg>
   );
 }
 function IconStepDone() {
   return (
     <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
-      <circle cx="17" cy="17" r="13" stroke="#d4af37" strokeWidth="1.8"/>
-      <path d="M11 17.5l4.5 4.5 8-9" stroke="#d4af37" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="17" cy="17" r="13" stroke="var(--color-gold-primary)" strokeWidth="1.8"/>
+      <path d="M11 17.5l4.5 4.5 8-9" stroke="var(--color-gold-primary)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }
 function IconStar({ filled }: { filled: boolean }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill={filled ? '#d4af37' : 'none'}>
+    <svg width="14" height="14" viewBox="0 0 14 14" fill={filled ? 'var(--color-gold-primary)' : 'none'}>
       <path d="M7 1l1.8 3.6L13 5.3l-3 2.9.7 4.1L7 10.4l-3.7 1.9.7-4.1-3-2.9 4.2-.7L7 1Z"
-        stroke="#d4af37" strokeWidth="1" strokeLinejoin="round"/>
+        stroke="var(--color-gold-primary)" strokeWidth="1" strokeLinejoin="round"/>
     </svg>
   );
 }
@@ -169,7 +169,7 @@ export default function Landing() {
   const heroWords = ['Le', 'pont', 'entre'];
 
   return (
-    <div className="min-h-screen" style={{ background: '#0a0416' }}>
+    <div className="min-h-screen eb-force-dark" style={{ background: '#0a0416' }}>
 
       {/* ── NAVBAR ── */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-4 flex items-center justify-between"
@@ -180,9 +180,9 @@ export default function Landing() {
           {[['#comment','Comment ça marche'],['#services','Services'],['#temoignages','Témoignages']].map(([href, label]) => (
             <a key={href} href={href}
               className="text-xs font-semibold tracking-widest uppercase transition-colors"
-              style={{ color: '#8a7a9a', letterSpacing: '0.1em' }}
-              onMouseEnter={e => { (e.target as HTMLAnchorElement).style.color = '#e8c97a'; }}
-              onMouseLeave={e => { (e.target as HTMLAnchorElement).style.color = '#8a7a9a'; }}>
+              style={{ color: 'var(--color-text-muted)', letterSpacing: '0.1em' }}
+              onMouseEnter={e => { (e.target as HTMLAnchorElement).style.color = 'var(--color-gold-light)'; }}
+              onMouseLeave={e => { (e.target as HTMLAnchorElement).style.color = 'var(--color-text-muted)'; }}>
               {label}
             </a>
           ))}
@@ -213,7 +213,7 @@ export default function Landing() {
           {!reduceMotion && PARTICLES.map((p, i) => (
             <span key={i} className="absolute rounded-full" style={{
               left: `${p.left}%`, top: `${p.top}%`, width: p.size, height: p.size,
-              background: i % 3 === 0 ? '#f5e6c4' : '#d4af37',
+              background: i % 3 === 0 ? '#f5e6c4' : 'var(--color-gold-primary)',
               boxShadow: '0 0 8px rgba(232,201,122,0.8)',
               animation: `twinkle ${p.duration}s ease-in-out ${p.delay}s infinite`,
               pointerEvents: 'none',
@@ -226,8 +226,8 @@ export default function Landing() {
           <Reveal delay={0.1} y={16}>
             <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full mb-10"
               style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.3)' }}>
-              <span className="animate-glow" style={{ width: 6, height: 6, borderRadius: '50%', background: '#d4af37', display: 'inline-block' }} />
-              <span className="text-xs font-semibold tracking-widest" style={{ color: '#d4af37', letterSpacing: '0.1em' }}>
+              <span className="animate-glow" style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-gold-primary)', display: 'inline-block' }} />
+              <span className="text-xs font-semibold tracking-widest" style={{ color: 'var(--color-gold-primary)', letterSpacing: '0.1em' }}>
                 LA 1ÈRE PLATEFORME DE L'ÉVÉNEMENTIEL EN CÔTE D'IVOIRE
               </span>
             </div>
@@ -270,7 +270,7 @@ export default function Landing() {
           </h1>
 
           <Reveal delay={1.15} y={18}>
-            <p className="text-lg mb-12 max-w-xl mx-auto leading-relaxed" style={{ color: '#b8a898', lineHeight: 1.8 }}>
+            <p className="text-lg mb-12 max-w-xl mx-auto leading-relaxed" style={{ color: 'var(--color-text-secondary)', lineHeight: 1.8 }}>
               Des galas d'Abidjan aux soirées de Grand-Bassam : confiez vos événements
               aux meilleurs talents du pays, ou décrochez les missions qui vous ressemblent.
             </p>
@@ -285,16 +285,16 @@ export default function Landing() {
               </button>
               <button onClick={() => navigate('/pour-les-organisateurs')}
                 className="px-8 py-4 rounded-xl font-bold text-sm flex items-center gap-3 justify-center transition-all hover:bg-white/10 w-full sm:w-auto cursor-pointer"
-                style={{ background: 'rgba(255,255,255,0.05)', border: '1.5px solid rgba(255,255,255,0.18)', color: '#f0e6d3', backdropFilter: 'blur(8px)', letterSpacing: '0.04em' }}>
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1.5px solid rgba(255,255,255,0.18)', color: 'var(--color-text-primary)', backdropFilter: 'blur(8px)', letterSpacing: '0.04em' }}>
                 Je suis Organisateur
               </button>
             </div>
             <div className="mt-6 text-center">
               <button onClick={() => navigate('/feed')}
                 className="text-sm font-medium inline-flex items-center gap-2"
-                style={{ color: '#b8a898', transition: 'color 0.2s' }}
-                onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color = '#e8c97a'}
-                onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.color = '#b8a898'}>
+                style={{ color: 'var(--color-text-secondary)', transition: 'color 0.2s' }}
+                onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-gold-light)'}
+                onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.color = 'var(--color-text-secondary)'}>
                 Explorer le fil <IconArrow />
               </button>
             </div>
@@ -315,7 +315,7 @@ export default function Landing() {
                 <Reveal key={s.label} delay={1.4 + i * 0.12} y={20} className="py-5 text-center"
                   style={{ borderRight: i < 3 ? '1px solid rgba(201,168,76,0.1)' : 'none' }}>
                   <div className="text-2xl font-bold text-gold-gradient">{s.value}</div>
-                  <div className="text-xs mt-1 font-medium tracking-wide" style={{ color: '#8a7a9a' }}>{s.label}</div>
+                  <div className="text-xs mt-1 font-medium tracking-wide" style={{ color: 'var(--color-text-muted)' }}>{s.label}</div>
                 </Reveal>
               ))}
             </div>
@@ -327,13 +327,13 @@ export default function Landing() {
       <section id="comment" className="py-28 px-6" style={{ background: '#0f0520' }}>
         <div className="max-w-6xl mx-auto">
           <Reveal className="text-center mb-16">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: '#d4af37', letterSpacing: '0.15em' }}>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--color-gold-primary)', letterSpacing: '0.15em' }}>
               Simple & Rapide
             </p>
-            <h2 className="font-display text-4xl font-bold gold-rule" style={{ color: '#f0e6d3' }}>
+            <h2 className="font-display text-4xl font-bold gold-rule" style={{ color: 'var(--color-text-primary)' }}>
               Trois étapes. Une équipe de rêve.
             </h2>
-            <p className="mt-8 text-base" style={{ color: '#8a7a9a' }}>De votre idée à l'événement parfait, sans détour</p>
+            <p className="mt-8 text-base" style={{ color: 'var(--color-text-muted)' }}>De votre idée à l'événement parfait, sans détour</p>
           </Reveal>
 
           <div className="landing-steps-gap grid grid-cols-1 md:grid-cols-3 gap-10 relative">
@@ -348,21 +348,21 @@ export default function Landing() {
                   <div className="w-28 h-28 rounded-full flex items-center justify-center transition-all duration-500 group-hover:scale-105"
                     style={{ background: 'rgba(201,168,76,0.04)', border: '1.5px solid rgba(201,168,76,0.18)' }}>
                     <div className="w-20 h-20 rounded-full flex items-center justify-center"
-                      style={{ background: 'linear-gradient(135deg,rgba(61,39,100,0.9),rgba(26,10,46,0.95))', border: '1px solid rgba(201,168,76,0.2)' }}>
+                      style={{ background: 'linear-gradient(135deg,var(--color-card-bg),rgba(26,10,46,0.95))', border: '1px solid rgba(201,168,76,0.2)' }}>
                       {idx === 0 && <IconStepPost />}
                       {idx === 1 && <IconStepMatch />}
                       {idx === 2 && <IconStepDone />}
                     </div>
                   </div>
                   <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                    style={{ background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642', boxShadow: '0 0 18px rgba(201,168,76,0.45)' }}>
+                    style={{ background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642', boxShadow: '0 0 18px rgba(201,168,76,0.45)' }}>
                     {s.n}
                   </div>
                 </div>
 
                 {/* Texte */}
-                <h3 className="font-display font-semibold text-2xl mb-4" style={{ color: '#f0e6d3', letterSpacing: '0.02em' }}>{s.title}</h3>
-                <p className="text-sm leading-loose max-w-xs" style={{ color: '#9a8a9a' }}>{s.desc}</p>
+                <h3 className="font-display font-semibold text-2xl mb-4" style={{ color: 'var(--color-text-primary)', letterSpacing: '0.02em' }}>{s.title}</h3>
+                <p className="text-sm leading-loose max-w-xs" style={{ color: 'var(--color-text-muted)' }}>{s.desc}</p>
               </Reveal>
             ))}
           </div>
@@ -377,10 +377,10 @@ export default function Landing() {
             <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, transparent 55%, #261642)' }} />
           </div>
           <Reveal className="landing-px flex flex-col justify-center px-10 py-12 md:py-16" y={0}>
-            <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: '#d4af37', letterSpacing: '0.15em' }}>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--color-gold-primary)', letterSpacing: '0.15em' }}>
               Pour les Freelances
             </p>
-            <h2 className="font-display text-4xl font-bold mb-8" style={{ color: '#f0e6d3' }}>
+            <h2 className="font-display text-4xl font-bold mb-8" style={{ color: 'var(--color-text-primary)' }}>
               Votre talent mérite une scène à sa hauteur
             </h2>
             <div className="space-y-4 mb-8">
@@ -391,7 +391,7 @@ export default function Landing() {
                       style={{ background: 'rgba(201,168,76,0.12)', border: '1px solid rgba(201,168,76,0.4)' }}>
                       <IconCheck />
                     </div>
-                    <p className="text-sm leading-relaxed" style={{ color: '#b8a898' }}>{item}</p>
+                    <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>{item}</p>
                   </div>
                 </Reveal>
               ))}
@@ -409,10 +409,10 @@ export default function Landing() {
       <section style={{ background: '#1c1132' }}>
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 min-h-[520px]">
           <Reveal className="flex flex-col justify-center px-10 py-16 order-2 md:order-1" y={0}>
-            <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: '#d4af37', letterSpacing: '0.15em' }}>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--color-gold-primary)', letterSpacing: '0.15em' }}>
               Pour les Organisateurs
             </p>
-            <h2 className="font-display text-4xl font-bold mb-8" style={{ color: '#f0e6d3' }}>
+            <h2 className="font-display text-4xl font-bold mb-8" style={{ color: 'var(--color-text-primary)' }}>
               Composez l'équipe que votre événement mérite
             </h2>
             <div className="space-y-4 mb-8">
@@ -423,7 +423,7 @@ export default function Landing() {
                       style={{ background: 'rgba(201,168,76,0.12)', border: '1px solid rgba(201,168,76,0.4)' }}>
                       <IconCheck />
                     </div>
-                    <p className="text-sm leading-relaxed" style={{ color: '#b8a898' }}>{item}</p>
+                    <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>{item}</p>
                   </div>
                 </Reveal>
               ))}
@@ -444,13 +444,13 @@ export default function Landing() {
       <section id="services" className="py-28 px-6" style={{ background: '#0a0416' }}>
         <div className="max-w-6xl mx-auto">
           <Reveal className="text-center mb-14">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: '#d4af37', letterSpacing: '0.15em' }}>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--color-gold-primary)', letterSpacing: '0.15em' }}>
               Nos Prestations
             </p>
-            <h2 className="font-display text-4xl font-bold gold-rule" style={{ color: '#f0e6d3' }}>
+            <h2 className="font-display text-4xl font-bold gold-rule" style={{ color: 'var(--color-text-primary)' }}>
               L'excellence, dans chaque métier
             </h2>
-            <p className="mt-8 text-base" style={{ color: '#8a7a9a' }}>
+            <p className="mt-8 text-base" style={{ color: 'var(--color-text-muted)' }}>
               Du service en salle à la sécurité, chaque prestation est portée par des professionnels passionnés
             </p>
           </Reveal>
@@ -466,9 +466,9 @@ export default function Landing() {
                   <div className="absolute inset-0"
                     style={{ background: 'linear-gradient(to top, rgba(8,3,18,0.94) 0%, rgba(8,3,18,0.35) 55%, rgba(8,3,18,0.1) 100%)' }} />
                   <div className="absolute bottom-0 left-0 right-0 p-5">
-                    <p className="text-sm font-semibold tracking-wide" style={{ color: '#f0e6d3' }}>{s.label}</p>
+                    <p className="text-sm font-semibold tracking-wide" style={{ color: 'var(--color-text-primary)' }}>{s.label}</p>
                     <p className="text-xs mt-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                      style={{ color: '#d4af37' }}>
+                      style={{ color: 'var(--color-gold-primary)' }}>
                       Voir les talents <IconArrow />
                     </p>
                   </div>
@@ -537,10 +537,10 @@ export default function Landing() {
       <section id="temoignages" className="py-28 px-6" style={{ background: '#0f0520' }}>
         <div className="max-w-6xl mx-auto">
           <Reveal className="text-center mb-14">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: '#d4af37', letterSpacing: '0.15em' }}>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--color-gold-primary)', letterSpacing: '0.15em' }}>
               Témoignages
             </p>
-            <h2 className="font-display text-4xl font-bold gold-rule" style={{ color: '#f0e6d3' }}>
+            <h2 className="font-display text-4xl font-bold gold-rule" style={{ color: 'var(--color-text-primary)' }}>
               La confiance se gagne, événement après événement
             </h2>
           </Reveal>
@@ -553,7 +553,7 @@ export default function Landing() {
                   <div className="flex gap-1 mb-5">
                     {Array.from({ length: 5 }).map((_, j) => <IconStar key={j} filled={j < t.rating} />)}
                   </div>
-                  <p className="text-sm leading-relaxed mb-6" style={{ color: '#b8a898', lineHeight: 1.8 }}>
+                  <p className="text-sm leading-relaxed mb-6" style={{ color: 'var(--color-text-secondary)', lineHeight: 1.8 }}>
                     "{t.text}"
                   </p>
                   <div className="flex items-center gap-3 pt-5" style={{ borderTop: '1px solid rgba(201,168,76,0.08)' }}>
@@ -561,11 +561,11 @@ export default function Landing() {
                       className="w-11 h-11 rounded-full object-cover"
                       style={{ border: '2px solid rgba(201,168,76,0.25)' }} />
                     <div>
-                      <p className="font-semibold text-sm" style={{ color: '#f0e6d3' }}>{t.name}</p>
-                      <p className="text-xs mt-0.5" style={{ color: '#8a7a9a' }}>{t.company}</p>
+                      <p className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>{t.name}</p>
+                      <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{t.company}</p>
                     </div>
                     <span className="ml-auto text-xs px-2.5 py-1 rounded-full font-medium"
-                      style={{ background: 'rgba(201,168,76,0.08)', color: '#d4af37', border: '1px solid rgba(201,168,76,0.2)' }}>
+                      style={{ background: 'rgba(201,168,76,0.08)', color: 'var(--color-gold-primary)', border: '1px solid rgba(201,168,76,0.2)' }}>
                       {t.role}
                     </span>
                   </div>
@@ -591,9 +591,9 @@ export default function Landing() {
             </div>
             <h2 className="font-display text-4xl font-bold mb-4">
               <span className="text-gold-gradient">Votre prochain événement</span><br />
-              <span style={{ color: '#f0e6d3' }}>commence ici</span>
+              <span style={{ color: 'var(--color-text-primary)' }}>commence ici</span>
             </h2>
-            <p className="text-sm mb-10 leading-relaxed" style={{ color: '#9a8a9a', lineHeight: 1.9 }}>
+            <p className="text-sm mb-10 leading-relaxed" style={{ color: 'var(--color-text-muted)', lineHeight: 1.9 }}>
               Gratuit pour les freelances. Simple pour les organisateurs.<br />
               Des centaines de talents et de missions vous attendent, partout en Côte d'Ivoire.
             </p>
@@ -622,14 +622,14 @@ export default function Landing() {
             {['À propos', 'Contact', 'CGU', 'Confidentialité'].map(link => (
               <a key={link} href="#"
                 className="text-xs tracking-wide transition-colors"
-                style={{ color: '#6a5a7a' }}
-                onMouseEnter={e => { (e.target as HTMLAnchorElement).style.color = '#d4af37'; }}
-                onMouseLeave={e => { (e.target as HTMLAnchorElement).style.color = '#6a5a7a'; }}>
+                style={{ color: 'var(--color-text-muted)' }}
+                onMouseEnter={e => { (e.target as HTMLAnchorElement).style.color = 'var(--color-gold-primary)'; }}
+                onMouseLeave={e => { (e.target as HTMLAnchorElement).style.color = 'var(--color-text-muted)'; }}>
                 {link}
               </a>
             ))}
           </div>
-          <p className="text-xs" style={{ color: '#5a4a6a' }}>© 2026 EventBridge · Côte d'Ivoire</p>
+          <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>© 2026 EventBridge · Côte d'Ivoire</p>
         </div>
       </footer>
 

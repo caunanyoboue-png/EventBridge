@@ -13,14 +13,14 @@ const CATEGORIES = [
 ];
 
 const C = {
-  card: '#1a1232', gold: '#d4af37', goldLt: '#e8c97a',
-  text: '#f0e6d3', sec: 'rgba(240,230,211,0.45)', bdr: 'rgba(201,168,76,0.12)',
+  card: '#1a1232', gold: 'var(--color-gold-primary)', goldLt: 'var(--color-gold-light)',
+  text: 'var(--color-text-primary)', sec: 'rgba(240,230,211,0.45)', bdr: 'rgba(201,168,76,0.12)',
 } as const;
 
 const inp: React.CSSProperties = {
   width: '100%', padding: '10px 14px', borderRadius: 9, fontSize: 13,
   outline: 'none', boxSizing: 'border-box',
-  background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.18)',
+  background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.18)',
   color: C.text,
 };
 
@@ -162,7 +162,7 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
             justifyContent: 'center', background: 'rgba(201,168,76,0.1)',
             border: '1px solid rgba(201,168,76,0.2)', flexShrink: 0 }}>
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M7 1v12M1 7h12" stroke="#d4af37" strokeWidth="1.6" strokeLinecap="round" strokeOpacity="0.8"/>
+              <path d="M7 1v12M1 7h12" stroke="var(--color-gold-primary)" strokeWidth="1.6" strokeLinecap="round" strokeOpacity="0.8"/>
             </svg>
           </div>
           <div>

@@ -11,10 +11,10 @@ import toast from 'react-hot-toast';
 
 const inp: React.CSSProperties = {
   width: '100%', padding: '10px 14px', borderRadius: 10, fontSize: 13, outline: 'none',
-  background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)',
-  color: '#f0e6d3',
+  background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)',
+  color: 'var(--color-text-primary)',
 };
-const label: React.CSSProperties = { fontSize: 11, color: '#b8a898', marginBottom: 5, display: 'block' };
+const label: React.CSSProperties = { fontSize: 11, color: 'var(--color-text-secondary)', marginBottom: 5, display: 'block' };
 const STEPS = ['Parties', 'Mission', 'Rémunération', 'Clauses', 'Récapitulatif'];
 
 interface Props {
@@ -91,11 +91,11 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'rgba(201,168,76,0.15)' }}>
           <div>
-            <h2 className="font-display font-bold text-lg" style={{ color: '#f0e6d3' }}>Contrat de mission</h2>
-            <p className="text-xs mt-0.5" style={{ color: '#b8a898' }}>CDD — Code du Travail ivoirien</p>
+            <h2 className="font-display font-bold text-lg" style={{ color: 'var(--color-text-primary)' }}>Contrat de mission</h2>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-secondary)' }}>CDD — Code du Travail ivoirien</p>
           </div>
           <button onClick={onCancel} className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(82,54,124,0.5)', color: '#b8a898' }}><X size={15} /></button>
+            style={{ background: 'var(--color-input-bg)', color: 'var(--color-text-secondary)' }}><X size={15} /></button>
         </div>
 
         {/* Stepper */}
@@ -105,13 +105,13 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
               <div className="flex items-center gap-1.5">
                 <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
                   style={i <= step
-                    ? { background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }
-                    : { border: '1px solid rgba(201,168,76,0.25)', color: '#7a6a7a' }}>
+                    ? { background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }
+                    : { border: '1px solid rgba(201,168,76,0.25)', color: 'var(--color-text-muted)' }}>
                   {i < step ? <Check size={13} /> : i + 1}
                 </div>
-                <span className="text-xs hidden sm:block" style={{ color: i === step ? '#d4af37' : '#7a6a7a' }}>{s}</span>
+                <span className="text-xs hidden sm:block" style={{ color: i === step ? 'var(--color-gold-primary)' : 'var(--color-text-muted)' }}>{s}</span>
               </div>
-              {i < STEPS.length - 1 && <div className="w-5 h-px mx-1" style={{ background: i < step ? '#d4af37' : 'rgba(201,168,76,0.2)' }} />}
+              {i < STEPS.length - 1 && <div className="w-5 h-px mx-1" style={{ background: i < step ? 'var(--color-gold-primary)' : 'rgba(201,168,76,0.2)' }} />}
             </div>
           ))}
         </div>
@@ -122,7 +122,7 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
           {/* Étape 1 — Parties */}
           {step === 0 && (
             <>
-              <p className="text-xs font-semibold" style={{ color: '#d4af37' }}>ORGANISATEUR</p>
+              <p className="text-xs font-semibold" style={{ color: 'var(--color-gold-primary)' }}>ORGANISATEUR</p>
               <div><label style={label}>Nom / Raison sociale</label>
                 <input style={inp} value={form.organizer_name} onChange={e => upd('organizer_name', e.target.value)} /></div>
               <div><label style={label}>Adresse</label>
@@ -130,7 +130,7 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
               <div><label style={label}>RCCM (numéro registre de commerce)</label>
                 <input style={inp} value={form.organizer_rccm} onChange={e => upd('organizer_rccm', e.target.value)} /></div>
 
-              <p className="text-xs font-semibold pt-2" style={{ color: '#d4af37' }}>FREELANCE</p>
+              <p className="text-xs font-semibold pt-2" style={{ color: 'var(--color-gold-primary)' }}>FREELANCE</p>
               <div><label style={label}>Nom complet</label>
                 <input style={inp} value={form.freelance_name} onChange={e => upd('freelance_name', e.target.value)} /></div>
               <div><label style={label}>Adresse</label>
@@ -210,19 +210,19 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
 
               {/* Récapitulatif calcul automatique */}
               <div className="rounded-xl p-4 space-y-2" style={{ background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.2)' }}>
-                <p className="text-xs font-semibold" style={{ color: '#d4af37' }}>Calcul automatique</p>
-                <div className="flex justify-between text-xs" style={{ color: '#b8a898' }}>
+                <p className="text-xs font-semibold" style={{ color: 'var(--color-gold-primary)' }}>Calcul automatique</p>
+                <div className="flex justify-between text-xs" style={{ color: 'var(--color-text-secondary)' }}>
                   <span>Montant brut total</span>
-                  <span style={{ color: '#f0e6d3', fontWeight: 600 }}>{formatCFA(totalGross)} FCFA</span>
+                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>{formatCFA(totalGross)} FCFA</span>
                 </div>
-                <div className="flex justify-between text-xs" style={{ color: '#b8a898' }}>
+                <div className="flex justify-between text-xs" style={{ color: 'var(--color-text-secondary)' }}>
                   <span>Indemnité fin de contrat (3% — Art. 15.8)</span>
-                  <span style={{ color: '#d4af37', fontWeight: 600 }}>{formatCFA(indemnity)} FCFA</span>
+                  <span style={{ color: 'var(--color-gold-primary)', fontWeight: 600 }}>{formatCFA(indemnity)} FCFA</span>
                 </div>
                 <div className="h-px" style={{ background: 'rgba(201,168,76,0.15)' }} />
                 <div className="flex justify-between text-xs font-bold">
-                  <span style={{ color: '#f0e6d3' }}>Total à verser</span>
-                  <span style={{ color: '#d4af37' }}>{formatCFA(totalGross + indemnity)} FCFA</span>
+                  <span style={{ color: 'var(--color-text-primary)' }}>Total à verser</span>
+                  <span style={{ color: 'var(--color-gold-primary)' }}>{formatCFA(totalGross + indemnity)} FCFA</span>
                 </div>
               </div>
             </>
@@ -231,7 +231,7 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
           {/* Étape 4 — Clauses optionnelles */}
           {step === 3 && (
             <>
-              <p className="text-xs" style={{ color: '#b8a898' }}>
+              <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
                 Les clauses légales obligatoires (Art. 3, 4, 5, 15.8, 15.9) sont automatiquement incluses dans le contrat.
                 Sélectionnez les clauses supplémentaires ci-dessous :
               </p>
@@ -240,23 +240,23 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
                 { key: 'has_confidentiality_clause', label: 'Clause de confidentialité', desc: 'Protection des informations commerciales et techniques' },
               ].map(({ key, label: lbl, desc }) => (
                 <label key={key} className="flex items-start gap-3 cursor-pointer p-3 rounded-xl transition-all"
-                  style={{ background: (form as Record<string, unknown>)[key] ? 'rgba(201,168,76,0.08)' : 'rgba(82,54,124,0.3)', border: '1px solid rgba(201,168,76,0.15)' }}>
+                  style={{ background: (form as Record<string, unknown>)[key] ? 'rgba(201,168,76,0.08)' : 'var(--color-surface)', border: '1px solid rgba(201,168,76,0.15)' }}>
                   <input type="checkbox" className="mt-0.5"
                     checked={(form as Record<string, unknown>)[key] as boolean}
                     onChange={e => upd(key, e.target.checked)} />
                   <div>
-                    <p className="text-sm font-medium" style={{ color: '#f0e6d3' }}>{lbl}</p>
-                    <p className="text-xs" style={{ color: '#b8a898' }}>{desc}</p>
+                    <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{lbl}</p>
+                    <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{desc}</p>
                   </div>
                 </label>
               ))}
 
-              <div className="rounded-xl p-4 text-xs space-y-1.5" style={{ background: 'rgba(82,54,124,0.3)', border: '1px solid rgba(201,168,76,0.1)' }}>
-                <p className="font-semibold" style={{ color: '#d4af37' }}>Clauses obligatoires incluses automatiquement :</p>
+              <div className="rounded-xl p-4 text-xs space-y-1.5" style={{ background: 'var(--color-surface)', border: '1px solid rgba(201,168,76,0.1)' }}>
+                <p className="font-semibold" style={{ color: 'var(--color-gold-primary)' }}>Clauses obligatoires incluses automatiquement :</p>
                 {['Interdiction du travail forcé (Art. 3)', 'Non-discrimination (Art. 4)', 'Anti-harcèlement (Art. 5)',
                   'Rupture anticipée et indemnités (Art. 15.9)', 'Indemnité de fin de contrat 3% (Art. 15.8)',
                   'Heures supplémentaires +15%/+50% (Art. 21.5)', 'Repos hebdomadaire 24h (Art. 24.1)'].map(c => (
-                  <p key={c} style={{ color: '#b8a898', display: 'flex', alignItems: 'flex-start', gap: 7 }}>
+                  <p key={c} style={{ color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'flex-start', gap: 7 }}>
                     <Check size={14} color="#10b981" style={{ flexShrink: 0, marginTop: 2 }} /> {c}
                   </p>
                 ))}
@@ -267,7 +267,7 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
           {/* Étape 5 — Récapitulatif */}
           {step === 4 && (
             <>
-              <div className="space-y-2 text-sm" style={{ color: '#b8a898' }}>
+              <div className="space-y-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                 {[
                   ['Organisateur', form.organizer_name],
                   ['RCCM', form.organizer_rccm || '—'],
@@ -284,17 +284,17 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
                 ].map(([k, v]) => (
                   <div key={k} className="flex justify-between">
                     <span>{k}</span>
-                    <span style={{ color: '#f0e6d3', fontWeight: 500 }}>{v}</span>
+                    <span style={{ color: 'var(--color-text-primary)', fontWeight: 500 }}>{v}</span>
                   </div>
                 ))}
                 <div className="h-px" style={{ background: 'rgba(201,168,76,0.15)' }} />
                 <div className="flex justify-between font-bold">
                   <span>Montant brut</span>
-                  <span style={{ color: '#d4af37' }}>{formatCFA(totalGross)}</span>
+                  <span style={{ color: 'var(--color-gold-primary)' }}>{formatCFA(totalGross)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Indemnité fin contrat (3%)</span>
-                  <span style={{ color: '#d4af37' }}>{formatCFA(indemnity)}</span>
+                  <span style={{ color: 'var(--color-gold-primary)' }}>{formatCFA(indemnity)}</span>
                 </div>
                 {!smig.ok && (
                   <p className="px-3 py-2 rounded-lg text-xs" style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171' }}>

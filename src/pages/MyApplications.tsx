@@ -83,12 +83,12 @@ export default function MyApplications() {
     pending:   { label: 'En attente', color: '#F59E0B', Icon: Hourglass },
     accepted:  { label: 'Acceptée',   color: '#00C896', Icon: CheckCircle2 },
     rejected:  { label: 'Refusée',    color: '#EF4444', Icon: XCircle },
-    withdrawn: { label: 'Retirée',    color: '#A0A0B8', Icon: Undo2 },
+    withdrawn: { label: 'Retirée',    color: 'var(--color-text-soft)', Icon: Undo2 },
   };
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><IcoDoc size={26} color={roleColor('freelance')} /> Mes candidatures</h1>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: 'var(--color-text-primary)' }}><IcoDoc size={26} color={roleColor('freelance')} /> Mes candidatures</h1>
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
@@ -99,8 +99,8 @@ export default function MyApplications() {
               className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all border"
               style={{
                 background: tab === t.key ? 'rgba(201,168,76,0.15)' : 'transparent',
-                borderColor: tab === t.key ? '#d4af37' : 'rgba(201,168,76,0.2)',
-                color: tab === t.key ? '#d4af37' : '#b8a898',
+                borderColor: tab === t.key ? 'var(--color-gold-primary)' : 'rgba(201,168,76,0.2)',
+                color: tab === t.key ? 'var(--color-gold-primary)' : 'var(--color-text-secondary)',
               }}>
               {t.label} {count > 0 && <span className="ml-1 text-xs opacity-70">({count})</span>}
             </button>
@@ -109,11 +109,11 @@ export default function MyApplications() {
       </div>
 
       {loading ? (
-        <div className="text-center py-16" style={{ color: '#b8a898' }}>Chargement...</div>
+        <div className="text-center py-16" style={{ color: 'var(--color-text-secondary)' }}>Chargement...</div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 card-glass">
-          <div className="flex justify-center mb-4"><Inbox size={40} color="#7a6a8a" strokeWidth={1.5} /></div>
-          <p style={{ color: '#b8a898' }}>Aucune candidature ici</p>
+          <div className="flex justify-center mb-4"><Inbox size={40} color="var(--color-text-muted)" strokeWidth={1.5} /></div>
+          <p style={{ color: 'var(--color-text-secondary)' }}>Aucune candidature ici</p>
           <button onClick={() => navigate('/missions')}
             className="btn-gold mt-4 px-6 py-2 rounded-xl text-sm font-bold text-[#261642]">
             Voir les missions
@@ -131,8 +131,8 @@ export default function MyApplications() {
                   <div className="flex items-center gap-3">
                     <ServiceIcon type={m?.service_type} size={26} />
                     <div>
-                      <h3 className="font-semibold" style={{ color: '#f0e6d3' }}>{m?.title}</h3>
-                      <p className="text-sm" style={{ color: '#A0A0B8' }}>
+                      <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>{m?.title}</h3>
+                      <p className="text-sm" style={{ color: 'var(--color-text-soft)' }}>
                         {m?.event_date ? formatDateShort(m.event_date) : ''} · {m?.hourly_rate ? formatCFA(m.hourly_rate) : ''}/h
                       </p>
                     </div>
@@ -142,7 +142,7 @@ export default function MyApplications() {
                   </span>
                 </div>
 
-                <p className="text-xs mb-4" style={{ color: '#b8a898' }}>
+                <p className="text-xs mb-4" style={{ color: 'var(--color-text-secondary)' }}>
                   Postulée le {a.applied_at ? new Date(a.applied_at).toLocaleDateString('fr-CI') : '–'}
                 </p>
 
@@ -154,7 +154,7 @@ export default function MyApplications() {
                   {orgId && (
                     <button onClick={() => navigate(`/public-profile?id=${orgId}`)}
                       className="px-4 py-2 rounded-lg text-sm border transition-all hover:opacity-80"
-                      style={{ borderColor: 'rgba(201,168,76,0.25)', color: '#d4af37' }}>
+                      style={{ borderColor: 'rgba(201,168,76,0.25)', color: 'var(--color-gold-primary)' }}>
                       Voir l'organisateur
                     </button>
                   )}
@@ -174,7 +174,7 @@ export default function MyApplications() {
                           </span>
                         )}
                         {a.status === 'pending' && (
-                          <span className="text-xs" style={{ color: '#b8a898' }}>
+                          <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
                             Annuler cette candidature ?
                           </span>
                         )}
@@ -185,7 +185,7 @@ export default function MyApplications() {
                         </button>
                         <button onClick={() => setConfirmId(null)}
                           className="px-3 py-1.5 rounded-lg text-xs border"
-                          style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#b8a898' }}>
+                          style={{ borderColor: 'rgba(201,168,76,0.3)', color: 'var(--color-text-secondary)' }}>
                           Non
                         </button>
                       </div>

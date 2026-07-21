@@ -15,7 +15,7 @@ const inp: React.CSSProperties = {
   outline: 'none',
   background: 'rgba(255,255,255,0.05)',
   border: '1px solid rgba(201,168,76,0.2)',
-  color: '#f0e6d3',
+  color: 'var(--color-text-primary)',
   boxSizing: 'border-box',
 };
 const btnGold: React.CSSProperties = {
@@ -26,7 +26,7 @@ const btnGold: React.CSSProperties = {
   fontWeight: 600,
   cursor: 'pointer',
   border: 'none',
-  background: 'linear-gradient(135deg,#d4af37,#e8c97a)',
+  background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))',
   color: '#261642',
   transition: 'opacity 0.15s',
 };
@@ -39,7 +39,7 @@ const btnOutline: React.CSSProperties = {
   cursor: 'pointer',
   background: 'transparent',
   border: '1px solid rgba(201,168,76,0.3)',
-  color: '#d4af37',
+  color: 'var(--color-gold-primary)',
   transition: 'background 0.15s',
 };
 
@@ -192,7 +192,7 @@ export default function Onboarding() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f0a1e' }}>
-        <div style={{ width: 36, height: 36, borderRadius: '50%', border: '2px solid #d4af37',
+        <div style={{ width: 36, height: 36, borderRadius: '50%', border: '2px solid var(--color-gold-primary)',
           borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
@@ -202,7 +202,7 @@ export default function Onboarding() {
   const currentRole = profile?.role || role;
 
   return (
-    <div style={{
+    <div className="eb-force-dark" style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '40px 16px',
       fontFamily: 'Inter, system-ui, sans-serif',
@@ -223,7 +223,7 @@ export default function Onboarding() {
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
             <Logo height={112} animated />
           </div>
-          <h1 style={{ fontSize: 22, fontWeight: 600, color: '#f0e6d3', margin: '0 0 6px' }}>{title}</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 600, color: 'var(--color-text-primary)', margin: '0 0 6px' }}>{title}</h1>
           <p style={{ fontSize: 14, color: 'rgba(240,230,211,0.5)', margin: 0 }}>{subtitle}</p>
         </div>
 
@@ -242,12 +242,12 @@ export default function Onboarding() {
           {emailSent && (
             <div style={{ textAlign: 'center', padding: '8px 0' }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>📧</div>
-              <h2 style={{ fontSize: 18, fontWeight: 700, color: '#f0e6d3', margin: '0 0 12px' }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--color-text-primary)', margin: '0 0 12px' }}>
                 Vérifiez votre boîte mail
               </h2>
               <p style={{ fontSize: 14, color: 'rgba(240,230,211,0.65)', lineHeight: 1.7, margin: '0 0 20px' }}>
                 Nous avons envoyé un lien de confirmation à<br/>
-                <strong style={{ color: '#d4af37' }}>{email}</strong>.<br/>
+                <strong style={{ color: 'var(--color-gold-primary)' }}>{email}</strong>.<br/>
                 Cliquez sur ce lien pour activer votre compte et accéder à la plateforme.
               </p>
               <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.35)', margin: '0 0 20px', lineHeight: 1.6 }}>
@@ -271,7 +271,7 @@ export default function Onboarding() {
               <div style={{ position: 'relative' }}>
                 <span style={{
                   position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)',
-                  fontSize: 13, color: '#d4af37', fontWeight: 600, pointerEvents: 'none', userSelect: 'none',
+                  fontSize: 13, color: 'var(--color-gold-primary)', fontWeight: 600, pointerEvents: 'none', userSelect: 'none',
                 }}>🇨🇮 +225</span>
                 <input
                   style={{ ...inp, paddingLeft: 80 }}
@@ -314,8 +314,8 @@ export default function Onboarding() {
                             padding: '6px 12px', borderRadius: 20, fontSize: 12, cursor: 'pointer',
                             transition: 'all 0.15s',
                             background: skills.includes(c) ? 'rgba(201,168,76,0.2)' : 'transparent',
-                            border: `1px solid ${skills.includes(c) ? '#d4af37' : 'rgba(201,168,76,0.2)'}`,
-                            color: skills.includes(c) ? '#d4af37' : 'rgba(240,230,211,0.5)',
+                            border: `1px solid ${skills.includes(c) ? 'var(--color-gold-primary)' : 'rgba(201,168,76,0.2)'}`,
+                            color: skills.includes(c) ? 'var(--color-gold-primary)' : 'rgba(240,230,211,0.5)',
                           }}>
                           {c}
                         </button>
@@ -388,10 +388,10 @@ export default function Onboarding() {
                   <input style={inp} placeholder="Nom de la structure *"
                     value={companyName} onChange={e => setCompanyName(e.target.value)} />
                   <select
-                    style={{ ...inp, cursor: 'pointer', background: '#1e0f3c', color: companySector ? '#f0e6d3' : 'rgba(240,230,211,0.4)' }}
+                    style={{ ...inp, cursor: 'pointer', background: 'var(--color-option-bg)', color: companySector ? 'var(--color-text-primary)' : 'rgba(240,230,211,0.4)' }}
                     value={companySector}
                     onChange={e => setCompanySector(e.target.value)}>
-                    <option value="" style={{ background: '#1e0f3c', color: 'rgba(240,230,211,0.4)' }}>Secteur d'activité</option>
+                    <option value="" style={{ background: 'var(--color-option-bg)', color: 'rgba(240,230,211,0.4)' }}>Secteur d'activité</option>
                     {[
                       'Événementiel & Communication',
                       'Hôtellerie & Restauration',
@@ -414,7 +414,7 @@ export default function Onboarding() {
                       'Politique & Institutionnel',
                       'Autre',
                     ].map(s => (
-                      <option key={s} value={s} style={{ background: '#1e0f3c', color: '#f0e6d3' }}>{s}</option>
+                      <option key={s} value={s} style={{ background: 'var(--color-option-bg)', color: 'var(--color-text-primary)' }}>{s}</option>
                     ))}
                   </select>
                 </>
@@ -447,7 +447,7 @@ export default function Onboarding() {
                 Pas encore de compte ?{' '}
                 <button type="button"
                   onClick={() => { setMode('register'); setStep(0); }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#d4af37', fontWeight: 600, fontSize: 13 }}>
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-gold-primary)', fontWeight: 600, fontSize: 13 }}>
                   S'inscrire gratuitement
                 </button>
               </p>
@@ -466,8 +466,8 @@ export default function Onboarding() {
                       padding: '20px 12px', borderRadius: 14, textAlign: 'center',
                       cursor: 'pointer', transition: 'all 0.15s',
                       background: role === r ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
-                      border: `1.5px solid ${role === r ? '#d4af37' : 'rgba(201,168,76,0.15)'}`,
-                      color: role === r ? '#d4af37' : 'rgba(240,230,211,0.5)',
+                      border: `1.5px solid ${role === r ? 'var(--color-gold-primary)' : 'rgba(201,168,76,0.15)'}`,
+                      color: role === r ? 'var(--color-gold-primary)' : 'rgba(240,230,211,0.5)',
                     }}>
                     <p style={{ fontSize: 15, fontWeight: 600, margin: '0 0 4px', textTransform: 'capitalize' }}>{r}</p>
                     <p style={{ fontSize: 12, margin: 0, color: role === r ? 'rgba(201,168,76,0.7)' : 'rgba(240,230,211,0.35)' }}>
@@ -484,7 +484,7 @@ export default function Onboarding() {
               <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(240,230,211,0.45)', margin: 0 }}>
                 Déjà un compte ?{' '}
                 <button type="button" onClick={() => setMode('login')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#d4af37', fontWeight: 600, fontSize: 13 }}>
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-gold-primary)', fontWeight: 600, fontSize: 13 }}>
                   Se connecter
                 </button>
               </p>
@@ -503,11 +503,11 @@ export default function Onboarding() {
               <input style={inp} type="password" placeholder="Mot de passe (min. 6 caractères) *"
                 value={password} onChange={e => setPassword(e.target.value)} />
               <select
-                style={{ ...inp, cursor: 'pointer', background: '#1e0f3c', color: '#f0e6d3' }}
+                style={{ ...inp, cursor: 'pointer', background: 'var(--color-option-bg)', color: 'var(--color-text-primary)' }}
                 value={ville} onChange={e => setVille(e.target.value)}>
                 {VILLES.map(v => (
                   <option key={v} value={v}
-                    style={{ background: '#1e0f3c', color: '#f0e6d3', padding: '8px' }}>
+                    style={{ background: 'var(--color-option-bg)', color: 'var(--color-text-primary)', padding: '8px' }}>
                     {v}
                   </option>
                 ))}

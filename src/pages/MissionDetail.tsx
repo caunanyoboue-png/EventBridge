@@ -32,20 +32,20 @@ function ReviewModal({ name, onClose, onSubmit }: {
   return (
     <div style={OVERLAY} onClick={onClose}>
       <div className="card-glass p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
-        <h3 className="font-semibold mb-1" style={{ color: '#f0e6d3' }}>Noter {name}</h3>
-        <p className="text-xs mb-4" style={{ color: '#b8a898' }}>Votre avis aide toute la communauté.</p>
+        <h3 className="font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>Noter {name}</h3>
+        <p className="text-xs mb-4" style={{ color: 'var(--color-text-secondary)' }}>Votre avis aide toute la communauté.</p>
         <div className="flex gap-1 mb-4">
           {[1, 2, 3, 4, 5].map(i => (
             <button key={i} type="button" onClick={() => setRating(i)}
               style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 2 }}>
-              <Star size={28} fill={i <= rating ? '#d4af37' : 'none'} color="#d4af37" />
+              <Star size={28} fill={i <= rating ? 'var(--color-gold-primary)' : 'none'} color="var(--color-gold-primary)" />
             </button>
           ))}
         </div>
         <textarea value={comment} onChange={e => setComment(e.target.value)} rows={3}
           placeholder="Commentaire (optionnel)"
           className="w-full px-4 py-3 rounded-xl text-sm outline-none mb-4"
-          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3', resize: 'none' }} />
+          style={{ background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)', resize: 'none' }} />
         <div className="flex gap-2">
           <button type="button" disabled={busy}
             onClick={async () => { setBusy(true); await onSubmit(rating, comment); setBusy(false); }}
@@ -53,7 +53,7 @@ function ReviewModal({ name, onClose, onSubmit }: {
             {busy ? '…' : 'Envoyer l\'avis'}
           </button>
           <button type="button" onClick={onClose} className="px-4 rounded-xl text-sm border"
-            style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#b8a898' }}>Annuler</button>
+            style={{ borderColor: 'rgba(201,168,76,0.3)', color: 'var(--color-text-secondary)' }}>Annuler</button>
         </div>
       </div>
     </div>
@@ -69,16 +69,16 @@ function DisputeModal({ name, onClose, onSubmit }: {
   return (
     <div style={OVERLAY} onClick={onClose}>
       <div className="card-glass p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
-        <h3 className="font-semibold mb-1" style={{ color: '#f0e6d3' }}>Signaler un litige</h3>
-        <p className="text-xs mb-4" style={{ color: '#b8a898' }}>Concernant {name}. Notre équipe examinera votre signalement.</p>
+        <h3 className="font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>Signaler un litige</h3>
+        <p className="text-xs mb-4" style={{ color: 'var(--color-text-secondary)' }}>Concernant {name}. Notre équipe examinera votre signalement.</p>
         <input value={reason} onChange={e => setReason(e.target.value)}
           placeholder="Motif (ex : absence, paiement, comportement)"
           className="w-full px-4 py-3 rounded-xl text-sm outline-none mb-3"
-          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }} />
+          style={{ background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)' }} />
         <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3}
           placeholder="Décrivez ce qui s'est passé"
           className="w-full px-4 py-3 rounded-xl text-sm outline-none mb-4"
-          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3', resize: 'none' }} />
+          style={{ background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)', resize: 'none' }} />
         <div className="flex gap-2">
           <button type="button" disabled={busy || !reason.trim()}
             onClick={async () => { setBusy(true); await onSubmit(reason, description); setBusy(false); }}
@@ -87,7 +87,7 @@ function DisputeModal({ name, onClose, onSubmit }: {
             {busy ? '…' : 'Envoyer le signalement'}
           </button>
           <button type="button" onClick={onClose} className="px-4 rounded-xl text-sm border"
-            style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#b8a898' }}>Annuler</button>
+            style={{ borderColor: 'rgba(201,168,76,0.3)', color: 'var(--color-text-secondary)' }}>Annuler</button>
         </div>
       </div>
     </div>
@@ -299,8 +299,8 @@ export default function MissionDetail() {
     setDisputeTarget(null);
   }
 
-  if (loading) return <DashboardLayout><div className="text-center py-20" style={{ color: '#b8a898' }}>Chargement...</div></DashboardLayout>;
-  if (!mission) return <DashboardLayout><div className="text-center py-20" style={{ color: '#b8a898' }}>Mission introuvable</div></DashboardLayout>;
+  if (loading) return <DashboardLayout><div className="text-center py-20" style={{ color: 'var(--color-text-secondary)' }}>Chargement...</div></DashboardLayout>;
+  if (!mission) return <DashboardLayout><div className="text-center py-20" style={{ color: 'var(--color-text-secondary)' }}>Mission introuvable</div></DashboardLayout>;
 
   const org = mission.organisateur as Profile | undefined;
   const roleList = (mission.roles || []) as MissionRole[];
@@ -317,9 +317,9 @@ export default function MissionDetail() {
     <DashboardLayout>
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => navigate(-1)} style={{ color: '#b8a898' }}>← Retour</button>
+          <button onClick={() => navigate(-1)} style={{ color: 'var(--color-text-secondary)' }}>← Retour</button>
           <ServiceIcon type={mission.service_type} size={26} />
-          <h1 className="font-display text-2xl font-bold flex-1" style={{ color: '#f0e6d3' }}>{mission.title}</h1>
+          <h1 className="font-display text-2xl font-bold flex-1" style={{ color: 'var(--color-text-primary)' }}>{mission.title}</h1>
           {mission.is_urgent && <span className="badge-urgent px-3 py-1 rounded-full text-sm font-bold inline-flex items-center gap-1.5"><Zap size={14} fill="currentColor" /> URGENT</span>}
         </div>
 
@@ -334,21 +334,21 @@ export default function MissionDetail() {
         <div className="card-glass p-8 mb-6">
           {/* Infos principales */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-sm">
-            <div className="flex items-center gap-2.5" style={{ color: '#b8a898' }}>
-              <Calendar size={16} color="#d4af37" /><span>{formatDate(mission.event_date)}{isMultiDay ? ` · ${dayList.length} jours` : ''}</span>
+            <div className="flex items-center gap-2.5" style={{ color: 'var(--color-text-secondary)' }}>
+              <Calendar size={16} color="var(--color-gold-primary)" /><span>{formatDate(mission.event_date)}{isMultiDay ? ` · ${dayList.length} jours` : ''}</span>
             </div>
-            <div className="flex items-center gap-2.5" style={{ color: '#b8a898' }}>
-              <Clock size={16} color="#d4af37" /><span>{mission.start_time?.substring(0,5)} – {mission.end_time?.substring(0,5)}{isMultiDay ? ' / jour' : ''}</span>
+            <div className="flex items-center gap-2.5" style={{ color: 'var(--color-text-secondary)' }}>
+              <Clock size={16} color="var(--color-gold-primary)" /><span>{mission.start_time?.substring(0,5)} – {mission.end_time?.substring(0,5)}{isMultiDay ? ' / jour' : ''}</span>
             </div>
-            <div className="flex items-center gap-2.5" style={{ color: '#b8a898' }}>
-              <MapPin size={16} color="#d4af37" /><span>{[mission.location, mission.ville].filter(Boolean).join(', ')}</span>
+            <div className="flex items-center gap-2.5" style={{ color: 'var(--color-text-secondary)' }}>
+              <MapPin size={16} color="var(--color-gold-primary)" /><span>{[mission.location, mission.ville].filter(Boolean).join(', ')}</span>
             </div>
             <div className="flex items-center gap-2.5">
-              <Wallet size={16} color="#d4af37" />
-              <span className="font-bold" style={{ color: '#d4af37' }}>{formatRateLabel(roleList, mission.hourly_rate)} · Total: {formatCFA(totalAmount)}</span>
+              <Wallet size={16} color="var(--color-gold-primary)" />
+              <span className="font-bold" style={{ color: 'var(--color-gold-primary)' }}>{formatRateLabel(roleList, mission.hourly_rate)} · Total: {formatCFA(totalAmount)}</span>
             </div>
-            <div className="flex items-center gap-2.5" style={{ color: '#b8a898' }}>
-              <Users size={16} color="#d4af37" />
+            <div className="flex items-center gap-2.5" style={{ color: 'var(--color-text-secondary)' }}>
+              <Users size={16} color="var(--color-gold-primary)" />
               <span>{slots_filled}/{mission.slots_total} poste(s) confirmé(s)</span>
             </div>
           </div>
@@ -356,12 +356,12 @@ export default function MissionDetail() {
           {/* Planning (multi-jours) */}
           {dayList.length > 0 && (
             <div className="mb-6">
-              <h3 className="font-semibold mb-2" style={{ color: '#f0e6d3' }}>Planning{isMultiDay ? ` · ${dayList.length} jours` : ''}</h3>
+              <h3 className="font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Planning{isMultiDay ? ` · ${dayList.length} jours` : ''}</h3>
               <div className="space-y-1.5">
                 {dayList.map((d, i) => (
-                  <div key={i} className="flex items-center justify-between text-sm px-3 py-2 rounded-lg" style={{ background: 'rgba(82,54,124,0.3)' }}>
-                    <span style={{ color: '#b8a898' }}>{isMultiDay ? `Jour ${i + 1} · ` : ''}{d.date ? new Date(d.date).toLocaleDateString('fr-CI', { weekday: 'short', day: '2-digit', month: 'short' }) : ''}</span>
-                    <span style={{ color: '#f0e6d3' }}>{d.start}–{d.end} · {Math.round(dayHours(d) * 100) / 100}h</span>
+                  <div key={i} className="flex items-center justify-between text-sm px-3 py-2 rounded-lg" style={{ background: 'var(--color-surface)' }}>
+                    <span style={{ color: 'var(--color-text-secondary)' }}>{isMultiDay ? `Jour ${i + 1} · ` : ''}{d.date ? new Date(d.date).toLocaleDateString('fr-CI', { weekday: 'short', day: '2-digit', month: 'short' }) : ''}</span>
+                    <span style={{ color: 'var(--color-text-primary)' }}>{d.start}–{d.end} · {Math.round(dayHours(d) * 100) / 100}h</span>
                   </div>
                 ))}
               </div>
@@ -371,12 +371,12 @@ export default function MissionDetail() {
           {/* Postes & tarifs (prix par compétence) */}
           {roleList.length > 0 && (
             <div className="mb-6">
-              <h3 className="font-semibold mb-2" style={{ color: '#f0e6d3' }}>Postes &amp; tarifs</h3>
+              <h3 className="font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Postes &amp; tarifs</h3>
               <div className="space-y-1.5">
                 {roleList.map(r => (
-                  <div key={r.skill} className="flex items-center justify-between text-sm px-3 py-2 rounded-lg" style={{ background: 'rgba(82,54,124,0.3)' }}>
-                    <span style={{ color: '#f0e6d3' }}>{r.skill} <span style={{ color: '#8a7a9a' }}>×{r.count}</span></span>
-                    <span className="font-bold" style={{ color: '#d4af37' }}>{formatCFA(r.rate)}{billingUnit(r.billing)}</span>
+                  <div key={r.skill} className="flex items-center justify-between text-sm px-3 py-2 rounded-lg" style={{ background: 'var(--color-surface)' }}>
+                    <span style={{ color: 'var(--color-text-primary)' }}>{r.skill} <span style={{ color: 'var(--color-text-muted)' }}>×{r.count}</span></span>
+                    <span className="font-bold" style={{ color: 'var(--color-gold-primary)' }}>{formatCFA(r.rate)}{billingUnit(r.billing)}</span>
                   </div>
                 ))}
               </div>
@@ -386,20 +386,20 @@ export default function MissionDetail() {
           {/* Progress bar */}
           <div className="mb-6">
             <div className="w-full h-2 rounded-full" style={{ background: '#52367c' }}>
-              <div className="h-full rounded-full" style={{ width: `${(slots_filled / mission.slots_total) * 100}%`, background: 'linear-gradient(to right,#d4af37,#e8c97a)' }} />
+              <div className="h-full rounded-full" style={{ width: `${(slots_filled / mission.slots_total) * 100}%`, background: 'linear-gradient(to right,var(--color-gold-primary),var(--color-gold-light))' }} />
             </div>
           </div>
 
           {/* Description */}
           <div className="mb-6">
-            <h3 className="font-semibold mb-2" style={{ color: '#f0e6d3' }}>Description</h3>
-            <p className="text-sm leading-relaxed" style={{ color: '#b8a898' }}>{mission.description}</p>
+            <h3 className="font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Description</h3>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>{mission.description}</p>
           </div>
 
           {/* Compétences (missions anciennes sans postes détaillés) */}
           {roleList.length === 0 && (mission.skills_required || []).length > 0 && (
             <div className="mb-6">
-              <h3 className="font-semibold mb-2" style={{ color: '#f0e6d3' }}>Compétences requises</h3>
+              <h3 className="font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Compétences requises</h3>
               <div className="flex flex-wrap gap-2">
                 {(mission.skills_required || []).map(s => (
                   <span key={s} className="px-3 py-1 rounded-full text-xs"
@@ -414,18 +414,18 @@ export default function MissionDetail() {
           {/* Dress code */}
           {mission.dress_code && (
             <div className="mb-6">
-              <h3 className="font-semibold mb-2" style={{ color: '#f0e6d3' }}>Dress code</h3>
-              <p className="text-sm flex items-center gap-2" style={{ color: '#b8a898' }}><Shirt size={15} color="#d4af37" /> {mission.dress_code}</p>
+              <h3 className="font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Dress code</h3>
+              <p className="text-sm flex items-center gap-2" style={{ color: 'var(--color-text-secondary)' }}><Shirt size={15} color="var(--color-gold-primary)" /> {mission.dress_code}</p>
             </div>
           )}
 
           {/* Carte de localisation */}
           {mission.latitude && mission.longitude && (
             <div className="mb-6">
-              <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: '#f0e6d3' }}>
-                <MapPin size={16} color="#d4af37" /> Localisation
+              <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+                <MapPin size={16} color="var(--color-gold-primary)" /> Localisation
                 {profile?.latitude && profile?.longitude && (
-                  <span style={{ marginLeft: 10, fontSize: 12, fontWeight: 400, color: '#d4af37' }}>
+                  <span style={{ marginLeft: 10, fontSize: 12, fontWeight: 400, color: 'var(--color-gold-primary)' }}>
                     · à {formatDistance(distanceKm(profile.latitude, profile.longitude, mission.latitude!, mission.longitude!))} de vous
                   </span>
                 )}
@@ -440,8 +440,8 @@ export default function MissionDetail() {
 
           {/* Organisateur */}
           {org && (
-            <div className="p-4 rounded-xl mb-6" style={{ background: 'rgba(82,54,124,0.4)', border: '1px solid rgba(201,168,76,0.1)' }}>
-              <h3 className="font-semibold mb-3" style={{ color: '#f0e6d3' }}>Organisateur</h3>
+            <div className="p-4 rounded-xl mb-6" style={{ background: 'var(--color-surface)', border: '1px solid rgba(201,168,76,0.1)' }}>
+              <h3 className="font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>Organisateur</h3>
               <div className="flex items-center gap-3">
                 {org.avatar_url ? (
                   <img src={org.avatar_url} alt=""
@@ -449,14 +449,14 @@ export default function MissionDetail() {
                       border: '1.5px solid rgba(201,168,76,0.3)', flexShrink: 0 }} />
                 ) : (
                   <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0"
-                    style={{ background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }}>
+                    style={{ background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }}>
                     {org.full_name?.[0]}
                   </div>
                 )}
                 <div style={{ flex: 1 }}>
-                  <p className="font-medium text-sm" style={{ color: '#f0e6d3' }}>{org.company_name || org.full_name}</p>
-                  <p className="text-xs flex items-center gap-1.5" style={{ color: '#b8a898' }}>
-                    <Star size={12} fill="#d4af37" color="#d4af37" /> {org.avg_rating || '–'} · {org.total_missions || 0} mission(s)
+                  <p className="font-medium text-sm" style={{ color: 'var(--color-text-primary)' }}>{org.company_name || org.full_name}</p>
+                  <p className="text-xs flex items-center gap-1.5" style={{ color: 'var(--color-text-secondary)' }}>
+                    <Star size={12} fill="var(--color-gold-primary)" color="var(--color-gold-primary)" /> {org.avg_rating || '–'} · {org.total_missions || 0} mission(s)
                   </p>
                 </div>
                 <button onClick={() => navigate(`/public-profile?id=${org.id}`)}
@@ -473,12 +473,12 @@ export default function MissionDetail() {
               {/* Choix du poste quand plusieurs compétences du freelance correspondent */}
               {!alreadyApplied && matchingRoles.length > 1 && (
                 <div>
-                  <label className="text-xs mb-1 block" style={{ color: '#b8a898' }}>Vous postulez comme</label>
+                  <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>Vous postulez comme</label>
                   <select value={chosenRole} onChange={e => setApplyRole(e.target.value)}
                     className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                    style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}>
+                    style={{ background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)' }}>
                     {matchingRoles.map(r => (
-                      <option key={r.skill} value={r.skill} style={{ background: '#1e0f3c', color: '#f0e6d3' }}>
+                      <option key={r.skill} value={r.skill} style={{ background: 'var(--color-option-bg)', color: 'var(--color-text-primary)' }}>
                         {r.skill} — {formatCFA(r.rate)}{billingUnit(r.billing)}
                       </option>
                     ))}
@@ -493,7 +493,7 @@ export default function MissionDetail() {
                     <span className="text-sm font-medium flex-1 flex items-center gap-2" style={{ color: '#10b981' }}><CheckCircle2 size={15} /> Candidature envoyée</span>
                     {confirmWithdraw ? (
                       <>
-                        <span className="text-xs" style={{ color: '#b8a898' }}>Retirer ?</span>
+                        <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>Retirer ?</span>
                         <button onClick={withdrawApplication} disabled={withdrawing}
                           className="px-3 py-1 rounded-lg text-xs font-bold border"
                           style={{ borderColor: '#ef4444', color: '#ef4444', background: 'rgba(239,68,68,0.1)' }}>
@@ -501,7 +501,7 @@ export default function MissionDetail() {
                         </button>
                         <button onClick={() => setConfirmWithdraw(false)}
                           className="px-3 py-1 rounded-lg text-xs border"
-                          style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#b8a898' }}>
+                          style={{ borderColor: 'rgba(201,168,76,0.3)', color: 'var(--color-text-secondary)' }}>
                           Non
                         </button>
                       </>
@@ -539,14 +539,14 @@ export default function MissionDetail() {
         {/* Clôture, avis & litige */}
         {(profile?.role === 'organisateur' || myAppStatus === 'accepted') && (
           <div className="card-glass p-6 mb-6">
-            <h2 className="font-semibold mb-4 flex items-center gap-2" style={{ color: '#f0e6d3' }}>
+            <h2 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
               <CheckCircle2 size={17} color="#00C896" /> Clôture &amp; avis
             </h2>
 
             {/* Organisateur : marquer terminée */}
             {profile?.role === 'organisateur' && mission.status !== 'completed' && (
               acceptedFreelances.length === 0 ? (
-                <p className="text-sm" style={{ color: '#b8a898' }}>
+                <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                   Confirmez au moins un freelance pour pouvoir clôturer la mission.
                 </p>
               ) : (
@@ -559,7 +559,7 @@ export default function MissionDetail() {
 
             {/* Freelance : en attente de la clôture */}
             {profile?.role !== 'organisateur' && mission.status !== 'completed' && (
-              <p className="text-sm" style={{ color: '#b8a898' }}>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                 Vous pourrez laisser un avis dès que l'organisateur aura clôturé la mission.
               </p>
             )}
@@ -569,11 +569,11 @@ export default function MissionDetail() {
               <div className="space-y-3">
                 {profile?.role === 'organisateur' ? (
                   acceptedFreelances.length === 0 ? (
-                    <p className="text-sm" style={{ color: '#b8a898' }}>Aucun freelance à évaluer.</p>
+                    <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Aucun freelance à évaluer.</p>
                   ) : acceptedFreelances.map(f => (
                     <div key={f.id} className="flex items-center justify-between gap-3 p-3 rounded-xl"
-                      style={{ background: 'rgba(82,54,124,0.3)' }}>
-                      <span className="text-sm" style={{ color: '#f0e6d3' }}>{f.full_name}</span>
+                      style={{ background: 'var(--color-surface)' }}>
+                      <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>{f.full_name}</span>
                       <div className="flex gap-2">
                         <button onClick={() => setReviewTarget({ id: f.id, name: f.full_name, type: 'org_to_free' })}
                           disabled={reviewedIds.has(f.id)}
@@ -611,7 +611,7 @@ export default function MissionDetail() {
         {profile?.role === 'organisateur' && (
           <div className="card-glass p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold flex items-center gap-2" style={{ color: '#f0e6d3' }}><FileText size={17} color="#d4af37" /> Contrat CDD</h2>
+              <h2 className="font-semibold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}><FileText size={17} color="var(--color-gold-primary)" /> Contrat CDD</h2>
               {!contract && acceptedFreelances.length > 0 && !showWizard && (
                 <button onClick={() => setShowWizard(true)}
                   className="btn-gold px-4 py-2 rounded-xl text-sm font-bold text-[#261642]">
@@ -622,16 +622,16 @@ export default function MissionDetail() {
             {contract ? (
               <ContractCard contract={contract} myRole="organizer" />
             ) : acceptedFreelances.length === 0 ? (
-              <p className="text-sm" style={{ color: '#b8a898' }}>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                 Acceptez au moins une candidature pour générer un contrat.
               </p>
             ) : showWizard && !selectedFreelance ? (
               <div className="space-y-2">
-                <p className="text-xs mb-2" style={{ color: '#b8a898' }}>Sélectionnez le freelance :</p>
+                <p className="text-xs mb-2" style={{ color: 'var(--color-text-secondary)' }}>Sélectionnez le freelance :</p>
                 {acceptedFreelances.map(fl => (
                   <button key={fl.id} onClick={() => setSelectedFreelance(fl)}
                     className="w-full text-left px-4 py-3 rounded-xl text-sm"
-                    style={{ background: 'rgba(82,54,124,0.4)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}>
+                    style={{ background: 'var(--color-surface)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)' }}>
                     {fl.full_name}
                   </button>
                 ))}
@@ -646,7 +646,7 @@ export default function MissionDetail() {
         {/* Section contrat (freelance) */}
         {profile?.role === 'freelance' && contract && (
           <div className="card-glass p-6 mb-6">
-            <h2 className="font-semibold mb-4" style={{ color: '#f0e6d3' }}>📄 Contrat CDD</h2>
+            <h2 className="font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>📄 Contrat CDD</h2>
             <ContractCard contract={contract} myRole="freelance" />
           </div>
         )}

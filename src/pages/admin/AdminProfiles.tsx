@@ -20,12 +20,12 @@ function RejectModal({ name, onClose, onConfirm }: {
     <div onClick={onClose}
       style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, background: 'rgba(15,10,30,0.85)', zIndex: 1000 }}>
       <div onClick={e => e.stopPropagation()} className="card-glass p-6 w-full max-w-md">
-        <h3 className="font-semibold mb-1" style={{ color: '#f0e6d3' }}>Rejeter la pièce de {name}</h3>
-        <p className="text-xs mb-4" style={{ color: '#b8a898' }}>Le motif sera envoyé au freelance pour qu'il corrige.</p>
+        <h3 className="font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>Rejeter la pièce de {name}</h3>
+        <p className="text-xs mb-4" style={{ color: 'var(--color-text-secondary)' }}>Le motif sera envoyé au freelance pour qu'il corrige.</p>
         <textarea value={reason} onChange={e => setReason(e.target.value)} rows={3}
           placeholder="Motif du rejet (ex : pièce illisible, expirée, ne correspond pas au nom)"
           className="w-full px-4 py-3 rounded-xl text-sm outline-none mb-4"
-          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3', resize: 'none' }} />
+          style={{ background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)', resize: 'none' }} />
         <div className="flex gap-2">
           <button type="button" disabled={busy || !reason.trim()}
             onClick={async () => { setBusy(true); await onConfirm(reason); setBusy(false); }}
@@ -34,7 +34,7 @@ function RejectModal({ name, onClose, onConfirm }: {
             {busy ? '…' : 'Rejeter'}
           </button>
           <button type="button" onClick={onClose} className="px-4 rounded-xl text-sm border"
-            style={{ borderColor: 'rgba(201,168,76,0.3)', color: '#b8a898' }}>Annuler</button>
+            style={{ borderColor: 'rgba(201,168,76,0.3)', color: 'var(--color-text-secondary)' }}>Annuler</button>
         </div>
       </div>
     </div>
@@ -123,20 +123,20 @@ export default function AdminProfiles() {
   function availability(p: Profile): { label: string; color: string } {
     if (p.status === 'suspended') return { label: 'Suspendu', color: '#ef4444' };
     if (p.status === 'banned') return { label: 'Banni', color: '#7f1d1d' };
-    if (p.role === 'freelance') return p.is_available ? { label: 'Disponible', color: '#10b981' } : { label: 'Indisponible', color: '#7a6a7a' };
+    if (p.role === 'freelance') return p.is_available ? { label: 'Disponible', color: '#10b981' } : { label: 'Indisponible', color: 'var(--color-text-muted)' };
     return { label: 'Actif', color: '#10b981' };
   }
 
   return (
     <DashboardLayout>
-      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: '#f0e6d3' }}><IcoUsers size={26} color={roleColor('admin')} /> Gestion des profils</h1>
+      <h1 className="font-display text-3xl font-bold mb-6 flex items-center gap-3" style={{ color: 'var(--color-text-primary)' }}><IcoUsers size={26} color={roleColor('admin')} /> Gestion des profils</h1>
 
       <div className="card-glass p-4 mb-6 flex flex-wrap gap-3 items-center">
         <input className="px-3 py-2 rounded-lg text-sm outline-none flex-1 min-w-40"
-          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
+          style={{ background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)' }}
           placeholder="Rechercher..." value={search} onChange={e => setSearch(e.target.value)} />
         <select className="px-3 py-2 rounded-lg text-sm outline-none"
-          style={{ background: 'rgba(82,54,124,0.5)', border: '1px solid rgba(201,168,76,0.2)', color: '#f0e6d3' }}
+          style={{ background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)' }}
           value={filterRole} onChange={e => setFilterRole(e.target.value)}>
           <option value="">Tous les rôles</option>
           <option value="freelance">Freelance</option>
@@ -146,20 +146,20 @@ export default function AdminProfiles() {
         <button onClick={() => setKycOnly(v => !v)}
           className="px-3 py-2 rounded-lg text-sm font-medium inline-flex items-center gap-1.5"
           style={kycOnly
-            ? { background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }
+            ? { background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }
             : { background: 'rgba(245,158,11,0.12)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.3)' }}>
           <ShieldCheck size={15} /> À valider ({kycPending})
         </button>
-        <span className="text-sm my-auto" style={{ color: '#b8a898' }}>{filtered.length} profil(s)</span>
+        <span className="text-sm my-auto" style={{ color: 'var(--color-text-secondary)' }}>{filtered.length} profil(s)</span>
       </div>
 
       {loading ? (
-        <div className="text-center py-16" style={{ color: '#b8a898' }}>Chargement...</div>
+        <div className="text-center py-16" style={{ color: 'var(--color-text-secondary)' }}>Chargement...</div>
       ) : (
         <div className="card-glass overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ background: 'rgba(82,54,124,0.4)', color: '#7a6a7a' }}>
+              <tr style={{ background: 'var(--color-surface)', color: 'var(--color-text-muted)' }}>
                 <th className="text-left py-3 px-4">Utilisateur</th>
                 <th className="text-left py-3 px-4">Rôle</th>
                 <th className="text-left py-3 px-4">Statut</th>
@@ -174,12 +174,12 @@ export default function AdminProfiles() {
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                        style={{ background: 'linear-gradient(135deg,#d4af37,#e8c97a)', color: '#261642' }}>
+                        style={{ background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }}>
                         {getInitials(p.full_name)}
                       </div>
                       <div>
-                        <p className="font-medium" style={{ color: '#f0e6d3' }}>{p.full_name}</p>
-                        <p className="text-xs" style={{ color: '#7a6a7a' }}>{p.email}</p>
+                        <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{p.full_name}</p>
+                        <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{p.email}</p>
                       </div>
                       <CertifiedBadge level={p.certification_level} certified={p.is_certified} />
                     </div>
@@ -197,25 +197,25 @@ export default function AdminProfiles() {
                   </td>
                   <td className="py-3 px-4">
                     {p.role !== 'freelance' ? (
-                      <span style={{ color: '#4a3a5a' }}>—</span>
+                      <span style={{ color: 'var(--color-text-muted)' }}>—</span>
                     ) : p.kyc_status === 'pending' ? (
                       <span className="px-2 py-0.5 rounded-full text-xs" style={{ background: 'rgba(245,158,11,0.2)', color: '#F59E0B' }}>À valider</span>
                     ) : (p.certification_level && p.certification_level !== 'none') ? (
                       <CertifiedBadge level={p.certification_level} certified={p.is_certified} />
                     ) : (
-                      <span className="px-2 py-0.5 rounded-full text-xs" style={{ background: 'rgba(122,106,122,0.15)', color: '#7a6a7a' }}>Non certifié</span>
+                      <span className="px-2 py-0.5 rounded-full text-xs" style={{ background: 'rgba(122,106,122,0.15)', color: 'var(--color-text-muted)' }}>Non certifié</span>
                     )}
                   </td>
-                  <td className="py-3 px-4" style={{ color: '#d4af37' }}>
+                  <td className="py-3 px-4" style={{ color: 'var(--color-gold-primary)' }}>
                     {p.avg_rating
-                      ? <span className="inline-flex items-center gap-1.5"><Star size={13} fill="#d4af37" color="#d4af37" /> {p.avg_rating.toFixed(1)}</span>
+                      ? <span className="inline-flex items-center gap-1.5"><Star size={13} fill="var(--color-gold-primary)" color="var(--color-gold-primary)" /> {p.avg_rating.toFixed(1)}</span>
                       : '–'}
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex gap-2 flex-wrap">
                       {p.role !== 'admin' && (
                         <button onClick={() => navigate(`/public-profile?id=${p.id}`)}
-                          className="px-2 py-1 rounded text-xs inline-flex items-center gap-1" style={{ background: 'rgba(201,168,76,0.12)', color: '#d4af37' }}>
+                          className="px-2 py-1 rounded text-xs inline-flex items-center gap-1" style={{ background: 'rgba(201,168,76,0.12)', color: 'var(--color-gold-primary)' }}>
                           <Eye size={12} /> Consulter
                         </button>
                       )}
