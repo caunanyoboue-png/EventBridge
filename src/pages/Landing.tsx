@@ -246,13 +246,13 @@ export default function Landing() {
             </div>
           </Reveal>
 
-          <h1 className="font-display font-bold mb-6 leading-tight"
-            style={{ fontSize: 'clamp(2.2rem, 5vw, 4.4rem)', color: 'var(--eb-l-hero-title)', letterSpacing: '-0.01em' }}>
+          <h1 className="font-display font-bold mb-7"
+            style={{ fontSize: 'clamp(2.5rem, 5.6vw, 5rem)', color: 'var(--eb-l-hero-title)', letterSpacing: '-0.02em', lineHeight: 1.05 }}>
             Le pont entre <span className="text-gold-gradient">talents</span><br />et <span className="text-gold-gradient">opportunités</span>
           </h1>
 
           <Reveal delay={0.3} y={18}>
-            <p className="text-lg mb-9 max-w-xl mx-auto" style={{ color: 'var(--color-text-secondary)', lineHeight: 1.8 }}>
+            <p className="text-lg mb-8 max-w-lg mx-auto" style={{ color: 'var(--color-text-secondary)', lineHeight: 1.75 }}>
               Des galas d'Abidjan aux soirées de Grand-Bassam : confiez vos événements aux meilleurs
               talents du pays, ou décrochez les missions qui vous ressemblent.
             </p>
@@ -332,7 +332,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto">
           <Reveal className="text-center mb-16">
             <Kicker>Simple &amp; Rapide</Kicker>
-            <h2 className="font-display text-4xl font-bold gold-rule" style={{ color: 'var(--color-text-primary)' }}>Trois étapes. Une équipe de rêve.</h2>
+            <h2 className="font-display text-4xl md:text-5xl font-bold gold-rule" style={{ color: 'var(--color-text-primary)' }}>Trois étapes. Une équipe de rêve.</h2>
             <p className="mt-8 text-base" style={{ color: 'var(--color-text-muted)' }}>De votre idée à l'événement parfait, sans détour</p>
           </Reveal>
 
@@ -369,7 +369,7 @@ export default function Landing() {
           </div>
           <Reveal className="flex flex-col justify-center px-8 md:px-10 py-12 md:py-16" y={0}>
             <Kicker>Pour les Freelances</Kicker>
-            <h2 className="font-display text-4xl font-bold mb-8" style={{ color: 'var(--color-text-primary)' }}>Votre talent mérite une scène à sa hauteur</h2>
+            <h2 className="font-display text-4xl md:text-5xl font-bold mb-8" style={{ color: 'var(--color-text-primary)' }}>Votre talent mérite une scène à sa hauteur</h2>
             <div className="space-y-4 mb-8">
               {FREELANCE_AVANTAGES.map((item, i) => (
                 <Reveal key={item} delay={0.12 + i * 0.1} y={14}>
@@ -394,7 +394,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 min-h-[520px]">
           <Reveal className="flex flex-col justify-center px-8 md:px-10 py-16 order-2 md:order-1" y={0}>
             <Kicker>Pour les Organisateurs</Kicker>
-            <h2 className="font-display text-4xl font-bold mb-8" style={{ color: 'var(--color-text-primary)' }}>Composez l'équipe que votre événement mérite</h2>
+            <h2 className="font-display text-4xl md:text-5xl font-bold mb-8" style={{ color: 'var(--color-text-primary)' }}>Composez l'équipe que votre événement mérite</h2>
             <div className="space-y-4 mb-8">
               {ORG_AVANTAGES.map((item, i) => (
                 <Reveal key={item} delay={0.12 + i * 0.1} y={14}>
@@ -423,7 +423,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto">
           <Reveal className="text-center mb-14">
             <Kicker>Nos Prestations</Kicker>
-            <h2 className="font-display text-4xl font-bold gold-rule" style={{ color: 'var(--color-text-primary)' }}>L'excellence, dans chaque métier</h2>
+            <h2 className="font-display text-4xl md:text-5xl font-bold gold-rule" style={{ color: 'var(--color-text-primary)' }}>L'excellence, dans chaque métier</h2>
             <p className="mt-8 text-base" style={{ color: 'var(--color-text-muted)' }}>Du service en salle à la sécurité, chaque prestation est portée par des professionnels passionnés</p>
           </Reveal>
 
@@ -460,7 +460,7 @@ export default function Landing() {
               <div className="w-16 h-16 rounded-full flex items-center justify-center animate-sos" style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.25)' }}><IconWarning /></div>
             </div>
             <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'rgba(255,180,180,0.85)', letterSpacing: '0.15em' }}>Alerte Urgence</p>
-            <h2 className="font-display text-4xl font-bold mb-4" style={{ color: '#fff' }}>S.O.S Brigade</h2>
+            <h2 className="font-display text-4xl md:text-5xl font-bold mb-4" style={{ color: '#fff' }}>S.O.S Brigade</h2>
             <p className="text-lg mb-3 font-medium" style={{ color: 'rgba(255,255,255,0.88)' }}>Un imprévu à une heure du grand soir ?</p>
             <p className="text-base mb-10 max-w-xl mx-auto leading-relaxed" style={{ color: 'rgba(255,255,255,0.62)', lineHeight: 1.8 }}>
               Déclenchez l'alerte : les freelances disponibles autour de votre événement sont prévenus en temps réel et confirmés en quelques minutes. Votre soirée est sauvée.
@@ -489,7 +489,7 @@ export default function Landing() {
         <div className="max-w-3xl mx-auto text-center">
           <Reveal className="mb-12">
             <Kicker>Témoignages</Kicker>
-            <h2 className="font-display text-4xl font-bold gold-rule" style={{ color: 'var(--color-text-primary)' }}>La confiance se gagne, événement après événement</h2>
+            <h2 className="font-display text-4xl md:text-5xl font-bold gold-rule" style={{ color: 'var(--color-text-primary)' }}>La confiance se gagne, événement après événement</h2>
           </Reveal>
 
           <div className="relative" style={{ minHeight: 300 }}>
@@ -538,12 +538,13 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── NEWSLETTER ── */}
-      <section className="py-24 px-6" style={{ background: 'var(--eb-l-sec-deep)' }}>
-        <Reveal className="max-w-2xl mx-auto text-center">
+      {/* ── NEWSLETTER (bandeau anthracite) ── */}
+      <section className="lux-ondark relative py-24 px-6 overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #13131f 100%)' }}>
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, rgba(201,151,44,0.12) 0%, transparent 62%)', pointerEvents: 'none' }} />
+        <Reveal className="relative max-w-2xl mx-auto text-center">
           <Kicker>Newsletter</Kicker>
           <h2 className="font-display text-3xl md:text-4xl font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>Ne manquez plus une opportunité</h2>
-          <p className="text-base mb-8" style={{ color: 'var(--color-text-muted)' }}>Les meilleures missions et les talents du moment, une fois par semaine dans votre boîte mail.</p>
+          <p className="text-base mb-8" style={{ color: 'var(--color-text-secondary)' }}>Les meilleures missions et les talents du moment, une fois par semaine dans votre boîte mail.</p>
           <form onSubmit={subscribe} className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
             <label htmlFor="nl-email" className="sr-only">Adresse email</label>
             <input id="nl-email" type="email" value={email} onChange={e => setEmail(e.target.value)}
@@ -565,7 +566,7 @@ export default function Landing() {
         <div className="relative z-10 max-w-2xl mx-auto text-center">
           <Reveal>
             <div className="flex justify-center mb-10"><LogoMark size={116} animated /></div>
-            <h2 className="font-display text-4xl font-bold mb-4">
+            <h2 className="font-display text-4xl md:text-5xl font-bold mb-4">
               <span className="text-gold-gradient">Votre prochain événement</span><br />
               <span style={{ color: 'var(--color-text-primary)' }}>commence ici</span>
             </h2>

@@ -184,32 +184,46 @@
   --lux-gold-grad: linear-gradient(135deg, #a9791a 0%, #c9972c 40%, #e4b84a 65%, #c9972c 100%);
 }
 :root[data-theme='light'] .eb-landing {
-  --color-text-primary: #1a1a2e;
-  --color-text-secondary: #4a4a5e;
-  --color-text-muted: #7a7a8c;
+  --color-text-primary: #211a30;
+  --color-text-secondary: #574f61;
+  --color-text-muted: #837a8c;
   --color-gold-primary: #a9791a;
   --color-gold-light: #c9972c;
-  --color-border: rgba(201, 151, 44, 0.30);
-  --color-card-border: rgba(26, 26, 46, 0.10);
-  --card-shadow: 0 16px 40px rgba(26, 26, 46, 0.10);
+  --color-border: rgba(201, 151, 44, 0.36);
+  --color-card-border: rgba(120, 92, 30, 0.16);
+  --card-shadow: 0 18px 44px rgba(120, 92, 30, 0.14);
 
-  --eb-l-root: #faf7f0;
-  --eb-l-sec-a: #f3eee3;
-  --eb-l-sec-plum: #ffffff;
-  --eb-l-sec-deep: #f3eee3;
-  --eb-l-footer: #f3eee3;
-  --eb-l-nav: rgba(250, 247, 240, 0.8);
-  --eb-l-hero-veil: linear-gradient(160deg, rgba(250,247,240,0.84) 0%, rgba(243,238,227,0.66) 45%, rgba(250,247,240,0.92) 100%);
-  --eb-l-cta-veil: rgba(250, 247, 240, 0.9);
-  --eb-l-card: #ffffff;
-  --eb-l-img-bottom: linear-gradient(to top, rgba(250,247,240,0.96) 0%, rgba(250,247,240,0.45) 55%, transparent 100%);
-  --eb-l-hero-title: #1a1a2e;
-  --eb-l-step-inner: #f3eee3;
-  --eb-l-glass-btn-bg: rgba(201, 151, 44, 0.08);
-  --eb-l-glass-btn-border: rgba(201, 151, 44, 0.30);
-  --eb-l-plum-fade-r: linear-gradient(to right, transparent 52%, #ffffff);
-  --eb-l-deep-fade-l: linear-gradient(to left, transparent 52%, #f3eee3);
+  /* Crèmes chaudes et contrastées (moins de « blanc plat ») */
+  --eb-l-root: #f4ecdd;
+  --eb-l-sec-a: #e8dcc4;
+  --eb-l-sec-plum: #fbf6ec;
+  --eb-l-sec-deep: #ede2ce;
+  --eb-l-footer: #e4d7bd;
+  --eb-l-nav: rgba(244, 236, 221, 0.82);
+  --eb-l-hero-veil: linear-gradient(160deg, rgba(244,236,221,0.82) 0%, rgba(232,220,196,0.6) 45%, rgba(244,236,221,0.9) 100%);
+  --eb-l-cta-veil: rgba(244, 236, 221, 0.88);
+  --eb-l-card: #fffdf7;
+  --eb-l-img-bottom: linear-gradient(to top, rgba(244,236,221,0.96) 0%, rgba(244,236,221,0.42) 55%, transparent 100%);
+  --eb-l-hero-title: #211a30;
+  --eb-l-step-inner: #efe4d0;
+  --eb-l-glass-btn-bg: rgba(201, 151, 44, 0.12);
+  --eb-l-glass-btn-border: rgba(201, 151, 44, 0.38);
+  --eb-l-plum-fade-r: linear-gradient(to right, transparent 52%, #fbf6ec);
+  --eb-l-deep-fade-l: linear-gradient(to left, transparent 52%, #ede2ce);
   --lux-gold-grad: linear-gradient(135deg, #8a6114 0%, #a9791a 45%, #c9972c 100%);
+}
+
+/* Bandeau ANTHRACITE au sein de la Landing (contraste luxe) — texte clair forcé,
+   quel que soit le thème. Ajoute de la couleur/profondeur au mode clair. */
+.eb-landing .lux-ondark {
+  --color-text-primary: #faf7f0;
+  --color-text-secondary: rgba(250, 247, 240, 0.74);
+  --color-text-muted: rgba(250, 247, 240, 0.55);
+  --color-gold-primary: #d8a63a;
+  --color-gold-light: #e8bd57;
+  --color-border: rgba(216, 166, 58, 0.32);
+  --color-card-border: rgba(216, 166, 58, 0.28);
+  --eb-l-card: rgba(255, 255, 255, 0.06);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
