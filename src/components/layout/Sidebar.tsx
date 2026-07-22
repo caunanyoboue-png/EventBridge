@@ -61,13 +61,13 @@ export default function Sidebar({ glassy, isOpen, onClose }: SidebarProps) {
   // Couleur des icônes/onglets selon le côté (rôle) — actif = pleine, inactif = atténuée.
   const pal = rolePal(profile?.role);
 
-  const bg   = glassy ? 'rgba(6,1,16,0.72)' : '#100420';
-  const bdr  = glassy ? 'rgba(201,168,76,0.12)' : 'rgba(201,168,76,0.1)';
+  const bg   = glassy ? 'rgba(30,42,68,0.82)' : '#1e2a44';
+  const bdr  = 'rgba(255,255,255,0.08)';
   const blur = glassy ? 'blur(22px)' : undefined;
 
   return (
     <aside
-      className={`eb-sidebar${isOpen ? ' open' : ''}`}
+      className={`eb-sidebar eb-on-navy${isOpen ? ' open' : ''}`}
       style={{ width: 240, height: '100vh', position: 'fixed', left: 0, top: 0, zIndex: 40,
         display: 'flex', flexDirection: 'column', padding: '20px 16px',
         background: bg, backdropFilter: blur, borderRight: `1px solid ${bdr}` }}

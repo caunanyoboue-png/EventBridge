@@ -14,13 +14,13 @@ import { formatCFA } from '../lib/utils';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
-  bg:        '#0f0a1e',
-  sidebar:   '#13102a',
-  card:      '#1a1232',
+  bg:        'var(--color-bg-primary)',
+  sidebar:   'var(--color-bg-secondary)',
+  card:      'var(--color-bg-card)',
   gold:      'var(--color-gold-primary)',
   goldLt:    'var(--color-gold-light)',
   text:      'var(--color-text-primary)',
-  textDim:   'rgba(240,230,211,0.55)',
+  textDim:   'var(--color-text-muted)',
   border:    'rgba(201,168,76,0.12)',
   cardBd:    'rgba(201,168,76,0.10)',
 } as const;
@@ -117,7 +117,7 @@ function SuggestRow({ Icon, color, title, sub, onClick }: {
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--color-text-primary)', margin: 0 }}>{title}</p>
-        <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.55)', margin: '2px 0 0', lineHeight: 1.45 }}>{sub}</p>
+        <p style={{ fontSize: 12, color: 'var(--color-text-muted)', margin: '2px 0 0', lineHeight: 1.45 }}>{sub}</p>
       </div>
       <ChevronRight size={16} color={color} style={{ flexShrink: 0 }} />
     </button>
@@ -197,7 +197,7 @@ export default function FreelanceDashboard() {
           }}>
             <div>
               <div style={{ fontSize: 22, fontWeight: 500, color: C.text }}>Bonjour, {firstName}</div>
-              <div style={{ fontSize: 13, color: 'rgba(240,230,211,0.55)', marginTop: 2, textTransform: 'capitalize' }}>
+              <div style={{ fontSize: 13, color: 'var(--color-text-muted)', marginTop: 2, textTransform: 'capitalize' }}>
                 {today}
               </div>
             </div>

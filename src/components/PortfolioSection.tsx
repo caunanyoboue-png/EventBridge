@@ -13,8 +13,8 @@ const CATEGORIES = [
 ];
 
 const C = {
-  card: '#1a1232', gold: 'var(--color-gold-primary)', goldLt: 'var(--color-gold-light)',
-  text: 'var(--color-text-primary)', sec: 'rgba(240,230,211,0.45)', bdr: 'rgba(201,168,76,0.12)',
+  card: 'var(--color-bg-card)', gold: 'var(--color-gold-primary)', goldLt: 'var(--color-gold-light)',
+  text: 'var(--color-text-primary)', sec: 'var(--color-text-muted)', bdr: 'rgba(201,168,76,0.12)',
 } as const;
 
 const inp: React.CSSProperties = {
@@ -169,7 +169,7 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
             <p style={{ fontSize: 13, fontWeight: 600, color: 'rgba(201,168,76,0.8)', margin: 0 }}>
               Nouvelle publication
             </p>
-            <p style={{ fontSize: 11, color: 'rgba(240,230,211,0.25)', margin: 0, marginTop: 1 }}>
+            <p style={{ fontSize: 11, color: 'var(--color-text-muted)', margin: 0, marginTop: 1 }}>
               Ajouter une photo · {items.length}/12
             </p>
           </div>
@@ -262,7 +262,7 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
                   {/* Description */}
                   {item.description && (
                     <div>
-                      <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.65)', margin: 0,
+                      <p style={{ fontSize: 12, color: 'var(--color-text-muted)', margin: 0,
                         lineHeight: 1.6, fontStyle: 'italic',
                         overflow: isExpanded ? 'visible' : 'hidden',
                         display: isExpanded ? 'block' : '-webkit-box',
@@ -281,7 +281,7 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
                   )}
 
                   {date && (
-                    <p style={{ fontSize: 11, color: 'rgba(240,230,211,0.28)', margin: 0 }}>
+                    <p style={{ fontSize: 11, color: 'var(--color-text-muted)', margin: 0 }}>
                       {date}
                     </p>
                   )}
@@ -293,7 +293,7 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
                     <button onClick={() => toggleLike(item.id)}
                       style={{ display: 'flex', alignItems: 'center', gap: 5,
                         background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                        color: isLiked ? '#ef4444' : 'rgba(240,230,211,0.35)',
+                        color: isLiked ? '#ef4444' : 'var(--color-text-muted)',
                         fontSize: 12, fontWeight: 500, transition: 'color 0.15s' }}>
                       <HeartIcon filled={isLiked} />
                       J'aime
@@ -302,10 +302,10 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
                     <button onClick={() => setLightbox(item)}
                       style={{ display: 'flex', alignItems: 'center', gap: 5,
                         background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                        color: 'rgba(240,230,211,0.35)', fontSize: 12, fontWeight: 500,
+                        color: 'var(--color-text-muted)', fontSize: 12, fontWeight: 500,
                         transition: 'color 0.15s' }}
                       onMouseEnter={e => (e.currentTarget.style.color = C.text)}
-                      onMouseLeave={e => (e.currentTarget.style.color = 'rgba(240,230,211,0.35)')}>
+                      onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-text-muted)')}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" strokeWidth="1.8">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -325,7 +325,7 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
       {items.length === 0 && canEdit && (
         <div style={{ textAlign: 'center', padding: '28px 24px', background: C.card,
           border: `1px solid ${C.bdr}`, borderRadius: 14 }}>
-          <p style={{ fontSize: 13, color: 'rgba(240,230,211,0.28)', lineHeight: 1.7, margin: 0 }}>
+          <p style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.7, margin: 0 }}>
             Aucune publication pour l'instant.<br/>
             Ajoutez une photo pour la mettre en avant.
           </p>
@@ -360,7 +360,7 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
 
             {/* Titre */}
             <div style={{ marginBottom: 12 }}>
-              <label style={{ fontSize: 11, color: 'rgba(240,230,211,0.4)',
+              <label style={{ fontSize: 11, color: 'var(--color-text-muted)',
                 display: 'block', marginBottom: 6 }}>
                 Titre <span style={{ opacity: 0.5 }}>(optionnel)</span>
               </label>
@@ -370,7 +370,7 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
 
             {/* Description */}
             <div style={{ marginBottom: 12 }}>
-              <label style={{ fontSize: 11, color: 'rgba(240,230,211,0.4)',
+              <label style={{ fontSize: 11, color: 'var(--color-text-muted)',
                 display: 'block', marginBottom: 6 }}>
                 Description <span style={{ opacity: 0.5 }}>(optionnel)</span>
               </label>
@@ -380,7 +380,7 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
                 rows={3}
                 placeholder="Décrivez cette photo — type de service, ambiance, contexte…"
                 style={{ ...inp, resize: 'none', lineHeight: 1.55 }} />
-              <p style={{ fontSize: 10, color: 'rgba(240,230,211,0.2)', margin: '4px 0 0',
+              <p style={{ fontSize: 10, color: 'var(--color-text-muted)', margin: '4px 0 0',
                 textAlign: 'right' }}>
                 {mDesc.length}/400
               </p>
@@ -388,7 +388,7 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
 
             {/* Catégorie */}
             <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 11, color: 'rgba(240,230,211,0.4)',
+              <label style={{ fontSize: 11, color: 'var(--color-text-muted)',
                 display: 'block', marginBottom: 6 }}>
                 Catégorie <span style={{ opacity: 0.5 }}>(optionnel)</span>
               </label>

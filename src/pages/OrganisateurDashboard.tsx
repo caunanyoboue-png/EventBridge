@@ -13,13 +13,13 @@ import toast from 'react-hot-toast';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const C = {
-  bg:     '#0f0a1e',
-  side:   '#13102a',
-  card:   '#1a1232',
+  bg:     'var(--color-bg-primary)',
+  side:   'var(--color-bg-secondary)',
+  card:   'var(--color-bg-card)',
   gold:   'var(--color-gold-primary)',
   goldLt: 'var(--color-gold-light)',
   text:   'var(--color-text-primary)',
-  sec:    'rgba(240,230,211,0.4)',
+  sec:    'var(--color-text-muted)',
   bdr:    'rgba(201,168,76,0.10)',
   sideB:  'rgba(201,168,76,0.12)',
 } as const;
@@ -712,7 +712,7 @@ export default function OrganisateurDashboard() {
                         }
                       </div>
                       <span style={{ fontSize: 12, fontWeight: 500,
-                        color: f.done ? C.sec : 'rgba(240,230,211,0.5)' }}>
+                        color: f.done ? C.sec : 'var(--color-text-muted)' }}>
                         {f.label}
                       </span>
                     </div>
@@ -732,7 +732,7 @@ export default function OrganisateurDashboard() {
                           lineHeight: 1.6, fontStyle: 'italic' }}>
                           "{r.comment || '—'}"
                         </p>
-                        <p style={{ fontSize: 11, color: 'rgba(240,230,211,0.2)', margin: 0 }}>
+                        <p style={{ fontSize: 11, color: 'var(--color-text-muted)', margin: 0 }}>
                           — {(r.reviewer as { full_name?: string })?.full_name || 'Anonyme'}
                         </p>
                       </div>

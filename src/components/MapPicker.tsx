@@ -149,7 +149,7 @@ export default function MapPicker({ lat, lng, onSelect, markerColor }: Props) {
         padding: '8px 12px', background: 'rgba(26,18,50,0.95)',
         borderBottom: '1px solid rgba(201,168,76,0.12)',
       }}>
-        <span style={{ fontSize: 12, color: 'rgba(240,230,211,0.5)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span style={{ fontSize: 12, color: 'var(--color-text-muted)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {address || 'Cliquez sur la carte pour placer l\'épingle'}
         </span>
         <button
@@ -172,7 +172,7 @@ export default function MapPicker({ lat, lng, onSelect, markerColor }: Props) {
       {/* Carte Leaflet */}
       <div ref={containerRef} style={{ height: 260, width: '100%' }} />
 
-      <p style={{ fontSize: 11, color: 'rgba(240,230,211,0.3)', padding: '6px 12px', background: 'rgba(26,18,50,0.95)', margin: 0 }}>
+      <p style={{ fontSize: 11, color: 'var(--color-text-muted)', padding: '6px 12px', background: 'rgba(26,18,50,0.95)', margin: 0 }}>
         Glissez l'épingle ou cliquez pour affiner la position · OpenStreetMap
       </p>
     </div>

@@ -170,9 +170,9 @@ export default function NotificationBell() {
             {notifs.length === 0 ? (
               <div style={{ padding: '36px 20px', textAlign: 'center' }}>
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
-                  <Bell size={28} color="rgba(240,230,211,0.4)" strokeWidth={1.5} />
+                  <Bell size={28} color="var(--color-text-muted)" strokeWidth={1.5} />
                 </div>
-                <p style={{ fontSize: 13, color: 'rgba(240,230,211,0.5)', margin: 0 }}>
+                <p style={{ fontSize: 13, color: 'var(--color-text-muted)', margin: 0 }}>
                   Aucune notification pour l'instant
                 </p>
               </div>
@@ -205,14 +205,14 @@ export default function NotificationBell() {
                     {n.title}
                   </p>
                   <p style={{
-                    fontSize: 11, color: 'rgba(240,230,211,0.6)', margin: '0 0 4px',
+                    fontSize: 11, color: 'var(--color-text-muted)', margin: '0 0 4px',
                     ...(expandedId === n.id
                       ? { whiteSpace: 'pre-wrap', lineHeight: 1.5 }
                       : { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }),
                   }}>
                     {n.body}
                   </p>
-                  <p style={{ fontSize: 10, color: 'rgba(240,230,211,0.28)', margin: 0 }}>
+                  <p style={{ fontSize: 10, color: 'var(--color-text-muted)', margin: 0 }}>
                     {n.created_at ? formatRelative(n.created_at) : ''}
                   </p>
                   {expandedId === n.id && targetRoute(n) && (

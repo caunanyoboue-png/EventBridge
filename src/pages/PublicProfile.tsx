@@ -103,7 +103,7 @@ export default function PublicProfile() {
 
   if (!viewed) return (
     <DashboardLayout>
-      <div style={{ textAlign: 'center', padding: '80px 0', color: 'rgba(240,230,211,0.45)' }}>
+      <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--color-text-muted)' }}>
         Profil introuvable.
       </div>
     </DashboardLayout>
@@ -133,7 +133,7 @@ export default function PublicProfile() {
         <button onClick={() => navigate(-1)}
           style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 20,
             background: 'none', border: 'none', cursor: 'pointer',
-            color: 'rgba(240,230,211,0.45)', fontSize: 14 }}>
+            color: 'var(--color-text-muted)', fontSize: 14 }}>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.6"
               strokeLinecap="round" strokeLinejoin="round"/>
@@ -377,7 +377,7 @@ export default function PublicProfile() {
                     <path d="M18 3.5l4.4 9 9.8 1.4-7.1 6.9 1.7 9.7L18 26.4 9.2 30.5l1.7-9.7-7.1-6.9 9.8-1.4L18 3.5Z"
                       stroke="var(--color-gold-primary)" strokeWidth="1.4" strokeLinejoin="round" strokeOpacity="0.35"/>
                   </svg>
-                  <p style={{ fontSize: 13, color: 'rgba(240,230,211,0.45)' }}>Aucun avis pour l'instant.</p>
+                  <p style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>Aucun avis pour l'instant.</p>
                 </div>
               ) : (
                 reviews.map((r, i) => {

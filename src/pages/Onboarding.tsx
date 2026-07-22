@@ -224,7 +224,7 @@ export default function Onboarding() {
             <Logo height={112} animated />
           </div>
           <h1 style={{ fontSize: 22, fontWeight: 600, color: 'var(--color-text-primary)', margin: '0 0 6px' }}>{title}</h1>
-          <p style={{ fontSize: 14, color: 'rgba(240,230,211,0.5)', margin: 0 }}>{subtitle}</p>
+          <p style={{ fontSize: 14, color: 'var(--color-text-muted)', margin: 0 }}>{subtitle}</p>
         </div>
 
         {/* Card formulaire */}
@@ -245,12 +245,12 @@ export default function Onboarding() {
               <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--color-text-primary)', margin: '0 0 12px' }}>
                 Vérifiez votre boîte mail
               </h2>
-              <p style={{ fontSize: 14, color: 'rgba(240,230,211,0.65)', lineHeight: 1.7, margin: '0 0 20px' }}>
+              <p style={{ fontSize: 14, color: 'var(--color-text-muted)', lineHeight: 1.7, margin: '0 0 20px' }}>
                 Nous avons envoyé un lien de confirmation à<br/>
                 <strong style={{ color: 'var(--color-gold-primary)' }}>{email}</strong>.<br/>
                 Cliquez sur ce lien pour activer votre compte et accéder à la plateforme.
               </p>
-              <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.35)', margin: '0 0 20px', lineHeight: 1.6 }}>
+              <p style={{ fontSize: 12, color: 'var(--color-text-muted)', margin: '0 0 20px', lineHeight: 1.6 }}>
                 Vous ne trouvez pas l'email ? Vérifiez vos spams.<br/>
                 Le lien expire après 24h.
               </p>
@@ -304,7 +304,7 @@ export default function Onboarding() {
               {currentRole === 'freelance' && (
                 <>
                   <div>
-                    <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.5)', marginBottom: 10 }}>
+                    <p style={{ fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 10 }}>
                       Compétences — {skills.length}/{MAX_SKILLS} sélectionnée(s)
                     </p>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -315,7 +315,7 @@ export default function Onboarding() {
                             transition: 'all 0.15s',
                             background: skills.includes(c) ? 'rgba(201,168,76,0.2)' : 'transparent',
                             border: `1px solid ${skills.includes(c) ? 'var(--color-gold-primary)' : 'rgba(201,168,76,0.2)'}`,
-                            color: skills.includes(c) ? 'var(--color-gold-primary)' : 'rgba(240,230,211,0.5)',
+                            color: skills.includes(c) ? 'var(--color-gold-primary)' : 'var(--color-text-muted)',
                           }}>
                           {c}
                         </button>
@@ -328,23 +328,23 @@ export default function Onboarding() {
                   {skills.length > 0 && !skills.some(isHourlyCompetence) ? (
                     <>
                       <div>
-                        <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.5)', marginBottom: 8 }}>
+                        <p style={{ fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 8 }}>
                           Prix par prestation (FCFA)
                         </p>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                           {skills.map(s => (
                             <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                              <span style={{ fontSize: 12, color: 'rgba(240,230,211,0.7)', flex: 1 }}>{s}</span>
+                              <span style={{ fontSize: 12, color: 'var(--color-text-muted)', flex: 1 }}>{s}</span>
                               <input style={{ ...inp, width: 140 }} type="number" min={0} placeholder="Ex: 50000"
                                 value={prestationRates[s] ? prestationRates[s] : ''}
                                 onChange={e => setPrestationRates(p => ({ ...p, [s]: e.target.value === '' ? 0 : Math.abs(parseInt(e.target.value, 10) || 0) }))} />
-                              <span style={{ fontSize: 11, color: 'rgba(240,230,211,0.4)', whiteSpace: 'nowrap' }}>/ prestation</span>
+                              <span style={{ fontSize: 11, color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>/ prestation</span>
                             </div>
                           ))}
                         </div>
                       </div>
                       <div>
-                        <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.5)', marginBottom: 6 }}>
+                        <p style={{ fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6 }}>
                           Années d'expérience
                         </p>
                         <input style={inp} type="number" min={0} placeholder="Ex: 3"
@@ -356,7 +356,7 @@ export default function Onboarding() {
                     <>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                         <div>
-                          <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.5)', marginBottom: 6 }}>
+                          <p style={{ fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6 }}>
                             Tarif horaire (FCFA)
                           </p>
                           <input style={inp} type="number" min={0} placeholder="Ex: 2500"
@@ -364,7 +364,7 @@ export default function Onboarding() {
                             onChange={e => setHourlyRate(e.target.value === '' ? 0 : Math.abs(parseInt(e.target.value, 10) || 0))} />
                         </div>
                         <div>
-                          <p style={{ fontSize: 12, color: 'rgba(240,230,211,0.5)', marginBottom: 6 }}>
+                          <p style={{ fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 6 }}>
                             Années d'expérience
                           </p>
                           <input style={inp} type="number" min={0} placeholder="Ex: 3"
@@ -373,7 +373,7 @@ export default function Onboarding() {
                         </div>
                       </div>
                       {skills.some(isHourlyCompetence) && skills.some(s => !isHourlyCompetence(s)) && (
-                        <p style={{ fontSize: 11, color: 'rgba(240,230,211,0.4)', margin: 0 }}>
+                        <p style={{ fontSize: 11, color: 'var(--color-text-muted)', margin: 0 }}>
                           Vous avez une compétence facturée à l'heure : c'est votre tarif horaire qui s'applique.
                         </p>
                       )}
@@ -388,10 +388,10 @@ export default function Onboarding() {
                   <input style={inp} placeholder="Nom de la structure *"
                     value={companyName} onChange={e => setCompanyName(e.target.value)} />
                   <select
-                    style={{ ...inp, cursor: 'pointer', background: 'var(--color-option-bg)', color: companySector ? 'var(--color-text-primary)' : 'rgba(240,230,211,0.4)' }}
+                    style={{ ...inp, cursor: 'pointer', background: 'var(--color-option-bg)', color: companySector ? 'var(--color-text-primary)' : 'var(--color-text-muted)' }}
                     value={companySector}
                     onChange={e => setCompanySector(e.target.value)}>
-                    <option value="" style={{ background: 'var(--color-option-bg)', color: 'rgba(240,230,211,0.4)' }}>Secteur d'activité</option>
+                    <option value="" style={{ background: 'var(--color-option-bg)', color: 'var(--color-text-muted)' }}>Secteur d'activité</option>
                     {[
                       'Événementiel & Communication',
                       'Hôtellerie & Restauration',
@@ -443,7 +443,7 @@ export default function Onboarding() {
                 {busy ? 'Connexion…' : 'Se connecter →'}
               </button>
 
-              <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(240,230,211,0.45)', margin: 0 }}>
+              <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--color-text-muted)', margin: 0 }}>
                 Pas encore de compte ?{' '}
                 <button type="button"
                   onClick={() => { setMode('register'); setStep(0); }}
@@ -467,10 +467,10 @@ export default function Onboarding() {
                       cursor: 'pointer', transition: 'all 0.15s',
                       background: role === r ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.03)',
                       border: `1.5px solid ${role === r ? 'var(--color-gold-primary)' : 'rgba(201,168,76,0.15)'}`,
-                      color: role === r ? 'var(--color-gold-primary)' : 'rgba(240,230,211,0.5)',
+                      color: role === r ? 'var(--color-gold-primary)' : 'var(--color-text-muted)',
                     }}>
                     <p style={{ fontSize: 15, fontWeight: 600, margin: '0 0 4px', textTransform: 'capitalize' }}>{r}</p>
-                    <p style={{ fontSize: 12, margin: 0, color: role === r ? 'rgba(201,168,76,0.7)' : 'rgba(240,230,211,0.35)' }}>
+                    <p style={{ fontSize: 12, margin: 0, color: role === r ? 'rgba(201,168,76,0.7)' : 'var(--color-text-muted)' }}>
                       {r === 'freelance' ? 'Je propose mes services' : 'Je recrute des talents'}
                     </p>
                   </button>
@@ -481,7 +481,7 @@ export default function Onboarding() {
                 Continuer →
               </button>
 
-              <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(240,230,211,0.45)', margin: 0 }}>
+              <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--color-text-muted)', margin: 0 }}>
                 Déjà un compte ?{' '}
                 <button type="button" onClick={() => setMode('login')}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-gold-primary)', fontWeight: 600, fontSize: 13 }}>
@@ -529,9 +529,9 @@ export default function Onboarding() {
         </div>
 
         {/* Lien retour accueil */}
-        <p style={{ textAlign: 'center', marginTop: 20, fontSize: 13, color: 'rgba(240,230,211,0.3)' }}>
+        <p style={{ textAlign: 'center', marginTop: 20, fontSize: 13, color: 'var(--color-text-muted)' }}>
           <button type="button" onClick={() => navigate('/')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(240,230,211,0.3)', fontSize: 13 }}>
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)', fontSize: 13 }}>
             ← Retour à l'accueil
           </button>
         </p>

@@ -5,11 +5,11 @@ import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 
 const C = {
-  card:    '#1a1232',
+  card:    'var(--color-bg-card)',
   gold:    'var(--color-gold-primary)',
   goldLt:  'var(--color-gold-light)',
   text:    'var(--color-text-primary)',
-  textDim: 'rgba(240,230,211,0.45)',
+  textDim: 'var(--color-text-muted)',
   border:  'rgba(201,168,76,0.12)',
 } as const;
 

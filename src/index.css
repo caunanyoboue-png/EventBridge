@@ -68,53 +68,66 @@
   --font-body: 'Inter', 'Manrope', 'Helvetica Neue', sans-serif;
 }
 
-/* ─── Thème CLAIR — LUXE crème chaude, texte anthracite, or profond ─── */
+/* ─── Thème CLAIR — SaaS moderne (fond clair, cartes blanches, texte navy,
+       or en ACCENT uniquement, bleu électrique). Contraste WCAG AA. ─── */
 :root[data-theme='light'] {
-  --color-bg-primary: #f4ecdd;
-  --color-bg-secondary: #ede2ce;
-  --color-bg-card: #fffdf7;
-  --color-bg-overlay: #fffdf7;
-  --color-night: #ede2ce;
-  --color-night-deep: #e4d7bd;
+  --color-bg-primary: #fcfaf5;
+  --color-bg-secondary: #f3f4f6;
+  --color-bg-card: #ffffff;
+  --color-bg-overlay: #ffffff;
+  --color-night: #f3f4f6;
+  --color-night-deep: #e5e7eb;
 
-  --color-surface: #ece1cd;
-  --color-surface-strong: #e3d6bd;
-  --color-input-bg: #fbf6ec;
-  --color-option-bg: #fffdf7;
-  --color-card-bg: #fffdf7;
-  --card-shadow: 0 2px 12px rgba(120, 92, 30, 0.08);
+  --color-surface: #f9fafb;
+  --color-surface-strong: #f3f4f6;
+  --color-input-bg: #ffffff;
+  --color-option-bg: #ffffff;
+  --color-card-bg: #ffffff;
+  --card-shadow: 0 10px 35px rgba(15, 23, 42, 0.08);
 
-  /* Or profond → lisible sur crème */
-  --color-gold-primary: #9a6d16;
-  --color-gold-light: #c1901f;
-  --color-gold-dark: #7a560f;
-  --color-gold-pale: #7a560f;
-  --color-gold-deep: #c1901f;
-  --color-champagne: #7a560f;
+  /* Or = accent (boutons/prix/premium), pas un aplat général */
+  --color-gold-primary: #c88916;
+  --color-gold-light: #e0a94a;
+  --color-gold-dark: #a96e0e;
+  --color-gold-pale: #a96e0e;
+  --color-gold-deep: #e0a94a;
+  --color-champagne: #a96e0e;
 
-  --color-text-primary: #211829;
-  --color-text-secondary: #463d33;
-  --color-text-muted: #5c5344;
-  --color-text-soft: #6b6152;
+  /* Texte : navy foncé -> gris, fort contraste */
+  --color-text-primary: #162033;
+  --color-text-secondary: #3e4756;
+  --color-text-muted: #6b7280;
+  --color-text-soft: #9ca3af;
 
-  --color-border: rgba(201, 151, 44, 0.30);
-  --color-border-hover: rgba(154, 109, 22, 0.5);
-  --glass-bg: #fffdf7;
-  --glass-border: rgba(120, 92, 30, 0.16);
-  --color-card-border: rgba(120, 92, 30, 0.16);
+  --color-border: #e5e7eb;
+  --color-border-hover: #c88916;
+  --glass-bg: #ffffff;
+  --glass-border: #e5e7eb;
+  --color-card-border: #e5e7eb;
 
-  --color-blue: #1e5fb4;
+  /* Bleu accent + navy secondaire */
+  --color-blue: #3b82f6;
+  --color-plum: #1e2a44;
+  --color-plum-light: #3b82f6;
+  --color-orchid: #3b82f6;
+  --color-toast-bg: #ffffff;
+  --color-header-bg: rgba(255, 255, 255, 0.85);
+  --eb-shadow: 0 10px 35px rgba(15, 23, 42, 0.10);
+  --eb-card-shadow: 0 12px 40px rgba(15, 23, 42, 0.10);
 
-  --color-plum: #4a90d9;
-  --color-plum-light: #6ba6e4;
-  --color-orchid: #1e5fb4;
-  --color-toast-bg: rgba(255, 253, 247, 0.98);
-  --color-header-bg: rgba(244, 236, 221, 0.92);
-  --eb-shadow: 0 12px 32px rgba(120, 92, 30, 0.16);
-  --eb-card-shadow: 0 14px 34px rgba(120, 92, 30, 0.14);
+  --gradient-gold: linear-gradient(135deg, #a96e0e 0%, #c88916 55%, #e0a94a 100%);
+  --gradient-royal: linear-gradient(160deg, #ffffff 0%, #fcfaf5 45%, #f3f4f6 100%);
+}
 
-  --gradient-gold: linear-gradient(135deg, #7a560f 0%, #b98a1a 45%, #c1901f 100%);
-  --gradient-royal: linear-gradient(160deg, #fffdf7 0%, #f4ecdd 45%, #ede2ce 100%);
+/* Sidebar / bandeaux TOUJOURS sombres (navy) → force un texte clair quel que
+   soit le thème (sinon le texte navy du thème clair devient invisible). */
+.eb-on-navy {
+  --color-text-primary: rgba(255, 255, 255, 0.94);
+  --color-text-secondary: rgba(255, 255, 255, 0.72);
+  --color-text-muted: rgba(255, 255, 255, 0.55);
+  --color-card-bg: rgba(255, 255, 255, 0.06);
+  --color-card-border: rgba(255, 255, 255, 0.10);
+  --color-border: rgba(255, 255, 255, 0.10);
 }
 
 /* Écrans à fond sombre sur-mesure (Landing, connexion) : on fige la palette
@@ -184,33 +197,33 @@
   --lux-gold-grad: linear-gradient(135deg, #a9791a 0%, #c9972c 40%, #e4b84a 65%, #c9972c 100%);
 }
 :root[data-theme='light'] .eb-landing {
-  --color-text-primary: #211829;
-  --color-text-secondary: #463d33;
-  --color-text-muted: #5c5344;
-  --color-gold-primary: #9a6d16;
-  --color-gold-light: #c1901f;
-  --color-border: rgba(201, 151, 44, 0.36);
-  --color-card-border: rgba(120, 92, 30, 0.16);
-  --card-shadow: 0 18px 44px rgba(120, 92, 30, 0.14);
+  --color-text-primary: #162033;
+  --color-text-secondary: #3e4756;
+  --color-text-muted: #6b7280;
+  --color-gold-primary: #c88916;
+  --color-gold-light: #e0a94a;
+  --color-border: #e5e7eb;
+  --color-card-border: #e5e7eb;
+  --card-shadow: 0 10px 35px rgba(15, 23, 42, 0.08);
 
-  /* Crèmes chaudes et contrastées (moins de « blanc plat ») */
-  --eb-l-root: #f4ecdd;
-  --eb-l-sec-a: #e8dcc4;
-  --eb-l-sec-plum: #fbf6ec;
-  --eb-l-sec-deep: #ede2ce;
-  --eb-l-footer: #e4d7bd;
-  --eb-l-nav: rgba(244, 236, 221, 0.82);
-  --eb-l-hero-veil: linear-gradient(160deg, rgba(244,236,221,0.82) 0%, rgba(232,220,196,0.6) 45%, rgba(244,236,221,0.9) 100%);
-  --eb-l-cta-veil: rgba(244, 236, 221, 0.88);
-  --eb-l-card: #fffdf7;
-  --eb-l-img-bottom: linear-gradient(to top, rgba(244,236,221,0.96) 0%, rgba(244,236,221,0.42) 55%, transparent 100%);
-  --eb-l-hero-title: #211a30;
-  --eb-l-step-inner: #efe4d0;
-  --eb-l-glass-btn-bg: rgba(201, 151, 44, 0.12);
-  --eb-l-glass-btn-border: rgba(201, 151, 44, 0.38);
-  --eb-l-plum-fade-r: linear-gradient(to right, transparent 52%, #fbf6ec);
-  --eb-l-deep-fade-l: linear-gradient(to left, transparent 52%, #ede2ce);
-  --lux-gold-grad: linear-gradient(135deg, #8a6114 0%, #a9791a 45%, #c9972c 100%);
+  /* SaaS clair : off-white + blanc, sections nettes */
+  --eb-l-root: #fcfaf5;
+  --eb-l-sec-a: #f3f4f6;
+  --eb-l-sec-plum: #ffffff;
+  --eb-l-sec-deep: #f3f4f6;
+  --eb-l-footer: #f3f4f6;
+  --eb-l-nav: rgba(255, 255, 255, 0.85);
+  --eb-l-hero-veil: linear-gradient(160deg, rgba(252,250,245,0.86) 0%, rgba(243,244,246,0.64) 45%, rgba(252,250,245,0.92) 100%);
+  --eb-l-cta-veil: rgba(252, 250, 245, 0.9);
+  --eb-l-card: #ffffff;
+  --eb-l-img-bottom: linear-gradient(to top, rgba(252,250,245,0.96) 0%, rgba(252,250,245,0.42) 55%, transparent 100%);
+  --eb-l-hero-title: #162033;
+  --eb-l-step-inner: #f3f4f6;
+  --eb-l-glass-btn-bg: rgba(59, 130, 246, 0.06);
+  --eb-l-glass-btn-border: rgba(22, 32, 51, 0.16);
+  --eb-l-plum-fade-r: linear-gradient(to right, transparent 52%, #ffffff);
+  --eb-l-deep-fade-l: linear-gradient(to left, transparent 52%, #f3f4f6);
+  --lux-gold-grad: linear-gradient(135deg, #a96e0e 0%, #c88916 55%, #e0a94a 100%);
 }
 
 /* Bandeau ANTHRACITE au sein de la Landing (contraste luxe) — texte clair forcé,
@@ -368,14 +381,15 @@ h3 {
   .btn-gold {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, var(--color-gold-primary), var(--color-gold-light));
-    color: #1a1a2e;
+    background: var(--color-gold-primary);
+    color: #162033;
     font-weight: 700;
-    border-radius: 8px;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-    box-shadow: 0 4px 20px rgba(201, 168, 76, 0.3);
+    border-radius: 10px;
+    transition: transform 0.2s ease, box-shadow 0.25s ease, background 0.2s ease;
+    box-shadow: 0 6px 18px rgba(200, 137, 22, 0.28);
     cursor: pointer;
   }
+  .btn-gold:hover { background: var(--color-gold-dark); }
   .btn-gold:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 30px rgba(212, 175, 55, 0.45), 0 0 12px rgba(212, 175, 55, 0.5);
