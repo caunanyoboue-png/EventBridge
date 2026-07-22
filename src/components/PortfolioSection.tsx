@@ -395,7 +395,7 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
               <select value={mCategory} onChange={e => setMCategory(e.target.value)} style={inp}>
                 <option value="">Sélectionner...</option>
                 {CATEGORIES.map(c => (
-                  <option key={c} value={c} style={{ background: '#261642' }}>{c}</option>
+                  <option key={c} value={c} style={{ background: 'var(--color-bg-primary)' }}>{c}</option>
                 ))}
               </select>
             </div>

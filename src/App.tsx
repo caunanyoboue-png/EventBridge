@@ -45,7 +45,7 @@ function ProtectedRoute({ children, role }: { children: ReactNode; role?: string
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#261642' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-bg-primary)' }}>
         <div className="text-center">
           <div className="w-16 h-16 rounded-full border-2 border-t-transparent animate-spin mx-auto mb-4"
             style={{ borderColor: 'var(--color-gold-primary)', borderTopColor: 'transparent' }} />
@@ -60,7 +60,7 @@ function ProtectedRoute({ children, role }: { children: ReactNode; role?: string
   // User connecté mais profil introuvable → onboarding pour créer le profil
   if (!profile) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f0a1e' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-primary)' }}>
         <div style={{ width: 32, height: 32, borderRadius: '50%', border: '2px solid var(--color-gold-primary)',
           borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -86,7 +86,7 @@ function BrowseRoute({ children }: { children: ReactNode }) {
   const { loading } = useAuth();
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#261642' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-bg-primary)' }}>
         <div className="w-12 h-12 rounded-full border-2 border-t-transparent animate-spin"
           style={{ borderColor: 'var(--color-gold-primary)', borderTopColor: 'transparent' }} />
       </div>

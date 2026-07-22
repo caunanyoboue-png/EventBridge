@@ -13,7 +13,7 @@ export default function Dashboard() {
   }, [profile, navigate]);
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f0a1e' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-bg-primary)' }}>
       <div style={{ width: 36, height: 36, borderRadius: '50%', border: '2px solid var(--color-gold-primary)',
         borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>

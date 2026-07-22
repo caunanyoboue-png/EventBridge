@@ -127,6 +127,7 @@ function Kicker({ children }: { children: ReactNode }) {
         style={{ color: 'var(--color-gold-primary)', letterSpacing: '0.18em' }}>
         <span style={{ width: 26, height: 1, background: 'var(--color-gold-primary)', display: 'inline-block', opacity: 0.6 }} />
         {children}
+        <span style={{ width: 26, height: 1, background: 'var(--color-gold-primary)', display: 'inline-block', opacity: 0.6 }} />
       </span>
     </p>
   );
@@ -138,6 +139,7 @@ export default function Landing() {
   const reduceMotion = useReducedMotion();
 
   const [scrolled, setScrolled] = useState(false);
+  const [active, setActive] = useState('accueil');
   const [skill, setSkill] = useState('');
   const [ville, setVille] = useState('');
   const [email, setEmail] = useState('');
@@ -151,7 +153,17 @@ export default function Landing() {
   }, [user, profile, navigate]);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const ids = ['comment', 'services', 'temoignages'];
+    const onScroll = () => {
+      setScrolled(window.scrollY > 30);
+      const mid = window.scrollY + window.innerHeight * 0.35;
+      let cur = 'accueil';
+      for (const id of ids) {
+        const el = document.getElementById(id);
+        if (el && el.offsetTop <= mid) cur = id;
+      }
+      setActive(cur);
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener('scroll', onScroll);
@@ -178,42 +190,53 @@ export default function Landing() {
     setEmail('');
   }
 
-  const navLinks: [string, string][] = [['#comment', 'Comment ça marche'], ['#services', 'Services'], ['#temoignages', 'Témoignages']];
+  const navLinks = [
+    { id: 'accueil', label: 'Accueil', href: '#top' },
+    { id: 'comment', label: 'Comment ça marche', href: '#comment' },
+    { id: 'services', label: 'Services', href: '#services' },
+    { id: 'temoignages', label: 'Témoignages', href: '#temoignages' },
+  ];
 
   return (
     <div className="min-h-screen eb-landing" style={{ background: 'var(--eb-l-root)', color: 'var(--color-text-primary)' }}>
       <LuxeLoader />
 
-      {/* ── NAVBAR (sticky, blur qui s'intensifie au scroll) ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 md:px-10 flex items-center justify-between"
-        style={{
-          height: scrolled ? 64 : 82,
-          background: scrolled ? 'var(--eb-l-nav)' : 'transparent',
-          backdropFilter: scrolled ? 'blur(18px)' : 'none',
-          borderBottom: `1px solid ${scrolled ? 'var(--color-border)' : 'transparent'}`,
-          boxShadow: scrolled ? 'var(--card-shadow)' : 'none',
-          transition: 'height 0.35s ease, background 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease',
-        }}>
-        <Logo height={scrolled ? 38 : 44} />
+      {/* ── NAVBAR flottante (pilule + blur) ── */}
+      <nav className="fixed top-3 left-3 right-3 md:top-4 md:left-4 md:right-4 z-50 flex justify-center">
+        <div className="w-full max-w-6xl flex items-center justify-between gap-4 px-4 md:px-6 rounded-full"
+          style={{
+            height: 62,
+            background: 'var(--color-header-bg)',
+            backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)',
+            border: '1px solid var(--color-border)',
+            boxShadow: scrolled ? 'var(--eb-card-shadow)' : 'var(--card-shadow)',
+            transition: 'box-shadow 0.35s ease',
+          }}>
+          <div onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ cursor: 'pointer', display: 'flex' }}>
+            <Logo height={38} />
+          </div>
 
-        <div className="hidden md:flex items-center gap-9">
-          {navLinks.map(([href, label]) => (
-            <a key={href} href={href}
-              className="text-xs font-semibold tracking-widest uppercase transition-colors"
-              style={{ color: 'var(--color-text-secondary)', letterSpacing: '0.1em' }}
-              onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-gold-primary)')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-text-secondary)')}>
-              {label}
-            </a>
-          ))}
-        </div>
+          <div className="hidden md:flex items-center gap-7">
+            {navLinks.map(l => (
+              <a key={l.id} href={l.href}
+                onClick={l.id === 'accueil' ? (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } : undefined}
+                className="relative text-sm font-medium transition-colors py-1"
+                style={{ color: active === l.id ? 'var(--color-gold-primary)' : 'var(--color-text-secondary)' }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-gold-primary)')}
+                onMouseLeave={e => (e.currentTarget.style.color = active === l.id ? 'var(--color-gold-primary)' : 'var(--color-text-secondary)')}>
+                {l.label}
+                {active === l.id && <span style={{ position: 'absolute', left: 2, right: 2, bottom: -3, height: 2, borderRadius: 2, background: 'var(--color-gold-primary)' }} />}
+              </a>
+            ))}
+          </div>
 
-        <div className="flex items-center gap-3">
-          <ThemeToggle compact />
-          <button onClick={() => navigate('/onboarding')}
-            className="btn-gold px-5 md:px-6 py-2.5 rounded-lg text-sm font-bold" style={{ color: '#1a1a2e' }}>
-            Connexion
-          </button>
+          <div className="flex items-center gap-2.5">
+            <ThemeToggle compact />
+            <button onClick={() => navigate('/onboarding')}
+              className="btn-gold px-5 md:px-6 py-2.5 rounded-full text-sm font-bold" style={{ color: '#1a1a2e' }}>
+              Connexion
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -335,7 +358,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto">
           <Reveal className="text-center mb-16">
             <Kicker>Simple &amp; Rapide</Kicker>
-            <h2 className="font-display text-3xl md:text-4xl font-bold gold-rule" style={{ color: 'var(--color-text-primary)' }}>Trois étapes. Une équipe de rêve.</h2>
+            <h2 className="font-display text-3xl md:text-4xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Trois étapes. Une équipe de rêve.</h2>
             <p className="mt-8 text-base" style={{ color: 'var(--color-text-muted)' }}>De votre idée à l'événement parfait, sans détour</p>
           </Reveal>
 
@@ -426,7 +449,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto">
           <Reveal className="text-center mb-14">
             <Kicker>Nos Prestations</Kicker>
-            <h2 className="font-display text-3xl md:text-4xl font-bold gold-rule" style={{ color: 'var(--color-text-primary)' }}>L'excellence, dans chaque métier</h2>
+            <h2 className="font-display text-3xl md:text-4xl font-bold" style={{ color: 'var(--color-text-primary)' }}>L'excellence, dans chaque métier</h2>
             <p className="mt-8 text-base" style={{ color: 'var(--color-text-muted)' }}>Du service en salle à la sécurité, chaque prestation est portée par des professionnels passionnés</p>
           </Reveal>
 
@@ -492,7 +515,7 @@ export default function Landing() {
         <div className="max-w-3xl mx-auto text-center">
           <Reveal className="mb-12">
             <Kicker>Témoignages</Kicker>
-            <h2 className="font-display text-3xl md:text-4xl font-bold gold-rule" style={{ color: 'var(--color-text-primary)' }}>La confiance se gagne, événement après événement</h2>
+            <h2 className="font-display text-3xl md:text-4xl font-bold" style={{ color: 'var(--color-text-primary)' }}>La confiance se gagne, événement après événement</h2>
           </Reveal>
 
           <div className="relative" style={{ minHeight: 300 }}>

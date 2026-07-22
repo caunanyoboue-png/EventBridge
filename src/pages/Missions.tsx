@@ -180,7 +180,7 @@ function MissionCard({ mission: m, onApply, onView, isFreelance, userLat, userLn
       </div>
 
       <div className="mb-4">
-        <div className="w-full h-1 rounded-full" style={{ background: '#52367c' }}>
+        <div className="w-full h-1 rounded-full" style={{ background: 'var(--color-surface-strong)' }}>
           <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: 'linear-gradient(to right,var(--color-gold-primary),var(--color-gold-light))' }} />
         </div>
       </div>

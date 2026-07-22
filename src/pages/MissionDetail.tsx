@@ -385,7 +385,7 @@ export default function MissionDetail() {
 
           {/* Progress bar */}
           <div className="mb-6">
-            <div className="w-full h-2 rounded-full" style={{ background: '#52367c' }}>
+            <div className="w-full h-2 rounded-full" style={{ background: 'var(--color-surface-strong)' }}>
               <div className="h-full rounded-full" style={{ width: `${(slots_filled / mission.slots_total) * 100}%`, background: 'linear-gradient(to right,var(--color-gold-primary),var(--color-gold-light))' }} />
             </div>
           </div>

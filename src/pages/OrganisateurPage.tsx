@@ -152,7 +152,7 @@ export default function OrganisateurPage() {
       </section>
 
       {/* AVANTAGES */}
-      <section className="py-24 px-6" style={{ background: '#0f0520' }}>
+      <section className="py-24 px-6" style={{ background: 'var(--color-bg-primary)' }}>
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--color-gold-primary)', letterSpacing: '0.15em' }}>Pourquoi EventBridge</p>
@@ -175,7 +175,7 @@ export default function OrganisateurPage() {
       </section>
 
       {/* COMMENT ÇA MARCHE */}
-      <section className="py-24 px-6" style={{ background: '#1c1132' }}>
+      <section className="py-24 px-6" style={{ background: 'var(--color-bg-secondary)' }}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--color-gold-primary)', letterSpacing: '0.15em' }}>Simple & Rapide</p>
@@ -250,7 +250,7 @@ export default function OrganisateurPage() {
       </section>
 
       {/* TÉMOIGNAGES */}
-      <section className="py-24 px-6" style={{ background: '#0f0520' }}>
+      <section className="py-24 px-6" style={{ background: 'var(--color-bg-primary)' }}>
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: 'var(--color-gold-primary)', letterSpacing: '0.15em' }}>Témoignages</p>
@@ -279,7 +279,7 @@ export default function OrganisateurPage() {
       </section>
 
       {/* CTA FINAL */}
-      <section className="py-28 px-6 text-center" style={{ background: '#1c1132' }}>
+      <section className="py-28 px-6 text-center" style={{ background: 'var(--color-bg-secondary)' }}>
         <div className="max-w-xl mx-auto">
           <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: 'var(--color-gold-primary)', letterSpacing: '0.15em' }}>Commencez aujourd'hui</p>
           <h2 className="font-display text-4xl font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
