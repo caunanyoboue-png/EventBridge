@@ -184,11 +184,11 @@
   --lux-gold-grad: linear-gradient(135deg, #a9791a 0%, #c9972c 40%, #e4b84a 65%, #c9972c 100%);
 }
 :root[data-theme='light'] .eb-landing {
-  --color-text-primary: #211a30;
-  --color-text-secondary: #574f61;
-  --color-text-muted: #837a8c;
-  --color-gold-primary: #a9791a;
-  --color-gold-light: #c9972c;
+  --color-text-primary: #211829;
+  --color-text-secondary: #463d33;
+  --color-text-muted: #5c5344;
+  --color-gold-primary: #9a6d16;
+  --color-gold-light: #c1901f;
   --color-border: rgba(201, 151, 44, 0.36);
   --color-card-border: rgba(120, 92, 30, 0.16);
   --card-shadow: 0 18px 44px rgba(120, 92, 30, 0.14);
