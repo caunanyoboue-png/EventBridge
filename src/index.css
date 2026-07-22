@@ -146,42 +146,70 @@
   --color-header-bg: rgba(16, 4, 32, 0.92);
 }
 
-/* ── Landing : surfaces sur-mesure (héros voilés, sections alternées, footer) ── */
+/* ══════════════════════════════════════════════════════════════════════════
+   LANDING « LUXE » (AfriLux) — or #C9972C / anthracite #1A1A2E / crème #FAF7F0
+   Playfair (titres) + Inter (corps). Le scope .eb-landing surcharge la palette
+   pour prévisualiser le nouveau style sans toucher au reste de l'app.
+   ══════════════════════════════════════════════════════════════════════════ */
 .eb-landing {
-  --eb-l-root: #0a0416;
-  --eb-l-sec-a: #0f0520;
-  --eb-l-sec-plum: #261642;
-  --eb-l-sec-deep: #1c1132;
-  --eb-l-footer: #040110;
-  --eb-l-nav: rgba(8, 3, 18, 0.9);
-  --eb-l-hero-veil: linear-gradient(160deg, rgba(8,3,18,0.9) 0%, rgba(20,8,40,0.82) 45%, rgba(8,3,18,0.92) 100%);
-  --eb-l-cta-veil: rgba(8, 3, 18, 0.92);
-  --eb-l-card: rgba(255, 255, 255, 0.025);
-  --eb-l-img-bottom: linear-gradient(to top, rgba(8,3,18,0.94) 0%, rgba(8,3,18,0.35) 55%, rgba(8,3,18,0.1) 100%);
-  --eb-l-hero-title: #f5ede0;
-  --eb-l-step-inner: rgba(26, 10, 46, 0.95);
-  --eb-l-glass-btn-bg: rgba(255, 255, 255, 0.05);
-  --eb-l-glass-btn-border: rgba(255, 255, 255, 0.18);
-  --eb-l-plum-fade-r: linear-gradient(to right, transparent 55%, #261642);
-  --eb-l-deep-fade-l: linear-gradient(to left, transparent 55%, #1c1132);
+  font-family: 'Inter', 'Manrope', sans-serif;
+
+  /* Surcharge des variables globales dans la Landing */
+  --color-text-primary: #faf7f0;
+  --color-text-secondary: rgba(250, 247, 240, 0.72);
+  --color-text-muted: rgba(250, 247, 240, 0.5);
+  --color-gold-primary: #c9972c;
+  --color-gold-light: #e4b84a;
+  --color-border: rgba(201, 151, 44, 0.22);
+  --color-card-border: rgba(201, 151, 44, 0.18);
+  --card-shadow: 0 20px 50px rgba(0, 0, 0, 0.42);
+
+  /* Surfaces de sections */
+  --eb-l-root: #1a1a2e;
+  --eb-l-sec-a: #16161f;
+  --eb-l-sec-plum: #1a1a2e;
+  --eb-l-sec-deep: #13131f;
+  --eb-l-footer: #101018;
+  --eb-l-nav: rgba(19, 19, 27, 0.72);
+  --eb-l-hero-veil: linear-gradient(160deg, rgba(19,19,27,0.86) 0%, rgba(26,26,46,0.68) 45%, rgba(16,16,24,0.92) 100%);
+  --eb-l-cta-veil: rgba(19, 19, 27, 0.9);
+  --eb-l-card: rgba(255, 255, 255, 0.04);
+  --eb-l-img-bottom: linear-gradient(to top, rgba(16,16,24,0.95) 0%, rgba(16,16,24,0.35) 55%, transparent 100%);
+  --eb-l-hero-title: #faf7f0;
+  --eb-l-step-inner: #13131f;
+  --eb-l-glass-btn-bg: rgba(255, 255, 255, 0.06);
+  --eb-l-glass-btn-border: rgba(250, 247, 240, 0.2);
+  --eb-l-plum-fade-r: linear-gradient(to right, transparent 52%, #1a1a2e);
+  --eb-l-deep-fade-l: linear-gradient(to left, transparent 52%, #13131f);
+  --lux-gold-grad: linear-gradient(135deg, #a9791a 0%, #c9972c 40%, #e4b84a 65%, #c9972c 100%);
 }
 :root[data-theme='light'] .eb-landing {
-  --eb-l-root: #ffffff;
-  --eb-l-sec-a: #eef3f9;
-  --eb-l-sec-plum: #f4f7fb;
-  --eb-l-sec-deep: #eef3f9;
-  --eb-l-footer: #eef3f9;
-  --eb-l-nav: rgba(255, 255, 255, 0.86);
-  --eb-l-hero-veil: linear-gradient(160deg, rgba(244,247,251,0.86) 0%, rgba(233,239,247,0.72) 45%, rgba(244,247,251,0.9) 100%);
-  --eb-l-cta-veil: rgba(244, 247, 251, 0.9);
+  --color-text-primary: #1a1a2e;
+  --color-text-secondary: #4a4a5e;
+  --color-text-muted: #7a7a8c;
+  --color-gold-primary: #a9791a;
+  --color-gold-light: #c9972c;
+  --color-border: rgba(201, 151, 44, 0.30);
+  --color-card-border: rgba(26, 26, 46, 0.10);
+  --card-shadow: 0 16px 40px rgba(26, 26, 46, 0.10);
+
+  --eb-l-root: #faf7f0;
+  --eb-l-sec-a: #f3eee3;
+  --eb-l-sec-plum: #ffffff;
+  --eb-l-sec-deep: #f3eee3;
+  --eb-l-footer: #f3eee3;
+  --eb-l-nav: rgba(250, 247, 240, 0.8);
+  --eb-l-hero-veil: linear-gradient(160deg, rgba(250,247,240,0.84) 0%, rgba(243,238,227,0.66) 45%, rgba(250,247,240,0.92) 100%);
+  --eb-l-cta-veil: rgba(250, 247, 240, 0.9);
   --eb-l-card: #ffffff;
-  --eb-l-img-bottom: linear-gradient(to top, rgba(244,247,251,0.96) 0%, rgba(244,247,251,0.45) 55%, transparent 100%);
-  --eb-l-hero-title: #16223d;
-  --eb-l-step-inner: #eef3f9;
-  --eb-l-glass-btn-bg: rgba(30, 95, 180, 0.06);
-  --eb-l-glass-btn-border: rgba(30, 95, 180, 0.28);
-  --eb-l-plum-fade-r: linear-gradient(to right, transparent 55%, #f4f7fb);
-  --eb-l-deep-fade-l: linear-gradient(to left, transparent 55%, #eef3f9);
+  --eb-l-img-bottom: linear-gradient(to top, rgba(250,247,240,0.96) 0%, rgba(250,247,240,0.45) 55%, transparent 100%);
+  --eb-l-hero-title: #1a1a2e;
+  --eb-l-step-inner: #f3eee3;
+  --eb-l-glass-btn-bg: rgba(201, 151, 44, 0.08);
+  --eb-l-glass-btn-border: rgba(201, 151, 44, 0.30);
+  --eb-l-plum-fade-r: linear-gradient(to right, transparent 52%, #ffffff);
+  --eb-l-deep-fade-l: linear-gradient(to left, transparent 52%, #f3eee3);
+  --lux-gold-grad: linear-gradient(135deg, #8a6114 0%, #a9791a 45%, #c9972c 100%);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -284,6 +312,7 @@ h3 {
   50% { transform: translate(6%, 5%) scale(1.12); }
   100% { transform: translate(-4%, 8%) scale(1.05); }
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 @layer utilities {
   .animate-twinkle { animation: twinkle 3s ease-in-out infinite; }
