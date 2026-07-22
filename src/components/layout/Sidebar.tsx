@@ -99,7 +99,7 @@ export default function Sidebar({ glassy, isOpen, onClose }: SidebarProps) {
             <div style={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 13, fontWeight: 800, color: '#261642',
-              background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))' }}>
+              background: 'var(--color-gold-primary)' }}>
               {getInitials(profile.full_name || 'U')}
             </div>
           )}

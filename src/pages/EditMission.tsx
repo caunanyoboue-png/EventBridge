@@ -230,7 +230,7 @@ export default function EditMission() {
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all"
                   style={i <= step
-                    ? { background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }
+                    ? { background: 'var(--color-gold-primary)', color: '#261642' }
                     : { border: '1px solid rgba(201,168,76,0.3)', color: 'var(--color-text-muted)' }}>
                   {i < step ? <Check size={15} /> : i + 1}
                 </div>

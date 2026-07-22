@@ -265,7 +265,7 @@ export default function Profile() {
                       outline: '2px solid rgba(201,168,76,0.4)' }} />
                 : <div style={{ width: 100, height: 100, borderRadius: '50%', display: 'flex',
                     alignItems: 'center', justifyContent: 'center', fontSize: 30, fontWeight: 800,
-                    color: '#261642', background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))',
+                    color: '#261642', background: 'var(--color-gold-primary)',
                     border: '3px solid #261642', outline: '2px solid rgba(201,168,76,0.3)' }}>
                     {initials}
                   </div>
@@ -415,7 +415,7 @@ export default function Profile() {
                   <button type="button" onClick={detectLocation} disabled={locating}
                     style={{ padding: '10px 18px', borderRadius: 10, fontSize: 13, fontWeight: 600,
                       cursor: locating ? 'wait' : 'pointer',
-                      background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))',
+                      background: 'var(--color-gold-primary)',
                       color: '#261642', border: 'none', opacity: locating ? 0.7 : 1 }}>
                     {locating ? 'Localisation…' : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><MapPin size={15} /> Détecter ma position</span>}
                   </button>

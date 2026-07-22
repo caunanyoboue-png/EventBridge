@@ -129,7 +129,7 @@ export default function KycCard({ alwaysShow = false, offersLink = true }: { alw
           <button type="button" onClick={submit} disabled={busy || !recto || !verso}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 16px', borderRadius: 10,
-              background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642', fontSize: 13, fontWeight: 700,
+              background: 'var(--color-gold-primary)', color: '#261642', fontSize: 13, fontWeight: 700,
               border: 'none', cursor: busy || !recto || !verso ? 'not-allowed' : 'pointer', opacity: busy || !recto || !verso ? 0.55 : 1,
             }}>
             {busy ? 'Envoi…' : 'Envoyer'}

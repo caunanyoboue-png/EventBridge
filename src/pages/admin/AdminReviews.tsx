@@ -111,7 +111,7 @@ export default function AdminReviews() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3 flex-1">
                   <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                    style={{ background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }}>
+                    style={{ background: 'var(--color-gold-primary)', color: '#261642' }}>
                     {getInitials(r.reviewer?.full_name || '?')}
                   </div>
                   <div className="flex-1">

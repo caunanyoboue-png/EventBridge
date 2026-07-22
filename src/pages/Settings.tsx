@@ -23,7 +23,7 @@ const inp: React.CSSProperties = {
 
 const sLabel: React.CSSProperties = {
   fontSize: 11, fontWeight: 500, textTransform: 'uppercase',
-  letterSpacing: '0.8px', color: 'rgba(201,168,76,0.5)',
+  letterSpacing: '0.8px', color: 'var(--color-text-muted)',
   marginBottom: 14,
 };
 
@@ -91,8 +91,8 @@ export default function Settings() {
               style={{
                 padding: '11px', borderRadius: 10, fontSize: 14, fontWeight: 500,
                 border: 'none', cursor: (busy || !newPwd || !confirmPwd) ? 'not-allowed' : 'pointer',
-                background: `linear-gradient(135deg,${C.gold},${C.goldLt})`,
-                color: '#261642',
+                background: C.gold,
+                color: '#162033',
                 opacity: (busy || !newPwd || !confirmPwd) ? 0.6 : 1,
                 transition: 'opacity 0.15s',
               }}>

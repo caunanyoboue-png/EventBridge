@@ -185,7 +185,7 @@ export default function PublicProfile() {
                     outline: '2px solid rgba(201,168,76,0.4)' }} />
               : <div style={{ width: 100, height: 100, borderRadius: '50%', display: 'flex',
                   alignItems: 'center', justifyContent: 'center', fontSize: 30, fontWeight: 800,
-                  color: '#261642', background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))',
+                  color: '#261642', background: 'var(--color-gold-primary)',
                   border: '3px solid #261642', outline: '2px solid rgba(201,168,76,0.3)' }}>
                   {initials}
                 </div>

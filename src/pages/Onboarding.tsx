@@ -26,7 +26,7 @@ const btnGold: React.CSSProperties = {
   fontWeight: 600,
   cursor: 'pointer',
   border: 'none',
-  background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))',
+  background: 'var(--color-gold-primary)',
   color: '#261642',
   transition: 'opacity 0.15s',
 };

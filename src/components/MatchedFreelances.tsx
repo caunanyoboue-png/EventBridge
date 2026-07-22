@@ -87,7 +87,7 @@ function Row({ r, onView }: { r: Match; onView: () => void }) {
       {r.avatar_url ? (
         <img src={r.avatar_url} alt="" style={{ width: 42, height: 42, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid rgba(201,168,76,0.25)' }} />
       ) : (
-        <div style={{ width: 42, height: 42, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: '#261642', background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))' }}>
+        <div style={{ width: 42, height: 42, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: '#261642', background: 'var(--color-gold-primary)' }}>
           {getInitials(r.full_name || 'U')}
         </div>
       )}

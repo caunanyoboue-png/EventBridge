@@ -128,7 +128,7 @@ export default function AdminPayouts() {
           <button key={t} onClick={() => setTab(t)}
             className="px-4 py-2 rounded-xl text-sm font-medium"
             style={tab === t
-              ? { background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }
+              ? { background: 'var(--color-gold-primary)', color: '#261642' }
               : { background: 'var(--color-surface)', color: 'var(--color-text-secondary)', border: '1px solid rgba(201,168,76,0.2)' }}>
             {t === 'pending' ? `À verser (${pending.length})` : `Versés (${paid.length})`}
           </button>
@@ -147,7 +147,7 @@ export default function AdminPayouts() {
             <div key={p.id} className="card-glass p-5 flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3 flex-1 min-w-48">
                 <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                  style={{ background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }}>
+                  style={{ background: 'var(--color-gold-primary)', color: '#261642' }}>
                   {getInitials(p.payee?.full_name || '?')}
                 </div>
                 <div>

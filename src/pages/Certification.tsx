@@ -62,7 +62,7 @@ export default function Certification() {
               <button key={p} onClick={() => setAnnual(isAnnual)}
                 className="px-4 py-2 rounded-xl text-sm font-semibold transition-all"
                 style={active
-                  ? { background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }
+                  ? { background: 'var(--color-gold-primary)', color: '#261642' }
                   : { background: 'var(--color-surface)', color: 'var(--color-text-secondary)', border: '1px solid rgba(201,168,76,0.2)' }}>
                 {isAnnual ? 'Annuel' : 'Mensuel'}
                 {isAnnual && <span style={{ marginLeft: 6, fontSize: 11, color: active ? '#261642' : '#00C896' }}>2 mois offerts</span>}
@@ -83,9 +83,9 @@ export default function Certification() {
                 transition={{ duration: 0.45, delay: index * 0.08, ease: 'easeOut' }}
                 style={{
                   position: 'relative', display: 'flex', flexDirection: 'column',
-                  background: '#2a1a47', borderRadius: 18, padding: '26px 22px',
-                  border: plan.popular ? `2px solid ${plan.color}` : '1px solid rgba(201,168,76,0.14)',
-                  boxShadow: plan.popular ? `0 0 30px ${plan.color}22` : 'none',
+                  background: 'var(--color-bg-card)', borderRadius: 18, padding: '26px 22px',
+                  border: plan.popular ? `2px solid ${plan.color}` : '1px solid var(--color-border)',
+                  boxShadow: plan.popular ? `0 0 30px ${plan.color}22` : 'var(--card-shadow)',
                 }}>
                 {/* Badge populaire */}
                 {plan.popular && (
@@ -123,7 +123,7 @@ export default function Certification() {
                 {/* Avantages */}
                 <ul style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 9, flex: 1 }}>
                   {plan.features.map(f => (
-                    <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12.5, color: '#d8cdbb' }}>
+                    <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12.5, color: 'var(--color-text-secondary)' }}>
                       <Check size={14} color={plan.color} style={{ marginTop: 2, flexShrink: 0 }} />
                       <span style={{ textAlign: 'left' }}>{f}</span>
                     </li>

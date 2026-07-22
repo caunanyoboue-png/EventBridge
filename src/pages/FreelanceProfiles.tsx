@@ -107,7 +107,7 @@ function FreelanceCard({ profile: p, userLat, userLng }: {
           <img src={p.avatar_url} className="w-14 h-14 rounded-full object-cover" alt="" />
         ) : (
           <div className="w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg"
-            style={{ background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }}>
+            style={{ background: 'var(--color-gold-primary)', color: '#261642' }}>
             {getInitials(p.full_name)}
           </div>
         )}

@@ -449,7 +449,7 @@ export default function MissionDetail() {
                       border: '1.5px solid rgba(201,168,76,0.3)', flexShrink: 0 }} />
                 ) : (
                   <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0"
-                    style={{ background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }}>
+                    style={{ background: 'var(--color-gold-primary)', color: '#261642' }}>
                     {org.full_name?.[0]}
                   </div>
                 )}

@@ -212,7 +212,7 @@ export default function Messages() {
                       borderColor: 'rgba(201,168,76,0.05)',
                     }}>
                     <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-                      style={{ background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }}>
+                      style={{ background: 'var(--color-gold-primary)', color: '#261642' }}>
                       {other ? getInitials(other.full_name) : '?'}
                     </div>
                     <div className="overflow-hidden flex-1">
@@ -261,7 +261,7 @@ export default function Messages() {
                   Retour
                 </button>
                 <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-                  style={{ background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }}>
+                  style={{ background: 'var(--color-gold-primary)', color: '#261642' }}>
                   {selected.other_user ? getInitials((selected.other_user as Profile).full_name) : '?'}
                 </div>
                 <div style={{ flex: 1 }}>
@@ -290,7 +290,7 @@ export default function Messages() {
                       <div className="max-w-xs lg:max-w-md">
                         <div className="rounded-2xl text-sm overflow-hidden"
                           style={isMe
-                            ? { background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642', borderBottomRightRadius: 4 }
+                            ? { background: 'var(--color-gold-primary)', color: '#261642', borderBottomRightRadius: 4 }
                             : { background: 'var(--color-surface-strong)', color: 'var(--color-text-primary)', border: '1px solid rgba(201,168,76,0.1)', borderBottomLeftRadius: 4 }
                           }>
                           {/* Pièce jointe image */}

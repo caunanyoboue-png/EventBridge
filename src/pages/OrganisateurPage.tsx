@@ -192,7 +192,7 @@ export default function OrganisateurPage() {
                     <span className="font-display text-2xl font-bold text-gold-gradient">{String(idx + 1).padStart(2, '0')}</span>
                   </div>
                   <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full"
-                    style={{ background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', boxShadow: '0 0 12px rgba(201,168,76,0.4)' }} />
+                    style={{ background: 'var(--color-gold-primary)', boxShadow: '0 0 12px rgba(201,168,76,0.4)' }} />
                 </div>
                 <h3 className="font-bold text-base mb-3" style={{ color: 'var(--color-text-primary)' }}>{s.title}</h3>
                 <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-muted)', lineHeight: 1.9 }}>{s.desc}</p>

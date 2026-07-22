@@ -105,7 +105,7 @@ export default function ContractWizard({ mission, organizer, freelance, myRole, 
               <div className="flex items-center gap-1.5">
                 <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
                   style={i <= step
-                    ? { background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }
+                    ? { background: 'var(--color-gold-primary)', color: '#261642' }
                     : { border: '1px solid rgba(201,168,76,0.25)', color: 'var(--color-text-muted)' }}>
                   {i < step ? <Check size={13} /> : i + 1}
                 </div>

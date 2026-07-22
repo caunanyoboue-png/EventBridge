@@ -148,7 +148,7 @@ export default function AdminDisputes() {
             <div className="flex gap-3">
               <button onClick={() => resolve(selected.id, 'resolved')}
                 className="flex-1 py-2 rounded-xl text-sm font-bold"
-                style={{ background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }}>
+                style={{ background: 'var(--color-gold-primary)', color: '#261642' }}>
                 Résoudre
               </button>
               <button onClick={() => resolve(selected.id, 'closed')}

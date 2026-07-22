@@ -29,7 +29,7 @@ const sLabel: React.CSSProperties = {
   fontWeight: 600,
   textTransform: 'uppercase',
   letterSpacing: '0.6px',
-  color: 'rgba(212,175,55,0.65)',
+  color: 'var(--color-text-muted)',
 };
 
 // ── Ligne candidature swipable (mobile : droite = accepter, gauche = refuser) ───
@@ -314,7 +314,7 @@ export default function OrganisateurDashboard() {
   return (
     <DashboardLayout>
       {/* HERO BAND — bannière de bienvenue arrondie */}
-      <div className="eb-hero-band" style={{ position: 'relative', height: 180, overflow: 'hidden', borderRadius: 16, marginBottom: 20 }}>
+      <div className="eb-hero-band eb-on-navy" style={{ position: 'relative', height: 180, overflow: 'hidden', borderRadius: 16, marginBottom: 20 }}>
           <img src="/images/Dashboard-organisateur.jpeg" alt=""
             style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 40%' }} />
           <div style={{ position: 'absolute', inset: 0,

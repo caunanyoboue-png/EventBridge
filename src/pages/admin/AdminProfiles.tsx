@@ -146,7 +146,7 @@ export default function AdminProfiles() {
         <button onClick={() => setKycOnly(v => !v)}
           className="px-3 py-2 rounded-lg text-sm font-medium inline-flex items-center gap-1.5"
           style={kycOnly
-            ? { background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }
+            ? { background: 'var(--color-gold-primary)', color: '#261642' }
             : { background: 'rgba(245,158,11,0.12)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.3)' }}>
           <ShieldCheck size={15} /> À valider ({kycPending})
         </button>
@@ -174,7 +174,7 @@ export default function AdminProfiles() {
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                        style={{ background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }}>
+                        style={{ background: 'var(--color-gold-primary)', color: '#261642' }}>
                         {getInitials(p.full_name)}
                       </div>
                       <div>

@@ -62,7 +62,7 @@ function KpiCard({
           <div style={{ fontSize: 26, fontWeight: 500, color: C.text, lineHeight: 1 }}>{value}</div>
           <div style={{
             fontSize: 12.5, fontWeight: 600, marginTop: 6,
-            color: 'rgba(212,175,55,0.65)',
+            color: 'var(--color-text-muted)',
             textTransform: 'uppercase', letterSpacing: '0.6px',
           }}>
             {label}
@@ -181,8 +181,8 @@ export default function FreelanceDashboard() {
 
   return (
     <DashboardLayout>
-      {/* Hero band — bannière de bienvenue arrondie */}
-      <div className="eb-hero-band" style={{
+      {/* Hero band — bannière de bienvenue arrondie (toujours sombre → texte clair) */}
+      <div className="eb-hero-band eb-on-navy" style={{
         height: 180, position: 'relative', overflow: 'hidden', borderRadius: 16, marginBottom: 20,
         backgroundImage: 'url(/images/imgdefonddashboardfreelance.png)',
         backgroundSize: 'cover', backgroundPosition: 'center',
@@ -282,7 +282,7 @@ export default function FreelanceDashboard() {
               }}>
                 <div style={{
                   fontSize: 12.5, fontWeight: 600, marginBottom: 18,
-                  color: 'rgba(212,175,55,0.65)',
+                  color: 'var(--color-text-muted)',
                   textTransform: 'uppercase', letterSpacing: '0.6px',
                   display: 'flex', alignItems: 'center', gap: 8,
                 }}>
@@ -367,7 +367,7 @@ export default function FreelanceDashboard() {
               }}>
                 <div style={{
                   fontSize: 11, fontWeight: 500, marginBottom: 14,
-                  color: 'rgba(201,168,76,0.5)',
+                  color: 'var(--color-text-muted)',
                   textTransform: 'uppercase', letterSpacing: '0.8px',
                 }}>
                   Accès rapide
@@ -390,7 +390,7 @@ export default function FreelanceDashboard() {
                 }}>
                   <span style={{
                     fontSize: 11, fontWeight: 500,
-                    color: 'rgba(201,168,76,0.5)',
+                    color: 'var(--color-text-muted)',
                     textTransform: 'uppercase', letterSpacing: '0.8px',
                   }}>
                     Complétion du profil

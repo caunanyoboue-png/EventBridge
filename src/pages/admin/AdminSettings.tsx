@@ -194,7 +194,7 @@ export default function AdminSettings() {
               <div key={a.id} className="flex items-center justify-between gap-3 p-3 rounded-xl" style={{ background: 'var(--color-surface)' }}>
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                    style={{ background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }}>
+                    style={{ background: 'var(--color-gold-primary)', color: '#261642' }}>
                     {getInitials(a.full_name)}
                   </div>
                   <div>

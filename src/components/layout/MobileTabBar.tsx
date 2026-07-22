@@ -55,7 +55,7 @@ const NAV: Record<string, RoleNav> = {
 
 // Dégradé + couleur d'icône du bouton central selon le côté.
 const CENTER: Record<string, { grad: string; on: string }> = {
-  freelance:    { grad: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', on: '#261642' },
+  freelance:    { grad: 'var(--color-gold-primary)', on: '#261642' },
   organisateur: { grad: 'linear-gradient(135deg,#3b82f6,#60a5fa)', on: '#ffffff' },
   admin:        { grad: 'linear-gradient(135deg,#16a34a,#4ade80)', on: '#06281a' },
 };

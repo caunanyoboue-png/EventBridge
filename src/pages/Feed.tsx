@@ -223,7 +223,7 @@ function Avatar({ src, name, size = 40 }: { src?: string | null; name?: string |
     ? <img src={src} alt="" style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid rgba(201,168,76,0.25)' }} />
     : <div style={{ width: size, height: size, borderRadius: '50%', flexShrink: 0, display: 'flex',
         alignItems: 'center', justifyContent: 'center', fontSize: size * 0.34, fontWeight: 700,
-        color: '#261642', background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))' }}>
+        color: '#261642', background: 'var(--color-gold-primary)' }}>
         {getInitials(name || 'U')}
       </div>;
 }
@@ -360,7 +360,7 @@ function PostCard({ post, liked, reposted, onLike, onRepost, onToggleComment,
             />
             <button onClick={onCommentSubmit} disabled={!commentText.trim() || commentLoading}
               style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', border: 'none', borderRadius: '50%',
+                background: 'var(--color-gold-primary)', border: 'none', borderRadius: '50%',
                 color: '#261642', cursor: 'pointer', flexShrink: 0,
                 opacity: (!commentText.trim() || commentLoading) ? 0.45 : 1 }}>
               {commentLoading ? <Loader2 size={17} className="animate-spin" /> : <Send size={16} />}
@@ -704,7 +704,7 @@ export default function Feed() {
             <button key={key} onClick={() => setTab(key)}
               style={{ padding: '7px 18px', borderRadius: 9, fontSize: 13, fontWeight: 600,
                 cursor: 'pointer', transition: 'all 0.18s', border: 'none',
-                background: tab === key ? 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))' : 'transparent',
+                background: tab === key ? 'var(--color-gold-primary)' : 'transparent',
                 color: tab === key ? '#261642' : 'var(--color-text-secondary)' }}>
               {label}
             </button>

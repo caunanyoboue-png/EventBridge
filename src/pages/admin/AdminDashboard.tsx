@@ -13,7 +13,7 @@ import { roleColor } from '../../lib/roleTheme';
 // Cartes 100 % solides (aucun backdrop-filter / aucune couche composite) :
 // élimine les artefacts GPU mobiles tout en gardant le style premium.
 const CARD: CSSProperties = {
-  background: '#2a1a47',
+  background: 'var(--color-bg-card)',
   border: '1px solid rgba(201,168,76,0.14)',
   borderRadius: 16,
 };

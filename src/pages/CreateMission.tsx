@@ -190,7 +190,7 @@ export default function CreateMission() {
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all"
                   style={i <= step
-                    ? { background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))', color: '#261642' }
+                    ? { background: 'var(--color-gold-primary)', color: '#261642' }
                     : { border: '1px solid rgba(201,168,76,0.3)', color: 'var(--color-text-muted)' }}>
                   {i < step ? <Check size={15} /> : i + 1}
                 </div>
@@ -234,7 +234,7 @@ export default function CreateMission() {
                   })}
                 </div>
                 {roles.length > 0 && (
-                  <p className="text-xs mt-2 flex items-center gap-1.5" style={{ color: 'rgba(201,168,76,0.7)' }}>
+                  <p className="text-xs mt-2 flex items-center gap-1.5" style={{ color: 'var(--color-text-muted)' }}>
                     <Check size={13} /> {roles.length} compétence(s) sélectionnée(s)
                   </p>
                 )}
@@ -424,7 +424,7 @@ export default function CreateMission() {
                       <circle cx="9" cy="13" r="2.5" stroke="var(--color-gold-primary)" strokeWidth="1.5" strokeOpacity="0.5"/>
                       <path d="M2 20l7-5 5 4 4-3 8 5" stroke="var(--color-gold-primary)" strokeWidth="1.5" strokeOpacity="0.5" strokeLinejoin="round"/>
                     </svg>
-                    <span style={{ fontSize: 12, color: 'rgba(201,168,76,0.5)' }}>Ajouter une photo du lieu</span>
+                    <span style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>Ajouter une photo du lieu</span>
                   </label>
                 )}
               </div>

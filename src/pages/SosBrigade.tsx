@@ -1089,7 +1089,7 @@ function AvatarMini({ name, src, size = 34 }: { name?: string | null; src?: stri
     ? <img src={src} alt="" style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
     : <div style={{ width: size, height: size, borderRadius: '50%', flexShrink: 0, display: 'flex',
         alignItems: 'center', justifyContent: 'center', fontSize: size * 0.33, fontWeight: 800,
-        color: '#261642', background: 'linear-gradient(135deg,var(--color-gold-primary),var(--color-gold-light))' }}>
+        color: '#261642', background: 'var(--color-gold-primary)' }}>
         {initials}
       </div>;
 }

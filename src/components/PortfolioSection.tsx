@@ -166,7 +166,7 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
             </svg>
           </div>
           <div>
-            <p style={{ fontSize: 13, fontWeight: 600, color: 'rgba(201,168,76,0.8)', margin: 0 }}>
+            <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-muted)', margin: 0 }}>
               Nouvelle publication
             </p>
             <p style={{ fontSize: 11, color: 'var(--color-text-muted)', margin: 0, marginTop: 1 }}>
