@@ -183,7 +183,7 @@ function OrgView() {
         distanceKm(form.latitude!, form.longitude!, f.latitude as number, f.longitude as number) <= SOS_RADIUS_KM
       );
       if (targets.length > 0) {
-        await supabase.from('notifications').insert(
+        const { error: notifErr } = await supabase.from('notifications').insert(
           targets.map(f => ({
             user_id: f.id,
             type: 'sos_alert',
@@ -193,6 +193,8 @@ function OrgView() {
             is_read: false,
           }))
         );
+        // Ne plus ignorer l'échec (ex : RLS) — sinon on annonce « X notifiés » à tort.
+        if (notifErr) console.error('[SOS] échec insertion notifications :', notifErr.message);
         await supabase.from('sos_sessions').update({ notified_count: targets.length }).eq('id', data.id);
         data.notified_count = targets.length;
       }
