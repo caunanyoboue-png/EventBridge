@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
-import { getWallet, getTransactions, initiateRecharge, requestWithdraw, confirmRecharge, type Wallet as W, type WalletTx } from '../lib/walletService';
+import { getWallet, getTransactions, rechargeWallet, requestWithdraw, type Wallet as W, type WalletTx } from '../lib/walletService';
 import { formatCFA } from '../lib/utils';
 import { roleColor } from '../lib/roleTheme';
 import { IcoWallet } from '../components/icons/DoodleIcons';
@@ -40,44 +40,16 @@ export default function Wallet() {
   }
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [profile?.id]);
 
-  // Retour depuis PayDunya (?recharge=done|cancel) — le crédit arrive via le webhook (async).
-  useEffect(() => {
-    const p = new URLSearchParams(window.location.search).get('recharge');
-    if (!p) return;
-    window.history.replaceState({}, '', '/wallet');
-    if (p === 'done') {
-      toast.success('Paiement reçu — vérification du crédit…');
-      (async () => {
-        try { await confirmRecharge(); } catch { /* le webhook a peut-être déjà crédité */ }
-        await load();
-      })();
-    } else if (p === 'cancel') {
-      toast('Recharge annulée.');
-    }
-    /* eslint-disable-next-line */
-  }, []);
-
   async function doRecharge() {
     if (amount < 200) { toast.error('Montant minimum : 200 FCFA.'); return; }
     setBusy(true);
     try {
-      const url = await initiateRecharge(amount);
-      window.location.href = url; // redirection vers la page de paiement PayDunya
+      await rechargeWallet(amount);
+      toast.success('Portefeuille rechargé (simulation).');
+      await load();
     } catch (e) {
       toast.error((e as Error).message || 'Erreur');
-      setBusy(false);
-    }
-  }
-
-  async function doConfirm() {
-    setBusy(true);
-    try {
-      const r = await confirmRecharge();
-      if (r.credited) toast.success('Recharge créditée !');
-      else toast('Aucune recharge en attente à créditer.');
-      await load();
-    } catch (e) { toast.error((e as Error).message || 'Erreur'); }
-    finally { setBusy(false); }
+    } finally { setBusy(false); }
   }
 
   async function doWithdraw() {
@@ -87,7 +59,7 @@ export default function Wallet() {
     setBusy(true);
     try {
       await requestWithdraw(amount, phone.trim(), operator);
-      toast.success('Retrait envoyé — versement en cours sur votre mobile money.');
+      toast.success('Retrait enregistré (simulation).');
       await load();
     } catch (e) {
       toast.error((e as Error).message || 'Erreur');
@@ -123,8 +95,8 @@ export default function Wallet() {
         </h2>
         <p className="text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>
           {isFreelance
-            ? 'Versement automatique sur votre compte mobile money via PayDunya.'
-            : 'Paiement sécurisé par PayDunya (Orange Money, MTN, Moov, Wave, carte).'}
+            ? 'Versement sur votre compte mobile money (Orange Money, MTN, Moov, Wave).'
+            : 'Rechargez par mobile money (Orange Money, MTN, Moov, Wave).'}
         </p>
 
         {!isFreelance && (
@@ -167,15 +139,9 @@ export default function Wallet() {
           )}
           <button onClick={isFreelance ? doWithdraw : doRecharge} disabled={busy}
             className="btn-gold px-6 py-2.5 rounded-xl text-sm font-bold text-[#261642] disabled:opacity-60">
-            {busy ? '…' : isFreelance ? 'Retirer' : 'Payer avec PayDunya'}
+            {busy ? '…' : isFreelance ? 'Retirer' : 'Recharger'}
           </button>
         </div>
-        {!isFreelance && (
-          <button onClick={doConfirm} disabled={busy}
-            className="mt-3 text-xs" style={{ color: 'var(--color-text-secondary)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}>
-            Déjà payé ? Vérifier ma recharge
-          </button>
-        )}
       </div>
 
       {/* Historique */}

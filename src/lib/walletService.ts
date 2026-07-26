@@ -19,37 +19,24 @@ export async function getTransactions(userId: string, limit = 40): Promise<Walle
   return (data || []) as WalletTx[];
 }
 
-// Appel d'une Edge Function avec le JWT de l'utilisateur.
-async function callFn<T = Record<string, unknown>>(name: string, body: unknown): Promise<T> {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) throw new Error('Non authentifié');
-  const base = import.meta.env.VITE_SUPABASE_URL;
-  const res = await fetch(`${base}/functions/v1/${name}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-    body: JSON.stringify(body),
-  });
-  const d = await res.json().catch(() => ({}));
-  if (!res.ok || (d as { error?: string }).error) {
-    throw new Error((d as { error?: string }).error || 'Service indisponible');
-  }
-  return d as T;
+// ─────────────────────────────────────────────────────────────────────────────
+// MODE SIMULATION (aucun prestataire externe branché).
+// Le vrai encaissement/versement (Mobile Money via Lygos) sera ajouté plus tard :
+// la recharge passera par une Edge Function serveur + webhook, et le crédit ne se
+// fera qu'après confirmation réelle du paiement.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Recharge du portefeuille — SIMULATION : crédite directement le solde. */
+export async function rechargeWallet(amount: number): Promise<void> {
+  const { error } = await supabase.rpc('wallet_recharge', { p_amount: amount, p_ref: `sim-${Date.now()}` });
+  if (error) throw error;
 }
 
-/** Recharge via PayDunya — renvoie l'URL de paiement (l'appelant y redirige). */
-export async function initiateRecharge(amount: number): Promise<string> {
-  const d = await callFn<{ payment_url: string }>('paydunya-initiate', { amount });
-  return d.payment_url;
-}
-
-/** Retrait via PayDunya Disburse — versement automatique sur le mobile money. */
+/** Retrait des gains — SIMULATION : débite le solde et enregistre le retrait. */
 export async function requestWithdraw(amount: number, phone: string, operator: string): Promise<void> {
-  await callFn('paydunya-withdraw', { amount, phone, operator });
-}
-
-/** Filet de sécurité : vérifie la dernière recharge en attente auprès de PayDunya et crédite. */
-export async function confirmRecharge(): Promise<{ credited: boolean }> {
-  return await callFn<{ credited: boolean }>('paydunya-confirm', {});
+  const method = phone ? `${operator} · ${phone}` : operator;
+  const { error } = await supabase.rpc('wallet_withdraw', { p_amount: amount, p_method: method });
+  if (error) throw error;
 }
 
 /** Payer une mission depuis le solde (escrow). Renvoie l'id du paiement. */
