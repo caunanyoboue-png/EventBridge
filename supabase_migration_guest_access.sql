@@ -38,6 +38,7 @@ create policy missions_anon_select on public.missions
 revoke select on public.missions from anon;
 grant select (
   id, organisateur_id, title, description, service_type, skills_required,
+  roles, days, nb_days,
   ville, event_date, start_time, end_time, hourly_rate, slots_total,
   slots_filled, is_urgent, status, venue_photo_url, created_at
 ) on public.missions to anon;
