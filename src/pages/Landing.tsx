@@ -461,7 +461,7 @@ export default function Landing() {
                   <img src={s.img} alt={s.label} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                   <div className="absolute inset-0" style={{ background: 'var(--eb-l-img-bottom)' }} />
                   <div className="absolute bottom-0 left-0 right-0 p-5">
-                    <p className="text-sm font-semibold tracking-wide" style={{ color: 'var(--color-text-primary)' }}>{s.label}</p>
+                    <p className="text-sm font-semibold tracking-wide" style={{ color: 'var(--eb-l-card-label)' }}>{s.label}</p>
                     <p className="text-xs mt-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: 'var(--eb-l-card-cta)' }}>
                       Voir les talents <IconArrow />
                     </p>
