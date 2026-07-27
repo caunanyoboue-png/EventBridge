@@ -296,7 +296,7 @@ function PostCard({ post, liked, reposted, onLike, onRepost, onToggleComment,
 
       {/* Content */}
       <div style={{ padding: '0 17px 13px' }}>
-        <p style={{ fontSize: 14.5, color: '#d8cabb', lineHeight: 1.75, whiteSpace: 'pre-wrap', margin: 0 }}>
+        <p style={{ fontSize: 14.5, color: 'var(--color-text-primary)', lineHeight: 1.75, whiteSpace: 'pre-wrap', margin: 0 }}>
           {post.content}
         </p>
       </div>
@@ -345,7 +345,7 @@ function PostCard({ post, liked, reposted, onLike, onRepost, onToggleComment,
                   <Avatar src={c.author.avatar_url} name={c.author.full_name} size={30} />
                   <div style={{ background: 'var(--color-surface)', borderRadius: 12, padding: '7px 12px', flex: 1 }}>
                     <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-gold-primary)' }}>{c.author.full_name}</span>
-                    <p style={{ fontSize: 13, color: '#d8cabb', margin: '3px 0 0', lineHeight: 1.5 }}>{c.content}</p>
+                    <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', margin: '3px 0 0', lineHeight: 1.5 }}>{c.content}</p>
                   </div>
                 </div>
               ))}
