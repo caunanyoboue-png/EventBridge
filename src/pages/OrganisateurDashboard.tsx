@@ -425,9 +425,21 @@ export default function OrganisateurDashboard() {
                               whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {fl?.full_name || 'Freelance inconnu'}
                             </p>
-                            <p style={{ fontSize: 11, color: C.sec, margin: '2px 0 0' }}>
-                              {m?.title || '—'}{m?.event_date ? ` · ${formatDateShort(m.event_date)}` : ''}
-                            </p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, margin: '4px 0 0', flexWrap: 'wrap' }}>
+                              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, maxWidth: '100%',
+                                padding: '2px 8px', borderRadius: 99, background: `${C.gold}16`, border: `1px solid ${C.gold}33`,
+                                fontSize: 10.5, fontWeight: 600, color: C.gold }} title={m?.title || ''}>
+                                <Briefcase size={11} style={{ flexShrink: 0 }} />
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  {m?.title || 'Mission inconnue'}
+                                </span>
+                              </span>
+                              {m?.event_date && (
+                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10.5, color: C.sec }}>
+                                  <Calendar size={11} /> {formatDateShort(m.event_date)}
+                                </span>
+                              )}
+                            </div>
                             {fl?.avg_rating && fl.avg_rating > 0 && (
                               <div style={{ marginTop: 4 }}>
                                 <Stars n={fl.avg_rating} />
@@ -633,9 +645,11 @@ export default function OrganisateurDashboard() {
                               whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {fl?.full_name || '—'}
                             </p>
-                            <p style={{ fontSize: 11, color: C.sec, margin: '1px 0 0',
-                              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                              {m?.title || '—'}
+                            <p style={{ fontSize: 11, color: C.sec, margin: '1px 0 0', display: 'flex',
+                              alignItems: 'center', gap: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                              title={m?.title || ''}>
+                              <Briefcase size={10} style={{ color: C.gold, flexShrink: 0 }} />
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{m?.title || '—'}</span>
                             </p>
                           </div>
                           <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px',
