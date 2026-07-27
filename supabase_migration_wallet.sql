@@ -1,7 +1,7 @@
 -- ═══════════════════════════════════════════════════════════════
 -- EventBridge — Portefeuille (wallet) + escrow + versements — MODE SIMULATION
--- Aucun mouvement d'argent réel : tout est virtuel, prêt à brancher CinetPay
--- (collecte pour la recharge, transfert pour le retrait) le jour venu.
+-- Aucun mouvement d'argent réel : tout est virtuel, prêt à brancher un
+-- prestataire Mobile Money (collecte pour la recharge, transfert pour le retrait).
 -- Exécuter dans Supabase → SQL Editor → New query → Run
 -- ═══════════════════════════════════════════════════════════════
 
@@ -57,7 +57,7 @@ BEGIN
 END $$;
 
 -- ─── 5. RECHARGE (simulation) : crédite le solde de l'appelant ──
--- En réel, cette fonction sera appelée par le webhook CinetPay après une collecte réussie.
+-- En réel, cette fonction sera appelée par le webhook du prestataire de paiement après une collecte réussie.
 CREATE OR REPLACE FUNCTION public.wallet_recharge(p_amount INTEGER, p_ref TEXT DEFAULT NULL)
 RETURNS INTEGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE uid UUID := auth.uid(); newbal INTEGER;
@@ -143,7 +143,7 @@ BEGIN
 END $$;
 
 -- ─── 9. RETRAIT (simulation payout) : le freelance retire vers son mobile money ─
--- En réel, déclenchera un transfert CinetPay ; ici on débite juste le solde + on trace.
+-- En réel, déclenchera un transfert Mobile Money ; ici on débite juste le solde + on trace.
 CREATE OR REPLACE FUNCTION public.wallet_withdraw(p_amount INTEGER, p_method TEXT DEFAULT NULL)
 RETURNS INTEGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE uid UUID := auth.uid(); bal INTEGER; newbal INTEGER;

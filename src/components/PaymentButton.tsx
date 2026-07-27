@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Hourglass, Loader2, CheckCircle2, XCircle, Undo2, CreditCard, RotateCw, type LucideIcon } from 'lucide-react';
+import { Hourglass, Loader2, CheckCircle2, XCircle, Undo2, Wallet, BadgeCheck, RotateCw, type LucideIcon } from 'lucide-react';
 import { type Payment } from '../types';
-import { initiateContractPayment, fetchPaymentByContract } from '../services/paymentService';
+import { payContractFromWallet, fetchPaymentByContract } from '../services/paymentService';
+import { releaseEscrow } from '../lib/walletService';
 import { formatCFA } from '../lib/utils';
 import toast from 'react-hot-toast';
 
@@ -19,7 +20,7 @@ const STATUS_UI: Record<string, { label: string; color: string; Icon: LucideIcon
   cancelled:  { label: 'Annulé',     color: 'var(--color-text-muted)', Icon: Undo2 },
 };
 
-// Commission/net : valeurs stockées, sinon repli sur 10 % (avant redéploiement de l'Edge Function).
+// Commission/net : valeurs stockées, sinon repli sur 10 %.
 function breakdown(p: Payment) {
   const commission = p.commission_amount ?? Math.round(p.amount * 0.10);
   const net = p.net_amount ?? (p.amount - commission);
@@ -30,6 +31,7 @@ export default function PaymentButton({ contractId, amount, myRole }: Props) {
   const [payment, setPayment] = useState<Payment | null>(null);
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
+  const [releasing, setReleasing] = useState(false);
 
   useEffect(() => {
     fetchPaymentByContract(contractId)
@@ -37,39 +39,38 @@ export default function PaymentButton({ contractId, amount, myRole }: Props) {
       .finally(() => setLoading(false));
   }, [contractId]);
 
-  // Polling si processing (attend confirmation webhook)
-  useEffect(() => {
-    if (payment?.status !== 'processing') return;
-    const iv = setInterval(async () => {
-      const p = await fetchPaymentByContract(contractId);
-      setPayment(p);
-      if (p?.status === 'completed' || p?.status === 'failed') clearInterval(iv);
-    }, 5000);
-    return () => clearInterval(iv);
-  }, [payment?.status, contractId]);
-
-  // Retour depuis CinetPay (paramètre ?payment=done dans l'URL)
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('payment') === 'done') {
-      fetchPaymentByContract(contractId).then(p => setPayment(p));
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-  }, [contractId]);
-
+  // Paiement depuis le portefeuille (escrow) — la somme est bloquée jusqu'à validation.
   async function handlePay() {
     setPaying(true);
     try {
-      const url = await initiateContractPayment(contractId);
-      window.location.href = url;
+      await payContractFromWallet(contractId);
+      const p = await fetchPaymentByContract(contractId);
+      setPayment(p);
+      toast.success('Paiement effectué — somme bloquée en escrow.');
     } catch (err: unknown) {
       const raw = err instanceof Error ? err.message : 'Erreur paiement';
-      // Échec réseau pur (souvent : Edge Function non déployée / injoignable)
-      const friendly = /failed to fetch|networkerror|load failed|fetch/i.test(raw)
-        ? 'Service de paiement indisponible pour le moment. Réessayez plus tard.'
+      const friendly = /solde insuffisant/i.test(raw)
+        ? 'Solde insuffisant — rechargez votre portefeuille.'
         : raw;
       toast.error(friendly);
+    } finally {
       setPaying(false);
+    }
+  }
+
+  // Validation de la prestation : libère l'escrow vers le portefeuille du freelance.
+  async function handleRelease() {
+    if (!payment) return;
+    setReleasing(true);
+    try {
+      await releaseEscrow(payment.id);
+      const p = await fetchPaymentByContract(contractId);
+      setPayment(p);
+      toast.success('Prestation validée — gains versés au freelance.');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Erreur');
+    } finally {
+      setReleasing(false);
     }
   }
 
@@ -140,6 +141,18 @@ export default function PaymentButton({ contractId, amount, myRole }: Props) {
             <span style={{ color: 'var(--color-text-primary)' }}>{formatCFA(net)}</span>
           </div>
         </div>
+        {payment.payout_status === 'paid' ? (
+          <div className="px-4 py-2.5 rounded-xl text-xs flex items-center justify-center gap-2"
+            style={{ background: 'rgba(0,200,150,0.1)', border: '1px solid rgba(0,200,150,0.3)', color: '#00C896' }}>
+            <BadgeCheck size={15} /> Gains versés au freelance{payment.payout_at ? ' le ' + new Date(payment.payout_at).toLocaleDateString('fr-CI') : ''}
+          </div>
+        ) : (
+          <button onClick={handleRelease} disabled={releasing}
+            className="btn-gold w-full py-3 rounded-xl text-sm font-bold text-[#261642] flex items-center justify-center gap-2"
+            style={{ opacity: releasing ? 0.7 : 1 }}>
+            {releasing ? 'Versement…' : <><BadgeCheck size={16} /> Valider la prestation et verser au freelance</>}
+          </button>
+        )}
       </div>
     );
   }
@@ -170,7 +183,7 @@ export default function PaymentButton({ contractId, amount, myRole }: Props) {
         <button onClick={handlePay} disabled={paying}
           className="btn-gold w-full py-3 rounded-xl text-sm font-bold text-[#261642] flex items-center justify-center gap-2"
           style={{ opacity: paying ? 0.7 : 1 }}>
-          {paying ? 'Redirection...' : <><RotateCw size={16} /> Réessayer — {formatCFA(amount)}</>}
+          {paying ? 'Paiement…' : <><RotateCw size={16} /> Réessayer — {formatCFA(amount)}</>}
         </button>
       </div>
     );
@@ -182,8 +195,8 @@ export default function PaymentButton({ contractId, amount, myRole }: Props) {
       className="btn-gold w-full py-3 rounded-xl text-sm font-bold text-[#261642] flex items-center justify-center gap-2"
       style={{ opacity: paying ? 0.7 : 1 }}>
       {paying
-        ? <><Loader2 size={16} className="animate-spin" /> Redirection vers CinetPay...</>
-        : <><CreditCard size={16} /> Payer {formatCFA(amount)} via CinetPay</>}
+        ? <><Loader2 size={16} className="animate-spin" /> Paiement…</>
+        : <><Wallet size={16} /> Payer {formatCFA(amount)} depuis mon portefeuille</>}
     </button>
   );
 }

@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════
--- EventBridge — Module Paiements CinetPay
+-- EventBridge — Module Paiements (escrow via portefeuille)
 -- Exécuter dans Supabase → SQL Editor → New query → Run
 -- ═══════════════════════════════════════════════════════════════
 
@@ -15,9 +15,7 @@ CREATE TABLE IF NOT EXISTS public.payments (
   currency         TEXT NOT NULL DEFAULT 'XOF',
   description      TEXT,
 
-  transaction_id   TEXT UNIQUE NOT NULL,       -- ID généré côté Edge Function
-  cinetpay_token   TEXT,                       -- token retourné par CinetPay
-  payment_url      TEXT,                       -- URL de paiement CinetPay
+  transaction_id   TEXT UNIQUE NOT NULL,       -- ID unique généré côté serveur (RPC)
 
   status           TEXT NOT NULL DEFAULT 'pending'
     CHECK (status IN ('pending','processing','completed','failed','cancelled')),

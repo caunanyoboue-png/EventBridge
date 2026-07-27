@@ -5,7 +5,7 @@ export type CertificationLevel = 'none' | 'grey' | 'blue';
 export type MissionStatus = 'draft' | 'open' | 'in_progress' | 'completed' | 'cancelled' | 'disputed';
 export type ApplicationStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn';
 export type PaymentStatus = 'pending' | 'escrow' | 'released' | 'refunded' | 'failed';
-export type CinetPayStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
+export type PaymentTxStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
 
 export interface Payment {
   id: string;
@@ -17,9 +17,7 @@ export interface Payment {
   currency: string;
   description?: string;
   transaction_id: string;
-  cinetpay_token?: string;
-  payment_url?: string;
-  status: CinetPayStatus;
+  status: PaymentTxStatus;
   paid_at?: string;
   // Commission plateforme + versement freelance
   commission_amount?: number;

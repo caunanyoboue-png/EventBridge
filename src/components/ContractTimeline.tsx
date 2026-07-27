@@ -47,7 +47,7 @@ export default function ContractTimeline({ contract }: { contract: Contract }) {
     { label: 'Contrat proposé', Icon: FileText, hint: 'Termes soumis aux deux parties' },
     { label: 'Accepté par les deux', Icon: Check, hint: 'Accord trouvé sur les conditions' },
     { label: 'Signé électroniquement', Icon: FileSignature, hint: 'Signatures organisateur + freelance' },
-    { label: 'Paiement effectué', Icon: CreditCard, hint: 'Encaissé via CinetPay (escrow)' },
+    { label: 'Paiement effectué', Icon: CreditCard, hint: 'Payé via le portefeuille (escrow)' },
     { label: 'Mission terminée', Icon: CheckCircle2, hint: 'Prestation réalisée et clôturée' },
   ];
 

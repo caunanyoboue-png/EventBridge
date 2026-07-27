@@ -1,25 +1,16 @@
 import { supabase } from '../lib/supabase';
 import { type Payment } from '../types';
 
-export async function initiateContractPayment(contractId: string): Promise<string> {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) throw new Error('Non authentifié');
-
-  const supabaseUrl = (supabase as unknown as { supabaseUrl: string }).supabaseUrl
-    || import.meta.env.VITE_SUPABASE_URL;
-
-  const res = await fetch(`${supabaseUrl}/functions/v1/cinetpay-initiate`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${session.access_token}`,
-    },
-    body: JSON.stringify({ contract_id: contractId }),
-  });
-
-  const data = await res.json();
-  if (!res.ok || data.error) throw new Error(data.error || 'Erreur paiement');
-  return data.payment_url as string;
+/**
+ * Paie un contrat signé depuis le solde du portefeuille de l'organisateur.
+ * Le montant (brut + indemnité) est calculé côté serveur à partir du contrat ;
+ * la somme est bloquée en escrow puis libérée au freelance à la validation.
+ * Renvoie l'id du paiement créé.
+ */
+export async function payContractFromWallet(contractId: string): Promise<string> {
+  const { data, error } = await supabase.rpc('wallet_pay_contract', { p_contract_id: contractId });
+  if (error) throw error;
+  return data as string;
 }
 
 export async function fetchPaymentByContract(contractId: string): Promise<Payment | null> {
