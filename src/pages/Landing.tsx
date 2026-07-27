@@ -289,20 +289,20 @@ export default function Landing() {
             <div className="flex flex-col sm:flex-row items-stretch gap-2 p-2 rounded-2xl mx-auto max-w-2xl mb-8"
               style={{ background: 'var(--eb-l-card)', border: '1px solid var(--color-border)', backdropFilter: 'blur(12px)', boxShadow: 'var(--card-shadow)' }}>
               <select value={skill} onChange={e => setSkill(e.target.value)} aria-label="Compétence recherchée"
-                className="flex-1 px-4 py-3 rounded-xl text-sm outline-none cursor-pointer"
+                className="flex-1 px-4 py-3 rounded-full text-sm outline-none cursor-pointer"
                 style={{ background: 'transparent', color: 'var(--color-text-primary)', border: 'none' }}>
                 <option value="" style={{ color: '#1a1a2e' }}>Quelle prestation ?</option>
                 {COMPETENCES.map(c => <option key={c} value={c} style={{ color: '#1a1a2e' }}>{c}</option>)}
               </select>
               <span className="hidden sm:block" style={{ width: 1, background: 'var(--color-border)' }} />
               <select value={ville} onChange={e => setVille(e.target.value)} aria-label="Ville"
-                className="flex-1 px-4 py-3 rounded-xl text-sm outline-none cursor-pointer"
+                className="flex-1 px-4 py-3 rounded-full text-sm outline-none cursor-pointer"
                 style={{ background: 'transparent', color: 'var(--color-text-primary)', border: 'none' }}>
                 <option value="" style={{ color: '#1a1a2e' }}>Où ?</option>
                 {VILLES.map(v => <option key={v} value={v} style={{ color: '#1a1a2e' }}>{v}</option>)}
               </select>
               <button onClick={runSearch}
-                className="btn-gold px-6 py-3 rounded-xl font-bold text-sm inline-flex items-center justify-center gap-2"
+                className="btn-gold px-6 py-3 rounded-full font-bold text-sm inline-flex items-center justify-center gap-2"
                 style={{ color: '#1a1a2e' }}>
                 <Search size={16} /> Rechercher
               </button>
@@ -312,12 +312,12 @@ export default function Landing() {
           <Reveal delay={0.52} y={18}>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button onClick={() => navigate('/onboarding')}
-                className="btn-gold px-8 py-4 rounded-xl font-bold text-sm flex items-center gap-3 justify-center w-full sm:w-auto"
+                className="btn-gold px-8 py-4 rounded-full font-bold text-sm flex items-center gap-3 justify-center w-full sm:w-auto"
                 style={{ color: '#1a1a2e', letterSpacing: '0.04em' }}>
                 Je suis Freelance <IconArrow />
               </button>
               <button onClick={() => navigate('/pour-les-organisateurs')}
-                className="px-8 py-4 rounded-xl font-bold text-sm flex items-center gap-3 justify-center w-full sm:w-auto cursor-pointer transition-colors"
+                className="px-8 py-4 rounded-full font-bold text-sm flex items-center gap-3 justify-center w-full sm:w-auto cursor-pointer transition-colors"
                 style={{ background: 'var(--eb-l-glass-btn-bg)', border: '1.5px solid var(--eb-l-glass-btn-border)', color: 'var(--color-text-primary)', backdropFilter: 'blur(8px)', letterSpacing: '0.04em' }}>
                 Je suis Organisateur
               </button>
@@ -408,7 +408,7 @@ export default function Landing() {
               ))}
             </div>
             <button onClick={() => navigate('/onboarding')}
-              className="btn-gold px-8 py-3 rounded-xl font-bold self-start flex items-center gap-2 text-sm" style={{ color: '#1a1a2e' }}>
+              className="btn-gold px-8 py-3 rounded-full font-bold self-start flex items-center gap-2 text-sm" style={{ color: '#1a1a2e' }}>
               Créer mon profil <IconArrow />
             </button>
           </Reveal>
@@ -433,7 +433,7 @@ export default function Landing() {
               ))}
             </div>
             <button onClick={() => navigate('/onboarding')}
-              className="btn-outline-gold px-8 py-3 rounded-xl font-bold self-start flex items-center gap-2 text-sm">
+              className="btn-outline-gold px-8 py-3 rounded-full font-bold self-start flex items-center gap-2 text-sm">
               Publier une mission <IconArrow />
             </button>
           </Reveal>
@@ -462,7 +462,7 @@ export default function Landing() {
                   <div className="absolute inset-0" style={{ background: 'var(--eb-l-img-bottom)' }} />
                   <div className="absolute bottom-0 left-0 right-0 p-5">
                     <p className="text-sm font-semibold tracking-wide" style={{ color: 'var(--color-text-primary)' }}>{s.label}</p>
-                    <p className="text-xs mt-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: 'var(--color-gold-primary)' }}>
+                    <p className="text-xs mt-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: 'var(--eb-l-card-cta)' }}>
                       Voir les talents <IconArrow />
                     </p>
                   </div>
@@ -504,7 +504,7 @@ export default function Landing() {
           </div>
           <Reveal delay={0.4} y={16}>
             <button onClick={() => navigate('/onboarding')}
-              className="px-10 py-4 rounded-xl font-bold text-sm tracking-wide cursor-pointer transition-transform hover:scale-[1.03]"
+              className="px-10 py-4 rounded-full font-bold text-sm tracking-wide cursor-pointer transition-transform hover:scale-[1.03]"
               style={{ background: 'white', color: '#b91c1c', letterSpacing: '0.04em' }}>Déclencher une alerte S.O.S</button>
           </Reveal>
         </div>
@@ -575,9 +575,9 @@ export default function Landing() {
             <label htmlFor="nl-email" className="sr-only">Adresse email</label>
             <input id="nl-email" type="email" value={email} onChange={e => setEmail(e.target.value)}
               placeholder="votre@email.com" required
-              className="flex-1 px-5 py-3.5 rounded-xl text-sm outline-none"
+              className="flex-1 px-5 py-3.5 rounded-full text-sm outline-none"
               style={{ background: 'var(--eb-l-card)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }} />
-            <button type="submit" className="btn-gold px-7 py-3.5 rounded-xl font-bold text-sm" style={{ color: '#1a1a2e' }}>S'abonner</button>
+            <button type="submit" className="btn-gold px-7 py-3.5 rounded-full font-bold text-sm" style={{ color: '#1a1a2e' }}>S'abonner</button>
           </form>
         </Reveal>
       </section>
@@ -604,10 +604,10 @@ export default function Landing() {
           <Reveal delay={0.2} y={18}>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button onClick={() => navigate('/onboarding')}
-                className="btn-gold px-10 py-4 rounded-xl font-bold text-sm flex items-center gap-2 justify-center" style={{ color: '#1a1a2e', letterSpacing: '0.04em' }}>
+                className="btn-gold px-10 py-4 rounded-full font-bold text-sm flex items-center gap-2 justify-center" style={{ color: '#1a1a2e', letterSpacing: '0.04em' }}>
                 Commencer maintenant <IconArrow />
               </button>
-              <button onClick={() => navigate('/pour-les-organisateurs')} className="btn-outline-gold px-10 py-4 rounded-xl font-bold text-sm">En savoir plus</button>
+              <button onClick={() => navigate('/pour-les-organisateurs')} className="btn-outline-gold px-10 py-4 rounded-full font-bold text-sm">En savoir plus</button>
             </div>
           </Reveal>
         </div>

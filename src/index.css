@@ -188,6 +188,7 @@
   --eb-l-cta-veil: rgba(19, 19, 27, 0.9);
   --eb-l-card: rgba(255, 255, 255, 0.04);
   --eb-l-img-bottom: linear-gradient(to top, rgba(16,16,24,0.95) 0%, rgba(16,16,24,0.35) 55%, transparent 100%);
+  --eb-l-card-cta: #e4b84a;
   --eb-l-hero-title: #faf7f0;
   --eb-l-step-inner: #13131f;
   --eb-l-glass-btn-bg: rgba(255, 255, 255, 0.06);
@@ -216,7 +217,8 @@
   --eb-l-hero-veil: linear-gradient(160deg, rgba(252,250,245,0.86) 0%, rgba(243,244,246,0.64) 45%, rgba(252,250,245,0.92) 100%);
   --eb-l-cta-veil: rgba(252, 250, 245, 0.9);
   --eb-l-card: #ffffff;
-  --eb-l-img-bottom: linear-gradient(to top, rgba(252,250,245,0.96) 0%, rgba(252,250,245,0.42) 55%, transparent 100%);
+  --eb-l-img-bottom: linear-gradient(to top, rgba(200,137,22,0.96) 0%, rgba(224,169,74,0.5) 50%, transparent 100%);
+  --eb-l-card-cta: #162033;
   --eb-l-hero-title: #162033;
   --eb-l-step-inner: #f3f4f6;
   --eb-l-glass-btn-bg: rgba(59, 130, 246, 0.06);
