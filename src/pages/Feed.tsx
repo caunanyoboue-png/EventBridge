@@ -615,7 +615,23 @@ export default function Feed() {
     if (error) {
       if (error.code === '23505') toast.error('Vous avez déjà postulé');
       else toast.error('Erreur lors de la candidature');
-    } else toast.success('Candidature envoyée !');
+    } else {
+      toast.success('Candidature envoyée !');
+      // Prévenir l'organisateur AVEC le titre de la mission concernée
+      const m = missions.find(x => x.id === missionId);
+      if (m) {
+        try {
+          await supabase.from('notifications').insert({
+            user_id: m.organisateur_id,
+            type: 'new_application',
+            title: 'Nouvelle candidature',
+            body: `${profile.full_name} a postulé à votre mission "${m.title}"`,
+            data: { mission_id: m.id, freelance_id: profile.id },
+            is_read: false,
+          });
+        } catch { /* la notification ne doit jamais bloquer la candidature */ }
+      }
+    }
   }
 
   const isFreelance = profile?.role === 'freelance';
