@@ -4,7 +4,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import type { CSSProperties } from 'react';
 
-const LOGO_SRC = '/logo.png.jpeg';
+const LOGO_SRC = '/logo.png';
 
 function imgStyle(radius: number): CSSProperties {
   return {
