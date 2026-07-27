@@ -24,7 +24,11 @@ export function formatRelative(date: string | Date): string {
 }
 
 export function formatCFA(amount: number): string {
-  return new Intl.NumberFormat('fr-CI').format(amount) + ' FCFA';
+  // Le format fr-CI insère une espace fine insécable (U+202F) comme séparateur de
+  // milliers ; on la normalise (ainsi que l'insécable U+00A0) en espace ASCII, sinon
+  // jsPDF (police standard, hors Latin-1) casse TOUT le texte du montant dans le PDF.
+  const n = new Intl.NumberFormat('fr-CI').format(amount).replace(/[  ]/g, ' ');
+  return n + ' FCFA';
 }
 
 export function getInitials(name: string): string {
