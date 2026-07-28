@@ -148,6 +148,7 @@ export default function OrganisateurDashboard() {
   const [hovBtn, setHovBtn] = useState<number | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [contractPrompt, setContractPrompt] = useState<{ missionId: string; freelanceId: string; freelanceName: string } | null>(null);
 
   // Stats dérivées
   const totalMissions    = missions.length;
@@ -248,6 +249,10 @@ export default function OrganisateurDashboard() {
               is_read: false,
             });
           } catch { /* notification failure must never block */ }
+          // Acceptation → proposer immédiatement la génération du contrat (obligatoire pour payer)
+          if (action === 'accepted') {
+            setContractPrompt({ missionId: m.id, freelanceId: fl.id, freelanceName: fl.full_name || 'ce freelance' });
+          }
         }
       }
       fetchAll();
@@ -758,6 +763,35 @@ export default function OrganisateurDashboard() {
             </div>
           </div>
         </div>
+
+        {/* Proposition de contrat (obligatoire pour payer) — après acceptation d'un freelance */}
+        {contractPrompt && (
+          <div style={{ position: 'fixed', inset: 0, zIndex: 9000, background: 'rgba(10,8,20,0.6)', backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+            onClick={() => setContractPrompt(null)}>
+            <div style={{ maxWidth: 440, width: '100%', background: C.card, border: `1px solid ${C.gold}40`, borderRadius: 18, padding: '28px 24px', textAlign: 'center' }}
+              onClick={e => e.stopPropagation()}>
+              <div style={{ width: 56, height: 56, borderRadius: '50%', margin: '0 auto 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: `${C.gold}18`, color: C.gold }}>
+                <FileText size={26} />
+              </div>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 8 }}>Freelance accepté ✓</h3>
+              <p style={{ fontSize: 13.5, color: C.sec, lineHeight: 1.65, marginBottom: 20 }}>
+                Pour payer <strong style={{ color: C.text }}>{contractPrompt.freelanceName}</strong> via la plateforme, vous devez générer un <strong style={{ color: C.text }}>contrat CDD</strong>.<br />
+                <span style={{ color: C.gold, fontWeight: 600 }}>C'est obligatoire</span> : sans contrat signé, aucun paiement (séquestre sécurisé) n'est possible.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <button onClick={() => { const p = contractPrompt; setContractPrompt(null); navigate(`/MissionDetail?id=${p.missionId}&contract=${p.freelanceId}`); }}
+                  className="btn-gold" style={{ padding: '12px', borderRadius: 12, fontSize: 14, fontWeight: 700, color: '#261642', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <FileText size={16} /> Générer le contrat maintenant
+                </button>
+                <button onClick={() => setContractPrompt(null)}
+                  style={{ padding: '10px', borderRadius: 12, fontSize: 13, fontWeight: 500, background: 'transparent', border: `1px solid ${C.bdr}`, color: C.sec, cursor: 'pointer' }}>
+                  Plus tard
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
     </DashboardLayout>
   );
 }

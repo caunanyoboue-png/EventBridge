@@ -141,6 +141,14 @@ export default function MissionDetail() {
     }
   }, [missionId, profile]);
 
+  // Ouverture auto du wizard de contrat après acceptation (arrivée depuis le dashboard : ?contract=<freelanceId>)
+  const wizardFor = params.get('contract');
+  useEffect(() => {
+    if (!wizardFor || contract || !acceptedFreelances.length) return;
+    const fl = acceptedFreelances.find(f => f.id === wizardFor);
+    if (fl) { setSelectedFreelance(fl); setShowWizard(true); }
+  }, [wizardFor, contract, acceptedFreelances]);
+
   async function fetchMission() {
     // Invité : colonnes sûres (pas d'adresse exacte, ni GPS, ni contact organisateur)
     const cols = isGuest
