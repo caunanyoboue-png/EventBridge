@@ -622,8 +622,9 @@ export default function MissionDetail() {
             {contract ? (
               <ContractCard contract={contract} myRole="organizer" />
             ) : acceptedFreelances.length === 0 ? (
-              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
                 Acceptez au moins une candidature pour générer un contrat.
+                <br /><span style={{ color: 'var(--color-text-muted)' }}>Le paiement du freelance passe obligatoirement par un contrat signé (paiement sécurisé bloqué en séquestre).</span>
               </p>
             ) : showWizard && !selectedFreelance ? (
               <div className="space-y-2">

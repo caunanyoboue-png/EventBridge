@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { FileText, Check, Pencil, X, Hourglass, FileSignature, CreditCard, BellRing } from 'lucide-react';
+import { FileText, Check, Pencil, X, Hourglass, FileSignature, CreditCard, BellRing, Lock } from 'lucide-react';
 import { type Contract, type ContractNegotiationEntry } from '../../types';
 import { formatCFA } from '../../lib/utils';
 import {
@@ -321,8 +321,8 @@ export default function ContractNegotiationView({ contract: initialContract, myR
         </div>
       )}
 
-      {/* Section paiement (contrat signé) */}
-      {contract.status === 'signed' && (
+      {/* Section paiement — le paiement passe OBLIGATOIREMENT par un contrat signé */}
+      {contract.status === 'signed' ? (
         <div className="card-glass p-5">
           <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--color-gold-primary)' }}><CreditCard size={16} /> Paiement</h3>
           <PaymentButton
@@ -330,6 +330,13 @@ export default function ContractNegotiationView({ contract: initialContract, myR
             amount={contract.total_gross + contract.end_of_contract_indemnity}
             myRole={myRole}
           />
+        </div>
+      ) : (contract.status !== 'rejected' && contract.status !== 'expired') && (
+        <div className="card-glass p-5">
+          <h3 className="text-sm font-semibold mb-2 flex items-center gap-2" style={{ color: 'var(--color-text-muted)' }}><Lock size={15} /> Paiement sécurisé</h3>
+          <p className="text-xs" style={{ color: 'var(--color-text-secondary)', lineHeight: 1.65 }}>
+            Le paiement du freelance se fait <strong>uniquement</strong> via ce contrat : la somme est bloquée en séquestre à la signature, puis versée au freelance une fois la prestation validée. Il se débloque dès que <strong>les deux parties ont signé</strong>.
+          </p>
         </div>
       )}
 
