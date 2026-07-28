@@ -26,6 +26,7 @@ export interface Payment {
   payout_at?: string;
   payout_method?: string;         // ex : Wave, Orange Money, MTN MoMo
   payout_ref?: string;            // référence de la transaction de versement
+  checked_in_at?: string;         // pointage : présence du freelance confirmée (code)
   created_at: string;
   updated_at: string;
   // jointures éventuelles

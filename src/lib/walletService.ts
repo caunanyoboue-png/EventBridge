@@ -59,3 +59,16 @@ export async function refundEscrow(paymentId: string): Promise<void> {
   const { error } = await supabase.rpc('wallet_refund', { p_payment_id: paymentId });
   if (error) throw error;
 }
+
+/** Le freelance confirme sa présence sur place avec le code remis par l'organisateur. */
+export async function confirmPresence(paymentId: string, code: string): Promise<void> {
+  const { error } = await supabase.rpc('wallet_confirm_presence', { p_payment_id: paymentId, p_code: code });
+  if (error) throw error;
+}
+
+/** Code de présence d'un paiement — lisible par le SEUL organisateur (RLS). null sinon. */
+export async function getCheckinCode(paymentId: string): Promise<string | null> {
+  const { data } = await supabase.from('payment_checkins')
+    .select('code').eq('payment_id', paymentId).maybeSingle();
+  return (data as { code?: string } | null)?.code ?? null;
+}
