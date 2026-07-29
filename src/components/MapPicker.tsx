@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { MapPin } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import toast from 'react-hot-toast';
 
 // Fix leaflet default marker icons (Vite bundling issue)
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -127,17 +128,36 @@ export default function MapPicker({ lat, lng, onSelect, markerColor }: Props) {
   }, [lat, lng]);
 
   async function geolocate() {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      toast.error("La géolocalisation n'est pas disponible sur cet appareil.");
+      return;
+    }
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
       async pos => {
-        const { latitude, longitude } = pos.coords;
-        mapRef.current?.flyTo([latitude, longitude], 16, { animate: true, duration: 1 });
+        const { latitude, longitude, accuracy } = pos.coords;
+        const coarse = accuracy != null && accuracy > 3000; // > 3 km : lecture WiFi/IP peu fiable (typique sur ordinateur)
+        mapRef.current?.flyTo([latitude, longitude], coarse ? 13 : 16, { animate: true, duration: 1 });
         await placeMarker(latitude, longitude);
         setLocating(false);
+        if (coarse) {
+          toast(
+            `Position approximative (±${Math.round(accuracy / 1000)} km). Sur ordinateur, la localisation passe par le WiFi/IP et vise souvent Abidjan — déplacez l'épingle pour ajuster.`,
+            { icon: '📍', duration: 7000 }
+          );
+        }
       },
-      () => setLocating(false),
-      { enableHighAccuracy: true, timeout: 10000 }
+      err => {
+        setLocating(false);
+        const msg =
+          err.code === err.PERMISSION_DENIED
+            ? "Localisation refusée. Autorisez l'accès à votre position, puis réessayez — ou placez l'épingle à la main."
+            : err.code === err.TIMEOUT
+            ? "La localisation a expiré. Réessayez, ou placez l'épingle à la main sur la carte."
+            : "Position indisponible. Placez l'épingle à la main sur la carte.";
+        toast.error(msg);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   }
 
