@@ -3,6 +3,7 @@ import { Hourglass, Loader2, CheckCircle2, XCircle, Undo2, Wallet, BadgeCheck, R
 import { type Payment } from '../types';
 import { payContractFromWallet, fetchPaymentByContract } from '../services/paymentService';
 import { releaseEscrow, refundEscrow, confirmPresence, getCheckinCode } from '../lib/walletService';
+import { supabase } from '../lib/supabase';
 import { formatCFA } from '../lib/utils';
 import toast from 'react-hot-toast';
 
@@ -51,13 +52,29 @@ export default function PaymentButton({ contractId, amount, myRole }: Props) {
     }
   }, [myRole, payment?.id, payment?.status, paidOut]);
 
-  async function reload() { setPayment(await fetchPaymentByContract(contractId)); }
+  async function reload(): Promise<Payment | null> {
+    const p = await fetchPaymentByContract(contractId);
+    setPayment(p);
+    return p;
+  }
+
+  // Notification (jamais bloquante) — garde les 2 parties informées à chaque étape de l'escrow.
+  async function notify(userId: string, title: string, body: string, missionId?: string | null) {
+    try {
+      await supabase.from('notifications').insert({
+        user_id: userId, type: 'payment', title, body,
+        data: missionId ? { mission_id: missionId } : {}, is_read: false,
+      });
+    } catch { /* jamais bloquant */ }
+  }
 
   async function handlePay() {
     setPaying(true);
     try {
       await payContractFromWallet(contractId);
-      await reload();
+      const p = await reload();
+      if (p?.payee_id) notify(p.payee_id, 'Paiement en séquestre',
+        "Un organisateur a payé votre prestation (fonds bloqués en séquestre). Présentez-vous à l'événement et saisissez le code de présence remis sur place pour débloquer votre versement.", p.mission_id);
       toast.success('Paiement effectué — somme bloquée en escrow.');
     } catch (err: unknown) {
       const raw = err instanceof Error ? err.message : 'Erreur paiement';
@@ -70,7 +87,9 @@ export default function PaymentButton({ contractId, amount, myRole }: Props) {
     setReleasing(true);
     try {
       await releaseEscrow(payment.id);
-      await reload();
+      const p = await reload();
+      if (p?.payee_id) notify(p.payee_id, 'Vous avez été payé',
+        `Votre prestation a été validée : ${formatCFA(breakdown(p).net)} crédités sur votre portefeuille.`, p.mission_id);
       toast.success('Prestation validée — gains versés au freelance.');
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Erreur');
@@ -82,7 +101,9 @@ export default function PaymentButton({ contractId, amount, myRole }: Props) {
     setRefunding(true);
     try {
       await refundEscrow(payment.id);
-      await reload();
+      const p = await reload();
+      if (p?.payee_id) notify(p.payee_id, 'Paiement annulé',
+        "Le paiement de votre prestation a été annulé (présence non confirmée). Si vous étiez présent, contactez l'organisateur ou ouvrez un litige.", p.mission_id);
       toast.success('Remboursé — la somme est revenue sur votre portefeuille.');
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Erreur');
@@ -94,8 +115,10 @@ export default function PaymentButton({ contractId, amount, myRole }: Props) {
     setChecking(true);
     try {
       await confirmPresence(payment.id, code.trim());
-      await reload();
+      const p = await reload();
       setCode('');
+      if (p?.payer_id) notify(p.payer_id, 'Présence confirmée',
+        'Le freelance a confirmé sa présence. Vous pouvez valider la prestation et le payer.', p.mission_id);
       toast.success('Présence confirmée !');
     } catch (err: unknown) {
       const raw = err instanceof Error ? err.message : 'Erreur';
