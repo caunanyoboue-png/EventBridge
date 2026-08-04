@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { supabase } from '../../lib/supabase';
-import { formatRelative } from '../../lib/utils';
+import { formatRelative, formatCFA } from '../../lib/utils';
+import { releaseEscrow, refundEscrow } from '../../lib/walletService';
+import { type Payment } from '../../types';
 import { IcoShield } from '../../components/icons/DoodleIcons';
 import { roleColor } from '../../lib/roleTheme';
 import toast from 'react-hot-toast';
@@ -27,8 +29,51 @@ export default function AdminDisputes() {
   const [selected, setSelected] = useState<Dispute | null>(null);
   const [resolution, setResolution] = useState('');
   const [filterStatus, setFilterStatus] = useState('open');
+  const [escrow, setEscrow] = useState<Payment | null>(null);
+  const [acting, setActing] = useState(false);
 
   useEffect(() => { fetchDisputes(); }, []);
+
+  // Paiement en séquestre (non versé) lié au litige sélectionné — pour trancher.
+  useEffect(() => {
+    if (!selected) { setEscrow(null); return; }
+    supabase.from('payments').select('*')
+      .eq('mission_id', selected.mission_id).eq('status', 'completed').neq('payout_status', 'paid')
+      .or(`payee_id.eq.${selected.reporter_id},payee_id.eq.${selected.reported_id}`)
+      .order('created_at', { ascending: false }).limit(1)
+      .then(({ data }) => setEscrow(((data || [])[0] as Payment) ?? null));
+  }, [selected]);
+
+  // Arbitrage : verser au freelance OU rembourser l'organisateur, puis clore le litige.
+  async function resolveWithMoney(action: 'release' | 'refund') {
+    if (!selected || !escrow) return;
+    setActing(true);
+    try {
+      if (action === 'release') {
+        await releaseEscrow(escrow.id);
+        await supabase.from('notifications').insert({
+          user_id: escrow.payee_id, type: 'payment', title: 'Litige tranché — vous êtes payé',
+          body: `Suite au litige, l'administration a ordonné votre versement : ${formatCFA(escrow.net_amount ?? escrow.amount)} crédités sur votre portefeuille.`,
+          data: { mission_id: escrow.mission_id }, is_read: false,
+        });
+      } else {
+        await refundEscrow(escrow.id);
+        await supabase.from('notifications').insert({
+          user_id: escrow.payer_id, type: 'payment', title: 'Litige tranché — remboursé',
+          body: `Suite au litige, l'administration a ordonné votre remboursement : ${formatCFA(escrow.amount)} recrédités sur votre portefeuille.`,
+          data: { mission_id: escrow.mission_id }, is_read: false,
+        });
+      }
+      const res = resolution.trim() || (action === 'release'
+        ? "Versement au freelance ordonné par l'administration."
+        : "Remboursement de l'organisateur ordonné par l'administration.");
+      await supabase.from('disputes').update({ status: 'resolved', resolution: res }).eq('id', selected.id);
+      toast.success(action === 'release' ? 'Freelance payé · litige résolu' : 'Organisateur remboursé · litige résolu');
+      setSelected(null); setResolution(''); setEscrow(null); fetchDisputes();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Erreur');
+    } finally { setActing(false); }
+  }
 
   async function fetchDisputes() {
     const { data } = await supabase.from('disputes')
@@ -145,6 +190,23 @@ export default function AdminDisputes() {
               style={{ background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)', resize: 'none' }}
               rows={4} placeholder="Décision de l'admin..."
               value={resolution} onChange={e => setResolution(e.target.value)} />
+            {escrow && (
+              <div className="mb-4 p-3 rounded-xl" style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.25)' }}>
+                <p className="text-xs mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                  Paiement en séquestre : <strong style={{ color: 'var(--color-text-primary)' }}>{formatCFA(escrow.amount)}</strong> (net freelance {formatCFA(escrow.net_amount ?? escrow.amount)}). Tranchez l'argent :
+                </p>
+                <div className="flex gap-2">
+                  <button onClick={() => resolveWithMoney('release')} disabled={acting}
+                    className="flex-1 py-2 rounded-lg text-xs font-bold" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)' }}>
+                    {acting ? '…' : 'Verser au freelance'}
+                  </button>
+                  <button onClick={() => resolveWithMoney('refund')} disabled={acting}
+                    className="flex-1 py-2 rounded-lg text-xs font-bold" style={{ background: 'rgba(239,68,68,0.12)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)' }}>
+                    {acting ? '…' : "Rembourser l'organisateur"}
+                  </button>
+                </div>
+              </div>
+            )}
             <div className="flex gap-3">
               <button onClick={() => resolve(selected.id, 'resolved')}
                 className="flex-1 py-2 rounded-xl text-sm font-bold"

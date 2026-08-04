@@ -115,6 +115,7 @@ export default function MissionDetail() {
   const [selectedFreelance, setSelectedFreelance] = useState<Profile | null>(null);
   const [myAppStatus, setMyAppStatus] = useState<string | null>(null);
   const [completing, setCompleting] = useState(false);
+  const [escrowWarn, setEscrowWarn] = useState<{ count: number; total: number } | null>(null);
   const [reviewedIds, setReviewedIds] = useState<Set<string>>(new Set());
   const [reviewTarget, setReviewTarget] = useState<{ id: string; name: string; type: 'org_to_free' | 'free_to_org' } | null>(null);
   const [disputeTarget, setDisputeTarget] = useState<{ id: string; name: string } | null>(null);
@@ -257,8 +258,20 @@ export default function MissionDetail() {
   }
 
   // Organisateur : clôturer la mission (après l'événement)
-  async function markCompleted() {
+  async function markCompleted(force = false) {
     if (!mission || completing) return;
+    // Garde-fou : ne pas clôturer si un paiement est encore bloqué en séquestre (non versé)
+    if (!force) {
+      const { data } = await supabase.from('payments')
+        .select('amount, net_amount')
+        .eq('mission_id', mission.id).eq('status', 'completed').neq('payout_status', 'paid');
+      const held = (data || []) as { amount: number; net_amount: number | null }[];
+      if (held.length) {
+        setEscrowWarn({ count: held.length, total: held.reduce((s, p) => s + (p.net_amount ?? p.amount), 0) });
+        return;
+      }
+    }
+    setEscrowWarn(null);
     setCompleting(true);
     const { error } = await supabase.from('missions').update({ status: 'completed' }).eq('id', mission.id);
     if (error) { toast.error('Erreur lors de la clôture'); setCompleting(false); return; }
@@ -558,11 +571,29 @@ export default function MissionDetail() {
                   Confirmez au moins un freelance pour pouvoir clôturer la mission.
                 </p>
               ) : (
-                <button onClick={markCompleted} disabled={completing}
+                <button onClick={() => markCompleted()} disabled={completing}
                   className="btn-gold px-5 py-2.5 rounded-xl text-sm font-bold text-[#261642]">
                   {completing ? '…' : <span className="inline-flex items-center gap-2"><CheckCircle2 size={15} /> Marquer la mission comme terminée</span>}
                 </button>
               )
+            )}
+
+            {escrowWarn && (
+              <div className="mt-3 p-3 rounded-xl" style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                <p className="text-xs mb-2" style={{ color: '#f59e0b', lineHeight: 1.6 }}>
+                  ⚠️ {escrowWarn.count} paiement{escrowWarn.count > 1 ? 's' : ''} encore en séquestre ({formatCFA(escrowWarn.total)} non versé{escrowWarn.count > 1 ? 's' : ''}). Si vous clôturez sans verser, le freelance ne sera pas payé via la plateforme. Réglez d'abord le paiement (section contrat), ou clôturez quand même.
+                </p>
+                <div className="flex gap-2">
+                  <button onClick={() => markCompleted(true)} disabled={completing}
+                    className="px-4 py-2 rounded-lg text-xs font-bold" style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)' }}>
+                    {completing ? '…' : 'Clôturer quand même'}
+                  </button>
+                  <button onClick={() => setEscrowWarn(null)}
+                    className="px-4 py-2 rounded-lg text-xs font-semibold" style={{ background: 'transparent', color: 'var(--color-text-secondary)', border: '1px solid rgba(201,168,76,0.2)' }}>
+                    Annuler
+                  </button>
+                </div>
+              </div>
             )}
 
             {/* Freelance : en attente de la clôture */}
