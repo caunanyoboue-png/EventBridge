@@ -39,15 +39,6 @@ export async function requestWithdraw(amount: number, phone: string, operator: s
   if (error) throw error;
 }
 
-/** Payer une mission depuis le solde (escrow). Renvoie l'id du paiement. */
-export async function payMission(missionId: string, freelanceId: string, amount: number): Promise<string> {
-  const { data, error } = await supabase.rpc('wallet_pay_mission', {
-    p_mission_id: missionId, p_freelance_id: freelanceId, p_amount: amount,
-  });
-  if (error) throw error;
-  return data as string;
-}
-
 /** Libérer l'escrow vers le freelance (à la validation de la mission). */
 export async function releaseEscrow(paymentId: string): Promise<void> {
   const { error } = await supabase.rpc('wallet_release', { p_payment_id: paymentId });
