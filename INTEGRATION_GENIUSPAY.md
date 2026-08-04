@@ -37,13 +37,22 @@
 
 ## 2. Secrets Supabase (Edge Functions)
 
+Auth API **confirmée** : deux headers `X-API-Key` (clé publique `pk_…`) + `X-API-Secret`
+(clé secrète `sk_…`) — **pas** de Bearer.
+
 ```bash
-supabase secrets set GENIUSPAY_API_KEY=...          # clé marchande
-supabase secrets set GENIUSPAY_WEBHOOK_SECRET=...    # pour vérifier le HMAC-SHA256
-supabase secrets set GENIUSPAY_MODE=test            # test | live
+supabase secrets set GENIUSPAY_PUBLIC_KEY=pk_sandbox_...   # header X-API-Key
+supabase secrets set GENIUSPAY_SECRET_KEY=sk_sandbox_...   # header X-API-Secret (JAMAIS côté client)
+supabase secrets set GENIUSPAY_WEBHOOK_SECRET=whsec_...    # retourné 1 seule fois à la création du webhook
+supabase secrets set GENIUSPAY_MODE=test                  # test | live
 supabase secrets set GENIUSPAY_BASE_URL=https://pay.genius.ci/api/v1
 ```
+Header d'auth pour tout appel : `X-API-Key: <pk>`, `X-API-Secret: <sk>`, `Content-Type: application/json`.
 (`SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` sont déjà disponibles côté Edge Functions.)
+
+Signature webhook **confirmée** : headers `X-Webhook-Signature` (HMAC-SHA256),
+`X-Webhook-Timestamp`, `X-Webhook-Event`, `X-Webhook-Environment` ; formule
+`HMAC-SHA256(timestamp + '.' + json_payload, whsec)`.
 
 ---
 
@@ -307,10 +316,12 @@ recharger le solde (le webhook l'aura déjà crédité). Le reste de l'UI est in
 ---
 
 ## 8. À confirmer dans la doc GeniusPay (avant de coder)
-- [ ] Format d'authentification API (`Authorization: Bearer` ? header `api-key` ?).
+- [x] **Auth API** — headers `X-API-Key: pk_…` + `X-API-Secret: sk_…` (pas de Bearer). ✅
+- [x] **Signature webhook** — `X-Webhook-Signature` = HMAC-SHA256(`timestamp + '.' + payload`, `whsec_…`) ; headers `X-Webhook-Timestamp/Event/Environment`. ✅
+- [x] **Clés** — `pk_/sk_` `sandbox`|`live`, dans Dashboard → Paramètres → API. ✅
 - [ ] Schéma exact requête/réponse `/merchant/payments` (champs, `payment_url`, `reference`).
 - [ ] Schéma exact `/merchant/payouts` (nom des champs : `recipient`/`phone`, `provider`, `wallet_id`…).
-- [ ] Webhook : nom du header de signature, algorithme exact, liste des `event`, champ `metadata`.
+- [ ] Liste exacte des `event` du webhook + champ où se trouve notre `metadata.reference`.
 - [ ] `callback_url`/`success_url` : configuration (dashboard vs par requête).
 - [ ] Mode payout **instantané vs 24-48 h** + frais réels par opérateur.
 - [ ] Plafonds (tx max 2 000 000 FCFA, retrait min 1 000 FCFA) et KYC particulier.
