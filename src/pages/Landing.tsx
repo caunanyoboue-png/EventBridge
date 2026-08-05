@@ -312,12 +312,12 @@ export default function Landing() {
           <Reveal delay={0.52} y={18}>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button onClick={() => navigate('/onboarding')}
-                className="btn-gold px-8 py-4 rounded-full font-bold text-sm flex items-center gap-3 justify-center w-full sm:w-auto"
+                className="btn-gold px-7 py-3 rounded-full font-bold text-sm flex items-center gap-3 justify-center w-full sm:w-auto"
                 style={{ color: '#1a1a2e', letterSpacing: '0.04em' }}>
                 Je suis Freelance <IconArrow />
               </button>
               <button onClick={() => navigate('/pour-les-organisateurs')}
-                className="px-8 py-4 rounded-full font-bold text-sm flex items-center gap-3 justify-center w-full sm:w-auto cursor-pointer transition-colors"
+                className="px-7 py-3 rounded-full font-bold text-sm flex items-center gap-3 justify-center w-full sm:w-auto cursor-pointer transition-colors"
                 style={{ background: 'var(--eb-l-glass-btn-bg)', border: '1.5px solid var(--eb-l-glass-btn-border)', color: 'var(--color-text-primary)', backdropFilter: 'blur(8px)', letterSpacing: '0.04em' }}>
                 Je suis Organisateur
               </button>
@@ -504,7 +504,7 @@ export default function Landing() {
           </div>
           <Reveal delay={0.4} y={16}>
             <button onClick={() => navigate('/onboarding')}
-              className="px-10 py-4 rounded-full font-bold text-sm tracking-wide cursor-pointer transition-transform hover:scale-[1.03]"
+              className="px-8 py-3 rounded-full font-bold text-sm tracking-wide cursor-pointer transition-transform hover:scale-[1.03]"
               style={{ background: 'white', color: '#b91c1c', letterSpacing: '0.04em' }}>Déclencher une alerte S.O.S</button>
           </Reveal>
         </div>
@@ -604,10 +604,10 @@ export default function Landing() {
           <Reveal delay={0.2} y={18}>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button onClick={() => navigate('/onboarding')}
-                className="btn-gold px-10 py-4 rounded-full font-bold text-sm flex items-center gap-2 justify-center" style={{ color: '#1a1a2e', letterSpacing: '0.04em' }}>
+                className="btn-gold px-8 py-3 rounded-full font-bold text-sm flex items-center gap-2 justify-center" style={{ color: '#1a1a2e', letterSpacing: '0.04em' }}>
                 Commencer maintenant <IconArrow />
               </button>
-              <button onClick={() => navigate('/pour-les-organisateurs')} className="btn-outline-gold px-10 py-4 rounded-full font-bold text-sm">En savoir plus</button>
+              <button onClick={() => navigate('/pour-les-organisateurs')} className="btn-outline-gold px-8 py-3 rounded-full font-bold text-sm">En savoir plus</button>
             </div>
           </Reveal>
         </div>
