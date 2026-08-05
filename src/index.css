@@ -17,6 +17,7 @@
   --color-input-bg: rgba(255, 255, 255, 0.06);
   --color-option-bg: #1f1f30;
   --color-card-bg: rgba(255, 255, 255, 0.045);
+  --card-solid: #2a1a47;              /* fond de carte OPAQUE (mobile : anti-bug GPU) */
   --card-shadow: none;
 
   /* Or */
@@ -83,6 +84,7 @@
   --color-input-bg: #ffffff;
   --color-option-bg: #ffffff;
   --color-card-bg: #ffffff;
+  --card-solid: #ffffff;              /* mobile : cartes blanches en mode clair (= desktop) */
   --card-shadow: 0 10px 35px rgba(15, 23, 42, 0.08);
 
   /* Or = accent (boutons/prix/premium), pas un aplat général */
@@ -143,6 +145,7 @@
   --color-input-bg: rgba(255, 255, 255, 0.06);
   --color-option-bg: #1f1f30;
   --color-card-bg: rgba(255, 255, 255, 0.045);
+  --card-solid: #2a1a47;              /* fond de carte OPAQUE (mobile : anti-bug GPU) */
   --card-shadow: none;
   --color-gold-primary: #c9972c;
   --color-gold-light: #e4b84a;

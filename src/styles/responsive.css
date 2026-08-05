@@ -222,7 +222,7 @@
     -webkit-backdrop-filter: none !important;
   }
   .card-glass {
-    background: #2a1a47 !important; /* opaque : supprime la couche de mélange GPU */
+    background: var(--card-solid) !important; /* opaque, thème-dépendant (blanc en clair = desktop) */
   }
 }
 
