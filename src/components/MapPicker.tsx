@@ -162,7 +162,7 @@ export default function MapPicker({ lat, lng, onSelect, markerColor }: Props) {
   }
 
   return (
-    <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(201,168,76,0.2)' }}>
+    <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(201,168,76,0.2)', isolation: 'isolate' }}>
       {/* Barre d'info + bouton GPS */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',

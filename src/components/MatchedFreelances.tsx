@@ -75,8 +75,9 @@ function Row({ r, onView }: { r: Match; onView: () => void }) {
   const scoreColor = pct >= 75 ? '#00C896' : pct >= 50 ? 'var(--color-gold-primary)' : 'var(--color-text-secondary)';
 
   return (
-    <div className="flex items-center gap-3 p-3 rounded-xl"
+    <div className="p-3 rounded-xl"
       style={{ background: 'var(--color-surface)', border: '1px solid rgba(201,168,76,0.12)' }}>
+      <div className="flex items-center gap-3">
       {/* Score de compatibilité */}
       <div style={{ width: 54, flexShrink: 0, textAlign: 'center' }}>
         <div style={{ fontSize: 20, fontWeight: 800, color: scoreColor, lineHeight: 1 }}>{pct}%</div>
@@ -117,16 +118,17 @@ function Row({ r, onView }: { r: Match; onView: () => void }) {
         {r.matched_skills && r.matched_skills.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
             {r.matched_skills.slice(0, 4).map(s => (
-              <span key={s} style={{ fontSize: 10, padding: '2px 7px', borderRadius: 999, background: 'rgba(0,200,150,0.14)', color: '#00C896', border: '1px solid rgba(0,200,150,0.3)' }}>
+              <span key={s} style={{ fontSize: 10, padding: '3px 9px', borderRadius: 999, background: 'rgba(0,200,150,0.14)', color: '#00C896', border: '1px solid rgba(0,200,150,0.3)', whiteSpace: 'nowrap' }}>
                 {s}
               </span>
             ))}
           </div>
         )}
       </div>
+      </div>
 
-      {/* Action */}
-      <button onClick={onView} className="btn-outline-gold px-3 py-1.5 rounded-lg text-xs" style={{ flexShrink: 0 }}>
+      {/* Action — placée dessous pour laisser respirer les infos sur mobile */}
+      <button onClick={onView} className="btn-outline-gold w-full mt-3 py-2 rounded-lg text-xs">
         Voir le profil
       </button>
     </div>

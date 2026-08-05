@@ -51,7 +51,7 @@ export default function MapView({ lat, lng, label, zoom = 15 }: Props) {
   }, [lat, lng, zoom]);
 
   return (
-    <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(201,168,76,0.15)' }}>
+    <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(201,168,76,0.15)', isolation: 'isolate' }}>
       <div ref={containerRef} style={{ height: 220, width: '100%' }} />
       <div style={{
         padding: '7px 12px', background: 'rgba(26,18,50,0.95)',

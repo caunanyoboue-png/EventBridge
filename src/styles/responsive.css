@@ -299,6 +299,8 @@
     background: #0d0620; border-top: 1px solid rgba(201, 168, 76, 0.14);
   }
   .eb-mobile-only { display: inline-flex !important; }
+  /* Le contenu doit dégager la tab bar fixe (62px) — sinon le bas passe dessous (carte, boutons…) */
+  .layout-main { padding-bottom: 88px !important; }
 }
 .eb-tab, .eb-tab-center {
   flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
