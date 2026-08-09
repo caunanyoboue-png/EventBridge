@@ -12,7 +12,7 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
 const GP_BASE = Deno.env.get('GENIUSPAY_BASE_URL') ?? 'https://pay.genius.ci/api/v1/merchant';
-const GP_SECRET = Deno.env.get('GENIUSPAY_SECRET_KEY')!;   // sk_sandbox_… (côté serveur uniquement)
+const GP_KEY = Deno.env.get('GENIUSPAY_API_KEY')!;   // clé sandbox utilisée en Bearer (côté serveur uniquement)
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
     const gpRes = await fetch(`${GP_BASE}/payments`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GP_SECRET}`,     // Bearer sk_ (confirmé : plus de 401 au test)
+        'Authorization': `Bearer ${GP_KEY}`,        // clé sandbox en Bearer (confirmé : réponse "environment": "sandbox")
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
