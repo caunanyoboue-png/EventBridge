@@ -26,8 +26,9 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
   try {
     const jwt = req.headers.get('Authorization') ?? '';
-    const { amount } = await req.json();
+    const { amount, return_url } = await req.json();
     if (!amount || amount < 200) return json({ error: 'Montant minimum : 200 FCFA.' }, 400);
+    const returnUrl = String(return_url || 'https://event-bridge-flax.vercel.app').replace(/\/$/, '');
 
     // Client "utilisateur" (RLS + RPC avec son JWT) et client service_role
     const asUser = createClient(SUPABASE_URL, ANON, { global: { headers: { Authorization: jwt } } });
@@ -46,40 +47,44 @@ Deno.serve(async (req) => {
     const { error: cErr } = await asUser.rpc('wallet_topup_create', { p_amount: amount, p_reference: reference });
     if (cErr) return json({ error: cErr.message }, 400);
 
-    // ── Appel GeniusPay : créer la collecte ─────────────────────────────
-    // TODO GP : ajuster les noms de champs selon le Guide d'intégration.
+    // ── Appel GeniusPay : créer la collecte (POST /payments) ────────────
+    // Schéma confirmé via l'API Lab (réponse { success, data:{ id, reference,
+    // amount, currency, status, checkout_url, payment_url, customer, ... } }).
     const gpRes = await fetch(`${GP_BASE}/payments`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GP_SECRET}`,   // TODO GP : confirmer (Bearer sk vs X-API-Secret)
+        'Authorization': `Bearer ${GP_SECRET}`,     // Bearer sk_ (confirmé : plus de 401 au test)
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       body: JSON.stringify({
         amount,
         currency: 'XOF',
-        reference,                                  // notre réf
-        metadata: { reference, user_id: user.id },
+        description: 'Recharge portefeuille EventBridge',
         customer: {
           name: profile?.full_name ?? user.email,
           email: profile?.email ?? user.email,
           phone: profile?.phone ?? '',
+          country: 'CI',
         },
-        callback_url: `${SUPABASE_URL}/functions/v1/geniuspay-webhook`,
+        success_url: `${returnUrl}/wallet?recharge=done`,
+        error_url: `${returnUrl}/wallet?recharge=cancel`,
+        metadata: { reference, user_id: user.id },   // notre réf, pour rapprocher le webhook
       }),
     });
 
     const gp = await gpRes.json().catch(() => ({}));
-    if (!gpRes.ok) {
+    if (!gpRes.ok || gp?.success === false) {
       await admin.from('wallet_topups').update({ status: 'failed' }).eq('reference', reference);
       return json({ error: gp?.error?.message ?? gp?.message ?? 'Échec de la collecte GeniusPay', gp }, 400);
     }
 
-    // TODO GP : noms exacts (payment_url / checkout_url / url) et (reference / id)
-    const paymentUrl = gp?.data?.payment_url ?? gp?.payment_url ?? gp?.data?.url ?? gp?.url;
-    const externalRef = gp?.data?.reference ?? gp?.reference ?? gp?.data?.id ?? gp?.id;
+    const d = gp?.data ?? gp;
+    const paymentUrl = d?.checkout_url ?? d?.payment_url;
+    const externalRef = d?.reference ?? d?.id;       // ex : "MTX-…" — pour le rapprochement webhook
     if (externalRef) await admin.from('wallet_topups').update({ external_ref: String(externalRef) }).eq('reference', reference);
 
-    return json({ payment_url: paymentUrl, reference, raw: gp });
+    return json({ payment_url: paymentUrl, reference });
   } catch (e) {
     return json({ error: (e as Error).message ?? 'Erreur serveur' }, 500);
   }

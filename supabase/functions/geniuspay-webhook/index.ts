@@ -40,18 +40,30 @@ Deno.serve(async (req) => {
   const type = (evtType || (evt.event as string) || (evt.type as string) || '').toLowerCase();
   const data = (evt.data as Record<string, unknown>) ?? evt;
   const meta = (data.metadata as Record<string, unknown>) ?? (evt.metadata as Record<string, unknown>) ?? {};
-  const reference = String(meta.reference ?? data.reference ?? '');
-  const external = String(data.id ?? data.reference ?? '');
+  const metaRef = String(meta.reference ?? '');
+  const gpRef = String(data.reference ?? data.id ?? '');   // réf/id GeniusPay (= external_ref stocké)
+
+  // Retrouve NOTRE référence : metadata en priorité, sinon via l'external_ref (réf GeniusPay).
+  async function ourRef(table: 'wallet_topups' | 'wallet_payouts'): Promise<string> {
+    if (metaRef) return metaRef;
+    if (!gpRef) return '';
+    const { data: row } = await admin.from(table).select('reference').eq('external_ref', gpRef).maybeSingle();
+    return (row as { reference?: string } | null)?.reference ?? '';
+  }
 
   try {
     if (type.includes('payment') && type.includes('success')) {
-      if (reference) await admin.rpc('wallet_topup_apply', { p_reference: reference, p_external: external });
+      const ref = await ourRef('wallet_topups');
+      if (ref) await admin.rpc('wallet_topup_apply', { p_reference: ref, p_external: gpRef });
     } else if (type.includes('payment') && (type.includes('fail') || type.includes('cancel'))) {
-      if (reference) await admin.from('wallet_topups').update({ status: 'failed' }).eq('reference', reference);
+      const ref = await ourRef('wallet_topups');
+      if (ref) await admin.from('wallet_topups').update({ status: 'failed' }).eq('reference', ref);
     } else if (type.includes('cashout') && (type.includes('complete') || type.includes('paid') || type.includes('success'))) {
-      if (reference) await admin.rpc('wallet_payout_mark_paid', { p_reference: reference, p_external: external });
+      const ref = await ourRef('wallet_payouts');
+      if (ref) await admin.rpc('wallet_payout_mark_paid', { p_reference: ref, p_external: gpRef });
     } else if (type.includes('cashout') && type.includes('fail')) {
-      if (reference) await admin.rpc('wallet_payout_reverse', { p_reference: reference });
+      const ref = await ourRef('wallet_payouts');
+      if (ref) await admin.rpc('wallet_payout_reverse', { p_reference: ref });
     }
   } catch (_e) { /* on répond 200 quand même : GeniusPay retentera si besoin */ }
 
