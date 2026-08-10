@@ -29,6 +29,7 @@ export default function Wallet() {
   const [operator, setOperator] = useState(WITHDRAW_MODES[0].value);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [reloadTick, setReloadTick] = useState(0);
 
   const isFreelance = profile?.role === 'freelance';
   const accent = roleColor(profile?.role);
@@ -38,18 +39,35 @@ export default function Wallet() {
     const [ww, tt] = await Promise.all([getWallet(profile.id), getTransactions(profile.id)]);
     setW(ww); setTxs(tt); setLoading(false);
   }
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [profile?.id]);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [profile?.id, reloadTick]);
+
+  // Retour de paiement GeniusPay (?recharge=done|cancel) : message + rafraîchissements
+  // successifs, car le solde est crédité en asynchrone par le webhook.
+  useEffect(() => {
+    const r = new URLSearchParams(window.location.search).get('recharge');
+    if (!r) return;
+    window.history.replaceState({}, '', window.location.pathname);
+    if (r === 'done') {
+      toast.success('Paiement reçu ! Votre solde sera crédité dans un instant.');
+      const t1 = setTimeout(() => setReloadTick(t => t + 1), 3000);
+      const t2 = setTimeout(() => setReloadTick(t => t + 1), 7000);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
+    }
+    if (r === 'cancel') toast('Paiement annulé.', { icon: 'ℹ️' });
+    // eslint-disable-next-line
+  }, []);
 
   async function doRecharge() {
     if (amount < 200) { toast.error('Montant minimum : 200 FCFA.'); return; }
     setBusy(true);
     try {
-      await rechargeWallet(amount);
-      toast.success('Portefeuille rechargé (simulation).');
-      await load();
+      const url = await rechargeWallet(amount);
+      toast.loading('Redirection vers le paiement sécurisé…');
+      window.location.href = url;   // → page de paiement GeniusPay
     } catch (e) {
       toast.error((e as Error).message || 'Erreur');
-    } finally { setBusy(false); }
+      setBusy(false);
+    }
   }
 
   async function doWithdraw() {

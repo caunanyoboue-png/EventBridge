@@ -149,7 +149,7 @@ export async function generateContractPDF(contract: Contract): Promise<string> {
   y = addSection(doc, contract.has_telework_clause || contract.has_confidentiality_clause ? '7. INDEMNITÉ DE FIN DE CONTRAT' : '6. INDEMNITÉ DE FIN DE CONTRAT', y, pageW);
   y = addParagraph(doc,
     `À l'issue du présent contrat, et sauf conclusion d'un CDI, le Freelance percevra une indemnité de fin de contrat ` +
-    `égale à 3% du montant total de la rémunération brute, soit ${formatCFA(contract.end_of_contract_indemnity)} FCFA, ` +
+    `égale à 3% du montant total de la rémunération brute, soit ${formatCFA(contract.end_of_contract_indemnity)}, ` +
     `versée lors du règlement du dernier salaire. (Art. 15.8)`,
     y, pageW, pageH);
 
@@ -175,7 +175,7 @@ export async function generateContractPDF(contract: Contract): Promise<string> {
 
   if (contract.organizer_signed_at) {
     doc.setTextColor(16, 185, 129);
-    doc.text(`✓ Signé le ${fmtDate(contract.organizer_signed_at)}`, col1, y);
+    doc.text(`Signé le ${fmtDate(contract.organizer_signed_at)}`, col1, y);
   } else {
     doc.setTextColor(150, 150, 150);
     doc.text('Signature en attente', col1, y);
@@ -183,7 +183,7 @@ export async function generateContractPDF(contract: Contract): Promise<string> {
 
   if (contract.freelance_signed_at) {
     doc.setTextColor(16, 185, 129);
-    doc.text(`✓ Signé le ${fmtDate(contract.freelance_signed_at)}`, col2, y);
+    doc.text(`Signé le ${fmtDate(contract.freelance_signed_at)}`, col2, y);
   } else {
     doc.setTextColor(150, 150, 150);
     doc.text('Signature en attente', col2, y);

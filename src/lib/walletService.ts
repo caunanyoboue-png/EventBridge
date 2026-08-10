@@ -20,16 +20,32 @@ export async function getTransactions(userId: string, limit = 40): Promise<Walle
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MODE SIMULATION (aucun prestataire externe branché).
-// Le vrai encaissement/versement (Mobile Money via Lygos) sera ajouté plus tard :
-// la recharge passera par une Edge Function serveur + webhook, et le crédit ne se
-// fera qu'après confirmation réelle du paiement.
+// RECHARGE — encaissement réel via GeniusPay (Mobile Money).
+// La recharge NE crédite plus directement : l'Edge Function « geniuspay-collect »
+// crée l'intention + l'URL de paiement ; le solde n'est crédité qu'après la
+// confirmation réelle (webhook → wallet_topup_apply). Le RETRAIT reste en
+// simulation tant que le payout GeniusPay n'est pas branché.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Recharge du portefeuille — SIMULATION : crédite directement le solde. */
-export async function rechargeWallet(amount: number): Promise<void> {
-  const { error } = await supabase.rpc('wallet_recharge', { p_amount: amount, p_ref: `sim-${Date.now()}` });
-  if (error) throw error;
+/** Démarre une recharge : crée l'intention côté serveur et renvoie l'URL de paiement GeniusPay. */
+export async function rechargeWallet(amount: number): Promise<string> {
+  const { data, error } = await supabase.functions.invoke('geniuspay-collect', {
+    body: { amount, return_url: window.location.origin },
+  });
+  if (error) {
+    let msg = error.message;
+    try {
+      const ctx = (error as { context?: Response }).context;
+      if (ctx && typeof ctx.json === 'function') {
+        const b = await ctx.json() as { error?: string };
+        if (b?.error) msg = b.error;
+      }
+    } catch { /* garde le message par défaut */ }
+    throw new Error(msg || 'Échec du démarrage du paiement.');
+  }
+  const url = (data as { payment_url?: string })?.payment_url;
+  if (!url) throw new Error((data as { error?: string })?.error || 'URL de paiement indisponible.');
+  return url;
 }
 
 /** Retrait des gains — SIMULATION : débite le solde et enregistre le retrait. */

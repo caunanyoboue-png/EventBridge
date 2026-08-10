@@ -1,15 +1,19 @@
 // EventBridge — GeniusPay : webhook (confirmations collecte + payout).
 // Déployer AVEC --no-verify-jwt (appelé par GeniusPay, pas par un utilisateur).
 //
-// Sécurité : on VÉRIFIE la signature HMAC-SHA256 avant de créditer quoi que ce soit.
-// Signature = HMAC-SHA256(timestamp + '.' + body, GENIUSPAY_WEBHOOK_SECRET)
-// (headers : X-Webhook-Signature / X-Webhook-Timestamp / X-Webhook-Event).
+// Sécurité : on n'agit QUE sur un appel authentifié. Deux mécanismes acceptés :
+//   1) Signature HMAC-SHA256(timestamp + '.' + body, GENIUSPAY_WEBHOOK_SECRET)
+//      via le header X-Webhook-Signature — le plus sûr, dès que GeniusPay expose le whsec ;
+//   2) Repli : un jeton secret dans l'URL (?k=GENIUSPAY_WEBHOOK_TOKEN), utile tant que le
+//      dashboard GeniusPay ne montre pas le whsec. On configure alors l'URL du webhook ainsi :
+//      https://qotdjjyhxxkfatduukdr.supabase.co/functions/v1/geniuspay-webhook?k=<TOKEN>
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const WH_SECRET = Deno.env.get('GENIUSPAY_WEBHOOK_SECRET')!;   // whsec_…
+const WH_SECRET = Deno.env.get('GENIUSPAY_WEBHOOK_SECRET') ?? '';   // whsec_… (optionnel pour l'instant)
+const WH_TOKEN  = Deno.env.get('GENIUSPAY_WEBHOOK_TOKEN')  ?? '';   // jeton d'URL de repli
 
 async function signHmac(payload: string): Promise<{ hex: string; b64: string }> {
   const key = await crypto.subtle.importKey(
@@ -21,17 +25,33 @@ async function signHmac(payload: string): Promise<{ hex: string; b64: string }> 
   return { hex, b64 };
 }
 
+// Comparaison à temps constant (anti timing-attack) pour le jeton d'URL.
+function ctEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let r = 0;
+  for (let i = 0; i < a.length; i++) r |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return r === 0;
+}
+
 Deno.serve(async (req) => {
   const raw = await req.text();
   const sig = req.headers.get('X-Webhook-Signature') ?? '';
   const ts = req.headers.get('X-Webhook-Timestamp') ?? '';
   const evtType = req.headers.get('X-Webhook-Event') ?? '';
 
-  // Vérif signature (on accepte hex OU base64 selon le format renvoyé)
-  const { hex, b64 } = await signHmac(`${ts}.${raw}`);
-  if (!sig || (sig !== hex && sig !== b64)) {
-    return new Response('signature invalide', { status: 401 });
+  // Authentification : HMAC (si le whsec est configuré) OU jeton d'URL (?k=…) en repli.
+  let authorized = false;
+  if (WH_SECRET && sig) {
+    try {
+      const { hex, b64 } = await signHmac(`${ts}.${raw}`);
+      if (sig === hex || sig === b64) authorized = true;
+    } catch { /* secret mal formé → on tentera le jeton */ }
   }
+  if (!authorized && WH_TOKEN) {
+    const k = new URL(req.url).searchParams.get('k') ?? '';
+    if (k && ctEqual(k, WH_TOKEN)) authorized = true;
+  }
+  if (!authorized) return new Response('unauthorized', { status: 401 });
 
   let evt: Record<string, unknown> = {};
   try { evt = JSON.parse(raw); } catch { return new Response('bad json', { status: 400 }); }

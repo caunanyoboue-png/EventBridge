@@ -106,9 +106,13 @@ BEGIN
     WHERE reference = p_reference AND status <> 'paid';
 END $$;
 
--- 8) Droits : recharge/retrait libre-service COUPÉS (crédit uniquement via webhook)
+-- 8) Droits :
+--   • Recharge libre-service COUPÉE → le crédit passe uniquement par le webhook signé
+--     après paiement réel (wallet_topup_apply, service_role).
+--   • Retrait : reste en SIMULATION pour l'instant (wallet_withdraw garde son droit) ;
+--     on le coupera au profit de wallet_payout_start quand le payout GeniusPay sera branché.
 REVOKE EXECUTE ON FUNCTION public.wallet_recharge(INTEGER, TEXT) FROM authenticated;
-REVOKE EXECUTE ON FUNCTION public.wallet_withdraw(INTEGER, TEXT) FROM authenticated;
+GRANT  EXECUTE ON FUNCTION public.wallet_withdraw(INTEGER, TEXT)  TO authenticated;   -- retrait encore simulé
 GRANT  EXECUTE ON FUNCTION public.wallet_topup_apply(TEXT, TEXT)      TO service_role;
 GRANT  EXECUTE ON FUNCTION public.wallet_payout_reverse(TEXT)         TO service_role;
 GRANT  EXECUTE ON FUNCTION public.wallet_payout_mark_paid(TEXT, TEXT) TO service_role;
