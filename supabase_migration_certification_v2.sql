@@ -25,9 +25,10 @@ BEGIN
     FROM public.profiles WHERE id = uid;
   IF urole <> 'freelance' THEN RAISE EXCEPTION 'La certification est réservée aux freelances'; END IF;
 
-  -- Garde-fou : les pièces doivent avoir été envoyées (en attente de contrôle ou déjà validées).
-  IF COALESCE(kyc, 'unverified') NOT IN ('pending','verified') THEN
-    RAISE EXCEPTION 'Envoyez d''abord votre pièce d''identité, puis réglez votre certification.';
+  -- Garde-fou : l'identité doit avoir été VÉRIFIÉE par un administrateur.
+  -- Tant que ce n'est pas le cas, toute la procédure de paiement est bloquée.
+  IF COALESCE(kyc, 'unverified') <> 'verified' THEN
+    RAISE EXCEPTION 'Votre identité doit d''abord être vérifiée. Envoyez votre pièce d''identité : nos équipes la contrôlent sous 24 à 48 h.';
   END IF;
 
   price := public.certification_price(p_level, p_period, uid);
@@ -58,14 +59,12 @@ BEGIN
       is_certified             = (kyc = 'verified')
     WHERE id = uid;
 
-  -- Notification : paiement encaissé
+  -- Notification : paiement encaissé (l'identité étant déjà vérifiée, le badge est actif de suite)
   INSERT INTO public.notifications(user_id, type, title, body, data)
     VALUES (uid, 'certification',
-            'Paiement de certification reçu',
-            CASE WHEN kyc = 'verified'
-              THEN 'Votre badge est actif jusqu''au ' || to_char(new_exp, 'DD/MM/YYYY') || '.'
-              ELSE 'Vos pièces sont en cours de vérification (24 à 48 h). Votre badge s''activera dès validation.'
-            END,
+            'Certification activée',
+            'Votre badge ' || CASE p_level WHEN 'blue' THEN 'Bleu' ELSE 'Gris' END
+            || ' est actif jusqu''au ' || to_char(new_exp, 'DD/MM/YYYY') || '.',
             jsonb_build_object('level', p_level, 'period', p_period, 'amount', price, 'expires_at', new_exp));
 
   RETURN new_exp;

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, BadgeCheck, Crown, Star, Wallet as WalletIcon } from 'lucide-react';
+import { Check, BadgeCheck, Crown, Star, Wallet as WalletIcon, ShieldCheck, Clock, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import DashboardLayout from '../components/layout/DashboardLayout';
@@ -51,9 +51,12 @@ export default function Certification() {
   const expiresAt = profile?.certification_expires_at
     ? new Date(profile.certification_expires_at) : null;
   const isActive = !!expiresAt && expiresAt > new Date();
-  const kycVerified = profile?.kyc_status === 'verified';
-  // Les pièces doivent être déposées avant tout paiement (en cours de contrôle ou déjà validées).
-  const piecesSent = profile?.kyc_status === 'pending' || kycVerified;
+  const kycStatus = profile?.kyc_status || 'unverified';
+  const kycVerified = kycStatus === 'verified';
+  const kycPending  = kycStatus === 'pending';
+  const kycRejected = kycStatus === 'rejected';
+  // Toute la procédure de paiement reste bloquée tant que l'identité n'est pas VÉRIFIÉE.
+  const canPay = kycVerified;
 
   const goUpload = () => document.getElementById('kyc-upload')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
@@ -76,8 +79,10 @@ export default function Certification() {
 
   /** Étape 1 : contrôles préalables, puis ouverture du récapitulatif. Aucun débit ici. */
   function askPay(level: 'grey' | 'blue') {
-    if (!piecesSent) {
-      toast.error("Envoyez d'abord votre pièce d'identité, puis réglez votre certification.");
+    if (!canPay) {
+      toast.error(kycPending
+        ? 'Vos pièces sont en cours de vérification. Vous pourrez choisir votre formule dès validation.'
+        : "Votre identité doit d'abord être vérifiée. Envoyez votre pièce d'identité.");
       goUpload();
       return;
     }
@@ -135,6 +140,58 @@ export default function Certification() {
             Inspirez confiance aux organisateurs et décrochez plus de missions. La certification est un <b style={{ color: 'var(--color-gold-primary)' }}>badge de professionnalisme</b> — pas une obligation.
           </p>
         </div>
+
+        {/* ── Étape préalable obligatoire : vérification de l'identité ── */}
+        {!canPay && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}
+            style={{
+              display: 'flex', gap: 14, alignItems: 'flex-start',
+              background: kycPending ? 'rgba(245,158,11,0.10)' : 'rgba(59,130,246,0.10)',
+              border: `1px solid ${kycPending ? 'rgba(245,158,11,0.40)' : 'rgba(59,130,246,0.40)'}`,
+              borderRadius: 16, padding: '18px 20px', marginBottom: 26,
+            }}>
+            <div style={{
+              flexShrink: 0, width: 38, height: 38, borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: kycPending ? 'rgba(245,158,11,0.20)' : 'rgba(59,130,246,0.20)',
+            }}>
+              {kycPending ? <Clock size={19} color="#f59e0b" /> : <ShieldCheck size={19} color="#3b82f6" />}
+            </div>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: 5 }}>
+                {kycPending
+                  ? 'Étape 1 sur 2 — Vérification en cours'
+                  : kycRejected
+                  ? 'Vos pièces ont été refusées'
+                  : 'Étape 1 sur 2 — Faites vérifier votre identité'}
+              </h2>
+              <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', lineHeight: 1.55 }}>
+                {kycPending ? (
+                  <>Nous contrôlons votre pièce d’identité — comptez <b>24 à 48 h</b>. Vous recevrez une
+                  notification dès la validation, et vous pourrez alors choisir et régler votre formule.</>
+                ) : kycRejected ? (
+                  <>Votre document n’a pas pu être validé. Renvoyez une photo <b>nette et complète</b> de votre
+                  pièce d’identité (recto et verso) pour débloquer la certification.</>
+                ) : (
+                  <>Avant de choisir une formule, votre identité doit être vérifiée : c’est ce qui donne sa valeur
+                  au badge auprès des organisateurs. <b>Envoyez votre pièce d’identité</b> (recto et verso) —
+                  nous la contrôlons sous 24 à 48 h. Le choix de la formule et le paiement ne sont
+                  débloqués qu’après cette validation.</>
+                )}
+              </p>
+
+              {!kycPending && (
+                <button onClick={goUpload}
+                  className="btn-gold px-5 py-2 rounded-xl text-sm font-bold text-[#261642]"
+                  style={{ marginTop: 12 }}>
+                  {kycRejected ? 'Renvoyer mes pièces' : 'Envoyer mes pièces'}
+                </button>
+              )}
+            </div>
+          </motion.div>
+        )}
 
         {/* Bascule mensuel / annuel */}
         <div className="flex items-center justify-center gap-3 mb-8">
@@ -233,10 +290,12 @@ export default function Certification() {
                     background: plan.popular ? `linear-gradient(135deg, ${plan.color}, #60a5fa)`
                       : isFree ? 'var(--color-surface)' : 'transparent',
                     color: plan.popular ? '#fff' : isFree ? 'var(--color-text-muted)' : 'var(--color-text-primary)',
-                    opacity: isFree ? 0.7 : !piecesSent ? 0.55 : 1,
+                    opacity: isFree ? 0.7 : !canPay ? 0.5 : 1,
                     display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7,
                   }}>
-                  {isFree ? 'Formule par défaut' : (
+                  {isFree ? 'Formule par défaut' : !canPay ? (
+                    <><Lock size={14} /> Identité à vérifier</>
+                  ) : (
                     <>
                       <WalletIcon size={15} />
                       {isCurrent && isActive ? 'Renouveler' : `Choisir — ${formatCFA(price)}`}
@@ -244,8 +303,9 @@ export default function Certification() {
                   )}
                 </button>
                 {!isFree && (
-                  <p style={{ fontSize: 10.5, textAlign: 'center', marginTop: 7, color: piecesSent ? 'var(--color-text-muted)' : '#f59e0b' }}>
-                    {piecesSent ? 'récapitulatif avant paiement' : "envoyez d'abord vos pièces ↓"}
+                  <p style={{ fontSize: 10.5, textAlign: 'center', marginTop: 7, color: canPay ? 'var(--color-text-muted)' : '#f59e0b' }}>
+                    {canPay ? 'récapitulatif avant paiement'
+                      : kycPending ? 'vérification en cours (24-48 h)' : 'envoyez vos pièces pour débloquer'}
                   </p>
                 )}
               </motion.div>
@@ -266,11 +326,10 @@ export default function Certification() {
           </p>
           {isActive && current !== 'none' && (
             <>
-              <p style={{ marginTop: 8, color: kycVerified ? '#00C896' : '#f59e0b' }}>
-                {kycVerified
-                  ? `✅ Certification ${current === 'blue' ? 'Bleue' : 'Grise'} active jusqu'au ${expiresAt!.toLocaleDateString('fr-FR')}.`
-                  : `⏳ Paiement reçu — vos pièces sont en cours de vérification (24 à 48 h). Votre badge s'activera dès validation. Abonnement valable jusqu'au ${expiresAt!.toLocaleDateString('fr-FR')}.`}
+              <p style={{ marginTop: 8, color: '#00C896' }}>
+                ✅ Certification {current === 'blue' ? 'Bleue' : 'Grise'} active jusqu'au {expiresAt!.toLocaleDateString('fr-FR')}.
               </p>
+              {/* Filet de sécurité : ne s'affiche que si l'identité a été invalidée après coup. */}
               {!kycVerified && (
                 <button onClick={doCancel} disabled={cancelling}
                   style={{ marginTop: 8, background: 'none', border: 'none', cursor: 'pointer', font: 'inherit',
@@ -285,7 +344,7 @@ export default function Certification() {
         {/* Zone d'envoi des pièces (KYC) */}
         <div id="kyc-upload" style={{ marginTop: 28 }}>
           <h2 className="font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>
-            Mes pièces {!piecesSent && <span style={{ fontSize: 12, fontWeight: 500, color: '#f59e0b' }}>— à envoyer avant le paiement</span>}
+            Mes pièces {!canPay && <span style={{ fontSize: 12, fontWeight: 500, color: '#f59e0b' }}>— étape obligatoire</span>}
           </h2>
           <KycCard alwaysShow offersLink={false} />
         </div>
@@ -333,9 +392,7 @@ export default function Certification() {
               </div>
 
               <p style={{ fontSize: 11, marginTop: 14, color: 'var(--color-text-muted)' }}>
-                {kycVerified
-                  ? 'Votre badge sera actif immédiatement.'
-                  : 'Vos pièces seront vérifiées sous 24 à 48 h. Tant qu’elles ne sont pas validées, vous pouvez annuler et être remboursé.'}
+                Votre identité étant vérifiée, votre badge sera actif immédiatement après le paiement.
               </p>
 
               <div className="flex gap-2 mt-5">
