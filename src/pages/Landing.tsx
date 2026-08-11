@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { motion, useReducedMotion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 import { useEffect, useState, type ReactNode, type CSSProperties } from 'react';
 import Logo, { LogoMark } from '../components/Logo';
 import ThemeToggle from '../components/ThemeToggle';
@@ -66,12 +67,10 @@ const ORG_AVANTAGES = [
   'Mobilisation d\'urgence avec le S.O.S Brigade : 20 km autour de vous, réponses en direct',
 ];
 
-const STATS: { to: number; suffix?: string; decimals?: number; label: string }[] = [
-  { to: 500, suffix: '+', label: 'Freelances actifs' },
-  { to: 1200, suffix: '+', label: 'Missions réalisées' },
-  { to: 4.8, decimals: 1, label: 'Note moyenne' },
-  { to: 98, suffix: '%', label: 'Satisfaction client' },
-];
+// Les statistiques proviennent de la base (RPC public_landing_stats) : aucun
+// chiffre n'est inventé. Une statistique sans donnée n'est tout simplement pas
+// affichée, plutôt que de montrer un compteur à zéro ou une valeur fictive.
+type Stat = { to: number; suffix?: string; decimals?: number; label: string };
 
 const PARTICLES = Array.from({ length: 22 }, (_, i) => ({
   left: ((i * 37 + 11) % 97) + 1.5,
@@ -144,9 +143,29 @@ export default function Landing() {
   const [ville, setVille] = useState('');
   const [email, setEmail] = useState('');
   const [testi, setTesti] = useState(0);
+  const [stats, setStats] = useState<Stat[]>([]);
 
   const { scrollY } = useScroll();
   const heroY = useTransform(scrollY, [0, 700], [0, 150]);
+
+  // Chiffres réels de la plateforme (agrégats, accessibles aux visiteurs).
+  useEffect(() => {
+    let off = false;
+    supabase.rpc('public_landing_stats').then(({ data, error }) => {
+      if (off || error || !data) return;
+      const d = data as { freelances: number; missions: number; reviews: number; avg_rating: number; satisfaction: number };
+      const list: Stat[] = [];
+      if (d.freelances > 0) list.push({ to: d.freelances, label: d.freelances > 1 ? 'Freelances actifs' : 'Freelance actif' });
+      if (d.missions > 0)   list.push({ to: d.missions, label: d.missions > 1 ? 'Missions réalisées' : 'Mission réalisée' });
+      // La note et la satisfaction n'ont de sens qu'avec des avis réels.
+      if (d.reviews > 0) {
+        list.push({ to: Number(d.avg_rating), decimals: 1, label: 'Note moyenne' });
+        list.push({ to: Number(d.satisfaction), suffix: '%', label: 'Avis positifs' });
+      }
+      setStats(list);
+    });
+    return () => { off = true; };
+  }, []);
 
   useEffect(() => {
     if (user && profile) navigate('/dashboard');
@@ -334,23 +353,32 @@ export default function Landing() {
           </Reveal>
         </div>
 
-        {/* Stats — compteurs animés */}
-        <div className="absolute bottom-0 left-0 right-0 px-6">
-          <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-4 rounded-t-2xl overflow-hidden"
-              style={{ background: 'var(--eb-l-card)', backdropFilter: 'blur(24px)', border: '1px solid var(--color-border)', borderBottom: 'none' }}>
-              {STATS.map((s, i) => (
-                <Reveal key={s.label} delay={0.15 + i * 0.1} y={20} className="py-5 text-center"
-                  style={{ borderRight: i < 3 ? '1px solid var(--color-border)' : 'none' }}>
-                  <div className="text-2xl md:text-3xl font-bold text-gold-gradient font-display">
-                    <AnimatedCounter to={s.to} suffix={s.suffix} decimals={s.decimals} />
-                  </div>
-                  <div className="text-xs mt-1 font-medium tracking-wide" style={{ color: 'var(--color-text-muted)' }}>{s.label}</div>
-                </Reveal>
-              ))}
+        {/* Stats — compteurs animés, alimentés par la base */}
+        {stats.length > 0 && (
+          <div className="absolute bottom-0 left-0 right-0 px-6">
+            <div className="max-w-4xl mx-auto">
+              {/* 2 colonnes sur mobile, autant que de statistiques sur grand écran
+                  (classes écrites en toutes lettres : Tailwind ne lit pas les noms calculés) */}
+              <div className={`grid rounded-t-2xl overflow-hidden ${
+                stats.length === 1 ? 'grid-cols-1'
+                : stats.length === 2 ? 'grid-cols-2'
+                : stats.length === 3 ? 'grid-cols-2 md:grid-cols-3'
+                : 'grid-cols-2 md:grid-cols-4'}`}
+                style={{ background: 'var(--eb-l-card)', backdropFilter: 'blur(24px)',
+                  border: '1px solid var(--color-border)', borderBottom: 'none' }}>
+                {stats.map((s, i) => (
+                  <Reveal key={s.label} delay={0.15 + i * 0.1} y={20} className="py-5 text-center"
+                    style={{ borderRight: i < stats.length - 1 ? '1px solid var(--color-border)' : 'none' }}>
+                    <div className="text-2xl md:text-3xl font-bold text-gold-gradient font-display">
+                      <AnimatedCounter to={s.to} suffix={s.suffix} decimals={s.decimals} />
+                    </div>
+                    <div className="text-xs mt-1 font-medium tracking-wide" style={{ color: 'var(--color-text-muted)' }}>{s.label}</div>
+                  </Reveal>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </section>
 
       {/* ── COMMENT ÇA MARCHE ── */}
