@@ -7,7 +7,7 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import KycCard from '../components/KycCard';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCFA } from '../lib/utils';
-import { getWallet, payCertification, getCertificationPrice } from '../lib/walletService';
+import { getWallet, payCertification, getCertificationPrice, cancelCertification } from '../lib/walletService';
 import { type CertificationLevel } from '../types';
 
 interface Plan {
@@ -43,6 +43,8 @@ export default function Certification() {
   const [balance, setBalance] = useState(0);
   const [prices, setPrices] = useState<Record<string, number>>({});
   const [paying, setPaying] = useState<string | null>(null);
+  const [confirmLevel, setConfirmLevel] = useState<'grey' | 'blue' | null>(null);
+  const [cancelling, setCancelling] = useState(false);
   const current = (profile?.certification_level || 'none') as CertificationLevel;
   const period = annual ? 'year' : 'month';
 
@@ -50,6 +52,8 @@ export default function Certification() {
     ? new Date(profile.certification_expires_at) : null;
   const isActive = !!expiresAt && expiresAt > new Date();
   const kycVerified = profile?.kyc_status === 'verified';
+  // Les pièces doivent être déposées avant tout paiement (en cours de contrôle ou déjà validées).
+  const piecesSent = profile?.kyc_status === 'pending' || kycVerified;
 
   const goUpload = () => document.getElementById('kyc-upload')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
@@ -70,27 +74,53 @@ export default function Certification() {
     return () => { off = true; };
   }, [profile?.id, period]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function doPay(level: 'grey' | 'blue') {
-    const price = prices[level] ?? 0;
-    if (balance < price) {
+  /** Étape 1 : contrôles préalables, puis ouverture du récapitulatif. Aucun débit ici. */
+  function askPay(level: 'grey' | 'blue') {
+    if (!piecesSent) {
+      toast.error("Envoyez d'abord votre pièce d'identité, puis réglez votre certification.");
+      goUpload();
+      return;
+    }
+    if (balance < (prices[level] ?? 0)) {
       toast.error('Solde insuffisant — rechargez votre portefeuille.');
       navigate('/wallet');
       return;
     }
+    setConfirmLevel(level);
+  }
+
+  /** Étape 2 : l'utilisateur a confirmé dans la modale — c'est ici que le solde est débité. */
+  async function confirmPay() {
+    const level = confirmLevel;
+    if (!level) return;
     setPaying(level);
     try {
       const exp = await payCertification(level, period);
       await refreshProfile();
       const w = await getWallet(profile!.id);
       setBalance(w.balance);
-      toast.success(`Certification active jusqu'au ${new Date(exp).toLocaleDateString('fr-FR')}.`);
-      if (!kycVerified) {
-        toast('Envoyez vos pièces pour activer votre badge.', { icon: '📄', duration: 6000 });
-        goUpload();
-      }
+      setConfirmLevel(null);
+      toast.success(
+        kycVerified
+          ? `Certification active jusqu'au ${new Date(exp).toLocaleDateString('fr-FR')}.`
+          : 'Paiement reçu. Vos pièces sont en cours de vérification (24 à 48 h).',
+      );
     } catch (e) {
       toast.error((e as Error).message || 'Paiement impossible');
     } finally { setPaying(null); }
+  }
+
+  async function doCancel() {
+    setCancelling(true);
+    try {
+      const amount = await cancelCertification();
+      await refreshProfile();
+      const w = await getWallet(profile!.id);
+      setBalance(w.balance);
+      toast.success(`Abonnement annulé — ${formatCFA(amount)} recrédités.`);
+    } catch (e) {
+      toast.error((e as Error).message || 'Annulation impossible');
+    } finally { setCancelling(false); }
   }
 
   return (
@@ -194,7 +224,7 @@ export default function Certification() {
 
                 {/* CTA */}
                 <button
-                  onClick={isFree ? undefined : () => doPay(plan.key as 'grey' | 'blue')}
+                  onClick={isFree ? undefined : () => askPay(plan.key as 'grey' | 'blue')}
                   disabled={isFree || paying !== null}
                   style={{
                     marginTop: 20, width: '100%', padding: '11px', borderRadius: 12,
@@ -203,19 +233,19 @@ export default function Certification() {
                     background: plan.popular ? `linear-gradient(135deg, ${plan.color}, #60a5fa)`
                       : isFree ? 'var(--color-surface)' : 'transparent',
                     color: plan.popular ? '#fff' : isFree ? 'var(--color-text-muted)' : 'var(--color-text-primary)',
-                    opacity: isFree ? 0.7 : 1,
+                    opacity: isFree ? 0.7 : !piecesSent ? 0.55 : 1,
                     display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7,
                   }}>
-                  {isFree ? 'Formule par défaut' : paying === plan.key ? 'Paiement…' : (
+                  {isFree ? 'Formule par défaut' : (
                     <>
                       <WalletIcon size={15} />
-                      {isCurrent && isActive ? 'Renouveler' : `Payer ${formatCFA(price)}`}
+                      {isCurrent && isActive ? 'Renouveler' : `Choisir — ${formatCFA(price)}`}
                     </>
                   )}
                 </button>
                 {!isFree && (
-                  <p style={{ fontSize: 10.5, textAlign: 'center', marginTop: 7, color: 'var(--color-text-muted)' }}>
-                    débité de votre portefeuille
+                  <p style={{ fontSize: 10.5, textAlign: 'center', marginTop: 7, color: piecesSent ? 'var(--color-text-muted)' : '#f59e0b' }}>
+                    {piecesSent ? 'récapitulatif avant paiement' : "envoyez d'abord vos pièces ↓"}
                   </p>
                 )}
               </motion.div>
@@ -235,20 +265,95 @@ export default function Certification() {
             </button>
           </p>
           {isActive && current !== 'none' && (
-            <p style={{ marginTop: 8, color: kycVerified ? '#00C896' : '#f59e0b' }}>
-              {kycVerified
-                ? `✅ Certification ${current === 'blue' ? 'Bleue' : 'Grise'} active jusqu'au ${expiresAt!.toLocaleDateString('fr-FR')}.`
-                : `⏳ Paiement reçu — votre badge s'activera dès la validation de vos pièces (envoyez-les ci-dessous). Abonnement valable jusqu'au ${expiresAt!.toLocaleDateString('fr-FR')}.`}
-            </p>
+            <>
+              <p style={{ marginTop: 8, color: kycVerified ? '#00C896' : '#f59e0b' }}>
+                {kycVerified
+                  ? `✅ Certification ${current === 'blue' ? 'Bleue' : 'Grise'} active jusqu'au ${expiresAt!.toLocaleDateString('fr-FR')}.`
+                  : `⏳ Paiement reçu — vos pièces sont en cours de vérification (24 à 48 h). Votre badge s'activera dès validation. Abonnement valable jusqu'au ${expiresAt!.toLocaleDateString('fr-FR')}.`}
+              </p>
+              {!kycVerified && (
+                <button onClick={doCancel} disabled={cancelling}
+                  style={{ marginTop: 8, background: 'none', border: 'none', cursor: 'pointer', font: 'inherit',
+                    color: 'var(--color-text-muted)', textDecoration: 'underline' }}>
+                  {cancelling ? 'Annulation…' : 'Annuler mon abonnement et être remboursé'}
+                </button>
+              )}
+            </>
           )}
         </div>
 
         {/* Zone d'envoi des pièces (KYC) */}
         <div id="kyc-upload" style={{ marginTop: 28 }}>
-          <h2 className="font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>Mes pièces</h2>
+          <h2 className="font-semibold mb-3" style={{ color: 'var(--color-text-primary)' }}>
+            Mes pièces {!piecesSent && <span style={{ fontSize: 12, fontWeight: 500, color: '#f59e0b' }}>— à envoyer avant le paiement</span>}
+          </h2>
           <KycCard alwaysShow offersLink={false} />
         </div>
       </div>
+
+      {/* ── Récapitulatif avant débit ─────────────────────────────── */}
+      {confirmLevel && (() => {
+        const plan = PLANS.find(p => p.key === confirmLevel)!;
+        const price = prices[confirmLevel] ?? 0;
+        const until = new Date(Math.max(expiresAt?.getTime() ?? 0, Date.now()));
+        if (annual) until.setFullYear(until.getFullYear() + 1); else until.setMonth(until.getMonth() + 1);
+        const busy = paying !== null;
+        return (
+          <div onClick={() => !busy && setConfirmLevel(null)}
+            style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center',
+              justifyContent: 'center', padding: 16, background: 'rgba(15,10,30,0.85)' }}>
+            <div onClick={e => e.stopPropagation()} className="card-glass p-6 w-full" style={{ maxWidth: 420 }}>
+              <h3 className="font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                Confirmer votre certification
+              </h3>
+              <p className="text-xs mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+                Vérifiez avant de valider : le montant sera débité de votre portefeuille.
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 9, fontSize: 13 }}>
+                {[
+                  ['Formule', plan.name],
+                  ['Durée', annual ? '1 an' : '1 mois'],
+                  ['Valable jusqu’au', until.toLocaleDateString('fr-FR')],
+                ].map(([k, v]) => (
+                  <div key={k} className="flex justify-between">
+                    <span style={{ color: 'var(--color-text-secondary)' }}>{k}</span>
+                    <span style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>{v}</span>
+                  </div>
+                ))}
+                <div style={{ height: 1, background: 'rgba(201,168,76,0.18)', margin: '3px 0' }} />
+                <div className="flex justify-between">
+                  <span style={{ color: 'var(--color-text-secondary)' }}>Montant à payer</span>
+                  <span style={{ color: 'var(--color-gold-primary)', fontWeight: 800, fontSize: 16 }}>{formatCFA(price)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: 'var(--color-text-secondary)' }}>Solde après paiement</span>
+                  <span style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>{formatCFA(balance - price)}</span>
+                </div>
+              </div>
+
+              <p style={{ fontSize: 11, marginTop: 14, color: 'var(--color-text-muted)' }}>
+                {kycVerified
+                  ? 'Votre badge sera actif immédiatement.'
+                  : 'Vos pièces seront vérifiées sous 24 à 48 h. Tant qu’elles ne sont pas validées, vous pouvez annuler et être remboursé.'}
+              </p>
+
+              <div className="flex gap-2 mt-5">
+                <button type="button" onClick={() => setConfirmLevel(null)} disabled={busy}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
+                  style={{ background: 'var(--color-surface)', color: 'var(--color-text-secondary)',
+                    border: '1px solid rgba(201,168,76,0.2)' }}>
+                  Annuler
+                </button>
+                <button type="button" onClick={confirmPay} disabled={busy}
+                  className="flex-1 btn-gold py-2.5 rounded-xl text-sm font-bold text-[#261642] disabled:opacity-60">
+                  {busy ? 'Paiement…' : 'Confirmer le paiement'}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </DashboardLayout>
   );
 }

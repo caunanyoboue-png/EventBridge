@@ -89,6 +89,13 @@ export async function payCertification(
   return data as string;
 }
 
+/** Annule son propre abonnement (possible tant que les pièces ne sont pas validées). */
+export async function cancelCertification(): Promise<number> {
+  const { data, error } = await supabase.rpc('certification_cancel');
+  if (error) throw error;
+  return Number(data);
+}
+
 /** Libérer l'escrow vers le freelance (à la validation de la mission). */
 export async function releaseEscrow(paymentId: string): Promise<void> {
   const { error } = await supabase.rpc('wallet_release', { p_payment_id: paymentId });
