@@ -355,7 +355,8 @@ export default function Certification() {
       {kycGate && (
         <div onClick={() => setKycGate(false)}
           style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center',
-            justifyContent: 'center', padding: 16, background: 'rgba(15,10,30,0.85)' }}>
+            justifyContent: 'center', padding: 16, background: 'rgba(10,6,22,0.92)',
+            backdropFilter: 'blur(9px)', WebkitBackdropFilter: 'blur(9px)' }}>
           <div onClick={e => e.stopPropagation()} className="card-glass p-6 w-full" style={{ maxWidth: 440 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 10 }}>
               <div style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
@@ -431,7 +432,8 @@ export default function Certification() {
         return (
           <div onClick={() => !busy && setConfirmLevel(null)}
             style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center',
-              justifyContent: 'center', padding: 16, background: 'rgba(15,10,30,0.85)' }}>
+              justifyContent: 'center', padding: 16, background: 'rgba(10,6,22,0.92)',
+            backdropFilter: 'blur(9px)', WebkitBackdropFilter: 'blur(9px)' }}>
             <div onClick={e => e.stopPropagation()} className="card-glass p-6 w-full" style={{ maxWidth: 420 }}>
               <h3 className="font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
                 Confirmer votre certification

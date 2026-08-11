@@ -97,8 +97,8 @@ export default function DashboardLayout({ children, bgImage }: Props) {
             {profile.role === 'organisateur' && (
               <button className="eb-mobile-only animate-sos" onClick={() => navigate('/sos-brigade')}
                 style={{ alignItems: 'center', gap: 6, background: '#dc2626', color: '#fff',
-                  border: 'none', borderRadius: 10, padding: '7px 11px', fontWeight: 700, fontSize: 12,
-                  cursor: 'pointer' }}>
+                  border: 'none', borderRadius: 999, padding: '8px 14px', fontWeight: 700, fontSize: 12,
+                  boxShadow: '0 3px 10px rgba(220,38,38,0.35)', cursor: 'pointer' }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="8.6"/><path d="M12 7.3v5.2"/><circle cx="12" cy="16" r=".9" fill="currentColor" stroke="none"/>
                 </svg>

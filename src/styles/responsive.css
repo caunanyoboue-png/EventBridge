@@ -289,27 +289,63 @@
 }
 
 /* ─── Barre d'onglets mobile (remplace le menu latéral en connecté) ─────────── */
+/* ── Barre d'onglets mobile : capsule flottante (inspiration Telegram) ──────
+   Détachée des bords, arrondie, translucide et floutée — s'adapte au thème. */
+:root, :root[data-theme='dark'] {
+  --eb-tabbar-bg:     rgba(19, 10, 38, 0.82);
+  --eb-tabbar-border: rgba(201, 168, 76, 0.18);
+  --eb-tabbar-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --eb-tabbar-ring:   #1a0f33;          /* liseré autour du bouton central */
+  --eb-tab-muted:     #7d6f90;
+}
+:root[data-theme='light'] {
+  --eb-tabbar-bg:     rgba(255, 255, 255, 0.9);
+  --eb-tabbar-border: rgba(15, 23, 42, 0.09);
+  --eb-tabbar-shadow: 0 10px 30px rgba(15, 23, 42, 0.16);
+  --eb-tabbar-ring:   #ffffff;
+  --eb-tab-muted:     #6b7280;
+}
+
+/* Sélecteur segmenté (filtres) — piste neutre en pilule, façon Telegram */
+.eb-segmented {
+  display: inline-flex; gap: 4; padding: 4px; border-radius: 999px;
+  background: var(--color-surface-strong);
+  border: 1px solid var(--eb-tabbar-border);
+}
+@media (max-width: 640px) {
+  .eb-segmented { display: flex; width: 100%; }
+}
+
 .eb-tabbar { display: none; }
 .eb-mobile-only { display: none; }
 @media (max-width: 1023px) {
   .eb-tabbar {
     display: flex; align-items: flex-end; justify-content: space-around;
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
-    height: 62px; padding: 0 4px 6px;
-    background: #0d0620; border-top: 1px solid rgba(201, 168, 76, 0.14);
+    position: fixed; z-index: 60;
+    left: 10px; right: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    height: 60px; padding: 0 4px 8px;
+    border-radius: 24px;
+    background: var(--eb-tabbar-bg);
+    border: 1px solid var(--eb-tabbar-border);
+    box-shadow: var(--eb-tabbar-shadow);
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
   }
   .eb-mobile-only { display: inline-flex !important; }
-  /* Le contenu doit dégager la tab bar fixe (62px) — sinon le bas passe dessous (carte, boutons…) */
-  .layout-main { padding-bottom: 88px !important; }
+  /* Le contenu doit dégager la barre flottante (60px + marges + safe-area) */
+  .layout-main { padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important; }
 }
 .eb-tab, .eb-tab-center {
   flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
   background: none; border: none; cursor: pointer; padding: 6px 0 2px; line-height: 1;
 }
 .eb-cbtn {
-  width: 52px; height: 52px; border-radius: 50%; margin-top: -22px;
+  width: 52px; height: 52px; border-radius: 50%; margin-top: -24px;
   display: flex; align-items: center; justify-content: center;
-  border: 3px solid #140a26; box-shadow: 0 5px 14px rgba(0, 0, 0, 0.45);
+  border: 3px solid var(--eb-tabbar-ring);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.32);
+  transition: transform 0.15s ease;
 }
 .eb-tab-center:active .eb-cbtn { transform: scale(0.94); }
 .eb-sheet-ov {
@@ -317,8 +353,11 @@
   display: flex; align-items: flex-end;
 }
 .eb-sheet {
-  width: 100%; background: #160a2e; border-top: 1px solid rgba(201, 168, 76, 0.2);
-  border-radius: 20px 20px 0 0; padding: 10px 14px 24px;
+  width: 100%; background: var(--color-bg-card);
+  border: 1px solid var(--eb-tabbar-border); border-bottom: none;
+  border-radius: 22px 22px 0 0; padding: 10px 14px 24px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.25);
   animation: sheetUp 0.22s ease;
 }
 @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }

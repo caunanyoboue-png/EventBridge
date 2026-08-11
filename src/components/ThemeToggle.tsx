@@ -12,10 +12,12 @@ export default function ThemeToggle({ compact = false }: { compact?: boolean }) 
       title={dark ? 'Passer en thème clair' : 'Passer en thème sombre'}
       aria-label={dark ? 'Passer en thème clair' : 'Passer en thème sombre'}
       style={{
-        display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer',
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: 'pointer',
         background: 'transparent', border: '1px solid var(--color-border-hover)',
-        color: 'var(--color-gold-primary)', borderRadius: 10,
-        padding: compact ? '7px' : '7px 12px', fontSize: 13, fontWeight: 600,
+        color: 'var(--color-gold-primary)',
+        // Bouton parfaitement rond en mode compact (en-tête mobile), pilule sinon.
+        borderRadius: 999, ...(compact ? { width: 38, height: 38, padding: 0 } : { padding: '7px 12px' }),
+        fontSize: 13, fontWeight: 600,
         transition: 'background 0.2s ease, border-color 0.2s ease',
       }}
     >

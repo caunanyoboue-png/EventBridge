@@ -714,13 +714,14 @@ export default function Feed() {
         )}
 
         {/* Tabs */}
-        <div style={{ display: 'inline-flex', gap: 4, marginBottom: 22, padding: 4, borderRadius: 12,
-          background: 'rgba(28,17,50,0.5)', border: '1px solid rgba(201,168,76,0.12)' }}>
+        {/* Sélecteur segmenté (piste neutre arrondie, pastille dorée pour l'onglet actif) */}
+        <div className="eb-segmented" style={{ marginBottom: 22 }}>
           {([['all', 'Tout'], ['posts', 'Posts'], ['missions', 'Missions']] as const).map(([key, label]) => (
             <button key={key} onClick={() => setTab(key)}
-              style={{ padding: '7px 18px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                cursor: 'pointer', transition: 'all 0.18s', border: 'none',
+              style={{ flex: 1, padding: '8px 18px', borderRadius: 999, fontSize: 13, fontWeight: 600,
+                cursor: 'pointer', transition: 'all 0.18s', border: 'none', whiteSpace: 'nowrap',
                 background: tab === key ? 'var(--color-gold-primary)' : 'transparent',
+                boxShadow: tab === key ? '0 2px 8px rgba(0,0,0,0.18)' : 'none',
                 color: tab === key ? '#261642' : 'var(--color-text-secondary)' }}>
               {label}
             </button>

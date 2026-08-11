@@ -60,7 +60,8 @@ const CENTER: Record<string, { grad: string; on: string }> = {
   admin:        { grad: 'linear-gradient(135deg,#16a34a,#4ade80)', on: '#06281a' },
 };
 
-const MUTED = '#7d6f90';
+// Gris des onglets inactifs — pilote par le thème (voir --eb-tab-muted).
+const MUTED = 'var(--eb-tab-muted)';
 
 export default function MobileTabBar() {
   const { profile, signOut } = useAuth();
@@ -123,7 +124,7 @@ export default function MobileTabBar() {
               );
             })}
             <button className="eb-sheet-row" onClick={() => { setSheet(false); signOut(); }}
-              style={{ color: '#ef4444', borderTop: '1px solid rgba(255,255,255,0.06)', borderRadius: 0, marginTop: 4, paddingTop: 14 }}>
+              style={{ color: '#ef4444', borderTop: '1px solid var(--eb-tabbar-border)', borderRadius: 0, marginTop: 4, paddingTop: 14 }}>
               <IcoLogout size={20} color="#ef4444" />
               Déconnexion
             </button>

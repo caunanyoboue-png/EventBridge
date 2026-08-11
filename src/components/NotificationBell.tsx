@@ -106,7 +106,7 @@ export default function NotificationBell() {
         onClick={() => setOpen(o => !o)}
         style={{
           position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          width: 38, height: 38, borderRadius: 10, cursor: 'pointer',
+          width: 38, height: 38, borderRadius: 999, cursor: 'pointer',
           background: open ? 'rgba(201,168,76,0.15)' : 'rgba(201,168,76,0.07)',
           border: '1px solid rgba(201,168,76,0.2)', transition: 'background 0.15s',
         }}
