@@ -48,10 +48,18 @@ export async function rechargeWallet(amount: number): Promise<string> {
   return url;
 }
 
-/** Retrait des gains — SIMULATION : débite le solde et enregistre le retrait. */
+/**
+ * Retrait des gains — enregistre une DEMANDE DE VERSEMENT.
+ * Le solde est débité immédiatement (atomique) et la demande est tracée dans
+ * `wallet_payouts` (statut « processing »). Le virement Mobile Money est ensuite
+ * exécuté par l'administrateur ; en cas d'échec, `wallet_payout_reverse` recrédite.
+ */
 export async function requestWithdraw(amount: number, phone: string, operator: string): Promise<void> {
   const method = phone ? `${operator} · ${phone}` : operator;
-  const { error } = await supabase.rpc('wallet_withdraw', { p_amount: amount, p_method: method });
+  const reference = 'EBPO_' + crypto.randomUUID().replaceAll('-', '');
+  const { error } = await supabase.rpc('wallet_payout_start', {
+    p_amount: amount, p_method: method, p_reference: reference,
+  });
   if (error) throw error;
 }
 

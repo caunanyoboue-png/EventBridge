@@ -281,7 +281,7 @@ function OrgView() {
             </div>
             <div>
               <label className="text-xs mb-1 block" style={{ color: 'var(--color-text-secondary)' }}>
-                Lieu sur la carte * <span style={{ color: 'var(--color-text-muted)' }}>(centre du rayon de 30 km)</span>
+                Lieu sur la carte * <span style={{ color: 'var(--color-text-muted)' }}>(centre du rayon de 20 km)</span>
               </label>
               <MapPicker lat={form.latitude} lng={form.longitude} markerColor="#ef4444"
                 onSelect={(lat, lng, addr) => setForm(p => ({ ...p, latitude: lat, longitude: lng, location: addr }))} />

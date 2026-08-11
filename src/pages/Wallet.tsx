@@ -77,7 +77,7 @@ export default function Wallet() {
     setBusy(true);
     try {
       await requestWithdraw(amount, phone.trim(), operator);
-      toast.success('Retrait enregistré (simulation).');
+      toast.success('Demande de retrait enregistrée. Versement sous 24 à 48 h.');
       await load();
     } catch (e) {
       toast.error((e as Error).message || 'Erreur');
@@ -113,7 +113,7 @@ export default function Wallet() {
         </h2>
         <p className="text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>
           {isFreelance
-            ? 'Versement sur votre compte mobile money (Orange Money, MTN, Moov, Wave).'
+            ? 'Versement sur votre compte mobile money (Orange Money, MTN, Moov, Wave) sous 24 à 48 h après votre demande.'
             : 'Rechargez par mobile money (Orange Money, MTN, Moov, Wave).'}
         </p>
 
