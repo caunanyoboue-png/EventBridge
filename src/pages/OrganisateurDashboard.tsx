@@ -2,9 +2,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Briefcase, Users, ChevronRight, FileText, Check, AlertCircle,
-  Target, Calendar, PlusCircle, X, Trash2,
+  Target, Calendar, PlusCircle, X, Trash2, ShieldAlert,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { canPublish } from '../lib/kyc';
 import { supabase } from '../lib/supabase';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { type Mission, type Application, type Review } from '../types';
@@ -359,6 +360,27 @@ export default function OrganisateurDashboard() {
 
       {/* CONTENU */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+          {/* Vérification d'identité — obligatoire avant toute publication */}
+          {!canPublish(profile) && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+              padding: '13px 16px', borderRadius: 12,
+              background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)' }}>
+              <ShieldAlert size={18} color="#ef4444" style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: 13, color: 'var(--color-text-secondary)', flex: 1, minWidth: 200 }}>
+                {profile?.kyc_status === 'pending'
+                  ? <><b style={{ color: 'var(--color-text-primary)' }}>Vérification en cours</b> — vous pourrez publier vos missions dès la validation de vos pièces (24 à 48 h).</>
+                  : <><b style={{ color: 'var(--color-text-primary)' }}>Vérifiez votre identité</b> pour publier vos missions et lancer un S.O.S Brigade.</>}
+              </span>
+              {profile?.kyc_status !== 'pending' && (
+                <button onClick={() => navigate('/profile')}
+                  className="btn-gold px-4 py-2 rounded-xl text-[#261642]"
+                  style={{ fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap' }}>
+                  Envoyer mes pièces
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Bannière candidatures en attente */}
           {pendingApps.length > 0 && (

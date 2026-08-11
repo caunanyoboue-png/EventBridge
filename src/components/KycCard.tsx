@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BadgeCheck, Clock, Upload, XCircle, Check, type LucideIcon } from 'lucide-react';
+import { BadgeCheck, Clock, Upload, XCircle, Check, ShieldAlert, type LucideIcon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
@@ -18,7 +18,8 @@ export default function KycCard({ alwaysShow = false, offersLink = true }: { alw
   const [selfie, setSelfie] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
 
-  if (!profile || profile.role !== 'freelance') return null;
+  if (!profile || (profile.role !== 'freelance' && profile.role !== 'organisateur')) return null;
+  const isOrga = profile.role === 'organisateur';
   const status = profile.kyc_status || 'unverified';
   const level = profile.certification_level || 'none';
 
@@ -39,6 +40,36 @@ export default function KycCard({ alwaysShow = false, offersLink = true }: { alw
         <div>
           <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-primary)' }}>Profil certifié{blue ? ' — Pro (bleu)' : ' (gris)'} ✓</div>
           <div style={{ fontSize: 12.5, color: 'var(--color-text-secondary)', marginTop: 2 }}>Votre badge Certifié est visible par les organisateurs.</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Identité déjà validée (sans certification payante) → état de confirmation.
+  const docsComplets = !!profile.kyc_document_path && !!profile.kyc_document_back_path && !!profile.kyc_selfie_path;
+  if (status === 'verified' && docsComplets) {
+    if (!alwaysShow && !isOrga) return null;
+    return (
+      <div style={{
+        background: 'rgba(0,200,150,0.10)', border: '1px solid rgba(0,200,150,0.35)', borderRadius: 14,
+        padding: '16px 18px', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
+      }}>
+        <div style={{ width: 42, height: 42, borderRadius: 11, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,200,150,0.20)' }}>
+          <BadgeCheck size={22} color="#00C896" />
+        </div>
+        <div style={{ flex: 1, minWidth: 180 }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-primary)' }}>Identité vérifiée ✓</div>
+          <div style={{ fontSize: 12.5, color: 'var(--color-text-secondary)', marginTop: 2 }}>
+            {isOrga
+              ? 'Vous pouvez publier vos missions et lancer un S.O.S Brigade.'
+              : 'Vous pouvez maintenant choisir votre formule de certification.'}
+          </div>
+          {!isOrga && offersLink && (
+            <button onClick={() => navigate('/certification')}
+              style={{ marginTop: 6, background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--color-gold-primary)', fontSize: 12, fontWeight: 700 }}>
+              Voir les offres de certification →
+            </button>
+          )}
         </div>
       </div>
     );
@@ -87,10 +118,15 @@ export default function KycCard({ alwaysShow = false, offersLink = true }: { alw
   const theme: { bg: string; bd: string; col: string; Icon: LucideIcon; title: string; msg: string } =
     status === 'pending'
       ? { bg: 'rgba(59,130,246,0.1)', bd: 'rgba(59,130,246,0.3)', col: '#3b82f6', Icon: Clock,
-          title: 'Vérification en cours', msg: 'Votre dossier (recto, verso et selfie) a bien été envoyé. Un administrateur le vérifie sous 24 à 48 h.' }
+          title: 'Vérification en cours',
+          msg: `Votre dossier (recto, verso et selfie) a bien été envoyé. Un administrateur le vérifie sous 24 à 48 h.${isOrga ? ' Vous pourrez publier vos missions dès la validation.' : ''}` }
       : status === 'rejected'
       ? { bg: 'rgba(239,68,68,0.1)', bd: 'rgba(239,68,68,0.3)', col: '#ef4444', Icon: XCircle,
           title: 'Dossier refusé', msg: profile.kyc_rejection_reason || 'Vos pièces ont été refusées. Merci d\'en renvoyer de nouvelles, bien lisibles : recto, verso et un selfie où l\'on vous voit tenir votre pièce.' }
+      : isOrga
+      ? { bg: 'rgba(239,68,68,0.08)', bd: 'rgba(239,68,68,0.30)', col: '#ef4444', Icon: ShieldAlert,
+          title: 'Vérification obligatoire pour publier',
+          msg: 'Avant de publier une mission ou de lancer un S.O.S Brigade, vous devez faire vérifier votre identité. Envoyez 3 documents : le recto et le verso de votre pièce (CNI ou passeport), plus un selfie où l\'on vous voit tenir cette pièce. Contrôle sous 24 à 48 h.' }
       : { bg: 'rgba(212,175,55,0.1)', bd: 'rgba(212,175,55,0.3)', col: 'var(--color-gold-primary)', Icon: BadgeCheck,
           title: 'Faites vérifier votre identité', msg: 'Envoyez 3 documents : le recto et le verso de votre pièce (CNI ou passeport), plus un selfie où l\'on vous voit tenir cette pièce — visage et document bien lisibles.' };
 
@@ -121,7 +157,7 @@ export default function KycCard({ alwaysShow = false, offersLink = true }: { alw
       <div style={{ flex: 1, minWidth: 180 }}>
         <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-primary)' }}>{theme.title}</div>
         <div style={{ fontSize: 12.5, color: 'var(--color-text-secondary)', marginTop: 2 }}>{theme.msg}</div>
-        {offersLink && canUpload && (
+        {offersLink && canUpload && !isOrga && (
           <button onClick={() => navigate('/certification')}
             style={{ marginTop: 6, background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--color-gold-primary)', fontSize: 12, fontWeight: 700 }}>
             Voir les offres de certification →

@@ -4,6 +4,8 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import MapPicker from '../components/MapPicker';
 import MapView from '../components/MapView';
 import { useAuth } from '../contexts/AuthContext';
+import { canPublish } from '../lib/kyc';
+import VerificationRequired from '../components/VerificationRequired';
 import { supabase } from '../lib/supabase';
 import { distanceKm, formatDistance, geocodeAddress, getBrowserPosition } from '../lib/geo';
 import { formatCFA } from '../lib/utils';
@@ -216,6 +218,15 @@ function OrgView() {
           <p>Vérification d'une alerte active...</p>
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Le S.O.S mobilise des freelances sur place : identité vérifiée exigée, comme pour les missions.
+  if (!canPublish(profile)) {
+    return (
+      <DashboardLayout>
+        <VerificationRequired action="lancer un S.O.S Brigade" />
       </DashboardLayout>
     );
   }

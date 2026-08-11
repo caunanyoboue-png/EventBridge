@@ -332,8 +332,8 @@ export default function Profile() {
           </p>
         </div>
 
-        {/* Certification (KYC) — freelance */}
-        {isFreelance && <KycCard alwaysShow />}
+        {/* Vérification d'identité (KYC) — freelance (certification) et organisateur (publication) */}
+        <KycCard alwaysShow />
 
         {/* ── TWO-COLUMN LAYOUT ────────────────────────────── */}
         <div className="profile-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 20, alignItems: 'flex-start' }}>

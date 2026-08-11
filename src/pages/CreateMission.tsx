@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Check, Zap, Search, Plus, Minus } from 'lucide-react';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
+import { canPublish } from '../lib/kyc';
+import VerificationRequired from '../components/VerificationRequired';
 import { supabase } from '../lib/supabase';
 import { COMPETENCES, formatCFA, isHourlyCompetence } from '../lib/utils';
 import MapPicker from '../components/MapPicker';
@@ -174,6 +176,15 @@ export default function CreateMission() {
   }
 
   const steps = ['Informations', 'Planning & Tarifs', 'Récapitulatif'];
+
+  // Identité non vérifiée → on n'ouvre même pas le formulaire (le verrou réel est en base).
+  if (!canPublish(profile)) {
+    return (
+      <DashboardLayout>
+        <VerificationRequired action="publier une mission" />
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
