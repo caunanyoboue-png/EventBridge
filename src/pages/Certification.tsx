@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, BadgeCheck, Crown, Star } from 'lucide-react';
+import { Check, BadgeCheck, Crown, Star, Wallet as WalletIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import KycCard from '../components/KycCard';
 import { useAuth } from '../contexts/AuthContext';
 import { formatCFA } from '../lib/utils';
+import { getWallet, payCertification, getCertificationPrice } from '../lib/walletService';
 import { type CertificationLevel } from '../types';
 
 interface Plan {
@@ -34,11 +37,61 @@ const PLANS: Plan[] = [
 ];
 
 export default function Certification() {
-  const { profile } = useAuth();
+  const { profile, refreshProfile } = useAuth();
+  const navigate = useNavigate();
   const [annual, setAnnual] = useState(false);
+  const [balance, setBalance] = useState(0);
+  const [prices, setPrices] = useState<Record<string, number>>({});
+  const [paying, setPaying] = useState<string | null>(null);
   const current = (profile?.certification_level || 'none') as CertificationLevel;
+  const period = annual ? 'year' : 'month';
+
+  const expiresAt = profile?.certification_expires_at
+    ? new Date(profile.certification_expires_at) : null;
+  const isActive = !!expiresAt && expiresAt > new Date();
+  const kycVerified = profile?.kyc_status === 'verified';
 
   const goUpload = () => document.getElementById('kyc-upload')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  // Solde + prix réels (le serveur applique la remise de renouvellement Bleu)
+  useEffect(() => {
+    if (!profile) return;
+    let off = false;
+    (async () => {
+      const [w, grey, blue] = await Promise.all([
+        getWallet(profile.id),
+        getCertificationPrice(profile.id, 'grey', period),
+        getCertificationPrice(profile.id, 'blue', period),
+      ]);
+      if (off) return;
+      setBalance(w.balance);
+      setPrices({ grey: grey ?? (annual ? 15000 : 1500), blue: blue ?? (annual ? 40000 : 4000) });
+    })();
+    return () => { off = true; };
+  }, [profile?.id, period]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function doPay(level: 'grey' | 'blue') {
+    const price = prices[level] ?? 0;
+    if (balance < price) {
+      toast.error('Solde insuffisant — rechargez votre portefeuille.');
+      navigate('/wallet');
+      return;
+    }
+    setPaying(level);
+    try {
+      const exp = await payCertification(level, period);
+      await refreshProfile();
+      const w = await getWallet(profile!.id);
+      setBalance(w.balance);
+      toast.success(`Certification active jusqu'au ${new Date(exp).toLocaleDateString('fr-FR')}.`);
+      if (!kycVerified) {
+        toast('Envoyez vos pièces pour activer votre badge.', { icon: '📄', duration: 6000 });
+        goUpload();
+      }
+    } catch (e) {
+      toast.error((e as Error).message || 'Paiement impossible');
+    } finally { setPaying(null); }
+  }
 
   return (
     <DashboardLayout>
@@ -75,7 +128,10 @@ export default function Certification() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
           {PLANS.map((plan, index) => {
             const isCurrent = current === plan.key;
-            const price = plan.key === 'none' ? 0 : annual ? plan.yearly : plan.monthly;
+            const isFree = plan.key === 'none';
+            const price = isFree ? 0 : (prices[plan.key] ?? (annual ? plan.yearly : plan.monthly));
+            const listPrice = annual ? plan.yearly : plan.monthly;
+            const discounted = !isFree && price < listPrice;
             return (
               <motion.div key={plan.key}
                 initial={{ opacity: 0, y: 24 }}
@@ -107,16 +163,22 @@ export default function Certification() {
 
                 {/* Prix */}
                 <div style={{ textAlign: 'center', marginTop: 16 }}>
-                  {plan.key === 'none' ? (
+                  {isFree ? (
                     <span style={{ fontSize: 34, fontWeight: 800, color: 'var(--color-gold-primary)' }}>Gratuit</span>
                   ) : (
                     <>
+                      {discounted && (
+                        <span style={{ fontSize: 15, color: 'var(--color-text-muted)', textDecoration: 'line-through', marginRight: 8 }}>
+                          {formatCFA(listPrice)}
+                        </span>
+                      )}
                       <span style={{ fontSize: 30, fontWeight: 800, color: 'var(--color-gold-primary)' }}>{formatCFA(price)}</span>
                       <span style={{ fontSize: 13, color: 'var(--color-text-secondary)', fontWeight: 600 }}> /{annual ? 'an' : 'mois'}</span>
                     </>
                   )}
-                  <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 4, minHeight: 14 }}>
-                    {plan.key !== 'none' && (annual ? 'facturé une fois par an' : 'facturé chaque mois')}
+                  <div style={{ fontSize: 11, color: discounted ? '#00C896' : 'var(--color-text-muted)', marginTop: 4, minHeight: 14 }}>
+                    {isFree ? '' : discounted ? 'remise fidélité Bleu appliquée'
+                      : annual ? 'facturé une fois par an' : 'facturé chaque mois'}
                   </div>
                 </div>
 
@@ -132,29 +194,54 @@ export default function Certification() {
 
                 {/* CTA */}
                 <button
-                  onClick={plan.key === 'none' ? undefined : goUpload}
-                  disabled={plan.key === 'none' || isCurrent}
+                  onClick={isFree ? undefined : () => doPay(plan.key as 'grey' | 'blue')}
+                  disabled={isFree || paying !== null}
                   style={{
                     marginTop: 20, width: '100%', padding: '11px', borderRadius: 12,
-                    fontSize: 14, fontWeight: 700, cursor: plan.key === 'none' || isCurrent ? 'default' : 'pointer',
+                    fontSize: 14, fontWeight: 700, cursor: isFree ? 'default' : 'pointer',
                     border: plan.popular ? 'none' : `1px solid ${plan.color}55`,
-                    background: isCurrent ? 'rgba(0,200,150,0.15)'
-                      : plan.popular ? `linear-gradient(135deg, ${plan.color}, #60a5fa)`
-                      : plan.key === 'none' ? 'var(--color-surface)' : 'transparent',
-                    color: isCurrent ? '#00C896' : plan.popular ? '#fff' : plan.key === 'none' ? 'var(--color-text-muted)' : 'var(--color-text-primary)',
-                    opacity: plan.key === 'none' && !isCurrent ? 0.7 : 1,
+                    background: plan.popular ? `linear-gradient(135deg, ${plan.color}, #60a5fa)`
+                      : isFree ? 'var(--color-surface)' : 'transparent',
+                    color: plan.popular ? '#fff' : isFree ? 'var(--color-text-muted)' : 'var(--color-text-primary)',
+                    opacity: isFree ? 0.7 : 1,
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7,
                   }}>
-                  {isCurrent ? 'Votre formule actuelle' : plan.key === 'none' ? 'Formule par défaut' : 'Envoyer mes pièces'}
+                  {isFree ? 'Formule par défaut' : paying === plan.key ? 'Paiement…' : (
+                    <>
+                      <WalletIcon size={15} />
+                      {isCurrent && isActive ? 'Renouveler' : `Payer ${formatCFA(price)}`}
+                    </>
+                  )}
                 </button>
+                {!isFree && (
+                  <p style={{ fontSize: 10.5, textAlign: 'center', marginTop: 7, color: 'var(--color-text-muted)' }}>
+                    débité de votre portefeuille
+                  </p>
+                )}
               </motion.div>
             );
           })}
         </div>
 
         {/* Note paiement */}
-        <p className="text-center text-xs mt-6" style={{ color: 'var(--color-text-muted)', maxWidth: 600, margin: '24px auto 0' }}>
-          💡 Le paiement mobile money (Orange · MTN · Moov · Wave) arrive bientôt. En attendant, <b style={{ color: 'var(--color-text-secondary)' }}>envoie tes pièces</b> ci-dessous : notre équipe vérifie et t'attribue ton badge.
-        </p>
+        <div className="text-center text-xs mt-6" style={{ color: 'var(--color-text-muted)', maxWidth: 620, margin: '24px auto 0' }}>
+          <p>
+            💡 Le règlement se fait <b style={{ color: 'var(--color-text-secondary)' }}>depuis votre portefeuille</b> — rechargez-le par
+            mobile money (Orange · MTN · Moov · Wave), puis choisissez votre formule.
+            {' '}Solde actuel : <b style={{ color: 'var(--color-gold-primary)' }}>{formatCFA(balance)}</b>
+            {' · '}
+            <button onClick={() => navigate('/wallet')} style={{ color: 'var(--color-gold-primary)', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', font: 'inherit', padding: 0 }}>
+              recharger
+            </button>
+          </p>
+          {isActive && current !== 'none' && (
+            <p style={{ marginTop: 8, color: kycVerified ? '#00C896' : '#f59e0b' }}>
+              {kycVerified
+                ? `✅ Certification ${current === 'blue' ? 'Bleue' : 'Grise'} active jusqu'au ${expiresAt!.toLocaleDateString('fr-FR')}.`
+                : `⏳ Paiement reçu — votre badge s'activera dès la validation de vos pièces (envoyez-les ci-dessous). Abonnement valable jusqu'au ${expiresAt!.toLocaleDateString('fr-FR')}.`}
+            </p>
+          )}
+        </div>
 
         {/* Zone d'envoi des pièces (KYC) */}
         <div id="kyc-upload" style={{ marginTop: 28 }}>

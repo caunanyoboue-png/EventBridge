@@ -63,6 +63,32 @@ export async function requestWithdraw(amount: number, phone: string, operator: s
   if (error) throw error;
 }
 
+// ─── Certification payante (abonnement réglé depuis le portefeuille) ────────
+
+export type CertifPeriod = 'month' | 'year';
+
+/** Prix réel côté serveur (tient compte de la remise de renouvellement Bleu). */
+export async function getCertificationPrice(
+  userId: string, level: 'grey' | 'blue', period: CertifPeriod,
+): Promise<number | null> {
+  const { data, error } = await supabase.rpc('certification_price', {
+    p_level: level, p_period: period, p_user: userId,
+  });
+  if (error) return null;
+  return Number(data);
+}
+
+/** Paie la certification depuis le solde. Renvoie la date d'expiration. */
+export async function payCertification(
+  level: 'grey' | 'blue', period: CertifPeriod,
+): Promise<string> {
+  const { data, error } = await supabase.rpc('wallet_pay_certification', {
+    p_level: level, p_period: period,
+  });
+  if (error) throw error;
+  return data as string;
+}
+
 /** Libérer l'escrow vers le freelance (à la validation de la mission). */
 export async function releaseEscrow(paymentId: string): Promise<void> {
   const { error } = await supabase.rpc('wallet_release', { p_payment_id: paymentId });

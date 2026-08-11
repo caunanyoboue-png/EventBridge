@@ -67,6 +67,8 @@ export interface Profile {
   total_reviews?: number;
   is_certified?: boolean;
   certification_level?: CertificationLevel;
+  certification_expires_at?: string;   // fin de l'abonnement certification
+  certification_paid_at?: string;
   is_super_admin?: boolean;
   is_available?: boolean;
   company_name?: string;

@@ -18,16 +18,21 @@ const WITHDRAW_MODES = [
 const TX_LABEL: Record<string, string> = {
   recharge: 'Recharge', hold: 'Mission payée (escrow)', release: 'Escrow libéré',
   earning: 'Gain mission', withdrawal: 'Retrait', refund: 'Remboursement',
+  certification: 'Certification',
 };
+
+const MIN_AMOUNT = 200;
 
 export default function Wallet() {
   const { profile } = useAuth();
   const [w, setW] = useState<W>({ balance: 0, held: 0, currency: 'XOF' });
   const [txs, setTxs] = useState<WalletTx[]>([]);
-  const [amount, setAmount] = useState<number>(10000);
+  const [amount, setAmount] = useState<number>(10000);   // recharge
+  const [wAmount, setWAmount] = useState<number>(5000);  // retrait
   const [phone, setPhone] = useState('');
   const [operator, setOperator] = useState(WITHDRAW_MODES[0].value);
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState(false);               // recharge en cours
+  const [busyW, setBusyW] = useState(false);             // retrait en cours
   const [loading, setLoading] = useState(true);
   const [reloadTick, setReloadTick] = useState(0);
 
@@ -58,7 +63,7 @@ export default function Wallet() {
   }, []);
 
   async function doRecharge() {
-    if (amount < 200) { toast.error('Montant minimum : 200 FCFA.'); return; }
+    if (amount < MIN_AMOUNT) { toast.error(`Montant minimum : ${MIN_AMOUNT} FCFA.`); return; }
     setBusy(true);
     try {
       const url = await rechargeWallet(amount);
@@ -71,17 +76,17 @@ export default function Wallet() {
   }
 
   async function doWithdraw() {
-    if (amount < 200) { toast.error('Montant minimum : 200 FCFA.'); return; }
-    if (amount > w.balance) { toast.error('Montant supérieur au solde disponible.'); return; }
+    if (wAmount < MIN_AMOUNT) { toast.error(`Montant minimum : ${MIN_AMOUNT} FCFA.`); return; }
+    if (wAmount > w.balance) { toast.error('Montant supérieur au solde disponible.'); return; }
     if (!phone.trim()) { toast.error('Renseignez votre numéro mobile money.'); return; }
-    setBusy(true);
+    setBusyW(true);
     try {
-      await requestWithdraw(amount, phone.trim(), operator);
+      await requestWithdraw(wAmount, phone.trim(), operator);
       toast.success('Demande de retrait enregistrée. Versement sous 24 à 48 h.');
       await load();
     } catch (e) {
       toast.error((e as Error).message || 'Erreur');
-    } finally { setBusy(false); }
+    } finally { setBusyW(false); }
   }
 
   const inputStyle = { background: 'var(--color-input-bg)', border: '1px solid rgba(201,168,76,0.2)', color: 'var(--color-text-primary)' };
@@ -106,18 +111,18 @@ export default function Wallet() {
         )}
       </div>
 
-      {/* Action : recharge (organisateur) ou retrait (freelance) */}
-      <div className="card-glass p-6 mb-6">
-        <h2 className="font-semibold mb-1" style={{ color: 'var(--color-gold-primary)' }}>
-          {isFreelance ? 'Retirer mes gains' : 'Recharger le portefeuille'}
-        </h2>
-        <p className="text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>
-          {isFreelance
-            ? 'Versement sur votre compte mobile money (Orange Money, MTN, Moov, Wave) sous 24 à 48 h après votre demande.'
-            : 'Rechargez par mobile money (Orange Money, MTN, Moov, Wave).'}
-        </p>
+      {/* Dépôt et retrait — disponibles pour les deux rôles */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
 
-        {!isFreelance && (
+        {/* ── Recharger ── */}
+        <div className="card-glass p-6">
+          <h2 className="font-semibold mb-1" style={{ color: 'var(--color-gold-primary)' }}>Recharger le portefeuille</h2>
+          <p className="text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>
+            {isFreelance
+              ? 'Alimentez votre solde par mobile money pour régler votre certification.'
+              : 'Rechargez par mobile money (Orange Money, MTN, Moov, Wave) pour payer vos missions.'}
+          </p>
+
           <div className="flex flex-wrap gap-2 mb-3">
             {QUICK.map(q => (
               <button key={q} onClick={() => setAmount(q)}
@@ -129,36 +134,60 @@ export default function Wallet() {
               </button>
             ))}
           </div>
-        )}
 
-        <div className="flex flex-wrap gap-3 items-end">
-          <div>
-            <label className="text-xs block mb-1" style={{ color: 'var(--color-text-secondary)' }}>Montant (FCFA)</label>
-            <input type="number" value={amount} min={200} step={500}
-              onChange={e => setAmount(Number(e.target.value))}
-              className="px-3 py-2 rounded-lg text-sm outline-none" style={{ ...inputStyle, width: 150 }} />
+          <div className="flex flex-wrap gap-3 items-end">
+            <div>
+              <label className="text-xs block mb-1" style={{ color: 'var(--color-text-secondary)' }}>Montant (FCFA)</label>
+              <input type="number" value={amount} min={MIN_AMOUNT} step={500}
+                onChange={e => setAmount(Number(e.target.value))}
+                className="px-3 py-2 rounded-lg text-sm outline-none" style={{ ...inputStyle, width: 150 }} />
+            </div>
+            <button onClick={doRecharge} disabled={busy}
+              className="btn-gold px-6 py-2.5 rounded-xl text-sm font-bold text-[#261642] disabled:opacity-60">
+              {busy ? '…' : 'Recharger'}
+            </button>
           </div>
-          {isFreelance && (
-            <>
-              <div>
-                <label className="text-xs block mb-1" style={{ color: 'var(--color-text-secondary)' }}>Numéro mobile money</label>
-                <input type="tel" value={phone} placeholder="+225 07 00 00 00 00"
-                  onChange={e => setPhone(e.target.value)}
-                  className="px-3 py-2 rounded-lg text-sm outline-none" style={{ ...inputStyle, width: 180 }} />
-              </div>
-              <div>
-                <label className="text-xs block mb-1" style={{ color: 'var(--color-text-secondary)' }}>Opérateur</label>
-                <select value={operator} onChange={e => setOperator(e.target.value)}
-                  className="px-3 py-2 rounded-lg text-sm outline-none" style={inputStyle}>
-                  {WITHDRAW_MODES.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-                </select>
-              </div>
-            </>
+        </div>
+
+        {/* ── Retirer ── */}
+        <div className="card-glass p-6">
+          <h2 className="font-semibold mb-1" style={{ color: 'var(--color-gold-primary)' }}>
+            {isFreelance ? 'Retirer mes gains' : 'Retirer mon solde'}
+          </h2>
+          <p className="text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>
+            Versement sur votre compte mobile money (Orange Money, MTN, Moov, Wave) sous 24 à 48 h après votre demande.
+          </p>
+
+          <div className="flex flex-wrap gap-3 items-end">
+            <div>
+              <label className="text-xs block mb-1" style={{ color: 'var(--color-text-secondary)' }}>Montant (FCFA)</label>
+              <input type="number" value={wAmount} min={MIN_AMOUNT} step={500} max={w.balance || undefined}
+                onChange={e => setWAmount(Number(e.target.value))}
+                className="px-3 py-2 rounded-lg text-sm outline-none" style={{ ...inputStyle, width: 150 }} />
+            </div>
+            <div>
+              <label className="text-xs block mb-1" style={{ color: 'var(--color-text-secondary)' }}>Numéro mobile money</label>
+              <input type="tel" value={phone} placeholder="+225 07 00 00 00 00"
+                onChange={e => setPhone(e.target.value)}
+                className="px-3 py-2 rounded-lg text-sm outline-none" style={{ ...inputStyle, width: 180 }} />
+            </div>
+            <div>
+              <label className="text-xs block mb-1" style={{ color: 'var(--color-text-secondary)' }}>Opérateur</label>
+              <select value={operator} onChange={e => setOperator(e.target.value)}
+                className="px-3 py-2 rounded-lg text-sm outline-none" style={inputStyle}>
+                {WITHDRAW_MODES.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+              </select>
+            </div>
+            <button onClick={doWithdraw} disabled={busyW || w.balance < MIN_AMOUNT}
+              className="btn-gold px-6 py-2.5 rounded-xl text-sm font-bold text-[#261642] disabled:opacity-60">
+              {busyW ? '…' : 'Retirer'}
+            </button>
+          </div>
+          {w.balance < MIN_AMOUNT && (
+            <p className="text-xs mt-3" style={{ color: 'var(--color-text-muted)' }}>
+              Solde insuffisant pour un retrait (minimum {formatCFA(MIN_AMOUNT)}).
+            </p>
           )}
-          <button onClick={isFreelance ? doWithdraw : doRecharge} disabled={busy}
-            className="btn-gold px-6 py-2.5 rounded-xl text-sm font-bold text-[#261642] disabled:opacity-60">
-            {busy ? '…' : isFreelance ? 'Retirer' : 'Recharger'}
-          </button>
         </div>
       </div>
 
