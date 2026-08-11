@@ -44,6 +44,7 @@ export default function Certification() {
   const [prices, setPrices] = useState<Record<string, number>>({});
   const [paying, setPaying] = useState<string | null>(null);
   const [confirmLevel, setConfirmLevel] = useState<'grey' | 'blue' | null>(null);
+  const [kycGate, setKycGate] = useState(false);   // formulaire bloquant « pièces obligatoires »
   const [cancelling, setCancelling] = useState(false);
   const current = (profile?.certification_level || 'none') as CertificationLevel;
   const period = annual ? 'year' : 'month';
@@ -52,8 +53,11 @@ export default function Certification() {
     ? new Date(profile.certification_expires_at) : null;
   const isActive = !!expiresAt && expiresAt > new Date();
   const kycStatus = profile?.kyc_status || 'unverified';
-  const kycVerified = kycStatus === 'verified';
-  const kycPending  = kycStatus === 'pending';
+  // Les pièces doivent exister RÉELLEMENT : d'anciens profils ont hérité d'un
+  // kyc_status « verified » sans avoir jamais déposé de document.
+  const hasDocs = !!profile?.kyc_document_path && !!profile?.kyc_document_back_path;
+  const kycVerified = kycStatus === 'verified' && hasDocs;
+  const kycPending  = kycStatus === 'pending' && hasDocs;
   const kycRejected = kycStatus === 'rejected';
   // Toute la procédure de paiement reste bloquée tant que l'identité n'est pas VÉRIFIÉE.
   const canPay = kycVerified;
@@ -79,13 +83,10 @@ export default function Certification() {
 
   /** Étape 1 : contrôles préalables, puis ouverture du récapitulatif. Aucun débit ici. */
   function askPay(level: 'grey' | 'blue') {
-    if (!canPay) {
-      toast.error(kycPending
-        ? 'Vos pièces sont en cours de vérification. Vous pourrez choisir votre formule dès validation.'
-        : "Votre identité doit d'abord être vérifiée. Envoyez votre pièce d'identité.");
-      goUpload();
-      return;
-    }
+    // 1) L'identité passe AVANT tout le reste : ni le solde ni la formule ne comptent
+    //    tant que les pièces ne sont pas déposées et validées.
+    if (!canPay) { setKycGate(true); return; }
+    // 2) Ensuite seulement, le solde.
     if (balance < (prices[level] ?? 0)) {
       toast.error('Solde insuffisant — rechargez votre portefeuille.');
       navigate('/wallet');
@@ -349,6 +350,76 @@ export default function Certification() {
           <KycCard alwaysShow offersLink={false} />
         </div>
       </div>
+
+      {/* ── Formulaire bloquant : pièces obligatoires avant toute suite ── */}
+      {kycGate && (
+        <div onClick={() => setKycGate(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center',
+            justifyContent: 'center', padding: 16, background: 'rgba(15,10,30,0.85)' }}>
+          <div onClick={e => e.stopPropagation()} className="card-glass p-6 w-full" style={{ maxWidth: 440 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 10 }}>
+              <div style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: kycPending ? 'rgba(245,158,11,0.18)' : 'rgba(59,130,246,0.18)' }}>
+                {kycPending ? <Clock size={20} color="#f59e0b" /> : <ShieldCheck size={20} color="#3b82f6" />}
+              </div>
+              <h3 className="font-semibold" style={{ color: 'var(--color-text-primary)', fontSize: 16 }}>
+                {kycPending ? 'Vérification en cours' : "Pièce d'identité obligatoire"}
+              </h3>
+            </div>
+
+            <p style={{ fontSize: 13.5, color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
+              {kycPending ? (
+                <>Nous contrôlons actuellement votre pièce d’identité. Comptez <b>24 à 48 h</b> :
+                vous recevrez une notification dès la validation, et vous pourrez alors régler votre formule.</>
+              ) : kycRejected ? (
+                <>Votre document n’a pas pu être validé. Renvoyez une photo <b>nette et complète</b> de
+                votre pièce d’identité (recto <i>et</i> verso) pour débloquer la certification.</>
+              ) : (
+                <>Avant de souscrire, vous devez <b>obligatoirement</b> faire vérifier votre identité.
+                Envoyez votre pièce d’identité (recto <i>et</i> verso) : nos équipes la contrôlent sous
+                <b> 24 à 48 h</b>. Le paiement ne sera possible qu’une fois cette vérification validée.</>
+              )}
+            </p>
+
+            {/* Rappel du parcours */}
+            <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 9 }}>
+              {[
+                ["Envoyer vos pièces d'identité", hasDocs],
+                ['Vérification par notre équipe (24-48 h)', kycVerified],
+                ['Choisir et régler votre formule', false],
+              ].map(([label, done], i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 12.5 }}>
+                  <span style={{
+                    width: 20, height: 20, borderRadius: '50%', flexShrink: 0, fontSize: 11, fontWeight: 700,
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    background: done ? 'rgba(0,200,150,0.18)' : 'var(--color-surface)',
+                    color: done ? '#00C896' : 'var(--color-text-muted)',
+                    border: `1px solid ${done ? 'rgba(0,200,150,0.4)' : 'rgba(201,168,76,0.2)'}`,
+                  }}>{done ? <Check size={12} /> : i + 1}</span>
+                  <span style={{ color: done ? '#00C896' : 'var(--color-text-secondary)' }}>{label as string}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-2 mt-5">
+              <button type="button" onClick={() => setKycGate(false)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold"
+                style={{ background: 'var(--color-surface)', color: 'var(--color-text-secondary)',
+                  border: '1px solid rgba(201,168,76,0.2)' }}>
+                Fermer
+              </button>
+              {!kycPending && (
+                <button type="button"
+                  onClick={() => { setKycGate(false); goUpload(); }}
+                  className="flex-1 btn-gold py-2.5 rounded-xl text-sm font-bold text-[#261642]">
+                  {kycRejected ? 'Renvoyer mes pièces' : 'Envoyer mes pièces'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Récapitulatif avant débit ─────────────────────────────── */}
       {confirmLevel && (() => {

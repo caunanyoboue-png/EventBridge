@@ -16,19 +16,25 @@ DECLARE
   uid UUID := auth.uid();
   price INTEGER; bal INTEGER; newbal INTEGER;
   cur_exp TIMESTAMPTZ; new_exp TIMESTAMPTZ; ref TEXT; kyc TEXT; urole TEXT;
+  doc_recto TEXT; doc_verso TEXT;
 BEGIN
   IF uid IS NULL THEN RAISE EXCEPTION 'Non authentifié'; END IF;
   IF p_level NOT IN ('grey','blue')  THEN RAISE EXCEPTION 'Niveau invalide'; END IF;
   IF p_period NOT IN ('month','year') THEN RAISE EXCEPTION 'Durée invalide'; END IF;
 
-  SELECT role, kyc_status, certification_expires_at INTO urole, kyc, cur_exp
+  SELECT role, kyc_status, certification_expires_at, kyc_document_path, kyc_document_back_path
+    INTO urole, kyc, cur_exp, doc_recto, doc_verso
     FROM public.profiles WHERE id = uid;
   IF urole <> 'freelance' THEN RAISE EXCEPTION 'La certification est réservée aux freelances'; END IF;
 
-  -- Garde-fou : l'identité doit avoir été VÉRIFIÉE par un administrateur.
-  -- Tant que ce n'est pas le cas, toute la procédure de paiement est bloquée.
+  -- Garde-fou : les pièces doivent avoir été réellement déposées ET validées par un
+  -- administrateur. (Le contrôle porte aussi sur les fichiers : d'anciens profils ont
+  -- hérité d'un kyc_status « verified » sans avoir jamais envoyé de document.)
+  IF doc_recto IS NULL OR doc_verso IS NULL THEN
+    RAISE EXCEPTION 'Envoyez d''abord votre pièce d''identité (recto et verso) depuis la page Certification.';
+  END IF;
   IF COALESCE(kyc, 'unverified') <> 'verified' THEN
-    RAISE EXCEPTION 'Votre identité doit d''abord être vérifiée. Envoyez votre pièce d''identité : nos équipes la contrôlent sous 24 à 48 h.';
+    RAISE EXCEPTION 'Votre identité doit d''abord être vérifiée. Nos équipes contrôlent vos pièces sous 24 à 48 h.';
   END IF;
 
   price := public.certification_price(p_level, p_period, uid);
