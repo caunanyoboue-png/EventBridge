@@ -10,10 +10,12 @@ import toast from 'react-hot-toast';
 export default function KycCard({ alwaysShow = false, offersLink = true }: { alwaysShow?: boolean; offersLink?: boolean }) {
   const { profile, updateProfile } = useAuth();
   const navigate = useNavigate();
-  const rectoRef = useRef<HTMLInputElement>(null);
-  const versoRef = useRef<HTMLInputElement>(null);
-  const [recto, setRecto] = useState<File | null>(null);
-  const [verso, setVerso] = useState<File | null>(null);
+  const rectoRef  = useRef<HTMLInputElement>(null);
+  const versoRef  = useRef<HTMLInputElement>(null);
+  const selfieRef = useRef<HTMLInputElement>(null);
+  const [recto, setRecto]   = useState<File | null>(null);
+  const [verso, setVerso]   = useState<File | null>(null);
+  const [selfie, setSelfie] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
 
   if (!profile || profile.role !== 'freelance') return null;
@@ -42,7 +44,7 @@ export default function KycCard({ alwaysShow = false, offersLink = true }: { alw
     );
   }
 
-  async function uploadOne(file: File, side: 'recto' | 'verso'): Promise<string> {
+  async function uploadOne(file: File, side: 'recto' | 'verso' | 'selfie'): Promise<string> {
     const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
     const path = `${profile!.id}/cni_${side}_${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from('kyc').upload(path, file, { upsert: true, contentType: file.type });
@@ -51,38 +53,46 @@ export default function KycCard({ alwaysShow = false, offersLink = true }: { alw
   }
 
   async function submit() {
-    if (!recto || !verso || !profile) { toast.error('Ajoutez le recto ET le verso de votre pièce.'); return; }
-    if (recto.size > 8 * 1024 * 1024 || verso.size > 8 * 1024 * 1024) { toast.error('Chaque image doit faire moins de 8 Mo.'); return; }
+    if (!recto || !verso || !selfie || !profile) {
+      toast.error('Ajoutez le recto, le verso et votre selfie avec la pièce.'); return;
+    }
+    const tooBig = [recto, verso, selfie].some(f => f.size > 8 * 1024 * 1024);
+    if (tooBig) { toast.error('Chaque image doit faire moins de 8 Mo.'); return; }
     setBusy(true);
     try {
-      const rectoPath = await uploadOne(recto, 'recto');
-      const versoPath = await uploadOne(verso, 'verso');
+      const rectoPath  = await uploadOne(recto, 'recto');
+      const versoPath  = await uploadOne(verso, 'verso');
+      const selfiePath = await uploadOne(selfie, 'selfie');
       await updateProfile({
         kyc_document_path: rectoPath, kyc_document_back_path: versoPath,
+        kyc_selfie_path: selfiePath,
         kyc_status: 'pending', kyc_submitted_at: new Date().toISOString(),
       });
-      toast.success('Pièce envoyée — en attente de vérification.');
-      setRecto(null); setVerso(null);
+      toast.success('Dossier envoyé — en attente de vérification.');
+      setRecto(null); setVerso(null); setSelfie(null);
     } catch (e) {
       const msg = (e as { message?: string })?.message || 'Échec de l\'envoi';
       console.error('[KYC upload]', e);
       toast.error(`Échec : ${msg}`);
     } finally {
       setBusy(false);
-      if (rectoRef.current) rectoRef.current.value = '';
-      if (versoRef.current) versoRef.current.value = '';
+      if (rectoRef.current)  rectoRef.current.value = '';
+      if (versoRef.current)  versoRef.current.value = '';
+      if (selfieRef.current) selfieRef.current.value = '';
     }
   }
+
+  const complet = !!recto && !!verso && !!selfie;
 
   const theme: { bg: string; bd: string; col: string; Icon: LucideIcon; title: string; msg: string } =
     status === 'pending'
       ? { bg: 'rgba(59,130,246,0.1)', bd: 'rgba(59,130,246,0.3)', col: '#3b82f6', Icon: Clock,
-          title: 'Certification en cours', msg: 'Vos pièces (recto + verso) ont bien été envoyées. Un administrateur les vérifie sous peu.' }
+          title: 'Vérification en cours', msg: 'Votre dossier (recto, verso et selfie) a bien été envoyé. Un administrateur le vérifie sous 24 à 48 h.' }
       : status === 'rejected'
       ? { bg: 'rgba(239,68,68,0.1)', bd: 'rgba(239,68,68,0.3)', col: '#ef4444', Icon: XCircle,
-          title: 'Pièce refusée', msg: profile.kyc_rejection_reason || 'Vos pièces ont été refusées. Merci d\'en renvoyer de nouvelles (recto + verso, bien lisibles).' }
+          title: 'Dossier refusé', msg: profile.kyc_rejection_reason || 'Vos pièces ont été refusées. Merci d\'en renvoyer de nouvelles, bien lisibles : recto, verso et un selfie où l\'on vous voit tenir votre pièce.' }
       : { bg: 'rgba(212,175,55,0.1)', bd: 'rgba(212,175,55,0.3)', col: 'var(--color-gold-primary)', Icon: BadgeCheck,
-          title: 'Obtenez votre badge Certifié', msg: 'Facultatif, mais ça rassure les organisateurs et booste votre visibilité. Envoyez le recto ET le verso de votre pièce (CNI ou passeport).' };
+          title: 'Faites vérifier votre identité', msg: 'Envoyez 3 documents : le recto et le verso de votre pièce (CNI ou passeport), plus un selfie où l\'on vous voit tenir cette pièce — visage et document bien lisibles.' };
 
   // Peut envoyer ses pièces tant qu'il n'est pas certifié et qu'aucune revue n'est en cours.
   const canUpload = status !== 'pending';
@@ -124,13 +134,17 @@ export default function KycCard({ alwaysShow = false, offersLink = true }: { alw
             onChange={e => setRecto(e.target.files?.[0] ?? null)} />
           <input ref={versoRef} type="file" accept="image/*,application/pdf" style={{ display: 'none' }}
             onChange={e => setVerso(e.target.files?.[0] ?? null)} />
+          {/* capture="user" ouvre directement la caméra frontale sur mobile */}
+          <input ref={selfieRef} type="file" accept="image/*" capture="user" style={{ display: 'none' }}
+            onChange={e => setSelfie(e.target.files?.[0] ?? null)} />
           {pick(recto, 'Recto', rectoRef)}
           {pick(verso, 'Verso', versoRef)}
-          <button type="button" onClick={submit} disabled={busy || !recto || !verso}
+          {pick(selfie, 'Selfie avec la pièce', selfieRef)}
+          <button type="button" onClick={submit} disabled={busy || !complet}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 16px', borderRadius: 10,
               background: 'var(--color-gold-primary)', color: '#261642', fontSize: 13, fontWeight: 700,
-              border: 'none', cursor: busy || !recto || !verso ? 'not-allowed' : 'pointer', opacity: busy || !recto || !verso ? 0.55 : 1,
+              border: 'none', cursor: busy || !complet ? 'not-allowed' : 'pointer', opacity: busy || !complet ? 0.55 : 1,
             }}>
             {busy ? 'Envoi…' : 'Envoyer'}
           </button>

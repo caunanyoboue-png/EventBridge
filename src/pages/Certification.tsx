@@ -53,9 +53,10 @@ export default function Certification() {
     ? new Date(profile.certification_expires_at) : null;
   const isActive = !!expiresAt && expiresAt > new Date();
   const kycStatus = profile?.kyc_status || 'unverified';
-  // Les pièces doivent exister RÉELLEMENT : d'anciens profils ont hérité d'un
-  // kyc_status « verified » sans avoir jamais déposé de document.
-  const hasDocs = !!profile?.kyc_document_path && !!profile?.kyc_document_back_path;
+  // Le dossier doit exister RÉELLEMENT et être complet (recto + verso + selfie) :
+  // d'anciens profils ont hérité d'un kyc_status « verified » sans aucun document.
+  const hasDocs = !!profile?.kyc_document_path && !!profile?.kyc_document_back_path
+    && !!profile?.kyc_selfie_path;
   const kycVerified = kycStatus === 'verified' && hasDocs;
   const kycPending  = kycStatus === 'pending' && hasDocs;
   const kycRejected = kycStatus === 'rejected';
@@ -386,7 +387,7 @@ export default function Certification() {
             {/* Rappel du parcours */}
             <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 9 }}>
               {[
-                ["Envoyer vos pièces d'identité", hasDocs],
+                ['Envoyer vos pièces : recto, verso et selfie', hasDocs],
                 ['Vérification par notre équipe (24-48 h)', kycVerified],
                 ['Choisir et régler votre formule', false],
               ].map(([label, done], i) => (

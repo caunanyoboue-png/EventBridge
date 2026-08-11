@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { supabase } from '../../lib/supabase';
-import { Star, ShieldCheck, FileText, Eye } from 'lucide-react';
+import { Star, ShieldCheck, FileText, Eye, UserCheck } from 'lucide-react';
 import { type Profile, type UserStatus, type CertificationLevel } from '../../types';
 import { getInitials } from '../../lib/utils';
 import CertifiedBadge from '../../components/CertifiedBadge';
@@ -219,19 +219,25 @@ export default function AdminProfiles() {
                           <Eye size={12} /> Consulter
                         </button>
                       )}
-                      {/* KYC : revue des pièces (recto / verso) */}
-                      {p.role === 'freelance' && p.kyc_document_path && (
-                        <button onClick={() => viewKyc(p.kyc_document_path)}
-                          className="px-2 py-1 rounded text-xs inline-flex items-center gap-1" style={{ background: 'rgba(59,130,246,0.15)', color: '#3b82f6' }}>
-                          <FileText size={12} /> Recto
+                      {/* Dossier d'identité : les 3 emplacements sont TOUJOURS affichés,
+                          pour voir d'un coup d'œil si une pièce manque au dossier. */}
+                      {p.role === 'freelance' && ([
+                        { key: 'recto',  label: 'Recto',  path: p.kyc_document_path,      Icon: FileText,  col: '#3b82f6' },
+                        { key: 'verso',  label: 'Verso',  path: p.kyc_document_back_path, Icon: FileText,  col: '#3b82f6' },
+                        { key: 'selfie', label: 'Selfie', path: p.kyc_selfie_path,        Icon: UserCheck, col: '#00C896' },
+                      ] as const).map(doc => (
+                        <button key={doc.key}
+                          onClick={() => viewKyc(doc.path)}
+                          disabled={!doc.path}
+                          title={doc.path ? `Voir le ${doc.label.toLowerCase()}` : `${doc.label} non fourni`}
+                          className="px-2 py-1 rounded text-xs inline-flex items-center gap-1"
+                          style={doc.path
+                            ? { background: `${doc.col}26`, color: doc.col }
+                            : { background: 'var(--color-surface)', color: 'var(--color-text-muted)',
+                                textDecoration: 'line-through', cursor: 'not-allowed', opacity: 0.6 }}>
+                          <doc.Icon size={12} /> {doc.label}
                         </button>
-                      )}
-                      {p.role === 'freelance' && p.kyc_document_back_path && (
-                        <button onClick={() => viewKyc(p.kyc_document_back_path)}
-                          className="px-2 py-1 rounded text-xs inline-flex items-center gap-1" style={{ background: 'rgba(59,130,246,0.15)', color: '#3b82f6' }}>
-                          <FileText size={12} /> Verso
-                        </button>
-                      )}
+                      ))}
                       {p.role === 'freelance' && p.kyc_status === 'pending' && (
                         <>
                           <button onClick={() => reviewKyc(p, 'verified')}

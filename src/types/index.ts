@@ -49,6 +49,7 @@ export interface Profile {
   kyc_status?: KycStatus;
   kyc_document_path?: string;        // recto
   kyc_document_back_path?: string;   // verso
+  kyc_selfie_path?: string;          // selfie tenant la pièce (anti-usurpation)
   kyc_rejection_reason?: string;
   kyc_submitted_at?: string;
   kyc_reviewed_at?: string;
