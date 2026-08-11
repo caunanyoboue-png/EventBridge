@@ -63,7 +63,7 @@ const ORG_AVANTAGES = [
   'Des profils vérifiés et certifiés, sélectionnés en quelques minutes',
   'Filtrez par compétence, disponibilité, ville et tarif',
   'Équipes, contrats et paiements réunis dans un seul écrin',
-  'Mobilisation d\'urgence avec le S.O.S Brigade en moins de 10 minutes',
+  'Mobilisation d\'urgence avec le S.O.S Brigade : 20 km autour de vous, réponses en direct',
 ];
 
 const STATS: { to: number; suffix?: string; decimals?: number; label: string }[] = [
@@ -489,11 +489,12 @@ export default function Landing() {
             <h2 className="font-display text-3xl md:text-4xl font-bold mb-4" style={{ color: '#fff' }}>S.O.S Brigade</h2>
             <p className="text-lg mb-3 font-medium" style={{ color: 'rgba(255,255,255,0.88)' }}>Un imprévu à une heure du grand soir ?</p>
             <p className="text-base mb-10 max-w-xl mx-auto leading-relaxed" style={{ color: 'rgba(255,255,255,0.62)', lineHeight: 1.8 }}>
-              Déclenchez l'alerte : les freelances disponibles autour de votre événement sont prévenus en temps réel et confirmés en quelques minutes. Votre soirée est sauvée.
+              Déclenchez l'alerte : les freelances disponibles dans un rayon de 20 km sont prévenus en temps réel et répondent directement depuis l'application. Vous suivez les confirmations en direct pendant les 30 minutes de l'alerte.
             </p>
           </Reveal>
           <div className="flex flex-wrap justify-center gap-5 mb-10">
-            {[{ v: '< 10 min', l: 'Temps de réponse moyen' }, { v: '10 km', l: 'Rayon de recherche' }, { v: '24h / 7j', l: 'Disponibilité' }].map((stat, i) => (
+            {/* Chiffres alignés sur le code : SOS_RADIUS_KM = 20 km, session valable 30 min */}
+            {[{ v: '20 km', l: "Rayon d'alerte" }, { v: '30 min', l: "Durée de l'alerte" }, { v: '24h / 7j', l: 'Déclenchement possible' }].map((stat, i) => (
               <Reveal key={stat.l} delay={0.15 + i * 0.12} y={20}>
                 <div className="text-center px-7 py-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)' }}>
                   <div className="text-xl font-bold text-white">{stat.v}</div>
