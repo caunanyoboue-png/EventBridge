@@ -489,6 +489,13 @@ export default function Feed() {
 
   useEffect(() => { fetchFeed(); }, [profile]);
 
+  // Arrivée depuis le lien de confirmation reçu par mail (dernière étape de l'inscription)
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has('welcome')) return;
+    window.history.replaceState({}, '', window.location.pathname);
+    toast.success('Bienvenue sur EventBridge ! Votre compte est activé.', { duration: 5000 });
+  }, []);
+
   async function fetchFeed() {
     setLoading(true);
     const [postsRes, missionsRes] = await Promise.all([
@@ -714,6 +721,23 @@ export default function Feed() {
         )}
 
         {/* Tabs */}
+        {/* Rappel de complétion — comptes créés avant l'inscription en une traite */}
+        {profile?.onboarding_done === false && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+            padding: '13px 16px', marginBottom: 18, borderRadius: 14,
+            background: 'rgba(201,168,76,0.10)', border: '1px solid rgba(201,168,76,0.35)' }}>
+            <span style={{ fontSize: 13, color: 'var(--color-text-secondary)', flex: 1, minWidth: 190 }}>
+              <b style={{ color: 'var(--color-text-primary)' }}>Complétez votre profil</b> pour
+              {profile.role === 'freelance' ? ' recevoir des propositions de mission.' : ' publier vos missions plus vite.'}
+            </span>
+            <button onClick={() => navigate('/onboarding')}
+              className="btn-gold px-4 py-2 rounded-xl text-[#261642]"
+              style={{ fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap' }}>
+              Compléter
+            </button>
+          </div>
+        )}
+
         {/* Sélecteur segmenté (piste neutre arrondie, pastille dorée pour l'onglet actif) */}
         <div className="eb-segmented" style={{ marginBottom: 22 }}>
           {([['all', 'Tout'], ['posts', 'Posts'], ['missions', 'Missions']] as const).map(([key, label]) => (

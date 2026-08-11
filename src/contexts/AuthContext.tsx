@@ -74,15 +74,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signUp(email: string, password: string, data: Partial<Profile>) {
+    // Le profil complet est transporté dans les métadonnées : le trigger
+    // handle_new_user() les recopie dans `profiles` à la création du compte.
+    // Le lien du mail est donc la DERNIÈRE étape → il mène droit au fil d'actualité.
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/onboarding`,
+        emailRedirectTo: `${window.location.origin}/feed?welcome=1`,
         data: {
           full_name: data.full_name || '',
           role: data.role || 'freelance',
           ville: data.ville || 'Abidjan - Cocody',
+          phone: data.phone ?? null,
+          quartier: data.quartier ?? null,
+          bio: data.bio ?? null,
+          skills: data.skills ?? null,
+          hourly_rate: data.hourly_rate ?? null,
+          prestation_rates: data.prestation_rates ?? null,
+          experience_years: data.experience_years ?? null,
+          company_name: data.company_name ?? null,
+          company_sector: data.company_sector ?? null,
         },
       },
     });

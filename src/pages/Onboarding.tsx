@@ -115,14 +115,45 @@ export default function Onboarding() {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // INSCRIPTION — étape 1 : créer le compte
+  // INSCRIPTION — passage à l'étape « profil » (aucun compte créé ici)
+  // ─────────────────────────────────────────────────────────────────────────
+  function goToProfileStep() {
+    if (!fullName || !email || !password) return;
+    if (password.length < 6) { toast.error('Le mot de passe doit faire au moins 6 caractères.'); return; }
+    setStep(2);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // INSCRIPTION — dernière étape : créer le compte avec le profil COMPLET.
+  // Le mail de confirmation est alors le tout dernier geste : son lien mène
+  // directement au fil d'actualité.
   // ─────────────────────────────────────────────────────────────────────────
   async function handleRegister() {
     if (!fullName || !email || !password) return;
     if (password.length < 6) { toast.error('Le mot de passe doit faire au moins 6 caractères.'); return; }
+    const isFree = role === 'freelance';
+    if (isFree && skills.length === 0) { toast.error('Choisissez au moins une compétence.'); return; }
+    if (!isFree && !companyName.trim()) { toast.error('Renseignez le nom de votre structure.'); return; }
     setBusy(true);
     try {
-      await signUp(email, password, { full_name: fullName, role, ville });
+      // Que des compétences non-horaires → prix par prestation ; sinon l'horaire prime.
+      const usePrestation = isFree && skills.length > 0 && !skills.some(isHourlyCompetence);
+      await signUp(email, password, {
+        full_name: fullName,
+        role,
+        ville,
+        phone: phone || undefined,
+        quartier: quartier || undefined,
+        bio: bio || undefined,
+        skills: isFree ? skills : undefined,
+        hourly_rate: isFree ? (usePrestation ? 0 : hourlyRate) : undefined,
+        prestation_rates: usePrestation
+          ? Object.fromEntries(skills.map(s => [s, prestationRates[s] || 0] as [string, number]))
+          : undefined,
+        experience_years: isFree ? expYears : undefined,
+        company_name: !isFree ? companyName : undefined,
+        company_sector: !isFree ? companySector : undefined,
+      });
       setEmailSent(true); // afficher l'écran "Vérifiez votre email"
     } catch (e: unknown) {
       const msg = (e as Error).message || '';
@@ -178,13 +209,17 @@ export default function Onboarding() {
   // Détermine si on doit montrer la complétion
   // ─────────────────────────────────────────────────────────────────────────
   const needsCompletion = (profile && profile.onboarding_done === false) || (mode === 'register' && step === 2);
+  // Vraie inscription en cours (pas un compte existant qui complète son profil)
+  const isRegistering = mode === 'register' && step === 2 && !user;
 
   // Titre dynamique
-  const title    = needsCompletion ? 'Complétez votre profil'
+  const title    = needsCompletion ? (isRegistering ? 'Votre profil' : 'Complétez votre profil')
     : mode === 'login' ? 'Bienvenue !'
     : step === 0 ? 'Qui êtes-vous ?'
     : 'Créer votre compte';
-  const subtitle = needsCompletion ? 'Encore quelques informations pour personnaliser votre expérience'
+  const subtitle = needsCompletion
+      ? (isRegistering ? 'Dernière étape avant la confirmation par email'
+                       : 'Encore quelques informations pour personnaliser votre expérience')
     : mode === 'login' ? 'Connectez-vous à votre espace EventBridge'
     : step === 0 ? 'Choisissez votre profil'
     : 'Renseignez vos informations';
@@ -420,9 +455,23 @@ export default function Onboarding() {
                 </>
               )}
 
-              <button onClick={handleComplete} disabled={busy} style={{ ...btnGold, opacity: busy ? 0.7 : 1, marginTop: 4 }}>
-                {busy ? 'Enregistrement…' : 'Accéder à la plateforme →'}
-              </button>
+              {/* Inscription en cours → on crée le compte (le mail sera la dernière étape).
+                  Compte existant au profil incomplet → simple mise à jour. */}
+              {isRegistering ? (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 4 }}>
+                  <button type="button" onClick={() => setStep(1)} disabled={busy} style={btnOutline}>
+                    ← Retour
+                  </button>
+                  <button onClick={handleRegister} disabled={busy}
+                    style={{ ...btnGold, opacity: busy ? 0.7 : 1 }}>
+                    {busy ? 'Création…' : 'Créer mon compte →'}
+                  </button>
+                </div>
+              ) : (
+                <button onClick={handleComplete} disabled={busy} style={{ ...btnGold, opacity: busy ? 0.7 : 1, marginTop: 4 }}>
+                  {busy ? 'Enregistrement…' : 'Accéder à la plateforme →'}
+                </button>
+              )}
             </div>
           )}
 
@@ -517,10 +566,10 @@ export default function Onboarding() {
                 <button type="button" onClick={() => setStep(0)} style={btnOutline}>
                   ← Retour
                 </button>
-                <button onClick={handleRegister}
+                <button onClick={goToProfileStep}
                   disabled={busy || !fullName || !email || !password || password.length < 6}
                   style={{ ...btnGold, opacity: (busy || !fullName || !email || !password || password.length < 6) ? 0.6 : 1 }}>
-                  {busy ? 'Création…' : "S'inscrire →"}
+                  Continuer →
                 </button>
               </div>
             </div>

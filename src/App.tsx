@@ -68,10 +68,8 @@ function ProtectedRoute({ children, role }: { children: ReactNode; role?: string
     );
   }
 
-  // Onboarding non terminé → forcer la complétion du profil
-  if (profile.onboarding_done === false) {
-    return <Navigate to="/onboarding" replace />;
-  }
+  // Profil incomplet : on ne bloque PAS la navigation (un bandeau de rappel
+  // s'affiche sur le fil d'actualité, avec un raccourci vers la complétion).
 
   // Mauvais rôle pour cette route
   if (role && profile.role !== role && profile.role !== 'admin') {
