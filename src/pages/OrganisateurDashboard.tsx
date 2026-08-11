@@ -2,14 +2,15 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Briefcase, Users, ChevronRight, FileText, Check, AlertCircle,
-  Target, Calendar, PlusCircle, X, Trash2, ShieldAlert,
+  Target, Calendar, PlusCircle, X, Trash2, ShieldAlert, Crown, Star,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { canPublish } from '../lib/kyc';
+import { canPublish, certRank, byCertificationThenRating } from '../lib/kyc';
 import { supabase } from '../lib/supabase';
 import DashboardLayout from '../components/layout/DashboardLayout';
-import { type Mission, type Application, type Review } from '../types';
-import { formatCFA, formatDateShort } from '../lib/utils';
+import CertifiedBadge from '../components/CertifiedBadge';
+import { type Mission, type Application, type Review, type Profile } from '../types';
+import { formatCFA, formatDateShort, getInitials } from '../lib/utils';
 import toast from 'react-hot-toast';
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
@@ -150,6 +151,7 @@ export default function OrganisateurDashboard() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [contractPrompt, setContractPrompt] = useState<{ missionId: string; freelanceId: string; freelanceName: string } | null>(null);
+  const [topFreelances, setTopFreelances] = useState<Profile[]>([]);
 
   // Stats dérivées
   const totalMissions    = missions.length;
@@ -222,6 +224,25 @@ export default function OrganisateurDashboard() {
   }, [profile]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  // « Top freelances » — vitrine réservée aux profils certifiés (avantage Bleu/Gris).
+  useEffect(() => {
+    let off = false;
+    (async () => {
+      const { data } = await supabase.from('profiles')
+        .select('id,full_name,avatar_url,ville,skills,hourly_rate,avg_rating,total_reviews,is_certified,certification_level,certification_expires_at')
+        .eq('role', 'freelance').eq('status', 'active')
+        .neq('certification_level', 'none')
+        .limit(24);
+      if (off) return;
+      const rows = ((data || []) as unknown as Profile[])
+        .filter(p => certRank(p) > 0)          // écarte les abonnements expirés
+        .sort(byCertificationThenRating)
+        .slice(0, 4);
+      setTopFreelances(rows);
+    })();
+    return () => { off = true; };
+  }, [profile?.id]);
 
   async function handleApplication(appId: string, action: 'accepted' | 'rejected') {
     setActionLoading(appId);
@@ -379,6 +400,48 @@ export default function OrganisateurDashboard() {
                   Envoyer mes pièces
                 </button>
               )}
+            </div>
+          )}
+
+          {/* Top freelances — vitrine des profils certifiés */}
+          {topFreelances.length > 0 && (
+            <div className="card-glass" style={{ padding: '18px 20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Crown size={17} color="#3b82f6" />
+                  <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>Top freelances</h3>
+                  <span style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>profils certifiés</span>
+                </div>
+                <button onClick={() => navigate('/freelances')}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12.5, fontWeight: 600, color: C.gold }}>
+                  Voir tout →
+                </button>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))', gap: 12 }}>
+                {topFreelances.map(f => (
+                  <button key={f.id} onClick={() => navigate(`/public-profile?id=${f.id}`)}
+                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '14px 10px',
+                      borderRadius: 12, cursor: 'pointer', textAlign: 'center',
+                      background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}>
+                    {f.avatar_url
+                      ? <img src={f.avatar_url} alt="" style={{ width: 46, height: 46, borderRadius: '50%', objectFit: 'cover' }} />
+                      : <div style={{ width: 46, height: 46, borderRadius: '50%', display: 'flex', alignItems: 'center',
+                          justifyContent: 'center', fontWeight: 700, color: '#261642', background: C.gold }}>
+                          {getInitials(f.full_name || 'U')}
+                        </div>}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, maxWidth: '100%' }}>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-primary)',
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.full_name}</span>
+                      <CertifiedBadge level={f.certification_level} certified={f.is_certified} />
+                    </div>
+                    <div style={{ fontSize: 11.5, color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      {f.avg_rating ? <><Star size={11} fill={C.gold} color={C.gold} /> {f.avg_rating.toFixed(1)}</> : 'Nouveau'}
+                      {f.hourly_rate ? <> · {formatCFA(f.hourly_rate)}/h</> : null}
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 

@@ -24,15 +24,15 @@ interface Plan {
 const PLANS: Plan[] = [
   {
     key: 'none', name: 'Gratuit', monthly: 0, yearly: 0, color: '#9aa0ac', Icon: Star,
-    features: ['Profil actif et visible', 'Candidatures limitées', 'Apparaît dans les recherches', 'Accès au S.O.S Brigade'],
+    features: ['Profil actif et visible', '10 candidatures par mois', 'Apparaît dans les recherches', 'Accès au S.O.S Brigade', '3 réalisations au portfolio'],
   },
   {
     key: 'grey', name: 'Certifié — Gris', monthly: 1500, yearly: 15000, color: '#9ca3af', Icon: BadgeCheck,
-    features: ['Badge Certifié (gris) après ton nom', 'Identité vérifiée', 'Remontée dans les recherches', 'Candidatures illimitées', 'Priorité sur le S.O.S Brigade', 'Portfolio étendu'],
+    features: ['Badge Certifié (gris) après ton nom', 'Identité vérifiée', 'Remontée dans les recherches', 'Candidatures illimitées', 'Alerté en premier sur le S.O.S Brigade', 'Portfolio illimité'],
   },
   {
     key: 'blue', name: 'Certifié — Bleu', monthly: 4000, yearly: 40000, color: '#3b82f6', Icon: Crown, popular: true,
-    features: ['Tout le niveau Gris', 'Visibilité maximale (tout en haut)', 'Section « Top freelances »', 'Réduction sur ta certification (renouvellement)', 'Portfolio complet mis en avant', 'Support prioritaire', 'Badge bleu « Pro »'],
+    features: ['Tout le niveau Gris', 'Visibilité maximale (tout en haut)', 'Section « Top freelances »', 'Réduction de 10 % au renouvellement', 'Portfolio illimité', 'Badge bleu « Pro »'],
   },
 ];
 

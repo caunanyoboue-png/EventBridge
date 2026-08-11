@@ -4,7 +4,7 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import MapPicker from '../components/MapPicker';
 import MapView from '../components/MapView';
 import { useAuth } from '../contexts/AuthContext';
-import { canPublish } from '../lib/kyc';
+import { canPublish, certRank } from '../lib/kyc';
 import VerificationRequired from '../components/VerificationRequired';
 import { supabase } from '../lib/supabase';
 import { distanceKm, formatDistance, geocodeAddress, getBrowserPosition } from '../lib/geo';
@@ -43,6 +43,9 @@ export default function SosBrigade() {
 ══════════════════════════════════════════════════════════════════════ */
 const SOS_KEY = 'eb_sos_active';
 const SOS_RADIUS_KM = 20; // rayon de matching géographique (km)
+// Avance laissée aux freelances certifiés avant d'alerter les profils gratuits
+// (avantage « Priorité sur le S.O.S Brigade » des formules Gris et Bleu).
+const SOS_HEAD_START_MS = 3 * 60 * 1000;
 
 // Extrait les id de session des notifications S.O.S reçues par le freelance.
 function sosIdsFromNotifs(notifs: { data: unknown }[] | null): string[] {
@@ -170,10 +173,10 @@ function OrgView() {
       }).select().single();
       if (error) throw error;
 
-      // Freelances dispo dont une compétence correspond + GÉOLOCALISÉS à ≤ 30 km
+      // Freelances dispo dont une compétence correspond + GÉOLOCALISÉS dans le rayon
       const { data: freelances } = await supabase
         .from('profiles')
-        .select('id, latitude, longitude')
+        .select('id, latitude, longitude, certification_level, certification_expires_at')
         .eq('role', 'freelance')
         .eq('is_available', true)
         .overlaps('skills', form.service_types)
@@ -184,21 +187,41 @@ function OrgView() {
       const targets = (freelances || []).filter(f =>
         distanceKm(form.latitude!, form.longitude!, f.latitude as number, f.longitude as number) <= SOS_RADIUS_KM
       );
+
+      // Avantage « Priorité sur le S.O.S Brigade » : les certifiés sont alertés
+      // tout de suite, les profils gratuits SOS_HEAD_START_MS plus tard.
+      const certifies = targets.filter(f => certRank(f) > 0);
+      const gratuits  = targets.filter(f => certRank(f) === 0);
+
+      const alerte = (ids: string[]) => supabase.from('notifications').insert(
+        ids.map(id => ({
+          user_id: id,
+          type: 'sos_alert',
+          title: 'S.O.S Brigade — Urgence !',
+          body: `Besoin urgent de ${typesLabel} à ${form.location}. ${form.slots_needed} poste(s) disponible(s).`,
+          data: { sos_session_id: data.id },
+          is_read: false,
+        }))
+      );
+
       if (targets.length > 0) {
-        const { error: notifErr } = await supabase.from('notifications').insert(
-          targets.map(f => ({
-            user_id: f.id,
-            type: 'sos_alert',
-            title: 'S.O.S Brigade — Urgence !',
-            body: `Besoin urgent de ${typesLabel} à ${form.location}. ${form.slots_needed} poste(s) disponible(s).`,
-            data: { sos_session_id: data.id },
-            is_read: false,
-          }))
-        );
+        const premiers = certifies.length > 0 ? certifies : gratuits;   // personne de certifié → tout le monde
+        const { error: notifErr } = await alerte(premiers.map(f => f.id as string));
         // Ne plus ignorer l'échec (ex : RLS) — sinon on annonce « X notifiés » à tort.
         if (notifErr) console.error('[SOS] échec insertion notifications :', notifErr.message);
-        await supabase.from('sos_sessions').update({ notified_count: targets.length }).eq('id', data.id);
-        data.notified_count = targets.length;
+
+        // Seconde vague : les profils gratuits, après l'avance laissée aux certifiés.
+        if (certifies.length > 0 && gratuits.length > 0) {
+          setTimeout(() => {
+            alerte(gratuits.map(f => f.id as string))
+              .then(({ error }) => { if (error) console.error('[SOS] 2e vague :', error.message); });
+            supabase.from('sos_sessions')
+              .update({ notified_count: targets.length }).eq('id', data.id).then(() => {});
+          }, SOS_HEAD_START_MS);
+        }
+
+        await supabase.from('sos_sessions').update({ notified_count: premiers.length }).eq('id', data.id);
+        data.notified_count = premiers.length;
       }
 
       lsSave(data as SosSession);

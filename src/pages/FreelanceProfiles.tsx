@@ -7,6 +7,7 @@ import { Users, Star, MapPin } from 'lucide-react';
 import { type Profile } from '../types';
 import { formatCFA, getInitials, COMPETENCES } from '../lib/utils';
 import { distanceKm, formatDistance } from '../lib/geo';
+import { byCertificationThenRating } from '../lib/kyc';
 import CertifiedBadge from '../components/CertifiedBadge';
 import { IcoUsers } from '../components/icons/DoodleIcons';
 import { roleColor } from '../lib/roleTheme';
@@ -24,11 +25,14 @@ export default function FreelanceProfiles() {
 
   async function fetchProfiles() {
     // Invité : colonnes d'affichage seulement (la RLS limite déjà aux profils actifs)
-    const cols = 'id,full_name,avatar_url,role,ville,skills,hourly_rate,avg_rating,total_reviews,is_certified,certification_level,is_available';
+    const cols = 'id,full_name,avatar_url,role,ville,skills,hourly_rate,avg_rating,total_reviews,is_certified,certification_level,certification_expires_at,is_available';
     let q = supabase.from('profiles').select(isGuest ? cols : '*').eq('role', 'freelance');
     if (!isGuest) q = q.eq('status', 'active');
     const { data } = await q.order('avg_rating', { ascending: false });
-    setProfiles((data || []) as unknown as Profile[]);
+    // Avantage certification : Bleu tout en haut, puis Gris, puis les profils
+    // gratuits — à rang égal, la meilleure note l'emporte.
+    const rows = ((data || []) as unknown as Profile[]).sort(byCertificationThenRating);
+    setProfiles(rows);
     setLoading(false);
   }
 

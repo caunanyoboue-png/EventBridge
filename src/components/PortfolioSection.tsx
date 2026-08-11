@@ -1,8 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { Check, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
+import { certRank } from '../lib/kyc';
 import { type PortfolioItem } from '../types';
 import toast from 'react-hot-toast';
+
+// Formule gratuite : portfolio plafonné (« Portfolio étendu » = avantage certifié)
+const FREE_PORTFOLIO_MAX = 3;
 
 const CATEGORIES = [
   'Service en salle', 'Bar / Barman', 'Cuisine gastronomique', 'Hôtesse accueil',
@@ -42,6 +47,7 @@ function HeartIcon({ filled }: { filled: boolean }) {
 }
 
 export default function PortfolioSection({ freelanceId, editable = false, currentUserId }: Props) {
+  const { profile } = useAuth();
   const [items, setItems] = useState<PortfolioItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -57,6 +63,9 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
   const [mCategory, setMCategory] = useState('');
 
   const canEdit = editable && currentUserId === freelanceId;
+  // Le portfolio du propriétaire : illimité s'il est certifié, 3 réalisations sinon.
+  const certifie = certRank(profile) > 0;
+  const quotaAtteint = canEdit && !certifie && items.length >= FREE_PORTFOLIO_MAX;
 
   useEffect(() => { fetchItems(); }, [freelanceId]);
 
@@ -71,6 +80,13 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Portfolio étendu = avantage des formules certifiées (le quota est aussi
+    // appliqué en base par le trigger enforce_portfolio_quota).
+    if (!certifie && items.length >= FREE_PORTFOLIO_MAX) {
+      toast.error(`Limite atteinte : ${FREE_PORTFOLIO_MAX} réalisations avec la formule gratuite. Faites-vous certifier pour un portfolio illimité.`);
+      if (fileRef.current) fileRef.current.value = '';
+      return;
+    }
     if (file.size > 8 * 1024 * 1024) { toast.error('Image trop lourde (max 8 MB)'); return; }
     setModal({ file, preview: URL.createObjectURL(file) });
     setMTitle(''); setMDesc(''); setMCategory('');
@@ -149,7 +165,7 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
   return (
     <>
       {/* ── BOUTON NOUVELLE PUBLICATION ── */}
-      {canEdit && items.length < 12 && (
+      {canEdit && items.length < 12 && !quotaAtteint && (
         <label
           style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '13px 18px',
             borderRadius: 14, cursor: 'pointer', transition: 'all 0.15s',
@@ -170,10 +186,26 @@ export default function PortfolioSection({ freelanceId, editable = false, curren
               Nouvelle publication
             </p>
             <p style={{ fontSize: 11, color: 'var(--color-text-muted)', margin: 0, marginTop: 1 }}>
-              Ajouter une photo · {items.length}/12
+              Ajouter une photo · {items.length}/{certifie ? 12 : FREE_PORTFOLIO_MAX}
+              {!certifie && ' (formule gratuite)'}
             </p>
           </div>
         </label>
+      )}
+
+      {/* Quota gratuit atteint → invitation à se certifier */}
+      {quotaAtteint && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '13px 18px', borderRadius: 14,
+          background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.3)' }}>
+          <span style={{ fontSize: 12.5, color: 'var(--color-text-secondary)', flex: 1 }}>
+            Vous avez atteint les <b style={{ color: 'var(--color-text-primary)' }}>{FREE_PORTFOLIO_MAX} réalisations</b> de la
+            formule gratuite. Faites-vous certifier pour un portfolio étendu.
+          </span>
+          <a href="/certification"
+            style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--color-gold-primary)', whiteSpace: 'nowrap' }}>
+            Se certifier →
+          </a>
+        </div>
       )}
 
       {/* ── GRILLE DE PUBLICATIONS ── */}
